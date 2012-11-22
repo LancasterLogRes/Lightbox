@@ -50,6 +50,16 @@ profile {
     QMAKE_LFLAGS += -pg
 }
 
+pi {
+        TP = $$IN_PWD/../thirdparty-pi
+}
+android {
+        TP = $$IN_PWD/../thirdparty-android
+}
+x86 {
+        TP = $$IN_PWD/../thirdparty-x86
+}
+
 QMAKE_CXXFLAGS += -ffast-math -pipe -fexceptions
 mac: QMAKE_CXXFLAGS +=  -std=c++11
 !mac: QMAKE_CXXFLAGS +=  -std=c++0x
@@ -61,7 +71,7 @@ crosscompilation {
         CHAINPATH = "$$NDK_PATH/toolchains/arm-linux-androideabi-4.6/prebuilt/linux-x86/bin"
         PLATFORM = "arm-linux-androideabi"
 
-        SYSTEM_FLAGS = '-DCAT_TARGET_NAME=$$TARGET' -fpic -ffunction-sections -funwind-tables -fstack-protector -D__ARM_ARCH_5__ -D__ARM_ARCH_5T__ -D__ARM_ARCH_5E__ -D__ARM_ARCH_5TE__  -march=armv5te -mtune=xscale -msoft-float -mthumb -Os -fomit-frame-pointer -fno-strict-aliasing -finline-limit=64 -DANDROID  -Wa,--noexecstack
+        SYSTEM_FLAGS = '-DNDEBUG -DCAT_TARGET_NAME=$$TARGET' -fpic -ffunction-sections -funwind-tables -fstack-protector -D__ARM_ARCH_5__ -D__ARM_ARCH_5T__ -D__ARM_ARCH_5E__ -D__ARM_ARCH_5TE__  -march=armv5te -mtune=xscale -msoft-float -mthumb -Os -fomit-frame-pointer -fno-strict-aliasing -finline-limit=64 -DANDROID  -Wa,--noexecstack
         SYSTEM_INCLUDES = "-I$$NDK_PATH/sources/android/native_app_glue" "-I$$NDK_PATH/sources/cxx-stl/gnu-libstdc++/4.6/include" "-I$$NDK_PATH/sources/cxx-stl/gnu-libstdc++/4.6/libs/armeabi/include" "-I$$NDK_PATH/platforms/android-14/arch-arm/usr/include -I../../Android/Boost/boost_1_49_0"
 
         QMAKE_CC		= "$$CHAINPATH/$$PLATFORM-gcc"
@@ -77,8 +87,9 @@ crosscompilation {
 
         CONFIG -= qt
 
-        QMAKE_LFLAGS_SHLIB = -shared --sysroot=/home/gav/Projects/lightbox/Android/android-ndk-r8b/platforms/android-14/arch-arm    -Wl,--no-undefined -Wl,-z,noexecstack -Wl,-z,relro -Wl,-z,now -L/home/gav/Projects/lightbox/Android/android-ndk-r8b/platforms/android-14/arch-arm/usr/lib
-        LIBS += /home/gav/Projects/lightbox/Android/android-ndk-r8b/sources/cxx-stl/gnu-libstdc++/4.6/libs/armeabi/libgnustl_static.a
+        QMAKE_LFLAGS_SHLIB = -shared --sysroot=$$NDK_PATH/platforms/android-14/arch-arm -Wl,--no-undefined -Wl,-z,noexecstack -Wl,-z,relro -Wl,-z,now -L$$NDK_PATH/platforms/android-14/arch-arm/usr/lib
+        LIBS += $$NDK_PATH/sources/cxx-stl/gnu-libstdc++/4.6/libs/armeabi/libgnustl_static.a -L$$TP/libpng -L$$TP/libzip
+        INCLUDEPATH += $$TP
 
         contains(TEMPLATE, lib) {
             CONFIG += static
@@ -87,7 +98,18 @@ crosscompilation {
             SOURCES += "$$NDK_PATH/sources/android/native_app_glue/android_native_app_glue.c"
             TEMPLATE = lib
             CONFIG += shared
-            QMAKE_POST_LINK = mkdir -p '"$${OBJECTS_DIR}wrap/libs/armeabi"' && cp '"$${DESTDIR}/lib$${TARGET}.so"' '"$${OBJECTS_DIR}wrap/libs/armeabi"' && sed '\'s/"android.app.lib_name" android:value=""/"android.app.lib_name" android:value="$$TARGET"/\'' '$$ANDROID_MANIFEST' > '"$${OBJECTS_DIR}wrap/AndroidManifest.xml"' && mkdir -p '"$${OBJECTS_DIR}wrap/res/values"' && echo '\'<?xml version="1.0" encoding="utf-8"?><resources><string name="app_name">Glow</string></resources>\'' > '$${OBJECTS_DIR}wrap/res/values/strings.xml' && $${SDK_PATH}/tools/android update project -p '$${OBJECTS_DIR}wrap' -t android-15 -n $$TARGET && ant debug -buildfile '$${OBJECTS_DIR}wrap/build.xml' && mv '$${OBJECTS_DIR}wrap/bin/$$TARGET-debug.apk' '$${DESTDIR}/$${TARGET}.apk' && rm -rf '$${OBJECTS_DIR}wrap'
+            QMAKE_POST_LINK = mkdir -p '"$${OBJECTS_DIR}wrap/libs/armeabi"' &&\
+                cp '"$${DESTDIR}/lib$${TARGET}.so"' '"$${OBJECTS_DIR}wrap/libs/armeabi"' &&\
+                sed '\'s/"android.app.lib_name" android:value=""/"android.app.lib_name" android:value="$$TARGET"/\'' '$$ANDROID_MANIFEST' > '"$${OBJECTS_DIR}wrap/AndroidManifest.xml"' &&\
+                mkdir -p '"$${OBJECTS_DIR}wrap/res/values"' &&\
+                echo '\'<?xml version="1.0" encoding="utf-8"?><resources><string name="app_name">Glow</string></resources>\'' > '$${OBJECTS_DIR}wrap/res/values/strings.xml' &&\
+                mkdir -p '"$${OBJECTS_DIR}wrap/assets"' &&\
+                for i in $${ANDROID_ASSETS}; do ln -s \$\$i' '"$${OBJECTS_DIR}wrap/assets"'; done &&\
+                $${SDK_PATH}/tools/android update project -p '$${OBJECTS_DIR}wrap' -t android-15 -n $$TARGET &&\
+                ant debug -buildfile '$${OBJECTS_DIR}wrap/build.xml' &&\
+                mv '$${OBJECTS_DIR}wrap/bin/$$TARGET-debug.apk' '$${DESTDIR}/$${TARGET}.apk' &&\
+                rm -rf '$${OBJECTS_DIR}wrap' &&\
+                echo DONE.
             QMAKE_CLEAN = '$${DESTDIR}$${TARGET}.apk'
         }
 
