@@ -20,7 +20,7 @@ win32 {
 }
 
 !android: LIBS += $$FFTW3_LIBS
-android: LIBS += -lstdc++
+android:LIBS += -llog -landroid -lLGL -lEGL -lGLESv2 -lCommon -llog -landroid -lpng -lz
 
 SOURCES += Common.cpp \
     FFTW.cpp \
@@ -46,6 +46,7 @@ HEADERS += Common.h Global.h \
     StreamIO.h \
     Statistics.h \
     Peaks.h \
+    Pimpl.h \
     Flags.h \
     DoTypes.h \
     MemberCollection.h \

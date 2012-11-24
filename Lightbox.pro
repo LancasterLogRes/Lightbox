@@ -1,3 +1,3 @@
 TEMPLATE = subdirs
 system(echo $$CONFIG)
-SUBDIRS = Common GUI GL
+SUBDIRS = Common Numeric App LGL GUI

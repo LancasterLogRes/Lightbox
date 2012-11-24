@@ -36,6 +36,8 @@
 
 #define LIGHTBOX_API __attribute__ ((visibility ("default")))
 
+#define LIGHTBOX_BLOCK_TO_STATEMENT(X) if (true) { X } else (void)0
+
 #define LIGHTBOX_BITS_QUOTE(A) #A
 #define LIGHTBOX_BITS_STRINGIFY(A) LIGHTBOX_BITS_QUOTE(A)
 #define LIGHTBOX_BITS_EXPAND(A) A

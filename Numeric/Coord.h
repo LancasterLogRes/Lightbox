@@ -1,0 +1,75 @@
+#pragma once
+
+#include "Vector.h"
+
+#undef _N
+
+namespace Lightbox
+{
+
+template<class Numeric>
+class Coord: public CalcPair<Numeric, Coord<Numeric> >
+{
+	typedef CalcPair<Numeric, Coord<Numeric> > Super;
+
+public:
+	Coord() {}
+	Coord(Pair<Numeric> _q): Super(_q) {}
+	Coord(Super _q): Super(_q) {}
+	Coord(Numeric _x, Numeric _y): Super(_x, _y) {}
+	template<class _N> explicit Coord(Coord<_N> _s): CalcPair<Numeric, Coord<Numeric>>(_s) {}
+
+	Super::x;
+	Super::y;
+	
+	bool operator<(Coord const& _c) const { return x() < _c.x() && y() < _c.y(); }
+	bool operator>(Coord const& _c) const { return x() > _c.x() && y() > _c.y(); }
+	bool operator<=(Coord const& _c) const { return x() <= _c.x() && y() <= _c.y(); }
+	bool operator>=(Coord const& _c) const { return x() >= _c.x() && y() >= _c.y(); }
+};
+
+typedef Coord<float> XY;
+
+typedef Coord<float> fCoord;
+typedef Coord<double> dCoord;
+typedef Coord<int> iCoord;
+typedef Coord<unsigned> uCoord;
+
+template<class Numeric>
+class Size: public CalcPair<Numeric, Size<Numeric> >
+{
+	typedef CalcPair<Numeric, Size<Numeric> > Super;
+
+public:
+	Size() {}
+	Size(Pair<Numeric> _q): Super(_q) {}
+	Size(Super _q): Super(_q) {}
+	Size(Numeric _w, Numeric _h): Super(_w, _h) {}
+	template<class _N> explicit Size(Size<_N> _s): CalcPair<Numeric, Size<Numeric>>(_s) {}
+
+	Numeric w() const { return x(); }
+	Numeric h() const { return y(); }
+	Numeric area() const { return w() * h(); }
+	Numeric perimeter() const { return (w() + h()) * 2; }
+
+	void setW(Numeric _w) { Super::setX(_w); }
+	void setH(Numeric _h) { Super::setY(_h); }
+
+	bool operator<(Size const& _c) const { return w() < _c.w() && h() < _c.h(); }
+	bool operator>(Size const& _c) const { return w() > _c.w() && h() > _c.h(); }
+	bool operator<=(Size const& _c) const { return w() <= _c.w() && h() <= _c.h(); }
+	bool operator>=(Size const& _c) const { return w() >= _c.w() && h() >= _c.h(); }
+
+private:
+	Super::x;
+	Super::y;
+	Super::setX;
+	Super::setY;
+};
+
+typedef Size<float> fSize;
+typedef Size<double> dSize;
+typedef Size<int> iSize;
+typedef Size<unsigned> uSize;
+
+}

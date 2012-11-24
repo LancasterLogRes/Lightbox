@@ -1,5 +1,5 @@
 CONFIG -= qt
-TARGET = Common
+TARGET = GUI
 TEMPLATE = lib
 include ( ../Common.pri )
 
