@@ -10,7 +10,7 @@ namespace Lightbox
 
 class Program;
 class ProgramFace;
-class Texture;
+class Texture2D;
 
 class Uniform
 {
@@ -20,7 +20,7 @@ public:
 
 	int location() const { return m_location; }
 
-//	Texture const& operator=(Texture const& _t) { set(_t); return _t; }
+	Texture2D const& operator=(Texture2D const& _t) { set(_t); return _t; }
 	int operator=(int _i) { set(_i); return _i; }
 	float operator=(float _f) { set(_f); return _f; }
 	float operator=(double _v) { float f = _v; set(f); return f; }
@@ -29,7 +29,7 @@ public:
 	template<typename _T> Vector4<_T> operator=(Vector4<_T> _v) { set(_v.x(), _v.y(), _v.z(), _v.w()); return _v; }
 	template<typename _T> Matrix4x4<_T> const& operator=(Matrix4x4<_T> const& _v) { set(_v.data()); return _v; }
 
-//	void set(Texture const& _t);
+	void set(Texture2D const& _t);
 	void set(int _0) { if (m_location >= 0 && Assert(m_p.lock().get())) LIGHTBOX_GL(glUniform1i(m_location, _0)); }
 	void set(int _0, int _1) { if (m_location >= 0 && Assert(m_p.lock().get())) LIGHTBOX_GL(glUniform2i(m_location, _0, _1)); }
 	void set(int _0, int _1, int _2) { if (m_location >= 0 && Assert(m_p.lock().get())) LIGHTBOX_GL(glUniform3i(m_location, _0, _1, _2)); }

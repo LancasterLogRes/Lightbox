@@ -1,5 +1,6 @@
 #include <sstream>
 #include <EGL/egl.h>
+#include <GLES2/gl2.h>
 #include <Common/Global.h>
 #include <android_native_app_glue.h>
 #include "AppEngine.h"
@@ -37,6 +38,8 @@ Display::Display()
 	eglQuerySurface(m_display, m_surface, EGL_HEIGHT, &h);
 	m_width = w;
 	m_height = h;
+
+	glViewport(0, 0, w, h);
 }
 
 Display::~Display()

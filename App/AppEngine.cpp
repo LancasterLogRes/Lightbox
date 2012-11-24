@@ -68,6 +68,7 @@ void AppEngine::gfxInit()
 
 	if (m_app)
 		m_app->initGraphics(*m_display);
+
 }
 
 void AppEngine::gfxDraw()

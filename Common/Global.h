@@ -321,6 +321,8 @@ private:
 	std::shared_ptr<void> m_lock;
 };
 
+template <class _T> inline foreign_vector<_T> foreign(_T* _d, size_t _s) { return foreign_vector<_T>(_d, _s); }
+
 class NullOutputStream
 {
 public:

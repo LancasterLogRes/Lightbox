@@ -1,6 +1,7 @@
 #include "ProgramFace.h"
 #include "Program.h"
 #include "Uniform.h"
+using namespace std;
 using namespace Lightbox;
 
 Uniform::Uniform(Program const& _p, std::string const& _name):
@@ -9,14 +10,14 @@ Uniform::Uniform(Program const& _p, std::string const& _name):
 {
 }
 
-/*void Uniform::set(Texture const& _t)
+void Uniform::set(Texture2D const& _t)
 {
 	if (m_location >= 0 && _t)
 	{
 		if (shared_ptr<ProgramFace> pf = m_p.lock())
 			set(pf->registerSampler(_t));
 		else
-			gAssert(false);
+			assert(false);
 	}
 }
-*/
+

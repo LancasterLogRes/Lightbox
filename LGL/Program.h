@@ -44,6 +44,16 @@ class ProgramUser: public boost::noncopyable
 public:
 	ProgramUser(Program const& _p): m_p(_p) { m_p.use(); }
 	~ProgramUser() { m_p.drop(); }
+
+	void points(GLsizei _count, GLint _first = 0) { LIGHTBOX_GL(glDrawArrays(GL_POINTS, _first, _count)); }
+	void lines(GLsizei _count, GLint _first = 0) { LIGHTBOX_GL(glDrawArrays(GL_LINES, _first, _count)); }
+	void lineLoop(GLsizei _count, GLint _first = 0) { LIGHTBOX_GL(glDrawArrays(GL_LINE_LOOP, _first, _count)); }
+	void lineStrip(GLsizei _count, GLint _first = 0) { LIGHTBOX_GL(glDrawArrays(GL_LINE_STRIP, _first, _count)); }
+	void triangles(GLsizei _count, GLint _first = 0) { LIGHTBOX_GL(glDrawArrays(GL_TRIANGLES, _first, _count)); }
+	void triangleStrip(GLsizei _count, GLint _first = 0) { LIGHTBOX_GL(glDrawArrays(GL_TRIANGLE_STRIP, _first, _count)); }
+	void triangleFan(GLsizei _count, GLint _first = 0) { LIGHTBOX_GL(glDrawArrays(GL_TRIANGLE_FAN, _first, _count)); }
+
+private:
 	Program m_p;
 };
 

@@ -6,10 +6,16 @@ LIBS += -lEGL -lGLESv2 -lCommon -lNumeric
 
 SOURCES += ProgramFace.cpp ShaderFace.cpp Uniform.cpp \
     Global.cpp \
-    Attrib.cpp
+    Attrib.cpp \
+    Texture2D.cpp \
+    TextureFace2D.cpp \
+    BufferFace.cpp Buffer.cpp
 HEADERS += ProgramFace.h ShaderFace.h Program.h \
     Shader.h Uniform.h \
     Global.h \
     All.h \
     ../LGL.h \
-    Attrib.h
+    Attrib.h \
+    Texture2D.h \
+    TextureFace2D.h \
+    BufferFace.h Buffer.h

@@ -7,14 +7,13 @@
 #include <numeric>
 #include <algorithm>
 #include <GLES2/gl2.h>
+#include "Texture2D.h"
 #include "Shader.h"
 
 namespace Lightbox
 {
 
-class Texture;
-
-class ProgramFace
+class ProgramFace: public boost::noncopyable
 {
 public:
 	ProgramFace(): m_id(glCreateProgram()) {}
@@ -30,12 +29,12 @@ public:
 	void use(std::shared_ptr<ProgramFace> const& _this) const;
 	void drop() const;
 
-//	int registerSampler(Texture const& _t);
+	int registerSampler(Texture2D const& _t);
 
 	static std::shared_ptr<ProgramFace> const& inUse() { return s_inUse; }
 
 private:
-//	mutable std::vector<Texture> m_reg;
+	mutable std::vector<Texture2D> m_reg;
 	Shader m_v;
 	Shader m_f;
 	GLuint m_id;

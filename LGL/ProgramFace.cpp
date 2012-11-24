@@ -1,6 +1,6 @@
 #include <algorithm>
 #include "Global.h"
-//#include "Texture.h"
+#include "Texture2D.h"
 #include "Program.h"
 #include "ProgramFace.h"
 using namespace std;
@@ -17,7 +17,6 @@ ProgramFace::~ProgramFace()
 		LIGHTBOX_GL(glDeleteProgram(m_id));
 	}
 }
-
 
 void ProgramFace::link() const
 {
@@ -45,8 +44,8 @@ void ProgramFace::link() const
 		}
 	}
 }
-/*
-int ProgramFace::registerSampler(Texture const& _t)
+
+int ProgramFace::registerSampler(Texture2D const& _t)
 {
 	auto i = find(m_reg.begin(), m_reg.end(), _t);
 	if (i == m_reg.end())
@@ -57,7 +56,7 @@ int ProgramFace::registerSampler(Texture const& _t)
 	}
 	return i - m_reg.begin();
 }
-*/
+
 void ProgramFace::use(shared_ptr<ProgramFace> const& _this) const
 {
 	if (s_inUse)
@@ -71,7 +70,7 @@ void ProgramFace::drop() const
 	if (Assert(s_inUse.get() == this))
 	{
 		LIGHTBOX_GL(glUseProgram(0));
-//		m_reg.clear();
+		m_reg.clear();
 		s_inUse = nullptr;
 	}
 }
