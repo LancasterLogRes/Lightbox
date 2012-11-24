@@ -2,11 +2,16 @@
 
 #include <array>
 #include <GLES2/gl2.h>
+#include <Common/Global.h>
 
 namespace Lightbox
 {
 
 class Attrib;
+template <class _T> class Buffer;
+template <class _T> class BufferFace;
+class Font;
+class FontFace;
 class Program;
 class ProgramFace;
 class Shader;
@@ -28,10 +33,10 @@ template <class _T, size_t _z> struct GLTypeTraits<std::array<_T, _z> >: public 
 
 void checkGlError(const char* op);
 
-template <class _T> _T GL_aux(_T _t, char const* _s) { checkGlError(_s); return _t; }
+template <class _T> _T GL_aux(_T _t, char const* _s) { cbug(69) << _s << "->" << _t; checkGlError(_s); return _t; }
 
 #define LIGHTBOX_GL_RET(X) GL_aux(X, #X)
-#define LIGHTBOX_GL(X) LIGHTBOX_BLOCK_TO_STATEMENT(X; checkGlError(#X);)
+#define LIGHTBOX_GL(X) LIGHTBOX_BLOCK_TO_STATEMENT(cbug(69) << #X; X; checkGlError(#X);)
 
 //inline bool assert(bool _b) { return _b; }
 #define Assert(X) X

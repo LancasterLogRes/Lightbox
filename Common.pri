@@ -60,6 +60,15 @@ x86 {
         TP = $$IN_PWD/../thirdparty-x86
 }
 
+resource_compiler.output = $${DESTDIR}/${QMAKE_FILE_IN_BASE}.c $${DESTDIR}/${QMAKE_FILE_IN_BASE}.h
+resource_compiler.input = RES
+resource_compiler.commands = echo ${QMAKE_FILE_IN} ${QMAKE_FILE_IN_BASE} && rm -f $${DESTDIR}/${QMAKE_FILE_IN_BASE}.c $${DESTDIR}/${QMAKE_FILE_IN_BASE}.h && for i in `cat ${QMAKE_FILE_IN}`; do cd $$RES_PATH && xxd -i \$\$i >> $${DESTDIR}/${QMAKE_FILE_IN_BASE}.c; echo \"extern unsigned int \$\$(echo \$\$i | sed s/\\\\./_/)_len;\" >> $${DESTDIR}/${QMAKE_FILE_IN_BASE}.h; echo \"extern unsigned char \$\$(echo \$\$i | sed s/\\\\./_/)[];\" >> $${DESTDIR}/${QMAKE_FILE_IN_BASE}.h; done
+resource_compiler.variable_out = SOURCES
+resource_compiler.depend_command = cat ${QMAKE_FILE_IN}
+resource_compiler.CONFIG += target_predeps
+resource_compiler.name = RESOURCE_COMPILER
+QMAKE_EXTRA_COMPILERS += resource_compiler
+
 QMAKE_CXXFLAGS += -ffast-math -pipe -fexceptions
 mac: QMAKE_CXXFLAGS +=  -std=c++11
 !mac: QMAKE_CXXFLAGS +=  -std=c++0x

@@ -133,3 +133,27 @@ void AppEngine::handleCommand(int32_t _cmd)
 	default:;
 	}
 }
+
+struct AssetCloser
+{
+	~AssetCloser()
+	{
+		AAsset_close(m_id);
+	}
+	AAsset* m_id;
+};
+
+std::function<void(uint8_t*, size_t)> Lightbox::assetReader(std::string const& _filename)
+{
+	auto a = make_shared<AssetCloser>();
+	if (a->m_id = AAssetManager_open(AppEngine::get()->androidApp()->activity->assetManager, _filename.c_str(), AASSET_MODE_UNKNOWN))
+		return [=](uint8_t* d, size_t s)
+		{
+			AAsset_read(a->m_id, d, s);
+		};
+	else
+	{
+		cwarn << "Couldn't find asset" << _filename;
+		return nullptr;
+	}
+}

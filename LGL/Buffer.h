@@ -12,6 +12,7 @@ class Buffer: public Pimpl<BufferFace<_T> >
 {
 public:
 	Buffer() {}
+	explicit Buffer(size_t _s, GLenum _usage = GL_STATIC_DRAW): Pimpl<BufferFace<_T> >(new BufferFace<_T>) { m_p->data(_s, 0, _usage); }
 	explicit Buffer(std::vector<_T> const& _data, GLenum _usage = GL_STATIC_DRAW): Pimpl<BufferFace<_T> >(new BufferFace<_T>) { m_p->data(_data.size(), _data.data(), _usage); }
 	explicit Buffer(foreign_vector<_T const> const& _data, GLenum _usage = GL_STATIC_DRAW): Pimpl<BufferFace<_T> >(new BufferFace<_T>) { m_p->data(_data.size(), _data.data(), _usage); }
 

@@ -346,6 +346,8 @@ public:
 	std::stringstream sstr;
 };
 
+#define LB_R(X) foreign_vector<uint8_t const>(X, X ## _len)
+
 }
 
 // Dirties the global namespace, but oh so convenient...

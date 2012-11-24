@@ -62,4 +62,6 @@ private:
 	static AppEngine* s_this;
 };
 
+std::function<void(uint8_t*, size_t)> assetReader(std::string const& _filename);
+
 }
