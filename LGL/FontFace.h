@@ -1,5 +1,6 @@
 #pragma once
 
+#include <string>
 #include <Common/Global.h>
 #include "Global.h"
 #include "Attrib.h"
@@ -16,7 +17,7 @@ class FontFace
 public:
 	FontFace(uint8_t const* _ttfData, float _size);
 
-	void draw(float _x, float _y, string const& _text);
+	void draw(float _x, float _y, std::string const& _text);
 
 	Program m_program;
 	Attrib m_index;

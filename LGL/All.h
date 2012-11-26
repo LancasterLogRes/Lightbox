@@ -11,3 +11,5 @@
 #include "Attrib.h"
 #include "BufferFace.h"
 #include "Buffer.h"
+#include "Font.h"
+#include "FontFace.h"

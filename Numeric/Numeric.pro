@@ -5,5 +5,4 @@ include ( ../Common.pri )
 LIBS += -lCommon
 
 SOURCES += Colour.cpp
-HEADERS += Colour.h Coord.h Matrix.h Vector.h Rect.h Quaternion.h \
-    LGL.h All.h ../Numeric.h
+HEADERS += Colour.h Coord.h Matrix.h Vector.h Rect.h Quaternion.h All.h ../Numeric.h

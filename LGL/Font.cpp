@@ -1,3 +1,4 @@
+#include "FontFace.h"
 #include "Font.h"
 
 using namespace Lightbox;

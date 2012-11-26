@@ -60,9 +60,10 @@ x86 {
         TP = $$IN_PWD/../thirdparty-x86
 }
 
-resource_compiler.output = $${DESTDIR}/${QMAKE_FILE_IN_BASE}.c $${DESTDIR}/${QMAKE_FILE_IN_BASE}.h
+INCLUDEPATH += $${OUT_PWD}
+resource_compiler.output = $${OUT_PWD}/${QMAKE_FILE_IN_BASE}.c $${OUT_PWD}/${QMAKE_FILE_IN_BASE}.h
 resource_compiler.input = RES
-resource_compiler.commands = echo ${QMAKE_FILE_IN} ${QMAKE_FILE_IN_BASE} && rm -f $${DESTDIR}/${QMAKE_FILE_IN_BASE}.c $${DESTDIR}/${QMAKE_FILE_IN_BASE}.h && for i in `cat ${QMAKE_FILE_IN}`; do cd $$RES_PATH && xxd -i \$\$i >> $${DESTDIR}/${QMAKE_FILE_IN_BASE}.c; echo \"extern unsigned int \$\$(echo \$\$i | sed s/\\\\./_/)_len;\" >> $${DESTDIR}/${QMAKE_FILE_IN_BASE}.h; echo \"extern unsigned char \$\$(echo \$\$i | sed s/\\\\./_/)[];\" >> $${DESTDIR}/${QMAKE_FILE_IN_BASE}.h; done
+resource_compiler.commands = echo ${QMAKE_FILE_IN} ${QMAKE_FILE_IN_BASE} && rm -f $${OUT_PWD}/${QMAKE_FILE_IN_BASE}.c $${OUT_PWD}/${QMAKE_FILE_IN_BASE}.h && for i in `cat ${QMAKE_FILE_IN}`; do cd $${_PRO_FILE_PWD_} && xxd -i \$\$i >> $${OUT_PWD}/${QMAKE_FILE_IN_BASE}.c; echo \"extern unsigned int \$\$(echo \$\$i | sed s/\\\\./_/)_len;\" >> $${OUT_PWD}/${QMAKE_FILE_IN_BASE}.h; echo \"extern unsigned char \$\$(echo \$\$i | sed s/\\\\./_/)[];\" >> $${OUT_PWD}/${QMAKE_FILE_IN_BASE}.h; done
 resource_compiler.variable_out = SOURCES
 resource_compiler.depend_command = cat ${QMAKE_FILE_IN}
 resource_compiler.CONFIG += target_predeps
@@ -80,7 +81,7 @@ crosscompilation {
         CHAINPATH = "$$NDK_PATH/toolchains/arm-linux-androideabi-4.6/prebuilt/linux-x86/bin"
         PLATFORM = "arm-linux-androideabi"
 
-        SYSTEM_FLAGS = '-DNDEBUG -frtti -fpic -ffunction-sections -funwind-tables -fstack-protector -D__ARM_ARCH_5__ -D__ARM_ARCH_5T__ -D__ARM_ARCH_5E__ -D__ARM_ARCH_5TE__  -march=armv5te -mtune=xscale -msoft-float -mthumb -Os -fomit-frame-pointer -fno-strict-aliasing -finline-limit=64 -DANDROID  -Wa,--noexecstack
+        SYSTEM_FLAGS = '-DNDEBUG -fpic -ffunction-sections -funwind-tables -fstack-protector -D__ARM_ARCH_5__ -D__ARM_ARCH_5T__ -D__ARM_ARCH_5E__ -D__ARM_ARCH_5TE__  -march=armv5te -mtune=xscale -msoft-float -mthumb -Os -fomit-frame-pointer -fno-strict-aliasing -finline-limit=64 -DANDROID  -Wa,--noexecstack
         SYSTEM_INCLUDES = "-I$$NDK_PATH/sources/android/native_app_glue" "-I$$NDK_PATH/sources/cxx-stl/gnu-libstdc++/4.6/include" "-I$$NDK_PATH/sources/cxx-stl/gnu-libstdc++/4.6/libs/armeabi/include" "-I$$NDK_PATH/platforms/android-14/arch-arm/usr/include -I../../Android/Boost/boost_1_49_0"
 
         QMAKE_CC		= "$$CHAINPATH/$$PLATFORM-gcc"
@@ -92,7 +93,7 @@ crosscompilation {
         QMAKE_STRIP             = "$$CHAINPATH/$$PLATFORM-strip"
 
         QMAKE_CFLAGS		= $$SYSTEM_FLAGS $$SYSTEM_INCLUDES
-        QMAKE_CXXFLAGS		= $$SYSTEM_FLAGS -std=gnu++0x $$SYSTEM_INCLUDES
+        QMAKE_CXXFLAGS		= $$SYSTEM_FLAGS -std=gnu++0x -frtti $$SYSTEM_INCLUDES
 
         CONFIG -= qt
 
