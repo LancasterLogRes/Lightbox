@@ -1,5 +1,9 @@
+#if LIGHTBOX_CROSSCOMPILATION_ANDROID
 #include <jni.h>
 #include <android_native_app_glue.h>
+#elif !defined(LIGHTBOX_CROSSCOMPILATION)
+#endif
+#include <fstream>
 #include "App.h"
 #include "Display.h"
 #include "AppEngine.h"
@@ -8,7 +12,8 @@ using namespace Lightbox;
 
 AppEngine* AppEngine::s_this = nullptr;
 
-AppEngine::AppEngine(struct android_app* _app): m_androidApp(_app)
+#if LIGHTBOX_CROSSCOMPILATION_ANDROID
+AppEngine::AppEngine(struct android_app* _app):m_androidApp(_app)
 {
 	app_dummy();
 
@@ -21,6 +26,12 @@ AppEngine::AppEngine(struct android_app* _app): m_androidApp(_app)
 	if (m_androidApp->savedState && m_app)
 		m_app->setState(foreign_vector<uint8_t>((unsigned char*)m_androidApp->savedState, m_androidApp->savedStateSize));
 }
+#elif !defined(LIGHTBOX_CROSSCOMPILATION)
+AppEngine::AppEngine()
+{
+	s_this = this;
+}
+#endif
 
 AppEngine::~AppEngine()
 {
@@ -33,11 +44,19 @@ void AppEngine::setApp(App* _app)
 
 void AppEngine::exec()
 {
+#if !defined(LIGHTBOX_CROSSCOMPILATION)
+	gfxInit();
+	gfxDraw();
+#endif
+
 	for (bool carryOn = true; carryOn;)
 	{
 		if (m_display && m_display->isAnimating())
 			gfxDraw();
+		else
+			sleep(1);
 
+#if LIGHTBOX_CROSSCOMPILATION_ANDROID
 		// Read all pending events.
 		int ident;
 		int events;
@@ -58,6 +77,8 @@ void AppEngine::exec()
 				break;
 			}
 		}
+#elif !defined(LIGHTBOX_CROSSCOMPILATION)
+#endif
 	}
 	m_display.reset();
 }
@@ -87,6 +108,7 @@ void AppEngine::gfxFini()
 	m_display.reset();
 }
 
+#if LIGHTBOX_CROSSCOMPILATION_ANDROID
 int32_t AppEngine::engine_handle_input(struct android_app* app, AInputEvent* event)
 {
 	return ((AppEngine*)app->userData)->handleInput(event);
@@ -156,4 +178,31 @@ std::function<void(uint8_t*, size_t)> Lightbox::assetReader(std::string const& _
 		cwarn << "Couldn't find asset" << _filename;
 		return nullptr;
 	}
+}
+#elif !defined(LIGHTBOX_CROSSCOMPILATION)
+std::function<void(uint8_t*, size_t)> Lightbox::assetReader(std::string const& _filename)
+{
+	auto a = make_shared<ifstream>();
+	a->open(_filename);
+	if (a->is_open())
+		return [=](uint8_t* d, size_t s)
+		{
+			a->read((char*)d, s);
+		};
+	else
+	{
+		cwarn << "Couldn't find asset" << _filename;
+		return nullptr;
+	}
+}
+#endif
+
+std::function<void(uint8_t*, size_t)> Lightbox::resReader(uint8_t const* _data)
+{
+	auto offset = make_shared<size_t>(0);
+	return [=](uint8_t* d, size_t s)
+	{
+		memcpy(d, _data + *offset, s);
+		*offset += s;
+	};
 }

@@ -1,3 +1,6 @@
+#define PNG_DEBUG 9
+#include <libpng/png.h>
+
 #include "Program.h"
 #include "TextureFace2D.h"
 using namespace std;
@@ -23,9 +26,6 @@ void TextureFace2D::deactivate(uint _unit) const
 	LIGHTBOX_GL(glActiveTexture(GL_TEXTURE0 + _unit));
 	LIGHTBOX_GL(glBindTexture(GL_TEXTURE_2D, 0));
 }
-
-
-#include <libpng/png.h>
 
 static void readPngAux(png_structp png, png_bytep data, png_size_t size)
 {

@@ -63,6 +63,12 @@ void ProgramFace::use(shared_ptr<ProgramFace> const& _this) const
 		s_inUse->drop();
 	LIGHTBOX_GL(glUseProgram(m_id));
 	s_inUse = _this;
+
+	for (auto& p: m_uniformPages)
+		p->setup(_this);
+
+	for (auto& f: m_nv)
+		f.second();
 }
 
 void ProgramFace::drop() const
@@ -73,5 +79,17 @@ void ProgramFace::drop() const
 		m_reg.clear();
 		s_inUse = nullptr;
 	}
+}
+
+void ProgramFace::tie(UniformPage const& _p)
+{
+	_p.sharedPtr()->registerProgram(this);
+	m_uniformPages.insert(_p.sharedPtr());
+}
+
+void ProgramFace::untie(UniformPage const& _p)
+{
+	_p.sharedPtr()->unregisterProgram(this);
+	m_uniformPages.erase(_p.sharedPtr());
 }
 

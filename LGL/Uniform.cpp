@@ -10,9 +10,9 @@ Uniform::Uniform(Program const& _p, std::string const& _name):
 {
 }
 
-void Uniform::set(Texture2D const& _t)
+void Uniform::set(Texture2D const& _t) const
 {
-	if (m_location >= 0 && _t)
+	if (m_location >= 0 && _t && Assert(isActive()))
 	{
 		if (shared_ptr<ProgramFace> pf = m_p.lock())
 			set(pf->registerSampler(_t));
@@ -21,3 +21,13 @@ void Uniform::set(Texture2D const& _t)
 	}
 }
 
+bool Uniform::isActive() const
+{
+	return ProgramFace::s_inUse == m_p.lock();
+}
+
+void Uniform::setNVAux(std::function<void()> const& _a) const
+{
+	if (std::shared_ptr<ProgramFace> p = m_p.lock())
+		p->m_nv.insert(make_pair(m_location, _a));
+}

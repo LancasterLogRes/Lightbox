@@ -1,5 +1,5 @@
 CONFIG -= qt
-TARGET = LGL
+TARGET = Numeric
 TEMPLATE = lib
 include ( ../Common.pri )
 LIBS += -lCommon

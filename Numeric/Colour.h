@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include "Vector.h"
 
 namespace Lightbox
 {
@@ -12,6 +13,7 @@ public:
 	Colour(float _r, float _g, float _b, float _a = 1.f): m_r(_r), m_g(_g), m_b(_b), m_a(_a) {}
 	Colour(Colour const& _c, float _a): m_r(_c.m_r), m_g(_c.m_g), m_b(_c.m_b), m_a(_a) {}
 
+	fVector4 const& asVector4() const { return (fVector4 const&)*this; }
 	operator float const*() const { return reinterpret_cast<float const*>(this); }
 	
 	float r() const { return m_r; }

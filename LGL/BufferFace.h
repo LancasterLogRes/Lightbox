@@ -2,7 +2,6 @@
 
 #include <vector>
 #include <GLES2/gl2.h>
-#include <Numeric/Rect.h>
 #include <Common/Global.h>
 #include "Global.h"
 

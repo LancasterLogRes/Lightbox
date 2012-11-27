@@ -13,61 +13,65 @@ public:
 	typedef Size<Numeric> xSize;
 
 	Rect() {}
-	Rect(xCoord _min, xCoord _max): m_min(_min), m_max(_max) {}
-	explicit Rect(xSize _size): m_min(0, 0), m_max(_size.w(), _size.h()) {}
-	Rect(Numeric _minx, Numeric _miny, Numeric _maxx, Numeric _maxy):
-		m_min(xCoord(_minx, _miny)), m_max(xCoord(_maxx, _maxy)) {}
-	template<class _N> explicit Rect(Rect<_N> _s): m_min(_s.min()), m_max(_s.max()) {}
+	Rect(xCoord _min, xSize _size): m_pos(_min), m_size(_size) {}
+	Rect(xCoord _min, xCoord _max): m_pos(_min), m_size(_max - _min) {}
+	explicit Rect(xSize _size): m_pos(0, 0), m_size(_size) {}
+	Rect(Numeric _x, Numeric _y, Numeric _w, Numeric _h): m_pos(_x, _y), m_size(_w, _h) {}
+	template<class _N> explicit Rect(Rect<_N> _s): m_pos(_s.pos()), m_size(_s.size()) {}
 	
-	xCoord min() const { return m_min; }
-	xCoord max() const { return m_max; }
-	
-	void setMin(xCoord _min) { m_min = _min; }
-	void setMax(xCoord _max) { m_max = _max; }
+	Vector4<Numeric>& asVector4() { return (Vector4<Numeric>&)*this; }
 
-	Numeric x() const { return m_min.x(); }
-	Numeric y() const { return m_min.y(); }
-	Numeric w() const { return m_max.x() - m_min.x(); }
-	Numeric h() const { return m_max.y() - m_min.y(); }
-	Numeric width() const { return m_max.x() - m_min.x(); }
-	Numeric height() const { return m_max.y() - m_min.y(); }
+	void move(xCoord _pos) { m_pos = _pos; }
+	void resize(xSize _s) { m_size = _s; }
+	void alterTopLeft(xCoord _pos) { m_size += m_pos - _pos; m_pos = _pos; }
+	void alterBottomRight(xCoord _max) { m_size = _max - m_pos; }
+
+	void setX(Numeric _x) { m_pos.setX(_x); }
+	void setY(Numeric _y) { m_pos.setY(_y); }
+	void setW(Numeric _w) { m_size.setW(_w); }
+	void setH(Numeric _h) { m_size.setH(_h); }
+	void setWidth(Numeric _w) { m_size.setW(_w); }
+	void setHeight(Numeric _h) { m_size.setH(_h); }
 	
-	void setX(Numeric _x) { m_min.setX(_x); }
-	void setY(Numeric _y) { m_min.setY(_y); }
-	void setW(Numeric _w) { m_max.setX(m_min.x() + _w); }
-	void setH(Numeric _h) { m_max.setY(m_min.y() + _h); }
-	void setWidth(Numeric _w) { m_max.setX(m_min.x() + _w); }
-	void setHeight(Numeric _h) { m_max.setY(m_min.y() + _h); }
+	xCoord pos() const { return m_pos; }
+	xSize size() const { return m_size; }
+	Numeric x() const { return m_pos.x(); }
+	Numeric y() const { return m_pos.y(); }
+	Numeric w() const { return m_size.w(); }
+	Numeric h() const { return m_size.h(); }
+	Numeric width() const { return m_size.w(); }
+	Numeric height() const { return m_size.h(); }
+	Numeric left() const { return m_pos.x(); }
+	Numeric top() const { return m_pos.y(); }
+	Numeric right() const { return m_pos.x() + m_size.w(); }
+	Numeric bottom() const { return m_pos.y() + m_size.h(); }
+	Numeric l() const { return m_pos.x(); }
+	Numeric t() const { return m_pos.y(); }
+	Numeric r() const { return m_pos.x() + m_size.w(); }
+	Numeric b() const { return m_pos.y() + m_size.h(); }
+	xCoord topLeft() const { return m_pos; }
+	xCoord topRight() const { return xCoord(right(), m_pos.y()); }
+	xCoord bottomLeft() const { return xCoord(m_pos.x(), bottom()); }
+	xCoord bottomRight() const { return xCoord(right(), bottom()); }
+	xCoord middle() const { return m_pos + m_size / 2; }
+
+	xCoord lerp(float _x, float _y) const { return m_pos + m_size * xCoord(_x, _y); }
+
+	Rect expanded(Numeric _f) const { return Rect(m_pos - _f, m_size + 2 * _f); }
+	Rect shrunk(Numeric _f) const { return Rect(m_pos + _f, m_size - 2 * _f); }
 	
-	xSize size() const { return m_max - m_min; }
-	void setSize(xSize _s) { m_max = m_min + _s; }
-	
-	Numeric left() const { return m_min.x(); }
-	Numeric top() const { return m_min.y(); }
-	Numeric right() const { return m_max.x(); }
-	Numeric bottom() const { return m_max.y(); }
-	Numeric l() const { return m_min.x(); }
-	Numeric t() const { return m_min.y(); }
-	Numeric r() const { return m_max.x(); }
-	Numeric b() const { return m_max.y(); }
-	
-	xCoord topLeft() const { return m_min; }
-	xCoord topRight() const { return xCoord(m_max.x(), m_min.y()); }
-	xCoord bottomLeft() const { return xCoord(m_min.x(), m_max.y()); }
-	xCoord bottomRight() const { return m_max; }
-	
-	Rect expanded(Numeric _f) const { return Rect(m_min - _f, m_max + _f); }
-	Rect shrunk(Numeric _f) const { return Rect(m_min + _f, m_max - _f); }
-	
-	Rect operator+(Numeric _f) const { return Rect(m_min - _f, m_max + _f); }
-	Rect operator-(Numeric _f) const { return Rect(m_min + _f, m_max - _f); }
+	Rect dividedBy(xSize _s) const { return Rect(m_pos / _s, m_size / _s); }
+
+	Rect operator+(Numeric _f) const { return expanded(_f); }
+	Rect operator-(Numeric _f) const { return shrunk(_f); }
+	Rect operator/(xSize _s) const { return dividedBy(_s); }
+	bool contains(xCoord const& _p) const { return _p >= m_pos && _p <= bottomRight(); }
 	// TODO
 	bool inside(Rect const&) const { return true; }
-	bool contains(xCoord const& _p) const { return _p >= m_min && _p <= m_max; }
-	
+
 private:
-	xCoord m_min;
-	xCoord m_max;
+	xCoord m_pos;
+	xSize m_size;
 };
 
 typedef Rect<float> fRect;

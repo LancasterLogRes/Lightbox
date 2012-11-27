@@ -1,5 +1,7 @@
 #pragma once
 
+#include <Numeric/Coord.h>
+
 namespace Lightbox
 {
 
@@ -18,6 +20,7 @@ public:
 
 	unsigned width() const { return m_width; }
 	unsigned height() const { return m_height; }
+	uSize size() const { return uSize(m_width, m_height); }
 
 private:
 	Display(Display const&) = delete;

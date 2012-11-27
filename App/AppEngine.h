@@ -18,8 +18,11 @@
 #include <memory>
 #include <Common/Global.h>
 
+#if LIGHTBOX_CROSSCOMPILATION_ANDROID
 struct android_app;
 struct AInputEvent;
+#elif !defined(LIGHTBOX_CROSSCOMPILATION)
+#endif
 
 namespace Lightbox
 {
@@ -30,7 +33,14 @@ class App;
 class AppEngine
 {
 public:
+#if LIGHTBOX_CROSSCOMPILATION_ANDROID
 	AppEngine(struct android_app* _app);
+
+	struct android_app* androidApp() { return m_androidApp; }
+#elif !defined(LIGHTBOX_CROSSCOMPILATION)
+	AppEngine();
+#endif
+
 	~AppEngine();
 
 	void setApp(App* _app);
@@ -39,7 +49,6 @@ public:
 	void exec();
 
 	static AppEngine* get() { assert(s_this); return s_this; }
-	struct android_app* androidApp() { return m_androidApp; }
 
 private:
 	AppEngine(AppEngine const&) = delete;
@@ -49,19 +58,24 @@ private:
 	void gfxDraw();
 	void gfxFini();
 
+
+	std::shared_ptr<Display> m_display;
+	std::shared_ptr<App> m_app;
+
+#if LIGHTBOX_CROSSCOMPILATION_ANDROID
 	static int32_t engine_handle_input(struct android_app* app, AInputEvent* event);
 	int32_t handleInput(AInputEvent* _event);
 	static void engine_handle_cmd(struct android_app* app, int32_t cmd);
 	void handleCommand(int32_t _cmd);
 
-	std::shared_ptr<Display> m_display;
-	std::shared_ptr<App> m_app;
-
 	struct android_app* m_androidApp;	///< The Android app object. Always valid.
+#elif !defined(LIGHTBOX_CROSSCOMPILATION)
+#endif
 
 	static AppEngine* s_this;
 };
 
+std::function<void(uint8_t*, size_t)> resReader(uint8_t const* _data);
 std::function<void(uint8_t*, size_t)> assetReader(std::string const& _filename);
 
 }

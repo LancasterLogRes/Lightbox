@@ -2,8 +2,8 @@
 
 #include <vector>
 #include <GLES2/gl2.h>
-#include <Numeric/Rect.h>
 #include <Common/Global.h>
+#include <Numeric/Coord.h>
 #include "Global.h"
 
 namespace Lightbox

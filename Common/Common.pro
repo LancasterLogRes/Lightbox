@@ -20,7 +20,7 @@ win32 {
 }
 
 !android: LIBS += $$FFTW3_LIBS
-android:LIBS += -llog -landroid -lLGL -lEGL -lGLESv2 -lCommon -llog -landroid -lpng -lz
+android: LIBS += -llog
 
 SOURCES += Common.cpp \
     FFTW.cpp \

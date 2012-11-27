@@ -3,7 +3,6 @@
 #include <typeinfo>
 
 #include "Vector.h"
-#include "Rect.h"
 
 namespace Lightbox
 {

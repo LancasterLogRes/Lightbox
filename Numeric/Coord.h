@@ -7,6 +7,8 @@
 namespace Lightbox
 {
 
+template<class Numeric> class Size;
+
 template<class Numeric>
 class Coord: public CalcPair<Numeric, Coord<Numeric> >
 {
@@ -17,7 +19,7 @@ public:
 	Coord(Pair<Numeric> _q): Super(_q) {}
 	Coord(Super _q): Super(_q) {}
 	Coord(Numeric _x, Numeric _y): Super(_x, _y) {}
-	template<class _N> explicit Coord(Coord<_N> _s): CalcPair<Numeric, Coord<Numeric>>(_s) {}
+	template <class _N> explicit Coord(Coord<_N> _s): CalcPair<Numeric, Coord<Numeric>>(_s) {}
 
 	Super::x;
 	Super::y;
@@ -26,6 +28,9 @@ public:
 	bool operator>(Coord const& _c) const { return x() > _c.x() && y() > _c.y(); }
 	bool operator<=(Coord const& _c) const { return x() <= _c.x() && y() <= _c.y(); }
 	bool operator>=(Coord const& _c) const { return x() >= _c.x() && y() >= _c.y(); }
+
+	Coord operator+(Size<Numeric> const& _c) const;
+	Size<Numeric> operator-(Coord const& _c) const;
 };
 
 typedef Coord<float> XY;
@@ -54,6 +59,8 @@ public:
 
 	void setW(Numeric _w) { Super::setX(_w); }
 	void setH(Numeric _h) { Super::setY(_h); }
+	void setWidth(Numeric _w) { Super::setX(_w); }
+	void setHeight(Numeric _h) { Super::setY(_h); }
 
 	bool operator<(Size const& _c) const { return w() < _c.w() && h() < _c.h(); }
 	bool operator>(Size const& _c) const { return w() > _c.w() && h() > _c.h(); }
@@ -71,5 +78,8 @@ typedef Size<float> fSize;
 typedef Size<double> dSize;
 typedef Size<int> iSize;
 typedef Size<unsigned> uSize;
+
+template <class Numeric> Coord<Numeric> Coord<Numeric>::operator+(Size<Numeric> const& _c) const { return Coord(x() + _c.w(), y() + _c.h()); }
+template <class Numeric> Size<Numeric> Coord<Numeric>::operator-(Coord const& _c) const { return Size<Numeric>(x() - _c.x(), y() - _c.y()); }
 
 }

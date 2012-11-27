@@ -6,10 +6,12 @@ DEFINES += "LIGHTBOX_TARGET_NAME=$$TARGET"
 
 android: CONFIG += crosscompilation
 pi: CONFIG += crosscompilation
-crosscompilation: !pi: !android: CONFIG += x86
-!crosscompilation: CONFIG += x86
+!pi: !android {
+    crosscompilation: CONFIG += amd
+    CONFIG += x86
+}
 
-pi|x86: CONFIG += force_static
+pi|amd: CONFIG += force_static
 !crosscompilation: CONFIG += force_shared
 
 message($$CONFIG)
@@ -28,21 +30,6 @@ CONFIG(debug, debug|release) {
 	QMAKE_CXXFLAGS += -DDEBUG -g3 -fno-inline -O0 -Wall
 	!win32: QMAKE_CXXFLAGS += -fPIC
 	system (echo "Debug build")
-}
-
-force_shared {
-	CONFIG -= create_prl link_prl static
-	CONFIG += shared dll dylib
-	DEFINES += LIGHTBOX_SHARED_LIBRARY
-	system (echo "Shared build")
-}
-
-force_static {
-	CONFIG += create_prl link_prl static
-	CONFIG -= shared dll dylib
-	DEFINES += LIGHTBOX_STATIC_LIBRARY
-        LIBS += -static
-	system (echo "Static build")
 }
 
 profile {
@@ -108,10 +95,10 @@ crosscompilation {
         contains(TEMPLATE, app) {
             SOURCES += "$$NDK_PATH/sources/android/native_app_glue/android_native_app_glue.c"
             TEMPLATE = lib
-            CONFIG += shared
+            CONFIG += force_shared
             QMAKE_POST_LINK = mkdir -p '"$${OBJECTS_DIR}wrap/libs/armeabi"' &&\
                 cp '"$${DESTDIR}/lib$${TARGET}.so"' '"$${OBJECTS_DIR}wrap/libs/armeabi"' &&\
-                sed '\'s/"android.app.lib_name" android:value=""/"android.app.lib_name" android:value="$$TARGET"/\'' '$$ANDROID_MANIFEST' > '"$${OBJECTS_DIR}wrap/AndroidManifest.xml"' &&\
+                sed '\'s/"android.app.lib_name" android:value=""/"android.app.lib_name" android:value="$$TARGET"/\'' '$${ANDROID_MANIFEST}' > '"$${OBJECTS_DIR}wrap/AndroidManifest.xml"' &&\
                 mkdir -p '"$${OBJECTS_DIR}wrap/res/values"' &&\
                 echo '\'<?xml version="1.0" encoding="utf-8"?><resources><string name="app_name">Glow</string></resources>\'' > '$${OBJECTS_DIR}wrap/res/values/strings.xml' &&\
                 mkdir -p '"$${OBJECTS_DIR}wrap/assets"' &&\
@@ -145,7 +132,7 @@ crosscompilation {
     }
     x86 {
         QMAKE_CXXFLAGS += -march=amdfam10 -O2 -pipe -mno-3dnow -mcx16 -mpopcnt -msse3 -msse4a -mmmx
-        DEFINES += LIGHTBOX_CROSSCOMPILATION_PC
+        DEFINES += LIGHTBOX_CROSSCOMPILATION_X86
     }
     DEFINES += LIGHTBOX_CROSSCOMPILATION
 }
@@ -182,3 +169,18 @@ win32 {
 
 LIBS += -L$$DESTDIR -Wl,-rpath,$$DESTDIR
 DEPENDPATH = $INCLUDEPATH
+
+force_shared {
+        CONFIG -= create_prl link_prl static
+        CONFIG += shared dll dylib
+        DEFINES += LIGHTBOX_SHARED_LIBRARY
+        system (echo "Shared build")
+}
+
+force_static {
+        CONFIG += create_prl link_prl static
+        CONFIG -= shared dll dylib
+        DEFINES += LIGHTBOX_STATIC_LIBRARY
+        LIBS += -static
+        system (echo "Static build")
+}

@@ -17,18 +17,26 @@ class FontFace
 public:
 	FontFace(uint8_t const* _ttfData, float _size);
 
-	void draw(float _x, float _y, std::string const& _text);
+	void draw(iCoord _anchor, std::string const& _text, Colour _c);
 
-	Program m_program;
+	static void initForDisplay(uSize _s);
+
+private:
 	Attrib m_index;
 	Attrib m_layout;
 	Attrib m_source;
 	Attrib m_size;
+	Uniform m_color;
 	Uniform m_tex;
 
 	void* m_charData;
 	Texture2D m_texture;
 	Buffer<uint8_t> m_buffer;
+
+	int m_above;
+	int m_below;
+
+	static Program s_program;
 };
 
 }

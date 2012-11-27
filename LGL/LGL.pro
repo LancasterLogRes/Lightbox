@@ -2,9 +2,9 @@ CONFIG -= qt
 TARGET = LGL
 TEMPLATE = lib
 include ( ../Common.pri )
-LIBS += -lEGL -lGLESv2 -lCommon -lNumeric
+LIBS += -lEGL -lGLESv2 -lCommon -lNumeric -lpng -lz
 
-SOURCES += ProgramFace.cpp ShaderFace.cpp Uniform.cpp \
+SOURCES += ProgramFace.cpp Program.cpp ShaderFace.cpp Uniform.cpp \
     Global.cpp \
     Attrib.cpp \
     Texture2D.cpp \

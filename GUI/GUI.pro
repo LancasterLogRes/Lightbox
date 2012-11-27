@@ -3,5 +3,10 @@ TARGET = GUI
 TEMPLATE = lib
 include ( ../Common.pri )
 
-SOURCES +=
-HEADERS +=
+SOURCES += \
+    View.cpp \
+    BasicButton.cpp
+HEADERS += \
+    View.h \
+    BasicButton.h \
+    Global.h

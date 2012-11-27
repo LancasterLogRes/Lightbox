@@ -11,3 +11,8 @@ Attrib::Attrib(Program const& _p, std::string const& _name):
 	if (m_location > -1)
 		glEnableVertexAttribArray(m_location);
 }
+
+bool Attrib::isActive() const
+{
+	return ProgramFace::inUse() == m_p.lock();
+}
