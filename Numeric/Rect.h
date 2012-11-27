@@ -55,7 +55,7 @@ public:
 	xCoord bottomRight() const { return xCoord(right(), bottom()); }
 	xCoord middle() const { return m_pos + m_size / 2; }
 
-	xCoord lerp(float _x, float _y) const { return m_pos + m_size * xCoord(_x, _y); }
+	xCoord lerp(float _x, float _y) const { return m_pos + xSize(m_size.w() * _x, m_size.h() * _y); }
 
 	Rect expanded(Numeric _f) const { return Rect(m_pos - _f, m_size + 2 * _f); }
 	Rect shrunk(Numeric _f) const { return Rect(m_pos + _f, m_size - 2 * _f); }
