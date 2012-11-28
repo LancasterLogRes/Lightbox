@@ -45,7 +45,7 @@ FontFace::FontFace(uint8_t const* _ttfData, float _size)
 		m_buffer.set(corners.data(), corners.size(), i * corners.size());
 }
 
-void FontFace::draw(iCoord _anchor, string const& _text, Colour _c)
+void FontFace::draw(fCoord _anchor, string const& _text, Colour _c)
 {
 	assert(s_program.isValid());
 
@@ -53,12 +53,12 @@ void FontFace::draw(iCoord _anchor, string const& _text, Colour _c)
 	std::vector<std::array<GLushort, 2> > source(_text.size() * 6);
 	std::vector<std::array<GLubyte, 2> > size(_text.size() * 6);
 
-	int width = 0;
+	float width = 0;
 	for (char c: _text)
 		width += ((stbtt_bakedchar*)m_charData)[c - s_charDataFirst].xadvance;
 
 	float x = _anchor.x() - width / 2;
-	float y = _anchor.y() - ((m_above + m_below) / 2 - m_above);
+	float y = _anchor.y() - ((m_above + m_below + 1) / 2 - m_above);
 
 	for (unsigned i = 0; i < _text.size(); ++i)
 	{

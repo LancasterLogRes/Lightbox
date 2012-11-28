@@ -2,3 +2,4 @@
 
 #include "View.h"
 #include "BasicButton.h"
+#include "GUIApp.h"

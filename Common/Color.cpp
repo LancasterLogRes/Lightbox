@@ -19,6 +19,7 @@
  */
 
 #include <cmath>
+#include "Colour.h"
 #include "Color.h"
 using namespace std;
 using namespace Lightbox;
@@ -53,4 +54,73 @@ Color Color::fromRGB(std::array<float, 3> _rgb)
 			ret.m_hue -= 1.f;
 	}
 	return ret;
+}
+
+Colour Color::toColour() const
+{
+	double      hh, p, q, t, ff;
+	long        i;
+	Colour         out;
+	out.setA(m_alpha);
+
+	if (m_sat <= 0.f)
+	{       // < is bogus, just shuts up warnings
+		if (isnan(m_hue))
+		{   // m_hue == NAN
+			out.setR(m_value);
+			out.setG(m_value);
+			out.setB(m_value);
+			return out;
+		}
+		// error - should never happen
+		out.setR(0.f);
+		out.setG(0.f);
+		out.setB(0.f);
+		return out;
+	}
+	hh = m_hue;
+	if (hh >= 1.f)
+		hh = 0.f;
+	hh *= 6.f;
+	i = (long)hh;
+	ff = hh - i;
+	p = m_value * (1.f - m_sat);
+	q = m_value * (1.f - (m_sat * ff));
+	t = m_value * (1.f - (m_sat * (1.f - ff)));
+
+	switch (i)
+	{
+	case 0:
+		out.setR(m_value);
+		out.setG(t);
+		out.setB(p);
+		break;
+	case 1:
+		out.setR(q);
+		out.setG(m_value);
+		out.setB(p);
+		break;
+	case 2:
+		out.setR(p);
+		out.setG(m_value);
+		out.setB(t);
+		break;
+
+	case 3:
+		out.setR(p);
+		out.setG(q);
+		out.setB(m_value);
+		break;
+	case 4:
+		out.setR(t);
+		out.setG(p);
+		out.setB(m_value);
+		break;
+	default:
+		out.setR(m_value);
+		out.setG(p);
+		out.setB(q);
+		break;
+	}
+	return out;
 }

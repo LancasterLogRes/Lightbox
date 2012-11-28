@@ -1,7 +1,7 @@
 #pragma once
 
 #include <cstdint>
-#include "Vector.h"
+#include <Numeric/Vector.h>
 
 namespace Lightbox
 {
@@ -20,6 +20,11 @@ public:
 	float g() const { return m_g; }
 	float b() const { return m_b; }
 	float a() const { return m_a; }
+
+	void setR(float _r) { m_r = _r; }
+	void setG(float _g) { m_g = _g; }
+	void setB(float _b) { m_b = _b; }
+	void setA(float _a) { m_a = _a; }
 
 	Colour operator+(Colour const& _c) const { return Colour(m_r + _c.m_r, m_g + _c.m_g, m_b + _c.m_b, m_a + _c.m_a); }
 	Colour operator*(float _f) const { return Colour(m_r * _f, m_g * _f, m_b * _f, m_a); }

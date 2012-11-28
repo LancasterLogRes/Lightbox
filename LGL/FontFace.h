@@ -2,6 +2,7 @@
 
 #include <string>
 #include <Common/Global.h>
+#include <Common/Colour.h>
 #include "Global.h"
 #include "Attrib.h"
 #include "Program.h"
@@ -17,7 +18,7 @@ class FontFace
 public:
 	FontFace(uint8_t const* _ttfData, float _size);
 
-	void draw(iCoord _anchor, std::string const& _text, Colour _c);
+	void draw(fCoord _anchor, std::string const& _text, Colour _c);
 
 	static void initForDisplay(uSize _s);
 

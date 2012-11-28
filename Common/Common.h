@@ -38,6 +38,7 @@
 #include "Trivial.h"
 #include "UnitTesting.h"
 #include "WavHeader.h"
+#include "Colour.h"
 
 namespace Lightbox
 {

@@ -1,4 +1,3 @@
-#include "Colour.h"
 #include "Coord.h"
 #include "Matrix.h"
 #include "Quaternion.h"

@@ -349,6 +349,8 @@ public:
 	static Vector4<T> average(Vector4<T> _p0, Vector4<T> _p1) { return Super::aggregate(_p0, _p1); }
 	static Vector4<T> average(Vector4<T> _p0, Vector4<T> _p1, Vector4<T> _p2) { return Super::aggregate(_p0, _p1, _p2); }
 
+	T dotted(Vector3<T> _b) const { return x() * _b.x() + y() * _b.y() + z() * _b.z() + w() * _b.w(); }
+
 private:
 	Super::length3;
 	Super::compare3;
@@ -381,7 +383,8 @@ template<class _S, class _T> _S& operator>>(_S& _in, Pair<_T>& _me)
 
 template<class _S, class _T> _S& operator<<(_S& _out, Pair<_T> const& _me)
 {
-	return _out << "(" << _me.x() << ", " << _me.y() << ")";
+	_out << "(" << _me.x() << ", " << _me.y() << ")";
+	return _out;
 }
 
 template<class _S, class _T> _S& operator>>(_S& _in, Quad<_T>& _me)
@@ -400,7 +403,8 @@ template<class _S, class _T> _S& operator>>(_S& _in, Quad<_T>& _me)
 
 template<class _S, class _T> _S& operator<<(_S& _out, Quad<_T> const& _me)
 {
-	return _out << "(" << _me.x() << ", " << _me.y() << ", " << _me.z() << ", " << _me.w() << ")";
+	_out << "(" << _me.x() << ", " << _me.y() << ", " << _me.z() << ", " << _me.w() << ")";
+	return _out;
 }
 
 template<class _S, class _T> _S& operator>>(_S& _in, Vector3<_T>& _me)
@@ -421,7 +425,8 @@ template<class _S, class _T> _S& operator>>(_S& _in, Vector3<_T>& _me)
 
 template<class _S, class _T> _S& operator<<(_S& _out, Vector3<_T> const& _me)
 {
-	return _out << "(" << _me.x() << ", " << _me.y() << ", " << _me.z() << ")";
+	_out << "(" << _me.x() << ", " << _me.y() << ", " << _me.z() << ")";
+	return _out;
 }
 
 }

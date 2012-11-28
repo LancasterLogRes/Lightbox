@@ -16,6 +16,8 @@
  */
 
 #include <memory>
+#include <array>
+#include <Numeric/Coord.h>
 #include <Common/Global.h>
 
 #if LIGHTBOX_CROSSCOMPILATION_ANDROID
@@ -43,6 +45,7 @@ public:
 
 	~AppEngine();
 
+	App* app() const { return &*m_app; }
 	void setApp(App* _app);
 	Display& display() { return *m_display; }
 
@@ -58,7 +61,6 @@ private:
 	void gfxDraw();
 	void gfxFini();
 
-
 	std::shared_ptr<Display> m_display;
 	std::shared_ptr<App> m_app;
 
@@ -67,6 +69,8 @@ private:
 	int32_t handleInput(AInputEvent* _event);
 	static void engine_handle_cmd(struct android_app* app, int32_t cmd);
 	void handleCommand(int32_t _cmd);
+
+	std::array<iCoord, 10> m_pointerState;
 
 	struct android_app* m_androidApp;	///< The Android app object. Always valid.
 #elif !defined(LIGHTBOX_CROSSCOMPILATION)

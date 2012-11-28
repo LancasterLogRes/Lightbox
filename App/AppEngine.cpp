@@ -54,7 +54,7 @@ void AppEngine::exec()
 		if (m_display && m_display->isAnimating())
 			gfxDraw();
 		else
-			sleep(1);
+			usleep(30);
 
 #if LIGHTBOX_CROSSCOMPILATION_ANDROID
 		// Read all pending events.
@@ -116,9 +116,52 @@ int32_t AppEngine::engine_handle_input(struct android_app* app, AInputEvent* eve
 
 int32_t AppEngine::handleInput(AInputEvent* _event)
 {
-	if (AInputEvent_getType(_event) == AINPUT_EVENT_TYPE_MOTION && m_app->motionEvent(AMotionEvent_getX(_event, 0), AMotionEvent_getY(_event, 0), _event))
-		return 1;
-	return 0;
+	bool ret = false;
+	if (AInputEvent_getType(_event) == AINPUT_EVENT_TYPE_MOTION)
+	{
+		int32_t action = AMotionEvent_getAction(_event);
+		int flags = action & AMOTION_EVENT_ACTION_MASK;
+		int index = (action & AMOTION_EVENT_ACTION_POINTER_INDEX_MASK) >> AMOTION_EVENT_ACTION_POINTER_INDEX_SHIFT;
+		int id = AMotionEvent_getPointerId(_event, index);
+
+		iCoord c(AMotionEvent_getX(_event, id), AMotionEvent_getY(_event, id));
+		switch (flags)
+		{
+		case AMOTION_EVENT_ACTION_POINTER_UP: case AMOTION_EVENT_ACTION_UP:
+			if (id >= 0 && id < 10)
+			{
+				ret = m_app->motionEvent(id, iCoord(-1, -1), false);
+				m_pointerState[id] = iCoord(-1, -1);
+			}
+			break;
+		case AMOTION_EVENT_ACTION_POINTER_DOWN: case AMOTION_EVENT_ACTION_DOWN:
+			if (id >= 0 && id < 10)
+			{
+				ret = m_app->motionEvent(id, c, true);
+				m_pointerState[id] = c;
+			}
+			break;
+		case AMOTION_EVENT_ACTION_MOVE:
+			for (int index = 0; index < 10; ++index)
+			{
+				id = AMotionEvent_getPointerId(_event, index);
+				if (id >= 0 && id < 10)
+				{
+					c = iCoord(AMotionEvent_getX(_event, id), AMotionEvent_getY(_event, id));
+					if (c != m_pointerState[id])
+						break;
+				}
+			}
+			if (id >= 0 && id < 10)
+			{
+				m_pointerState[id] = c;
+				ret = m_app->motionEvent(id, c, false);
+			}
+			break;
+		default:;
+		}
+	}
+	return ret ? 1 : 0;
 }
 
 void AppEngine::engine_handle_cmd(struct android_app* app, int32_t cmd)

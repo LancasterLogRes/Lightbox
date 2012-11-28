@@ -30,7 +30,8 @@ SOURCES += Common.cpp \
     RGBA.cpp \
     Color.cpp \
     Peaks.cpp \
-    Time.cpp
+    Time.cpp \
+    Colour.cpp
 HEADERS += Common.h Global.h \
     Time.h \
     GraphParameters.h \
@@ -53,4 +54,5 @@ HEADERS += Common.h Global.h \
     MemberMap.h \
     Members.h \
     GL.h \
-    RGBA.h
+    RGBA.h \
+Colour.h

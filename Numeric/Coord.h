@@ -28,6 +28,8 @@ public:
 	bool operator>(Coord const& _c) const { return x() > _c.x() && y() > _c.y(); }
 	bool operator<=(Coord const& _c) const { return x() <= _c.x() && y() <= _c.y(); }
 	bool operator>=(Coord const& _c) const { return x() >= _c.x() && y() >= _c.y(); }
+	bool operator==(Coord const& _c) const { return compare(_c); }
+	bool operator!=(Coord const& _c) const { return !compare(_c); }
 
 	Coord operator+(Size<Numeric> const& _c) const;
 	Size<Numeric> operator-(Coord const& _c) const;
@@ -50,6 +52,7 @@ public:
 	Size(Pair<Numeric> _q): Super(_q) {}
 	Size(Super _q): Super(_q) {}
 	Size(Numeric _w, Numeric _h): Super(_w, _h) {}
+	explicit Size(Coord<Numeric> _c): Super((Super)_c) {}
 	template<class _N> explicit Size(Size<_N> _s): CalcPair<Numeric, Size<Numeric>>(_s) {}
 
 	Numeric w() const { return x(); }
@@ -66,6 +69,8 @@ public:
 	bool operator>(Size const& _c) const { return w() > _c.w() && h() > _c.h(); }
 	bool operator<=(Size const& _c) const { return w() <= _c.w() && h() <= _c.h(); }
 	bool operator>=(Size const& _c) const { return w() >= _c.w() && h() >= _c.h(); }
+	bool operator==(Size const& _c) const { return compare(_c); }
+	bool operator!=(Size const& _c) const { return !compare(_c); }
 
 private:
 	Super::x;

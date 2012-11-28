@@ -35,6 +35,7 @@ namespace Lightbox
 
 class Color;
 typedef std::vector<Color> Colors;
+class Colour;
 
 class Color
 {
@@ -63,6 +64,7 @@ public:
 	Color& attenuate(float _x) { m_value *= _x; return *this; }
 	Color attenuated(float _x) const { return Color(m_hue, m_sat, m_value * _x, m_alpha); }
 
+	Colour toColour() const;
 	RGBA toRGBA() const { RGBA ret; ret.setHsv(clamp<int>(m_hue * 360, 0, 359), clamp<int>(m_sat * 255, 0, 255), clamp<int>(m_value * 255, 0, 255), clamp<int>(m_alpha * 255, 0, 255)); return ret; }
 	static Color fromRGB(std::array<float, 3> _rgb);
 //	operator RGBA() const { return toRGBA(); }
