@@ -2,7 +2,7 @@
 
 #include <Common/Pimpl.h>
 #include <Common/Global.h>
-#include <Common/Colour.h>
+#include <Common/RGBA.h>
 #include <Numeric/Coord.h>
 #include "Global.h"
 
@@ -15,7 +15,7 @@ public:
 	Font() {}
 	Font(uint8_t const* _ttfData, float _size);
 
-	void draw(fCoord _anchor, std::string const& _text, Colour _c = Colour::Black);
+	void draw(fCoord _anchor, std::string const& _text, RGBA _c = RGBA::Black) const;
 };
 
 }

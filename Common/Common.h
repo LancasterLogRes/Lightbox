@@ -31,14 +31,14 @@
 #include "MemberCollection.h"
 #include "MemberMap.h"
 #include "Members.h"
-#include "RGBA.h"
+#include "RGBA8.h"
 #include "Statistics.h"
 #include "StreamIO.h"
 #include "Time.h"
 #include "Trivial.h"
 #include "UnitTesting.h"
 #include "WavHeader.h"
-#include "Colour.h"
+#include "RGBA.h"
 
 namespace Lightbox
 {

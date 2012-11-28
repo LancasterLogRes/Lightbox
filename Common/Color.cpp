@@ -19,7 +19,7 @@
  */
 
 #include <cmath>
-#include "Colour.h"
+#include "RGBA.h"
 #include "Color.h"
 using namespace std;
 using namespace Lightbox;
@@ -30,97 +30,124 @@ float Color::hueCorrection(float _h)
 	return lerpLookup(c_brightnessCurve, _h);
 }
 
-Color Color::fromRGB(std::array<float, 3> _rgb)
+void Color::convertFrom(ColorSpace _cc, float _x, float _y, float _z, float _w)
 {
-	Color ret(0, 0, 0);
-	float m = min(_rgb[0], min(_rgb[1], _rgb[2]));
-	ret.m_value = max(_rgb[0], max(_rgb[1], _rgb[2]));
-	float c = ret.m_value - m;
-	if (c != 0)
+	if (_cc == RGBA8Space || _cc == RGB8Space)
+		_x /= 255, _y /= 255, _z /= 255, _w /= 255;
+
+	m_alpha = 1.f;
+	switch (_cc)
 	{
-		ret.m_sat = c / ret.m_value;
-		array<float, 3> d;
-		for (int i = 0; i < 3; ++i)
-			d[i] = (((ret.m_value - _rgb[i]) / 6.f) + (c / 2.f)) / c;
-		if (_rgb[0] == ret.m_value)
-			ret.m_hue = d[2] - d[1];
-		else if (_rgb[1] == ret.m_value)
-			ret.m_hue = (1.f/3.f) + d[0] - d[2];
-		else if (_rgb[2] == ret.m_value)
-			ret.m_hue = (2.f/3.f) + d[1] - d[0];
-		if (ret.m_hue < 0.f)
-			ret.m_hue += 1.f;
-		if (ret.m_hue > 1.f)
-			ret.m_hue -= 1.f;
+	case RGBASpace:
+	case RGBA8Space:
+		m_alpha = _w;
+	case RGBSpace:
+	case RGB8Space:
+		float m = min(_x, min(_y, _z));
+		m_value = max(_x, max(_y, _z));
+		float c = m_value - m;
+		if (c != 0)
+		{
+			m_sat = c / m_value;
+			array<float, 3> d = {{ _x, _y, _z }};
+			for (float& i: d)
+				i = (((m_value - i) / 6.f) + (c / 2.f)) / c;
+			if (_x == m_value)
+				m_hue = d[2] - d[1];
+			else if (_y == m_value)
+				m_hue = (1.f/3.f) + d[0] - d[2];
+			else if (_z == m_value)
+				m_hue = (2.f/3.f) + d[1] - d[0];
+			if (m_hue < 0.f)
+				m_hue += 1.f;
+			if (m_hue > 1.f)
+				m_hue -= 1.f;
+		}
+		break;
 	}
-	return ret;
 }
 
-Colour Color::toColour() const
+fVector4 Color::convertTo(ColorSpace _cc) const
 {
-	double      hh, p, q, t, ff;
-	long        i;
-	Colour         out;
-	out.setA(m_alpha);
+	float x;
+	float y;
+	float z;
+	float w = 1.f;
 
-	if (m_sat <= 0.f)
-	{       // < is bogus, just shuts up warnings
-		if (isnan(m_hue))
-		{   // m_hue == NAN
-			out.setR(m_value);
-			out.setG(m_value);
-			out.setB(m_value);
-			return out;
-		}
-		// error - should never happen
-		out.setR(0.f);
-		out.setG(0.f);
-		out.setB(0.f);
-		return out;
-	}
-	hh = m_hue;
-	if (hh >= 1.f)
-		hh = 0.f;
-	hh *= 6.f;
-	i = (long)hh;
-	ff = hh - i;
-	p = m_value * (1.f - m_sat);
-	q = m_value * (1.f - (m_sat * ff));
-	t = m_value * (1.f - (m_sat * (1.f - ff)));
-
-	switch (i)
+	switch (_cc)
 	{
-	case 0:
-		out.setR(m_value);
-		out.setG(t);
-		out.setB(p);
-		break;
-	case 1:
-		out.setR(q);
-		out.setG(m_value);
-		out.setB(p);
-		break;
-	case 2:
-		out.setR(p);
-		out.setG(m_value);
-		out.setB(t);
-		break;
+	case RGBASpace:
+	case RGBA8Space:
+		w = m_alpha;
+	case RGBSpace:
+	case RGB8Space:
+	{
+		double      hh, p, q, t, ff;
+		long        i;
 
-	case 3:
-		out.setR(p);
-		out.setG(q);
-		out.setB(m_value);
-		break;
-	case 4:
-		out.setR(t);
-		out.setG(p);
-		out.setB(m_value);
-		break;
-	default:
-		out.setR(m_value);
-		out.setG(p);
-		out.setB(q);
+		if (m_sat <= 0.f)
+		{       // < is bogus, just shuts up warnings
+			if (isnan(m_hue))
+			{   // m_hue == NAN
+				x = m_value;
+				y = m_value;
+				z = m_value;
+				break;
+			}
+			// error - should never happen
+			x = 0.f;
+			y = 0.f;
+			z = 0.f;
+			break;
+		}
+		hh = m_hue;
+		if (hh >= 1.f)
+			hh = 0.f;
+		hh *= 6.f;
+		i = (long)hh;
+		ff = hh - i;
+		p = m_value * (1.f - m_sat);
+		q = m_value * (1.f - (m_sat * ff));
+		t = m_value * (1.f - (m_sat * (1.f - ff)));
+
+		switch (i)
+		{
+		case 0:
+			x = m_value;
+			y = t;
+			z = p;
+			break;
+		case 1:
+			x = q;
+			y = m_value;
+			z = p;
+			break;
+		case 2:
+			x = p;
+			y = m_value;
+			z = t;
+			break;
+		case 3:
+			x = p;
+			y = q;
+			z = m_value;
+			break;
+		case 4:
+			x = t;
+			y = p;
+			z = m_value;
+			break;
+		default:
+			x = m_value;
+			y = p;
+			z = q;
+			break;
+		}
 		break;
 	}
-	return out;
+	default:;
+	}
+	if (_cc == RGBA8Space || _cc == RGB8Space)
+		x *= 255, y *= 255, z *= 255, w *= 255;
+	return fVector4(x, y, z, w);
 }

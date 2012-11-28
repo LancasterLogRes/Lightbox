@@ -19,6 +19,7 @@
 #include <array>
 #include <Numeric/Coord.h>
 #include <Common/Global.h>
+#include "Global.h"
 
 #if LIGHTBOX_CROSSCOMPILATION_ANDROID
 struct android_app;
@@ -70,7 +71,7 @@ private:
 	static void engine_handle_cmd(struct android_app* app, int32_t cmd);
 	void handleCommand(int32_t _cmd);
 
-	std::array<iCoord, 10> m_pointerState;
+	std::array<iCoord, 5> m_pointerState;
 
 	struct android_app* m_androidApp;	///< The Android app object. Always valid.
 #elif !defined(LIGHTBOX_CROSSCOMPILATION)

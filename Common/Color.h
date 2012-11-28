@@ -26,16 +26,18 @@
 #include <iostream>
 #include <iomanip>
 #include <cstdint>
-
+#include <Numeric/Vector.h>
 #include "Global.h"
 #include "RGBA.h"
+#include "RGBA8.h"
 
 namespace Lightbox
 {
 
 class Color;
 typedef std::vector<Color> Colors;
-class Colour;
+
+enum ColorSpace { RGBASpace, RGBSpace, RGBA8Space, RGB8Space };
 
 class Color
 {
@@ -45,8 +47,11 @@ public:
 	Color(): m_hue(0), m_sat(0), m_value(0), m_alpha(0) {}
 	explicit Color(float _value, float _alpha = 1.f): m_hue(0), m_sat(0), m_value(_value), m_alpha(_alpha) {}
 	Color(float _hue, float _sat, float _value, float _alpha = 1.f): m_hue(_hue), m_sat(_sat), m_value(_value), m_alpha(_alpha) {}
-	explicit Color(RGBA const& _rgba): m_hue(_rgba.h() / 360.f), m_sat(_rgba.s() / 255.f), m_value(_rgba.v() / 255.f), m_alpha(_rgba.a() / 255.f) {}
 	Color(Color const& _c): m_hue(_c.m_hue), m_sat(_c.m_sat), m_value(_c.m_value), m_alpha(_c.m_alpha) {}
+	Color(ColorSpace _cc, float _x, float _y, float _z, float _w = 0.f) { convertFrom(_cc, _x, _y, _z, _w); }
+
+	explicit Color(RGBA _rgba) { convertFrom(RGBASpace, _rgba.r(), _rgba.g(), _rgba.b(), _rgba.a()); }
+	explicit Color(RGBA8 _rgba) { convertFrom(RGBA8Space, _rgba.r(), _rgba.g(), _rgba.b(), _rgba.a()); }
 
 	float hue() const { return m_hue; }
 	float sat() const { return m_sat; }
@@ -64,10 +69,15 @@ public:
 	Color& attenuate(float _x) { m_value *= _x; return *this; }
 	Color attenuated(float _x) const { return Color(m_hue, m_sat, m_value * _x, m_alpha); }
 
-	Colour toColour() const;
-	RGBA toRGBA() const { RGBA ret; ret.setHsv(clamp<int>(m_hue * 360, 0, 359), clamp<int>(m_sat * 255, 0, 255), clamp<int>(m_value * 255, 0, 255), clamp<int>(m_alpha * 255, 0, 255)); return ret; }
-	static Color fromRGB(std::array<float, 3> _rgb);
-//	operator RGBA() const { return toRGBA(); }
+	void convertFrom(ColorSpace _cc, float _x, float _y, float _z, float _w = 0.f);
+	fVector4 convertTo(ColorSpace _cc) const;
+
+	RGBA toRGBA() const { return (RGBA&&)convertTo(RGBASpace); }
+	RGBA8 toRGBA8() const { auto r = convertTo(RGBA8Space); return RGBA8(r.x(), r.y(), r.z(), r.w()); }
+	static Color fromRGB(std::array<float, 3> _rgb) { return Color(RGBSpace, _rgb[0], _rgb[1], _rgb[2]); }
+
+	inline explicit operator RGBA() const { return toRGBA(); }
+	inline explicit operator RGBA8() const { return toRGBA8(); }
 
 	// shorthand forms.
 	float h() const { return m_hue; }

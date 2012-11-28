@@ -5,33 +5,11 @@
 #include <boost/utility.hpp>
 #include <Numeric/Rect.h>
 #include <Common/Pimpl.h>
-#include <LGL.h>
 #include <App/Display.h>
 #include <Common/MemberMap.h>
 
 namespace Lightbox
 {
-
-class ViewManager
-{
-public:
-	static void init(Display& _d) { if (!s_this) s_this = new ViewManager(_d); }
-	static ViewManager* get() { return s_this; }
-
-	Display* display;
-	uSize displaySize;
-	UniformPage uniforms;
-	PagedUniform offsetScale;
-	PagedUniform color;
-	Buffer<float> geometryBuffer;
-	Program program;
-	Attrib geometry;
-	Font defaultFont;
-
-private:
-	ViewManager(Display& _d);
-	static ViewManager* s_this;
-};
 
 struct Event
 {
@@ -40,14 +18,15 @@ struct Event
 
 struct TouchEvent: public Event
 {
-	TouchEvent(int _id, iCoord _local): id(_id), local(_local) {}
+	TouchEvent(int _id, iCoord _global): id(_id), local(_global), global(_global) {}
 	int id;
-	iCoord local;
+	fCoord local;
+	iCoord global;
 };
 
-struct TouchDownEvent: public TouchEvent { TouchDownEvent(int _id, iCoord _local): TouchEvent(_id, _local) {} };
-struct TouchUpEvent: public TouchEvent { TouchUpEvent(int _id, iCoord _local): TouchEvent(_id, _local) {} };
-struct TouchMoveEvent: public TouchEvent { TouchMoveEvent(int _id, iCoord _local): TouchEvent(_id, _local) {} };
+struct TouchDownEvent: public TouchEvent { TouchDownEvent(int _id, iCoord _global): TouchEvent(_id, _global) {} };
+struct TouchUpEvent: public TouchEvent { TouchUpEvent(int _id, iCoord _global): TouchEvent(_id, _global) {} };
+struct TouchMoveEvent: public TouchEvent { TouchMoveEvent(int _id, iCoord _global): TouchEvent(_id, _global) {} };
 
 struct Context
 {
@@ -73,6 +52,12 @@ public:
 	virtual bool event(Event*) { return false; }
 	virtual void resized() {}
 
+	View view() const { return m_this.lock(); }
+	View parent() const { return m_parent.lock(); }
+
+	fCoord globalPos() const;
+
+	virtual bool sensesEvent(Event* _e);
 	void handleDraw(Context const& _c);
 	bool handleEvent(Event* _e);
 
@@ -83,6 +68,9 @@ protected:
 	ViewBody() {}
 
 	template <class _Body, class ... _T> static std::shared_ptr<_Body> doCreate(View const& _parent, _T ... _args) { auto ret = std::shared_ptr<_Body>(new _Body(_args ...)); ret->m_this = ret; ret->setParent(_parent); return ret; }
+
+	void lockPointer(int _id);
+	void releasePointer(int _id);
 
 //private:
 	fRect m_geometry;	// parent coordinate system

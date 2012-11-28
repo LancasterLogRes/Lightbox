@@ -27,17 +27,16 @@ SOURCES += Common.cpp \
     Maths.cpp \
     StreamIO.cpp \
     Global.cpp \
-    RGBA.cpp \
     Color.cpp \
     Peaks.cpp \
     Time.cpp \
-    Colour.cpp
+    RGBA8.cpp \
+    RGBA.cpp
 HEADERS += Common.h Global.h \
     Time.h \
     GraphParameters.h \
     WavHeader.h \
     Algorithms.h \
-    RGBA.h \
     Color.h \
     Trivial.h \
     BoolArray.h \
@@ -54,5 +53,6 @@ HEADERS += Common.h Global.h \
     MemberMap.h \
     Members.h \
     GL.h \
-    RGBA.h \
-Colour.h
+    RGBA8.h \
+    RGBA8.h \
+    RGBA.h

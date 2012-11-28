@@ -12,4 +12,5 @@ SOURCES += AppEngine.cpp \
 HEADERS +=    AppEngine.h \
     Display.h \
     App.h \
-    All.h
+    All.h \
+    Global.h

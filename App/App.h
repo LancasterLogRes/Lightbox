@@ -3,6 +3,7 @@
 #include <boost/utility.hpp>
 #include <Common/Global.h>
 #include <Numeric/Coord.h>
+#include "Global.h"
 
 class AInputEvent;
 
@@ -18,11 +19,11 @@ public:
 	virtual ~App() {}
 
 	virtual void initGraphics(Display&) {}
-	virtual void drawGraphics(Display&) {}
+	virtual void drawGraphics() {}
 	virtual foreign_vector<uint8_t const> state() { return foreign_vector<uint8_t const>(); }
 	virtual void setState(foreign_vector<uint8_t> const&) {}
 
-	virtual bool motionEvent(int, iCoord, bool) { return false; }
+	virtual bool motionEvent(int, iCoord, int) { return false; }
 };
 
 }

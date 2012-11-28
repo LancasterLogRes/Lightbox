@@ -1,30 +1,10 @@
 #include <LGL.h>
 #include <App/Display.h>
+#include "GUIApp.h"
 #include "View.h"
 #include "Shaders.h"
 using namespace std;
 using namespace Lightbox;
-
-ViewManager* ViewManager::s_this = nullptr;
-
-ViewManager::ViewManager(Display& _d)
-{
-	display = &_d;
-	displaySize = _d.size();
-
-	geometryBuffer = Buffer<float>({ 0.f, 1.f, 1.f, 1.f, 0.f, 0.f, 1.f, 0.f });
-
-	program = Program(Shader::vertex(LB_R(View_vert)), Shader::fragment(LB_R(View_frag)));
-
-	program.tie(uniforms);
-	uniforms["displaySize"] = (vec2)(fSize)_d.size();
-	offsetScale = uniforms["offsetScale"];
-	color = uniforms["color"];
-
-	geometry = program.attrib("geometry");
-
-	defaultFont = Font(ubuntu_r_ttf, 16.f);
-}
 
 ViewBody::~ViewBody()
 {
@@ -32,7 +12,7 @@ ViewBody::~ViewBody()
 
 void ViewBody::update()
 {
-	ViewManager::get()->display->setOneOffAnimating();
+	GUIApp::joint().display->setOneOffAnimating();
 }
 
 void ViewBody::setParent(View const& _p)
@@ -64,27 +44,58 @@ void ViewBody::handleDraw(Context const& _c)
 
 void ViewBody::draw(Context _c)
 {
-	auto vm = ViewManager::get();
+	auto vm = GUIApp::joint();
 
-	vm->offsetScale = fRect(m_geometry).translated(_c.offset).asVector4();
-	vm->color = vec4(.4f, .5f, .6f, 1.f);
+	vm.offsetScale = fRect(m_geometry).translated(_c.offset).asVector4();
+	vm.color = RGBA(GUIApp::style().back * .25f);
 
 	{
-		ProgramUser u(vm->program);
-		vm->geometry.setData(vm->geometryBuffer, 2);
+		ProgramUser u(vm.program);
+		vm.geometry.setData(vm.unitQuad, 2);
 		u.triangleStrip(4);
 	}
+}
+
+bool ViewBody::sensesEvent(Event* _e)
+{
+	if (auto e = dynamic_cast<TouchEvent*>(_e))
+		return m_geometry.contains(e->local);
+	return false;
 }
 
 bool ViewBody::handleEvent(Event* _e)
 {
 	if (event(_e))
-	{
 		return true;
-	}
 
-	// TODO: alter context of _e
-	// TODO: pass to children
-	// TODO: restore context of _e
+	auto p = m_geometry.pos();
+	if (auto e = dynamic_cast<TouchEvent*>(_e))
+		e->local -= p;
+
+	for (auto const& ch: m_children)
+		if (ch->sensesEvent(_e) && ch->handleEvent(_e))
+			return true;
+
+	if (auto e = dynamic_cast<TouchEvent*>(_e))
+		e->local += p;
+
 	return false;
+}
+
+fCoord ViewBody::globalPos() const
+{
+	fCoord ret = m_geometry.pos();
+	for (View p = parent(); p; p = p->parent())
+		ret += p->globalPos();
+	return ret;
+}
+
+void ViewBody::lockPointer(int _id)
+{
+	GUIApp::get()->lockPointer(_id, view());
+}
+
+void ViewBody::releasePointer(int _id)
+{
+	GUIApp::get()->releasePointer(_id, view());
 }

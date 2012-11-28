@@ -2,6 +2,7 @@
 #include "stb_truetype.h"
 #include "FontFace.h"
 #include "Shaders.h"
+#include "GUIApp.h"
 using namespace std;
 using namespace Lightbox;
 
@@ -9,22 +10,17 @@ static const unsigned s_maxAtOnce = 64;
 static const unsigned s_charDataFirst = 32;
 static const unsigned s_charDataCount = 96;
 
-Program FontFace::s_program;
-
-void FontFace::initForDisplay(uSize _s)
-{
-	s_program = Program(Shader::vertex(LB_R(Font_vert)), Shader::fragment(LB_R(Font_frag)));
-	s_program.uniform("displaySize").keep() = (vec2)(fSize)_s;
-}
-
 FontFace::FontFace(uint8_t const* _ttfData, float _size)
 {
-	m_index = s_program.attrib("a_index");
-	m_layout = s_program.attrib("a_layout");
-	m_source = s_program.attrib("a_source");
-	m_size = s_program.attrib("a_size");
-	m_color = s_program.uniform("u_color");
-	m_tex = s_program.uniform("u_tex");
+	m_program = Program(Shader::vertex(LB_R(Font_vert)), Shader::fragment(LB_R(Font_frag)));
+	m_program.tie(GUIApp::joint().uniforms);
+
+	m_index = m_program.attrib("a_index");
+	m_layout = m_program.attrib("a_layout");
+	m_source = m_program.attrib("a_source");
+	m_size = m_program.attrib("a_size");
+	m_color = m_program.uniform("u_color");
+	m_tex = m_program.uniform("u_tex");
 
 	unsigned char temp_bitmap[512*512];
 
@@ -45,9 +41,9 @@ FontFace::FontFace(uint8_t const* _ttfData, float _size)
 		m_buffer.set(corners.data(), corners.size(), i * corners.size());
 }
 
-void FontFace::draw(fCoord _anchor, string const& _text, Colour _c)
+void FontFace::draw(fCoord _anchor, string const& _text, RGBA _c)
 {
-	assert(s_program.isValid());
+	assert(m_program.isValid());
 
 	std::vector<std::array<GLshort, 2> > layout(_text.size() * 6);
 	std::vector<std::array<GLushort, 2> > source(_text.size() * 6);
@@ -70,8 +66,8 @@ void FontFace::draw(fCoord _anchor, string const& _text, Colour _c)
 			size[i * 6 + j] = {{GLubyte(q.x1 - q.x0), GLubyte(q.y1 - q.y0)}};
 	}
 
-	ProgramUser u(s_program);
-	m_color = _c.asVector4();
+	ProgramUser u(m_program);
+	m_color = _c;
 	m_tex = m_texture;
 	m_index.setData(m_buffer, 2);
 	m_layout.setStaticData(layout.data(), 2);

@@ -98,7 +98,7 @@ void AppEngine::gfxDraw()
 		return;
 
 	if (m_app)
-		m_app->drawGraphics(*m_display);
+		m_app->drawGraphics();
 
 	m_display->update();
 }
@@ -128,34 +128,34 @@ int32_t AppEngine::handleInput(AInputEvent* _event)
 		switch (flags)
 		{
 		case AMOTION_EVENT_ACTION_POINTER_UP: case AMOTION_EVENT_ACTION_UP:
-			if (id >= 0 && id < 10)
+			if (id >= 0 && id < 5)
 			{
-				ret = m_app->motionEvent(id, iCoord(-1, -1), false);
+				ret = m_app->motionEvent(id, m_pointerState[id], -1);
 				m_pointerState[id] = iCoord(-1, -1);
 			}
 			break;
 		case AMOTION_EVENT_ACTION_POINTER_DOWN: case AMOTION_EVENT_ACTION_DOWN:
-			if (id >= 0 && id < 10)
+			if (id >= 0 && id < 5)
 			{
-				ret = m_app->motionEvent(id, c, true);
+				ret = m_app->motionEvent(id, c, 1);
 				m_pointerState[id] = c;
 			}
 			break;
 		case AMOTION_EVENT_ACTION_MOVE:
-			for (int index = 0; index < 10; ++index)
+			for (int index = 0; index < 5; ++index)
 			{
 				id = AMotionEvent_getPointerId(_event, index);
-				if (id >= 0 && id < 10)
+				if (id >= 0 && id < 5)
 				{
 					c = iCoord(AMotionEvent_getX(_event, id), AMotionEvent_getY(_event, id));
 					if (c != m_pointerState[id])
 						break;
 				}
 			}
-			if (id >= 0 && id < 10)
+			if (id >= 0 && id < 5)
 			{
 				m_pointerState[id] = c;
-				ret = m_app->motionEvent(id, c, false);
+				ret = m_app->motionEvent(id, c, 0);
 			}
 			break;
 		default:;

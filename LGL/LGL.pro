@@ -9,9 +9,7 @@ SOURCES += ProgramFace.cpp Program.cpp ShaderFace.cpp Uniform.cpp \
     Attrib.cpp \
     Texture2D.cpp \
     TextureFace2D.cpp \
-    BufferFace.cpp Buffer.cpp \
-    FontFace.cpp \
-    Font.cpp
+    BufferFace.cpp Buffer.cpp
 HEADERS += ProgramFace.h ShaderFace.h Program.h \
     Shader.h Uniform.h \
     Global.h \
@@ -20,9 +18,7 @@ HEADERS += ProgramFace.h ShaderFace.h Program.h \
     Attrib.h \
     Texture2D.h \
     TextureFace2D.h \
-    BufferFace.h Buffer.h \
-    FontFace.h \
-    Font.h
+    BufferFace.h Buffer.h
 
 RES += Shaders.resources
 
