@@ -29,7 +29,7 @@ bool BasicButtonBody::event(Event* _e)
 {
 	if (auto e = dynamic_cast<TouchDownEvent*>(_e))
 	{
-		cdebug << boolalpha << e->id << "DOWN at" << e->local << m_geometry.contains(e->local);
+//		cdebug << boolalpha << e->id << "DOWN at" << e->local << m_geometry.contains(e->local);
 		m_isDown = true;
 		m_downPointer = e->id;
 		lockPointer(e->id);
@@ -38,11 +38,11 @@ bool BasicButtonBody::event(Event* _e)
 	}
 	else if (auto e = dynamic_cast<TouchUpEvent*>(_e))
 	{
-		cdebug << boolalpha << e->id << "UP at" << e->local << m_isDown << (e->id == m_downPointer) << m_geometry.contains(e->local);
+//		cdebug << boolalpha << e->id << "UP at" << e->local << m_isDown << (e->id == m_downPointer) << m_geometry.contains(e->local);
 		if (m_isDown && e->id == m_downPointer)
 		{
-			if (m_geometry.contains(e->local) && m_onTap)
-				m_onTap(this);
+			if (m_geometry.contains(e->local))
+				tapped();
 			m_downPointer = -1;
 			m_isDown = false;
 			update();
@@ -50,4 +50,10 @@ bool BasicButtonBody::event(Event* _e)
 		return true;
 	}
 	return false;
+}
+
+void BasicButtonBody::tapped()
+{
+	if (m_onTapped)
+		m_onTapped(view());
 }

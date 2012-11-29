@@ -18,7 +18,7 @@ void Style::generateColors(Color _fore)
 
 GUIApp::GUIApp()
 {
-	m_root = ViewBody::create(nullptr);
+	m_root = ViewBody::create();
 }
 
 GUIApp::~GUIApp()
@@ -66,7 +66,7 @@ bool GUIApp::motionEvent(int _id, iCoord _pos, int _direction)
 	bool ret = false;
 	if (m_pointerLock[_id])
 	{
-		auto gp = m_pointerLock[_id]->globalPos();
+		auto gp = m_pointerLock[_id]->parent()->globalPos();
 		ev->local -= gp;
 		ret = m_pointerLock[_id]->handleEvent(ev);
 		ev->local += gp;

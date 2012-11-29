@@ -13,7 +13,8 @@ SOURCES += \
     GUIApp.cpp \
     Joint.cpp \
     FontFace.cpp \
-    Font.cpp
+    Font.cpp \
+    RadioButton.cpp
 
 HEADERS += \
     View.h \
@@ -23,6 +24,7 @@ HEADERS += \
     All.h \
     Joint.h \
     FontFace.h \
-    Font.h
+    Font.h \
+    RadioButton.h
 OTHER_FILES += Shaders.resources View.frag View.vert \
     Fonts.resources
