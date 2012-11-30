@@ -2,6 +2,8 @@
 #include <jni.h>
 #include <android_native_app_glue.h>
 #elif !defined(LIGHTBOX_CROSSCOMPILATION)
+#include <X11/Xlib.h>
+#include <X11/Xutil.h>
 #endif
 #include <fstream>
 #include "App.h"
@@ -47,6 +49,9 @@ void AppEngine::exec()
 #if !defined(LIGHTBOX_CROSSCOMPILATION)
 	gfxInit();
 	gfxDraw();
+	::Display* xDisplay = (::Display*)m_display->xDisplay();
+	::Window xWindow = m_display->xWindow();
+	XSelectInput(xDisplay, xWindow, ExposureMask | KeyPressMask | KeyReleaseMask | ButtonPressMask | ButtonReleaseMask);
 #endif
 
 	for (bool carryOn = true; carryOn;)
@@ -78,6 +83,30 @@ void AppEngine::exec()
 			}
 		}
 #elif !defined(LIGHTBOX_CROSSCOMPILATION)
+		XEvent event;
+		XNextEvent(xDisplay, &event);
+
+		bool used = false;
+
+		switch (event.type)
+		{
+		case ButtonPress:
+			used = m_app->motionEvent(0, iCoord(event.xbutton.x, event.xbutton.y), 1);
+			break;
+		case ButtonRelease:
+			used = m_app->motionEvent(0, iCoord(event.xbutton.x, event.xbutton.y), -1);
+			break;
+		case MotionNotify:
+			used = m_app->motionEvent(0, iCoord(event.xmotion.x, event.xmotion.y), 1);
+			break;
+		case DestroyNotify:
+			carryOn = false;
+			break;
+		case Expose:
+			m_display->repaint();
+			break;
+		default:;
+		}
 #endif
 	}
 	m_display.reset();

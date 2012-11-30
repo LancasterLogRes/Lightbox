@@ -117,6 +117,9 @@ Lightbox::Display::Display()
 #if !defined(LIGHTBOX_CROSSCOMPILATION)
 	XFree(visInfo);
 	XMapWindow(xDisplay, win);
+
+	m_xDisplay = xDisplay;
+	m_xWindow = win;
 #endif
 
 	EGL_CHECK(eglMakeCurrent(m_display, m_surface, m_surface, m_context));
@@ -141,6 +144,9 @@ Lightbox::Display::~Display()
 		if (m_surface != EGL_NO_SURFACE)
 			eglDestroySurface(m_display, m_surface);
 		eglTerminate(m_display);
+#if !defined(LIGHTBOX_CROSSCOMPILATION)
+		XCloseDisplay((::Display*)m_xDisplay);
+#endif
 	}
 }
 

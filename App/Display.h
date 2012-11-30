@@ -13,6 +13,7 @@ public:
 
 	bool isAnimating() const { return m_animators || m_animating; }
 	void setOneOffAnimating() { m_animating = true; }
+	void repaint() { m_animating = true; }
 	void setAnimating() { ++m_animators; }
 	void releaseAnimating() { --m_animators; }
 
@@ -21,6 +22,12 @@ public:
 	unsigned width() const { return m_width; }
 	unsigned height() const { return m_height; }
 	uSize size() const { return uSize(m_width, m_height); }
+
+#if LIGHTBOX_CROSSCOMPILATION_ANDROID
+#elif !defined(LIGHTBOX_CROSSCOMPILATION)
+	void* xDisplay() const { return m_xDisplay; }
+	unsigned long xWindow() const { return m_xWindow; }
+#endif
 
 private:
 	Display(Display const&) = delete;
@@ -35,6 +42,12 @@ private:
 
 	unsigned m_width;
 	unsigned m_height;
+
+#if LIGHTBOX_CROSSCOMPILATION_ANDROID
+#elif !defined(LIGHTBOX_CROSSCOMPILATION)
+	void* m_xDisplay;
+	unsigned long m_xWindow;
+#endif
 };
 
 }
