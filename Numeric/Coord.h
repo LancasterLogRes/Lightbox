@@ -21,8 +21,8 @@ public:
 	Coord(Numeric _x, Numeric _y): Super(_x, _y) {}
 	template <class _N> explicit Coord(Coord<_N> _s): CalcPair<Numeric, Coord<Numeric>>(_s) {}
 
-	Super::x;
-	Super::y;
+	using Super::x;
+	using Super::y;
 	
 	bool operator<(Coord const& _c) const { return x() < _c.x() && y() < _c.y(); }
 	bool operator>(Coord const& _c) const { return x() > _c.x() && y() > _c.y(); }
@@ -73,10 +73,10 @@ public:
 	bool operator!=(Size const& _c) const { return !compare(_c); }
 
 private:
-	Super::x;
-	Super::y;
-	Super::setX;
-	Super::setY;
+	using Super::x;
+	using Super::y;
+	using Super::setX;
+	using Super::setY;
 };
 
 typedef Size<float> fSize;

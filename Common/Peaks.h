@@ -37,7 +37,7 @@ template <class T>
 std::pair<T, T> parabolicPeakOf(T _a, T _b, T _c)
 {
 	T p = (_a - _c) / (2 * (_a - 2 * _b + _c));
-	return make_pair(p, _b - (_a - _c) * p / 4.f);
+	return std::make_pair(p, _b - (_a - _c) * p / 4.f);
 }
 
 std::map<float, float> parabolicPeaks(std::vector<float> const& _s);

@@ -16,6 +16,8 @@ template<class T> class Pair;
 template<class _S, class _T> _S& operator>>(_S& _in, Pair<_T>& _me);
 template<class _S, class _T> _S& operator<<(_S& _out, Pair<_T> const& _me);
 
+static const double s_tolerance = 1e-8;
+
 template<class T>
 class Pair
 {
@@ -61,6 +63,9 @@ public:
 
 	bool compare(This _c) const { return m_x == _c.m_x && m_y == _c.m_y; }
 
+	T length() const { return sqrt(length()); }
+	T lengthSquared() const { return x()*x() + y()*y(); }
+
 protected:
 	T m_x;
 	T m_y;
@@ -70,11 +75,22 @@ template<class T, typename R>
 class CalcPair: public Pair<T>
 {
 public:
+	typedef Pair<T> Super;
+
 	CalcPair() {}
 	CalcPair(T _x, T _y): Pair<T>(_x, _y) {}
 	CalcPair(T const* _data): Pair<T>(_data) {}
 	template<typename _T> explicit CalcPair(_T const* _data): Pair<T>(_data) {}
 	template<typename _T> explicit CalcPair(Pair<_T> const& _data): Pair<T>(_data) {}
+
+	using Super::summed;
+	using Super::subbed;
+	using Super::scaled;
+	using Super::slashed;
+	using Super::sum;
+	using Super::scale;
+	using Super::sub;
+	using Super::slash;
 
 	R operator+(R _x) const { return R(summed(_x)); }
 	R operator-(R _x) const { return R(subbed(_x)); }
@@ -84,6 +100,8 @@ public:
 	R operator-(T _x) const { return R(subbed(_x)); }
 	R operator*(T _x) const { return R(scaled(_x)); }
 	R operator/(T _x) const { return R(slashed(_x)); }
+
+	R operator-() const { return R(scaled(T(-1))); }
 
 	inline friend R operator*(T _a, R _b) { return R(_b.scaled(_a)); }
 	inline friend R operator/(T _a, R _b) { return R(_b.slashed(_a)); }
@@ -103,6 +121,7 @@ template<class T> class Quad;
 template<class _S, class _T> _S& operator<<(_S& _out, Quad<_T> const& _me);
 template<class _S, class _T> _S& operator>>(_S& _in, Quad<_T>& _me);
 
+// TODO: reimplement using SIMD
 template<class T>
 class Quad
 {
@@ -159,6 +178,8 @@ public:
 
 	T length() const { return sqrt(x() * x() + y() * y() + z() * z() + w() * w()); }
 	T length3() const { return sqrt(x() * x() + y() * y() + z() * z()); }
+	T lengthSquared() const { return x() * x() + y() * y() + z() * z() + w() * w(); }
+	T length3Squared() const { return x() * x() + y() * y() + z() * z(); }
 
 	bool compare(This _c) const { return m_x == _c.m_x && m_y == _c.m_y && m_z == _c.m_z && m_w == _c.m_w; }
 	bool compare3(This _c) const { return m_x == _c.m_x && m_y == _c.m_y && m_z == _c.m_z; }
@@ -174,11 +195,22 @@ template<class T, typename R>
 class CalcQuad: public Quad<T>
 {
 public:
+	typedef Quad<T> Super;
+
 	CalcQuad() {}
 	CalcQuad(T _x, T _y, T _z, T _w = 1.0): Quad<T>(_x, _y, _z, _w) {}
 	CalcQuad(T const* _data): Quad<T>(_data) {}
 	template<typename _T> explicit CalcQuad(_T const* _data): Quad<T>(_data) {}
 	template<typename _T> explicit CalcQuad(Quad<_T> const& _data): Quad<T>(_data) {}
+
+	using Super::summed;
+	using Super::subbed;
+	using Super::scaled;
+	using Super::slashed;
+	using Super::sum;
+	using Super::scale;
+	using Super::sub;
+	using Super::slash;
 
 	R operator+(R _x) const { return R(summed(_x)); }
 	R operator-(R _x) const { return R(subbed(_x)); }
@@ -188,6 +220,8 @@ public:
 	R operator-(T _x) const { return R(subbed(_x)); }
 	R operator*(T _x) const { return R(scaled(_x)); }
 	R operator/(T _x) const { return R(slashed(_x)); }
+
+	R operator-() const { return R(scaled(T(-1))); }
 
 	inline friend R operator*(T _a, R _b) { return R(_b.scaled(_a)); }
 	inline friend R operator/(T _a, R _b) { return R(_b.slashed(_a)); }
@@ -218,13 +252,26 @@ public:
 	Vector2<T>(T _x, T _y): Super(_x, _y) {}
 	template<class _T> explicit Vector2<T>(Vector2<_T> _n): Super(_n) {}
 
-	Super::x;
-	Super::y;
-	Super::setX;
-	Super::setY;
+	using Super::x;
+	using Super::y;
+	using Super::setX;
+	using Super::setY;
+	using Super::length;
+	using Super::lengthSquared;
 
 	bool operator==(Vector2<T> _c) const { return compare(_c); }
 	bool operator!=(Vector2<T> _c) const { return !compare(_c); }
+
+	T const* asArray2() const { return Super::data(); }
+	T* asArray2() { return Super::data(); }
+
+	T dotted(Vector2<T> _b) const { return x() * _b.x() + y() * _b.y(); }
+
+	void normalize() { T l = length(); if (l > 0) { setX(x() / l); setY(y() / l); } }
+	Vector2<T> normalized() const { Vector2<T> ret(*this); ret.normalize(); return ret; }
+
+	bool isSignificant() const { return lengthSquared() > s_tolerance; }
+	bool approximates(Vector2<T> const& _cmp) const { return ((*this) - _cmp).lengthSquared() < s_tolerance; }
 };
 
 typedef Vector2<unsigned> uVector2;
@@ -241,10 +288,12 @@ typedef Vector2<float> V2;
 typedef Vector2<unsigned> uV2;
 typedef Vector2<int> iV2;
 
+template <class _T> inline Vector2<_T> operator*(_T _s, Vector2<_T> _v) { return _v *= _s; }
+template <class _T> inline Vector2<_T> operator/(_T _s, Vector2<_T> _v) { return _v /= _s; }
+
 template <class T> class Vector3;
 template <class _S, class _T> _S& operator<<(_S& _out, Vector3<_T> const& _me);
 template <class _S, class _T> _S& operator>>(_S& _in, Vector3<_T>& _me);
-
 
 template<class T>
 class Vector3: public CalcQuad<T, Vector3<T> >
@@ -265,14 +314,14 @@ public:
 	template<class _T> explicit Vector3<T>(_T const _d[3]): Super(_d) {}
 	template<class _T> explicit Vector3<T>(Vector3<_T> _n): Super(_n) {}
 
-	Super::x;
-	Super::y;
-	Super::z;
-	Super::setX;
-	Super::setY;
-	Super::setZ;
+	using Super::x;
+	using Super::y;
+	using Super::z;
+	using Super::setX;
+	using Super::setY;
+	using Super::setZ;
 
-	Super::operator*;
+	using Super::operator*;
 	T operator*(Vector3<T> _b) const { return dotted(_b); }
 	Vector3<T> operator%(Vector3<T> _b) const { return crossed(_b); }
 	Vector3<T>& operator^=(Vector3<T> _b) { return crossWith(_b); }
@@ -281,6 +330,7 @@ public:
 	bool operator!=(Vector3<T> _b) const { return !compare3(_b); }
 
 	T length() const { return Super::length3(); }
+	T lengthSquared() const { return Super::length3Squared(); }
 	static Vector3<T> aggregate(Vector3<T> _p0, T _w0, Vector3<T> _p1, T _w1) { return Super::aggregate(_p0, _w0, _p1, _w1); }
 	static Vector3<T> aggregate(Vector3<T> _p0, T _w0, Vector3<T> _p1, T _w1, Vector3<T> _p2, T _w2) { return Super::aggregate(_p0, _w0, _p1, _w1, _p2, _w2); }
 	static Vector3<T> average(Vector3<T> _p0, Vector3<T> _p1) { return Super::aggregate(_p0, _p1); }
@@ -288,20 +338,35 @@ public:
 
 	T dotted(Vector3<T> _b) const { return x() * _b.x() + y() * _b.y() + z() * _b.z(); }
 	Vector3<T> crossed(Vector3<T> _b) const { return Vector3<T>(y() * _b.z() - z() * _b.y(), z() * _b.x() - x() * _b.z(), x() * _b.y() - y() * _b.x()); }
-	Vector3<T>& crossWith(Vector3<T> _b) { set(y() * _b.z() - z() * _b.y(), z() * _b.x() - x() * _b.z(), x() * _b.y() - y() * _b.x()); return *this; }
+	Vector3<T>& crossWith(Vector3<T> _b) { Quad<T>::set(y() * _b.z() - z() * _b.y(), z() * _b.x() - x() * _b.z(), x() * _b.y() - y() * _b.x()); return *this; }
 
-	Vector3<T> normalised() const { return slashed(length()); }
-	void normalise() { slash(length()); }
+	void normalize() { normalise(); }
+	Vector3<T> normalized() const { return normalised(); }
+	Vector3<T> normalised() const { return Super::slashed(length()); }
+	void normalise() { Super::slash(length()); }
 	void normaliseTo(T _mag) { slash(length() / _mag); }
 	
 //	const fVector2 toPolar() const { return fVector2(frac((abs(x()) > 0.0 ? atan2(z(), x()) : (z() > 0.0 ? PIBY2 : -PIBY2)) / PI2 + 1.0),  acos(y() / length()) / PI); }
 	Vector2<T> toPolar() const { return Vector2<T>(frac(atan2(z(), x()) / TwoPi + 1.0), acos(y() / length()) / Pi); }
 
+	bool isSignificant() const { return lengthSquared() > s_tolerance; }
+	bool isXYSignificant() const { return sqr(x()) + sqr(y()) > s_tolerance; }
+	bool isParallelTo(Vector3<T> const& _v) const { return !crossed(_v).isSignificant(); }
+	bool isPerpendicularTo(Vector3<T> const& _v) const { return fabs(dotted(_v)) < s_tolerance; }
+	bool approximates(Vector3<T> const& _cmp) const { return ((*this) - _cmp).lengthSquared() < s_tolerance; }
+
+	// KILL
+	T const* asArray3() const { return Super::data(); }
+	T* asArray3() { return Super::data(); }
+
 private:
-	Super::w;
-	Super::setW;
-	Super::compare;
+	using Super::w;
+	using Super::setW;
+	using Super::compare;
 };
+
+template <class _T> inline Vector3<_T> operator*(_T _s, Vector3<_T> _v) { return _v *= _s; }
+template <class _T> inline Vector3<_T> operator/(_T _s, Vector3<_T> _v) { return _v /= _s; }
 
 typedef Vector3<double> dVector3;
 typedef Vector3<float> fVector3;
@@ -316,6 +381,10 @@ typedef Vector3<double> dV3;
 typedef Vector3<float> V3;
 typedef Vector3<unsigned> uV3;
 typedef Vector3<int> iV3;
+
+static const fVector3 Xaxis = fVector3(1, 0, 0);
+static const fVector3 Yaxis = fVector3(0, 1, 0);
+static const fVector3 Zaxis = fVector3(0, 0, 1);
 
 template<class T = double>
 class Vector4: public CalcQuad<T, Vector4<T> >
@@ -336,10 +405,10 @@ public:
 	template<class _T> explicit Vector4<T>(_T const _d[4]): Super(_d) {}
 	template<class _T> explicit Vector4<T>(Vector4<_T> _n): Super(_n) {}
 
-	Super::x;
-	Super::y;
-	Super::z;
-	Super::w;
+	using Super::x;
+	using Super::y;
+	using Super::z;
+	using Super::w;
 
 	bool operator==(Vector4<T> _c) const { return compare(_c); }
 	bool operator!=(Vector4<T> _c) const { return !compare(_c); }
@@ -352,8 +421,8 @@ public:
 	T dotted(Vector3<T> _b) const { return x() * _b.x() + y() * _b.y() + z() * _b.z() + w() * _b.w(); }
 
 private:
-	Super::length3;
-	Super::compare3;
+	using Super::length3;
+	using Super::compare3;
 };
 
 typedef Vector4<double> dVector4;
@@ -428,5 +497,13 @@ template<class _S, class _T> _S& operator<<(_S& _out, Vector3<_T> const& _me)
 	_out << "(" << _me.x() << ", " << _me.y() << ", " << _me.z() << ")";
 	return _out;
 }
+
+inline std::string toString(fVector3 const& _v)
+{
+	std::stringstream ss;
+	ss << "fVector3(" << _v.x() << ", " << _v.y() << ", " << _v.z() << ")";
+	return ss.str();
+}
+
 
 }

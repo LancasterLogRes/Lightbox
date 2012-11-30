@@ -1,5 +1,4 @@
 #include "RGBA.h"
-#include "LGL.h"
 using namespace Lightbox;
 
 RGBA const RGBA::Black(0.f, 0.f, 0.f, 1.f);

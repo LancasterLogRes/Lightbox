@@ -116,15 +116,17 @@ crosscompilation {
         DEFINES += LIGHTBOX_CROSSCOMPILATION_ANDROID
     }
     pi {
+        PI_TOOLS = /home/gav/Projects/lightbox/RPi/x-tools/arm-unknown-linux-gnueabi/bin
+
         # modified straight out of arm-none-linux-gnueabi's qmakespec
         # /usr/share/qt4/mkspecs/qws/linux-arm-gnueabi-g++
-        QMAKE_CC                = arm-unknown-linux-gnueabi-gcc
-        QMAKE_CXX               = arm-unknown-linux-gnueabi-g++
-        QMAKE_LINK              = arm-unknown-linux-gnueabi-g++
-        QMAKE_LINK_SHLIB        = arm-unknown-linux-gnueabi-g++
-        QMAKE_AR                = arm-unknown-linux-gnueabi-ar cqs
-        QMAKE_OBJCOPY           = arm-unknown-linux-gnueabi-objcopy
-        QMAKE_STRIP             = arm-unknown-linux-gnueabi-strip
+        QMAKE_CC                = $$PI_TOOLS/arm-unknown-linux-gnueabi-gcc
+        QMAKE_CXX               = $$PI_TOOLS/arm-unknown-linux-gnueabi-g++
+        QMAKE_LINK              = $$PI_TOOLS/arm-unknown-linux-gnueabi-g++
+        QMAKE_LINK_SHLIB        = $$PI_TOOLS/arm-unknown-linux-gnueabi-g++
+        QMAKE_AR                = $$PI_TOOLS/arm-unknown-linux-gnueabi-ar cqs
+        QMAKE_OBJCOPY           = $$PI_TOOLS/arm-unknown-linux-gnueabi-objcopy
+        QMAKE_STRIP             = $$PI_TOOLS/arm-unknown-linux-gnueabi-strip
 
         QMAKE_CXXFLAGS += -O2 -pipe -march=armv6zk -mfpu=vfp -mfloat-abi=hard -mcpu=arm1176jzf-s
 
@@ -184,3 +186,33 @@ force_static {
         LIBS += -static
         system (echo "Static build")
 }
+
+isEmpty(LIGHTBOX_ROOT_PROJECT): LIGHTBOX_ROOT_PROJECT = Lightbox
+
+message ("$$LIGHTBOX_ROOT_PROJECT <- $$LIGHTBOX_USES_PROJECTS")
+
+defineReplace(ProjectPath) {
+    To = $$1
+    dd = $$DESTDIR
+    dd ~= s:/[^/]*(/\\.)*/\\.\\.::
+    dd ~= s/$$LIGHTBOX_ROOT_PROJECT/$$To/
+    return($$dd)
+}
+
+defineReplace(IncludePath) {
+    To = $$1
+    dd = $$IN_PWD
+    dd ~= s/Lightbox/$$To/
+    return($$dd)
+}
+
+for(p, LIGHTBOX_USES_PROJECTS) {
+    pp = $$ProjectPath($$p)
+    LIBS += -L$$pp -Wl,-rpath,$$pp
+    INCLUDEPATH += $$IncludePath($$p)
+}
+
+win32: DESTDIR = $$ProjectPath(Lightbox)
+INCLUDEPATH += $$IncludePath($$LIGHTBOX_ROOT_PROJECT)
+DEPENDPATH = $INCLUDEPATH
+
