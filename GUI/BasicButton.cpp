@@ -58,7 +58,7 @@ void BasicButtonBody::tapped()
 		m_onTapped(view());
 }
 
-fSize BasicButtonBody::minimumSize() const
+fSize BasicButtonBody::specifyMinimumSize() const
 {
 	return GUIApp::style().bold.measure(m_text);
 }

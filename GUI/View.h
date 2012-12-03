@@ -88,44 +88,46 @@ public:
 	void setParent(View const& _p);
 	void setGeometry(fRect _geometry) { m_geometry = _geometry; resized(); }
 	void resize(fSize _size) { auto g = m_geometry; g.resize(_size); setGeometry(g); }
-	ChildIndex childIndex() const { return m_childIndex; }
+	void setEnabled(bool _en) { m_isEnabled = _en; update(); }
+	void setVisible(bool _vi) { m_isVisible = _vi; update(); }
 	void setChildIndex(ChildIndex _i) { m_childIndex = _i; }
+	void setLayerout(Layerout* _newLayerout) { m_layerout = std::shared_ptr<Layerout>(_newLayerout); m_layerout->m_view = m_this; noteLayoutDirty(); }
+	void setStretch(float _stretch) { m_stretch = _stretch; noteMetricsChanged(); }
 
 	View withLayerout(Layerout* _newLayerout) { setLayerout(_newLayerout); return view(); }
 	View withStretch(float _stretch) { setStretch(_stretch); return view(); }
 
-	template <class _T> _T property(std::string const& _name) { try { return boost::any_cast<_T>(m_misc[_name]); } catch (...) { return _T(); } }
-	template <class _T> View setProperty(std::string const& _name, _T const& _t) { m_misc[_name] = _t; return view(); }
-
-	void setLayerout(Layerout* _newLayerout) { m_layerout = std::shared_ptr<Layerout>(_newLayerout); m_layerout->m_view = m_this; noteLayoutDirty(); }
-	Layerout* layerout() const { return &*m_layerout; }
-
-	void setStretch(float _stretch) { m_stretch = _stretch; noteMetricsChanged(); }
-	float stretch() const { return m_stretch; }
-
-	fRect geometry() const { return m_geometry; }
+	fCoord globalPos() const;
 	ViewSet children() const { return m_children; }
 	View view() const { return m_this.lock(); }
+	bool isEnabled() const { return m_isEnabled; }
+	bool isVisible() const { return m_isVisible; }
+	ChildIndex childIndex() const { return m_childIndex; }
+	fRect geometry() const { return m_geometry; }
 	View parent() const { return m_parent.lock(); }
+	Layerout* layerout() const { return &*m_layerout; }
+	float stretch() const { return m_stretch; }
 
-	fCoord globalPos() const;
+	template <class _T> _T property(std::string const& _name) { try { return boost::any_cast<_T>(m_misc[_name]); } catch (...) { return _T(); } }
+	template <class _T> View setProperty(std::string const& _name, _T const& _t) { m_misc[_name] = _t; return view(); }
 
 	virtual bool sensesEvent(Event* _e);
 	void handleDraw(Context const& _c);
 	bool handleEvent(Event* _e);
 
-	virtual fSize minimumSize() const;	// default is determined by layerout.
-
 	void update();
 	void relayout();
+
 	void noteMetricsChanged() { if (auto p = m_parent.lock()) p->noteLayoutDirty(); }
 	void noteLayoutDirty() { noteMetricsChanged(); relayout(); }
+
+	fSize minimumSize() const { return specifyMinimumSize(); }
 
 //protected:
 //	virtual MemberMap propertyMap() const { return MemberMap(); }
 
 protected:
-	ViewBody(): m_childIndex(0), m_stretch(1.f) {}
+	ViewBody();
 
 	template <class _Body, class ... _T> static std::shared_ptr<_Body> doCreate(View const& _parent, _T ... _args) { auto ret = std::shared_ptr<_Body>(new _Body(_args ...)); ret->m_this = ret; ret->setParent(_parent); return ret; }
 
@@ -136,6 +138,8 @@ protected:
 	virtual bool event(Event*) { return false; }
 	virtual void resized() { relayout(); update(); }
 
+	virtual fSize specifyMinimumSize() const;	// default is determined by layerout.
+
 //private:
 	fRect m_geometry;					// Relative to the parent's coordinate system. (0, 0) is at parent's top left.
 	std::weak_ptr<ViewBody> m_this;		// weak_ptr to itself in order to gain access to its shared_ptr. @warning populated directly after construction. Don't use it (or anything that needs it) in the constructor!
@@ -145,6 +149,8 @@ protected:
 	std::shared_ptr<Layerout> m_layerout;
 	ChildIndex m_childIndex;
 	float m_stretch;
+	bool m_isVisible;
+	bool m_isEnabled;
 };
 
 template <class _Inherits, class _ViewBody>

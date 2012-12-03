@@ -25,7 +25,7 @@ void TextLabelBody::draw(Context const& _c)
 	f.draw(transGeo.lerp(.5f, .5f), m_text, RGBA(m_color.isValid() ? m_color : GUIApp::style().fore));
 }
 
-fSize TextLabelBody::minimumSize() const
+fSize TextLabelBody::specifyMinimumSize() const
 {
 	auto const& f = m_font.isValid() ? m_font : GUIApp::style().regular;
 	return f.measure(m_text);

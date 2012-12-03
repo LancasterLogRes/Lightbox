@@ -6,6 +6,14 @@
 using namespace std;
 using namespace Lightbox;
 
+ViewBody::ViewBody():
+	m_childIndex(0),
+	m_stretch(1.f),
+	m_isVisible(true),
+	m_isEnabled(true)
+{
+}
+
 ViewBody::~ViewBody()
 {
 }
@@ -38,14 +46,28 @@ void ViewBody::setParent(View const& _p)
 
 void ViewBody::handleDraw(Context const& _c)
 {
-	draw(_c);
+	if (m_isVisible)
+	{
+		draw(_c);
 
-	Context c = _c;
-	c.offset += fSize(m_geometry.topLeft());
-	for (auto const& ch: m_children)
-		ch->handleDraw(c);
+		Context c = _c;
+		c.offset += fSize(m_geometry.topLeft());
+		for (auto const& ch: m_children)
+			ch->handleDraw(c);
 
-//	drawOverlay(_c);
+//		drawOverlay(_c);
+		if (!m_isEnabled)
+		{
+			auto vm = GUIApp::joint();
+
+			vm.offsetScale = fRect(m_geometry).translated(_c.offset).asVector4();
+			vm.color = RGBA(0, 0.5f);
+
+			ProgramUser u(vm.program);
+			vm.geometry.setData(vm.unitQuad, 2);
+			u.triangleStrip(4);
+		}
+	}
 }
 
 void ViewBody::draw(Context const& _c)
@@ -64,8 +86,9 @@ void ViewBody::draw(Context const& _c)
 
 bool ViewBody::sensesEvent(Event* _e)
 {
-	if (auto e = dynamic_cast<TouchEvent*>(_e))
-		return m_geometry.contains(e->local);
+	if (m_isVisible && m_isEnabled)
+		if (auto e = dynamic_cast<TouchEvent*>(_e))
+			return m_geometry.contains(e->local);
 	return false;
 }
 
@@ -84,7 +107,6 @@ bool ViewBody::handleEvent(Event* _e)
 
 	if (auto e = dynamic_cast<TouchEvent*>(_e))
 		e->local += p;
-
 	return false;
 }
 
@@ -97,7 +119,7 @@ void ViewBody::relayout()
 	}
 }
 
-fSize ViewBody::minimumSize() const
+fSize ViewBody::specifyMinimumSize() const
 {
 	if (m_layerout)
 		return m_layerout->minimumSize();

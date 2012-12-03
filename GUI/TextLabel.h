@@ -18,7 +18,7 @@ class TextLabelBody: public ViewCreator<ViewBody, TextLabelBody>
 public:
 	virtual ~TextLabelBody();
 
-	virtual fSize minimumSize() const;
+	virtual fSize specifyMinimumSize() const;
 	
 protected:
 	TextLabelBody(std::string _text = "");

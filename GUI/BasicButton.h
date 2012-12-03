@@ -24,7 +24,7 @@ public:
 	virtual void draw(Context const& _c);
 	virtual bool event(Event* _e);
 
-	virtual fSize minimumSize() const;
+	virtual fSize specifyMinimumSize() const;
 
 protected:
 	BasicButtonBody(std::string const& _text = std::string()): m_text(_text), m_isDown(false) {}
