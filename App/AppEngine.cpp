@@ -97,7 +97,7 @@ void AppEngine::exec()
 			used = m_app->motionEvent(0, iCoord(event.xbutton.x, event.xbutton.y), -1);
 			break;
 		case MotionNotify:
-			used = m_app->motionEvent(0, iCoord(event.xmotion.x, event.xmotion.y), 1);
+			used = m_app->motionEvent(0, iCoord(event.xmotion.x, event.xmotion.y), 0);
 			break;
 		case DestroyNotify:
 			carryOn = false;
@@ -159,6 +159,7 @@ int32_t AppEngine::handleInput(AInputEvent* _event)
 		case AMOTION_EVENT_ACTION_POINTER_UP: case AMOTION_EVENT_ACTION_UP:
 			if (id >= 0 && id < 5)
 			{
+				cnote << "(" << id << "up" << m_pointerState[id] << ")";
 				ret = m_app->motionEvent(id, m_pointerState[id], -1);
 				m_pointerState[id] = iCoord(-1, -1);
 			}
@@ -167,6 +168,7 @@ int32_t AppEngine::handleInput(AInputEvent* _event)
 			if (id >= 0 && id < 5)
 			{
 				ret = m_app->motionEvent(id, c, 1);
+				cnote << "(" << id << "down" << m_pointerState[id] << ")";
 				m_pointerState[id] = c;
 			}
 			break;
@@ -176,9 +178,12 @@ int32_t AppEngine::handleInput(AInputEvent* _event)
 				id = AMotionEvent_getPointerId(_event, index);
 				if (id >= 0 && id < 5)
 				{
-					c = iCoord(AMotionEvent_getX(_event, id), AMotionEvent_getY(_event, id));
-					if (c != m_pointerState[id])
+					c = iCoord(AMotionEvent_getX(_event, index), AMotionEvent_getY(_event, index));
+					if (c != m_pointerState[index])
+					{
+						cnote << "(" << id << "[" << index << "] move" << m_pointerState[id] << "->" << c << ")";
 						break;
+					}
 				}
 			}
 			if (id >= 0 && id < 5)

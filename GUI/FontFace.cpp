@@ -75,3 +75,11 @@ void FontFace::draw(fCoord _anchor, string const& _text, RGBA _c)
 	m_size.setStaticData(size.data(), 2);
 	u.triangles(_text.size() * 6);
 }
+
+fSize FontFace::measure(std::string const& _text) const
+{
+	float width = 0;
+	for (char c: _text)
+		width += ((stbtt_bakedchar*)m_charData)[c - s_charDataFirst].xadvance;
+	return fSize(width, m_above + m_below + 1);
+}

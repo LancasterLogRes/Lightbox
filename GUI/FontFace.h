@@ -18,6 +18,7 @@ class FontFace
 public:
 	FontFace(uint8_t const* _ttfData, float _size);
 
+	fSize measure(std::string const& _text) const;
 	void draw(fCoord _anchor, std::string const& _text, RGBA _c);
 
 	static void initForDisplay(uSize _s);

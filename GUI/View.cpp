@@ -48,7 +48,7 @@ void ViewBody::handleDraw(Context const& _c)
 //	drawOverlay(_c);
 }
 
-void ViewBody::draw(Context _c)
+void ViewBody::draw(Context const& _c)
 {
 	auto vm = GUIApp::joint();
 
@@ -128,41 +128,6 @@ template <class _T> double lext(_T _v, _T _lower, _T _upper)
 	return double(_v - _lower) / (_upper - _lower);
 }
 
-void HorizontalLayerout::layout(fSize _s)
-{
-	if (View v = m_view.lock())
-	{
-		float maxChild = 0.f;
-		fSize minChildren(0, 0);
-		std::vector<float> childMins;
-		childMins.reserve(v->children().size());
-		for (auto const& c: v->children())
-		{
-			auto m = c->minimumSize();
-			minChildren = fSize(minChildren.w() + m.w(), max(minChildren.h(), m.h()));
-			maxChild = max(maxChild, m.w());
-			childMins.push_back(m.w());
-		}
-		float perfect = maxChild * v->children().size();
-		{
-			float overMinimum = lext(_s.w(), minChildren.w(), perfect);
-			unsigned i = 0;
-			fCoord cursor(0, 0);
-			for (auto const& c: v->children())
-			{
-				fSize s;
-				if (_s.w() < perfect)
-					s = fSize(lerp(overMinimum, childMins[i], maxChild), _s.h());
-				else
-					s = fSize(_s.w() / v->children().size(), _s.h());
-				c->setGeometry(fRect(cursor, s));
-				cursor.setX(cursor.x() + s.w());
-				i++;
-			}
-		}
-	}
-}
-
 fSize HorizontalLayerout::minimumSize()
 {
 	fSize ret(0, 0);
@@ -173,4 +138,97 @@ fSize HorizontalLayerout::minimumSize()
 			ret = fSize(ret.w() + m.w(), max(ret.h(), m.h()));
 		}
 	return ret;
+}
+
+fSize VerticalLayerout::minimumSize()
+{
+	fSize ret(0, 0);
+	if (View v = m_view.lock())
+		for (auto const& c: v->children())
+		{
+			auto m = c->minimumSize();
+			ret = fSize(max(ret.w(), m.w()), ret.h() + m.h());
+		}
+	return ret;
+}
+
+template <class _T> _T defaultTo(_T _val, _T _default, _T _invalid = (_T)0)
+{
+	return _val == _invalid ? _default : _val;
+}
+
+std::vector<float> doLayout(float _total, std::vector<float> const& _stretch, std::vector<float> const& _size)
+{
+	std::vector<float> ret(_stretch.size(), -1.f);
+	float totalStretch = defaultTo(sumOf(_stretch), 1.f, 0.f);
+	float totalUnreserved = 1.f;
+	RESTART_OUTER:
+	for (unsigned i = 0; i < ret.size(); ++i)
+		if (ret[i] == -1.f && _total * _stretch[i] / totalStretch * totalUnreserved < _size[i])
+		{
+			totalStretch -= _stretch[i];
+			ret[i] = _size[i] / _total;
+			totalUnreserved -= ret[i];
+			// reset back to start of the loop since totalUnreserved has now changed -
+			// other children may need to reserve stretch space to honour their minimum.
+			goto RESTART_OUTER;
+		}
+
+	// normalStretch now has entries (0, 1] for each child such that:
+	//   minimum > stretch / totalStretch * totalUnreserved * totalPixels
+	// in that case, normalStretch = the normalized stretch factor for the
+	// child (i.e. minimum / totalPixels).
+	for (unsigned i = 0; i < ret.size(); ++i)
+		if (ret[i] == -1)
+			ret[i] = _stretch[i] / totalStretch * totalUnreserved;
+
+	return ret;
+}
+
+void VerticalLayerout::layout(fSize _s)
+{
+	if (View v = m_view.lock())
+	{
+		vector<float> stretch;
+		stretch.reserve(v->children().size());
+		vector<float> minima;
+		minima.reserve(v->children().size());
+		for (auto const& c: v->children())
+			stretch += c->stretch(),
+			minima += c->minimumSize().height();
+		vector<float> sizes = doLayout(_s.height(), stretch, minima);
+		fCoord cursor(0, 0);
+		auto i = sizes.begin();
+		for (auto const& c: v->children())
+		{
+			fSize s(_s.w(), _s.h() * *i);
+			c->setGeometry(fRect(cursor, s));
+			cursor.setY(cursor.y() + s.h());
+			++i;
+		}
+	}
+}
+
+void HorizontalLayerout::layout(fSize _s)
+{
+	if (View v = m_view.lock())
+	{
+		vector<float> stretch;
+		stretch.reserve(v->children().size());
+		vector<float> minima;
+		minima.reserve(v->children().size());
+		for (auto const& c: v->children())
+			stretch += c->stretch(),
+			minima += c->minimumSize().width();
+		vector<float> sizes = doLayout(_s.width(), stretch, minima);
+		fCoord cursor(0, 0);
+		auto i = sizes.begin();
+		for (auto const& c: v->children())
+		{
+			fSize s(_s.w() * *i, _s.h());
+			c->setGeometry(fRect(cursor, s));
+			cursor.setX(cursor.x() + s.w());
+			++i;
+		}
+	}
 }

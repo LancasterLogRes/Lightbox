@@ -14,7 +14,8 @@ SOURCES += \
     Joint.cpp \
     FontFace.cpp \
     Font.cpp \
-    RadioButton.cpp
+    ToggleButton.cpp \
+    TextLabel.cpp
 
 HEADERS += \
     View.h \
@@ -25,6 +26,7 @@ HEADERS += \
     Joint.h \
     FontFace.h \
     Font.h \
-    RadioButton.h
+    ToggleButton.h \
+    TextLabel.h
 OTHER_FILES += Shaders.resources View.frag View.vert \
     Fonts.resources

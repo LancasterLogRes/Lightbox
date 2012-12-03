@@ -53,6 +53,8 @@ public:
 	explicit Color(RGBA _rgba) { convertFrom(RGBASpace, _rgba.r(), _rgba.g(), _rgba.b(), _rgba.a()); }
 	explicit Color(RGBA8 _rgba) { convertFrom(RGBA8Space, _rgba.r(), _rgba.g(), _rgba.b(), _rgba.a()); }
 
+	bool isValid() const { return h() >= 0; }
+
 	float hue() const { return m_hue; }
 	float sat() const { return m_sat; }
 	float value() const { return m_value; }
@@ -120,7 +122,7 @@ static const Color Magenta = Color(0.8333333, 1, 1);
 static const Color Cyan = Color(0.5, 1, 1);
 static const Color Black = Color(0);
 
-static const Color NullColor;
+static const Color NullColor(-1, 0, 0, 0);
 
 static const Colors NullColors;
 static const Colors RedOnly = { Red };

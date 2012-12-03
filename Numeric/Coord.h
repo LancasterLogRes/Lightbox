@@ -57,6 +57,8 @@ public:
 
 	Numeric w() const { return x(); }
 	Numeric h() const { return y(); }
+	Numeric width() const { return x(); }
+	Numeric height() const { return y(); }
 	Numeric area() const { return w() * h(); }
 	Numeric perimeter() const { return (w() + h()) * 2; }
 

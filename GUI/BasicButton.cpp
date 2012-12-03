@@ -7,7 +7,7 @@
 using namespace std;
 using namespace Lightbox;
 
-void BasicButtonBody::draw(Context _c)
+void BasicButtonBody::draw(Context const& _c)
 {
 	auto const& j = GUIApp::joint();
 
@@ -21,7 +21,7 @@ void BasicButtonBody::draw(Context _c)
 	}
 
 	auto const& f = m_isDown ? GUIApp::style().bold : GUIApp::style().regular;
-	f.draw(m_geometry.lerp(.5f, .5f) + fSize(1, -1), m_text, RGBA(0.f, 0.f, 0.f, .9f));
+	f.draw(m_geometry.lerp(.5f, .5f) + fSize(0, -1), m_text, RGBA(0.f, 0.f, 0.f, .9f));
 	f.draw(m_geometry.lerp(.5f, .5f), m_text, RGBA(GUIApp::style().fore * 2.f));
 }
 
@@ -29,7 +29,7 @@ bool BasicButtonBody::event(Event* _e)
 {
 	if (auto e = dynamic_cast<TouchDownEvent*>(_e))
 	{
-//		cdebug << boolalpha << e->id << "DOWN at" << e->local << m_geometry.contains(e->local);
+		cdebug << m_text << ":" << boolalpha << e->id << "DOWN at" << e->local << m_geometry.contains(e->local);
 		m_isDown = true;
 		m_downPointer = e->id;
 		lockPointer(e->id);
@@ -38,7 +38,7 @@ bool BasicButtonBody::event(Event* _e)
 	}
 	else if (auto e = dynamic_cast<TouchUpEvent*>(_e))
 	{
-//		cdebug << boolalpha << e->id << "UP at" << e->local << m_isDown << (e->id == m_downPointer) << m_geometry.contains(e->local);
+		cdebug << m_text << ":" << boolalpha << e->id << "UP at" << e->local << m_isDown << (e->id == m_downPointer) << m_geometry.contains(e->local);
 		if (m_isDown && e->id == m_downPointer)
 		{
 			if (m_geometry.contains(e->local))
@@ -56,4 +56,9 @@ void BasicButtonBody::tapped()
 {
 	if (m_onTapped)
 		m_onTapped(view());
+}
+
+fSize BasicButtonBody::minimumSize() const
+{
+	return GUIApp::style().bold.measure(m_text);
 }

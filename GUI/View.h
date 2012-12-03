@@ -91,11 +91,17 @@ public:
 	ChildIndex childIndex() const { return m_childIndex; }
 	void setChildIndex(ChildIndex _i) { m_childIndex = _i; }
 
+	View withLayerout(Layerout* _newLayerout) { setLayerout(_newLayerout); return view(); }
+	View withStretch(float _stretch) { setStretch(_stretch); return view(); }
+
 	template <class _T> _T property(std::string const& _name) { try { return boost::any_cast<_T>(m_misc[_name]); } catch (...) { return _T(); } }
 	template <class _T> View setProperty(std::string const& _name, _T const& _t) { m_misc[_name] = _t; return view(); }
 
-	void setLayerout(Layerout* _newLayerout) { m_layerout = std::shared_ptr<Layerout>(_newLayerout); m_layerout->m_view = m_this; relayout(); }
+	void setLayerout(Layerout* _newLayerout) { m_layerout = std::shared_ptr<Layerout>(_newLayerout); m_layerout->m_view = m_this; noteLayoutDirty(); }
 	Layerout* layerout() const { return &*m_layerout; }
+
+	void setStretch(float _stretch) { m_stretch = _stretch; noteMetricsChanged(); }
+	float stretch() const { return m_stretch; }
 
 	fRect geometry() const { return m_geometry; }
 	ViewSet children() const { return m_children; }
@@ -112,19 +118,21 @@ public:
 
 	void update();
 	void relayout();
+	void noteMetricsChanged() { if (auto p = m_parent.lock()) p->noteLayoutDirty(); }
+	void noteLayoutDirty() { noteMetricsChanged(); relayout(); }
 
 //protected:
 //	virtual MemberMap propertyMap() const { return MemberMap(); }
 
 protected:
-	ViewBody() {}
+	ViewBody(): m_childIndex(0), m_stretch(1.f) {}
 
 	template <class _Body, class ... _T> static std::shared_ptr<_Body> doCreate(View const& _parent, _T ... _args) { auto ret = std::shared_ptr<_Body>(new _Body(_args ...)); ret->m_this = ret; ret->setParent(_parent); return ret; }
 
 	void lockPointer(int _id);
 	void releasePointer(int _id);
 
-	virtual void draw(Context _c);
+	virtual void draw(Context const& _c);
 	virtual bool event(Event*) { return false; }
 	virtual void resized() { relayout(); update(); }
 
@@ -136,6 +144,7 @@ protected:
 	std::unordered_map<std::string, boost::any> m_misc;
 	std::shared_ptr<Layerout> m_layerout;
 	ChildIndex m_childIndex;
+	float m_stretch;
 };
 
 template <class _Inherits, class _ViewBody>
@@ -172,7 +181,7 @@ inline View operator|(View const& _a, View const& _b)
 	}
 }
 
-inline View const& operator|=(View const& _parent, View const& _b)
+inline View const& operator+=(View const& _parent, View const& _b)
 {
 	_b->setParent(_parent);
 	return _parent;

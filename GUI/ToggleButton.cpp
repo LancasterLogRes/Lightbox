@@ -1,21 +1,21 @@
 #include <Common/Global.h>
 #include "Global.h"
 #include "GUIApp.h"
-#include "RadioButton.h"
+#include "ToggleButton.h"
 using namespace std;
 using namespace Lightbox;
 
-RadioButtonBody::RadioButtonBody(std::string const& _text):
+ToggleButtonBody::ToggleButtonBody(std::string const& _text):
 	ViewCreator(_text),
 	m_isChecked(true)
 {
 }
 
-RadioButtonBody::~RadioButtonBody()
+ToggleButtonBody::~ToggleButtonBody()
 {
 }
 
-RadioButton RadioButtonBody::setChecked(bool _c)
+ToggleButton ToggleButtonBody::setChecked(bool _c)
 {
 	// only if there are members to this set - if not it stays checked.
 	if (m_isChecked != _c)
@@ -31,7 +31,7 @@ RadioButton RadioButtonBody::setChecked(bool _c)
 	return view();
 }
 
-RadioButton RadioButtonBody::setExclusiveWith(RadioButton const& _b)
+ToggleButton ToggleButtonBody::setExclusiveWith(ToggleButton const& _b)
 {
 	if (m_members)
 	{
@@ -67,17 +67,17 @@ RadioButton RadioButtonBody::setExclusiveWith(RadioButton const& _b)
 	return view();
 }
 
-RadioButton RadioButtonBody::getActive() const
+ToggleButton ToggleButtonBody::getActive() const
 {
 	if (m_members)
 		for (auto const& b: *m_members)
 			if (auto bb = b.lock())
 				if (bb->m_isChecked)
 					return bb;
-	return (RadioButton)view();
+	return (ToggleButton)view();
 }
 
-void RadioButtonBody::draw(Context _c)
+void ToggleButtonBody::draw(Context const& _c)
 {
 	auto const& j = GUIApp::joint();
 
@@ -92,6 +92,6 @@ void RadioButtonBody::draw(Context _c)
 	}
 
 	auto const& f = m_isChecked ? GUIApp::style().bold : GUIApp::style().regular;
-	f.draw(transGeo.lerp(.5f, .5f) + fSize(1, -1), m_text, RGBA(0.f, 0.f, 0.f, .9f));
+	f.draw(transGeo.lerp(.5f, .5f) + fSize(0, -1), m_text, RGBA(0.f, 0.f, 0.f, .9f));
 	f.draw(transGeo.lerp(.5f, .5f), m_text, RGBA(GUIApp::style().fore * 2.f));
 }

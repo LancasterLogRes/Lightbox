@@ -21,8 +21,10 @@ public:
 	template <class _T> BasicButton setOnTapped(_T const& _t) { m_onTapped = _t; return view(); }
 	std::function<void(BasicButton)> onTapped() const { return m_onTapped; }
 
-	virtual void draw(Context _c);
+	virtual void draw(Context const& _c);
 	virtual bool event(Event* _e);
+
+	virtual fSize minimumSize() const;
 
 protected:
 	BasicButtonBody(std::string const& _text = std::string()): m_text(_text), m_isDown(false) {}
