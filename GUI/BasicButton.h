@@ -6,7 +6,7 @@ namespace Lightbox
 {
 
 class BasicButtonBody;
-typedef std::shared_ptr<BasicButtonBody> BasicButton;
+typedef boost::intrusive_ptr<BasicButtonBody> BasicButton;
 
 class BasicButtonBody: public ViewCreator<ViewBody, BasicButtonBody>
 {
@@ -17,8 +17,8 @@ public:
 	virtual ~BasicButtonBody() {}
 	
 	std::string const& text() const { return m_text; }
-	BasicButton setText(std::string const& _s) { m_text = _s; update(); return view(); }
-	template <class _T> BasicButton setOnTapped(_T const& _t) { m_onTapped = _t; return view(); }
+	BasicButton setText(std::string const& _s) { m_text = _s; update(); return this; }
+	template <class _T> BasicButton setOnTapped(_T const& _t) { m_onTapped = _t; return this; }
 	std::function<void(BasicButton)> onTapped() const { return m_onTapped; }
 
 	virtual void draw(Context const& _c);

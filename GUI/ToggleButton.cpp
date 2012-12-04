@@ -13,6 +13,8 @@ ToggleButtonBody::ToggleButtonBody(std::string const& _text):
 
 ToggleButtonBody::~ToggleButtonBody()
 {
+	if (m_members)
+		m_members->erase(this);
 }
 
 ToggleButton ToggleButtonBody::setChecked(bool _c)
@@ -23,12 +25,11 @@ ToggleButton ToggleButtonBody::setChecked(bool _c)
 		m_isChecked = _c;
 		if (m_isChecked && m_members)
 			for (auto const& b: *m_members)
-				if (auto bb = b.lock())
-					if (&*bb != this)
-						bb->setChecked(false);
+				if (b && b != this)
+					b->setChecked(false);
 		toggled();
 	}
-	return view();
+	return this;
 }
 
 ToggleButton ToggleButtonBody::setExclusiveWith(ToggleButton const& _b)
@@ -37,15 +38,15 @@ ToggleButton ToggleButtonBody::setExclusiveWith(ToggleButton const& _b)
 	{
 		if (_b->m_members)
 			for (auto const& b: *_b->m_members)
-				if (auto bb = b.lock())
+				if (b)
 				{
 					m_members->insert(b);
-					bb->m_members = m_members;
-					bb->setChecked(false);
+					b->m_members = m_members;
+					b->setChecked(false);
 				} else {}
 		else
 		{
-			m_members->insert(_b);
+			m_members->insert(_b.get());
 			_b->m_members = m_members;
 			_b->setChecked(false);
 		}
@@ -53,28 +54,27 @@ ToggleButton ToggleButtonBody::setExclusiveWith(ToggleButton const& _b)
 	else
 		if (_b->m_members)
 		{
-			_b->m_members->insert(view());
+			_b->m_members->insert(this);
 			m_members = _b->m_members;
 			setChecked(false);
 		}
 		else
 		{
 			_b->m_members = m_members = make_shared<MemberSet>();
-			m_members->insert(view());
-			m_members->insert(_b);
+			m_members->insert(this);
+			m_members->insert(_b.get());
 			_b->setChecked(false);
 		}
-	return view();
+	return this;
 }
 
-ToggleButton ToggleButtonBody::getActive() const
+ToggleButton ToggleButtonBody::getActive()
 {
 	if (m_members)
 		for (auto const& b: *m_members)
-			if (auto bb = b.lock())
-				if (bb->m_isChecked)
-					return bb;
-	return (ToggleButton)view();
+			if (b && b->m_isChecked)
+				return b;
+	return (ToggleButton)this;
 }
 
 void ToggleButtonBody::draw(Context const& _c)

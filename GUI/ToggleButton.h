@@ -6,7 +6,7 @@ namespace Lightbox
 {
 
 class ToggleButtonBody;
-typedef std::shared_ptr<ToggleButtonBody> ToggleButton;
+typedef boost::intrusive_ptr<ToggleButtonBody> ToggleButton;
 
 class ToggleButtonBody: public ViewCreator<BasicButtonBody, ToggleButtonBody>
 {
@@ -19,24 +19,24 @@ public:
 	bool isChecked() const { return m_isChecked; }
 	void toggle() { setChecked(!isChecked()); }
 
-	template <class _T> ToggleButton setOnToggled(_T const& _f) { m_onToggled = _f; return view(); }
-	template <class _T> ToggleButton setOnChecked(_T const& _f) { m_onChecked = _f; return view(); }
+	template <class _T> ToggleButton setOnToggled(_T const& _f) { m_onToggled = _f; return this; }
+	template <class _T> ToggleButton setOnChecked(_T const& _f) { m_onChecked = _f; return this; }
 
 	std::function<void(ToggleButton)> onChecked() const { return m_onChecked; }
 	std::function<void(ToggleButton)> onToggled() const { return m_onToggled; }
 
 	ToggleButton setExclusiveWith(ToggleButton const& _b);
-	ToggleButton getActive() const;
+	ToggleButton getActive();
 
 protected:
 	ToggleButtonBody(std::string const& _text = std::string());
 
 	virtual void draw(Context const& _c);
-	virtual void toggled() { if (m_onToggled) m_onToggled(view()); if (m_isChecked && m_onChecked) m_onChecked(view()); }
+	virtual void toggled() { if (m_onToggled) m_onToggled(this); if (m_isChecked && m_onChecked) m_onChecked(this); }
 	virtual void tapped() { if (m_members) setChecked(true); else toggle(); }
 
 private:
-	typedef std::set<std::weak_ptr<ToggleButtonBody>, std::owner_less<std::weak_ptr<ToggleButtonBody> > > MemberSet;
+	typedef std::set<ToggleButtonBody*> MemberSet;	/// OK as the ~ToggleButton removes itself from its member set.
 	std::shared_ptr<MemberSet> m_members;
 	std::function<void(ToggleButton)> m_onToggled;
 	std::function<void(ToggleButton)> m_onChecked;

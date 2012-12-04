@@ -89,4 +89,16 @@ typedef Size<unsigned> uSize;
 template <class Numeric> Coord<Numeric> Coord<Numeric>::operator+(Size<Numeric> const& _c) const { return Coord(x() + _c.w(), y() + _c.h()); }
 template <class Numeric> Size<Numeric> Coord<Numeric>::operator-(Coord const& _c) const { return Size<Numeric>(x() - _c.x(), y() - _c.y()); }
 
+template<class _S, class _T> _S& operator<<(_S& _out, Coord<_T> const& _me)
+{
+	_out << "(" << _me.x() << "," << _me.y() << ")";
+	return _out;
+}
+
+template<class _S, class _T> _S& operator<<(_S& _out, Size<_T> const& _me)
+{
+	_out << "(" << _me.w() << "x" << _me.h() << ")";
+	return _out;
+}
+
 }

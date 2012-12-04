@@ -4,6 +4,7 @@
 #include <set>
 #include <unordered_map>
 #include <boost/utility.hpp>
+#include <boost/intrusive_ptr.hpp>
 #include <boost/any.hpp>
 #include <Numeric/Rect.h>
 #include <Common/Pimpl.h>
@@ -39,7 +40,8 @@ struct Context
 };
 
 class ViewBody;
-typedef std::shared_ptr<ViewBody> View;
+typedef boost::intrusive_ptr<ViewBody> View;
+
 struct ViewSiblingsComparator
 {
 	inline bool operator()(View const& _a, View const& _b) const;
@@ -55,7 +57,7 @@ public:
 	virtual fSize minimumSize() = 0;
 
 protected:
-	std::weak_ptr<ViewBody> m_view;
+	ViewBody* m_view;	// Only allowed here as this will get deleted in the view's destructor.
 };
 
 class HorizontalLayerout: public Layerout
@@ -76,6 +78,8 @@ class ViewBody: public boost::noncopyable
 {
 	template <class _T, class _I> friend class ViewCreator;
 	friend class GUIApp;
+	inline friend void intrusive_ptr_add_ref(ViewBody* _v);
+	inline friend void intrusive_ptr_release(ViewBody* _v);
 
 public:
 	typedef unsigned ChildIndex;
@@ -90,26 +94,27 @@ public:
 	void resize(fSize _size) { auto g = m_geometry; g.resize(_size); setGeometry(g); }
 	void setEnabled(bool _en) { m_isEnabled = _en; update(); }
 	void setVisible(bool _vi) { m_isVisible = _vi; update(); }
-	void setChildIndex(ChildIndex _i) { m_childIndex = _i; }
-	void setLayerout(Layerout* _newLayerout) { m_layerout = std::shared_ptr<Layerout>(_newLayerout); m_layerout->m_view = m_this; noteLayoutDirty(); }
+	void setChildIndex(ChildIndex _i) { if (m_parent) { m_references++; m_parent->m_children.erase(this); m_childIndex = _i; m_parent->m_children.insert(this); m_references--; } else m_childIndex = _i; noteMetricsChanged(); }
+	void setLayerout(Layerout* _newLayerout) { m_layerout = _newLayerout; m_layerout->m_view = this; noteLayoutDirty(); }
 	void setStretch(float _stretch) { m_stretch = _stretch; noteMetricsChanged(); }
+	void setPadding(float _padding) { m_padding = fVector4(_padding, _padding, _padding, _padding); noteMetricsChanged(); }
 
-	View withLayerout(Layerout* _newLayerout) { setLayerout(_newLayerout); return view(); }
-	View withStretch(float _stretch) { setStretch(_stretch); return view(); }
+	View withLayerout(Layerout* _newLayerout) { setLayerout(_newLayerout); return View(this); }
+	View withStretch(float _stretch) { setStretch(_stretch); return View(this); }
 
 	fCoord globalPos() const;
 	ViewSet children() const { return m_children; }
-	View view() const { return m_this.lock(); }
 	bool isEnabled() const { return m_isEnabled; }
 	bool isVisible() const { return m_isVisible; }
 	ChildIndex childIndex() const { return m_childIndex; }
 	fRect geometry() const { return m_geometry; }
-	View parent() const { return m_parent.lock(); }
-	Layerout* layerout() const { return &*m_layerout; }
+	View parent() const { return View(m_parent); }
+	Layerout* layerout() const { return m_layerout; }
 	float stretch() const { return m_stretch; }
+	fVector4 padding() const { return m_padding; }
 
 	template <class _T> _T property(std::string const& _name) { try { return boost::any_cast<_T>(m_misc[_name]); } catch (...) { return _T(); } }
-	template <class _T> View setProperty(std::string const& _name, _T const& _t) { m_misc[_name] = _t; return view(); }
+	template <class _T> View setProperty(std::string const& _name, _T const& _t) { m_misc[_name] = _t; return View(this); }
 
 	virtual bool sensesEvent(Event* _e);
 	void handleDraw(Context const& _c);
@@ -118,7 +123,7 @@ public:
 	void update();
 	void relayout();
 
-	void noteMetricsChanged() { if (auto p = m_parent.lock()) p->noteLayoutDirty(); }
+	void noteMetricsChanged() { if (m_parent) m_parent->noteLayoutDirty(); }
 	void noteLayoutDirty() { noteMetricsChanged(); relayout(); }
 
 	fSize minimumSize() const { return specifyMinimumSize(); }
@@ -129,7 +134,12 @@ public:
 protected:
 	ViewBody();
 
-	template <class _Body, class ... _T> static std::shared_ptr<_Body> doCreate(View const& _parent, _T ... _args) { auto ret = std::shared_ptr<_Body>(new _Body(_args ...)); ret->m_this = ret; ret->setParent(_parent); return ret; }
+	template <class _Body, class ... _T> static boost::intrusive_ptr<_Body> doCreate(View const& _parent, _T ... _args)
+	{
+		auto ret = boost::intrusive_ptr<_Body>(new _Body(_args ...), false);
+		ret->setParent(_parent);
+		return ret;
+	}
 
 	void lockPointer(int _id);
 	void releasePointer(int _id);
@@ -142,16 +152,28 @@ protected:
 
 //private:
 	fRect m_geometry;					// Relative to the parent's coordinate system. (0, 0) is at parent's top left.
-	std::weak_ptr<ViewBody> m_this;		// weak_ptr to itself in order to gain access to its shared_ptr. @warning populated directly after construction. Don't use it (or anything that needs it) in the constructor!
-	std::weak_ptr<ViewBody> m_parent;
+	ViewBody* m_parent;					// Raw pointers are only allowed here because the parent will remove itself from here in its destructor.
+	unsigned m_references;
 	ViewSet m_children;
 	std::unordered_map<std::string, boost::any> m_misc;
-	std::shared_ptr<Layerout> m_layerout;
+	Layerout* m_layerout;
 	ChildIndex m_childIndex;
 	float m_stretch;
+	fVector4 m_padding;
 	bool m_isVisible;
 	bool m_isEnabled;
 };
+
+inline void intrusive_ptr_add_ref(ViewBody* _v)
+{
+	++_v->m_references;
+}
+
+inline void intrusive_ptr_release(ViewBody* _v)
+{
+	if (!--_v->m_references)
+		delete _v;
+}
 
 template <class _Inherits, class _ViewBody>
 class ViewCreator: public _Inherits
@@ -159,9 +181,8 @@ class ViewCreator: public _Inherits
 public:
 	template <class ... _P> ViewCreator(_P ... _args): _Inherits(_args ... ) {}
 
-	template <class ... _T> static std::shared_ptr<_ViewBody> create(_T ... _args) { return ViewBody::doCreate<_ViewBody, _T ...>(nullptr, _args ...); }
-	template <class ... _T> static std::shared_ptr<_ViewBody> spawn(View const& _parent, _T ... _args) { return ViewBody::doCreate<_ViewBody, _T ...>(_parent, _args ...); }
-	std::shared_ptr<_ViewBody> view() const { return std::static_pointer_cast<_ViewBody>(ViewBody::view()); }
+	template <class ... _T> static boost::intrusive_ptr<_ViewBody> create(_T ... _args) { return ViewBody::doCreate<_ViewBody, _T ...>(nullptr, _args ...); }
+	template <class ... _T> static boost::intrusive_ptr<_ViewBody> spawn(View const& _parent, _T ... _args) { return ViewBody::doCreate<_ViewBody, _T ...>(_parent, _args ...); }
 };
 
 bool ViewSiblingsComparator::operator()(View const& _a, View const& _b) const { return _a->childIndex() < _b->childIndex(); }

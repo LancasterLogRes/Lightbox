@@ -55,7 +55,7 @@ bool BasicButtonBody::event(Event* _e)
 void BasicButtonBody::tapped()
 {
 	if (m_onTapped)
-		m_onTapped(view());
+		m_onTapped(this);
 }
 
 fSize BasicButtonBody::specifyMinimumSize() const

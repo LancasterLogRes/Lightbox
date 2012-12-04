@@ -8,7 +8,7 @@ namespace Lightbox
 {
 
 class TextLabelBody;
-typedef std::shared_ptr<TextLabelBody> TextLabel;
+typedef boost::intrusive_ptr<TextLabelBody> TextLabel;
 
 class TextLabelBody: public ViewCreator<ViewBody, TextLabelBody>
 {

@@ -80,4 +80,10 @@ typedef Rect<double> dRect;
 typedef Rect<int> iRect;
 typedef Rect<unsigned> uRect;
 
+template<class _S, class _T> _S& operator<<(_S& _out, Rect<_T> const& _me)
+{
+	_out << "@" << _me.pos() << "+" << _me.size();
+	return _out;
+}
+
 }

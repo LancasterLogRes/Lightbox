@@ -7,8 +7,12 @@ using namespace std;
 using namespace Lightbox;
 
 ViewBody::ViewBody():
+	m_parent(nullptr),
+	m_references(1),		// 1 allows it to alwys stay alive during the construction process, even if an intrusive_ptr is constructed with it. It decremented during the doCreate() method from which the constructor is always called.
+	m_layerout(nullptr),
 	m_childIndex(0),
 	m_stretch(1.f),
+	m_padding(4.f, 4.f, 4.f, 4.f),
 	m_isVisible(true),
 	m_isEnabled(true)
 {
@@ -16,6 +20,10 @@ ViewBody::ViewBody():
 
 ViewBody::~ViewBody()
 {
+	delete m_layerout;
+	m_layerout = nullptr;
+	for (auto const& c: m_children)
+		c->setParent(nullptr);
 }
 
 void ViewBody::update()
@@ -25,22 +33,24 @@ void ViewBody::update()
 
 void ViewBody::setParent(View const& _p)
 {
-	auto us = m_this.lock();
-	assert(us);
-	View p = m_parent.lock();
-	if (p != _p)
+	if (m_parent != _p)
 	{
-		if (p)
-			p->m_children.erase(us);
-		m_parent = _p;
+		auto op = m_parent;
+		if (m_parent)
+			m_parent->m_children.erase(this);
+		m_parent = _p.get();
 		if (_p)
 		{
 			if (_p->m_children.size())
 				m_childIndex = (*prev(_p->m_children.end()))->m_childIndex + 1;
 			else
 				m_childIndex = 0;
-			_p->m_children.insert(us);
+			_p->m_children.insert(this);
 		}
+		if (op)
+			op->noteLayoutDirty();
+		if (m_parent)
+			m_parent->noteLayoutDirty();
 	}
 }
 
@@ -137,12 +147,12 @@ fCoord ViewBody::globalPos() const
 
 void ViewBody::lockPointer(int _id)
 {
-	GUIApp::get()->lockPointer(_id, view());
+	GUIApp::get()->lockPointer(_id, this);
 }
 
 void ViewBody::releasePointer(int _id)
 {
-	GUIApp::get()->releasePointer(_id, view());
+	GUIApp::get()->releasePointer(_id, this);
 }
 
 template <class _T> double lext(_T _v, _T _lower, _T _upper)
@@ -153,11 +163,12 @@ template <class _T> double lext(_T _v, _T _lower, _T _upper)
 fSize HorizontalLayerout::minimumSize()
 {
 	fSize ret(0, 0);
-	if (View v = m_view.lock())
-		for (auto const& c: v->children())
+	if (m_view)
+		for (auto const& c: m_view->children())
 		{
 			auto m = c->minimumSize();
-			ret = fSize(ret.w() + m.w(), max(ret.h(), m.h()));
+			auto p = c->padding();
+			ret = fSize(ret.w() + m.w() + p.x() + p.z(), max(ret.h(), m.h() + p.y() + p.w()));
 		}
 	return ret;
 }
@@ -165,11 +176,12 @@ fSize HorizontalLayerout::minimumSize()
 fSize VerticalLayerout::minimumSize()
 {
 	fSize ret(0, 0);
-	if (View v = m_view.lock())
-		for (auto const& c: v->children())
+	if (m_view)
+		for (auto const& c: m_view->children())
 		{
 			auto m = c->minimumSize();
-			ret = fSize(max(ret.w(), m.w()), ret.h() + m.h());
+			auto p = c->padding();
+			ret = fSize(max(ret.w(), m.w() + p.x() + p.z()), ret.h() + m.h() + p.y() + p.w());
 		}
 	return ret;
 }
@@ -209,23 +221,24 @@ std::vector<float> doLayout(float _total, std::vector<float> const& _stretch, st
 
 void VerticalLayerout::layout(fSize _s)
 {
-	if (View v = m_view.lock())
+	if (m_view)
 	{
 		vector<float> stretch;
-		stretch.reserve(v->children().size());
+		stretch.reserve(m_view->children().size());
 		vector<float> minima;
-		minima.reserve(v->children().size());
-		for (auto const& c: v->children())
+		minima.reserve(m_view->children().size());
+		for (auto const& c: m_view->children())
 			stretch += c->stretch(),
-			minima += c->minimumSize().height();
+			minima += c->minimumSize().height() + c->padding().y() + c->padding().w();
 		vector<float> sizes = doLayout(_s.height(), stretch, minima);
 		fCoord cursor(0, 0);
 		auto i = sizes.begin();
-		for (auto const& c: v->children())
+		for (auto const& c: m_view->children())
 		{
-			fSize s(_s.w(), _s.h() * *i);
-			c->setGeometry(fRect(cursor, s));
-			cursor.setY(cursor.y() + s.h());
+			auto p = c->padding();
+			fSize s(_s.w() - p.x() - p.z(), _s.h() * *i - p.y() - p.w());
+			c->setGeometry(fRect(cursor, s).translated(fCoord(p.x(), p.y())));
+			cursor.setY(cursor.y() + s.h() + p.y() + p.w());
 			++i;
 		}
 	}
@@ -233,23 +246,24 @@ void VerticalLayerout::layout(fSize _s)
 
 void HorizontalLayerout::layout(fSize _s)
 {
-	if (View v = m_view.lock())
+	if (m_view)
 	{
 		vector<float> stretch;
-		stretch.reserve(v->children().size());
+		stretch.reserve(m_view->children().size());
 		vector<float> minima;
-		minima.reserve(v->children().size());
-		for (auto const& c: v->children())
+		minima.reserve(m_view->children().size());
+		for (auto const& c: m_view->children())
 			stretch += c->stretch(),
-			minima += c->minimumSize().width();
+			minima += c->minimumSize().width() + c->padding().x() + c->padding().z();
 		vector<float> sizes = doLayout(_s.width(), stretch, minima);
 		fCoord cursor(0, 0);
 		auto i = sizes.begin();
-		for (auto const& c: v->children())
+		for (auto const& c: m_view->children())
 		{
-			fSize s(_s.w() * *i, _s.h());
-			c->setGeometry(fRect(cursor, s));
-			cursor.setX(cursor.x() + s.w());
+			auto p = c->padding();
+			fSize s(_s.w() * *i - p.x() - p.z(), _s.h() - p.y() - p.w());
+			c->setGeometry(fRect(cursor, s).translated(fCoord(p.x(), p.y())));
+			cursor.setX(cursor.x() + s.w() + p.x() + p.z());
 			++i;
 		}
 	}
