@@ -233,6 +233,11 @@ namespace Lightbox
 
 template <class _T> _T const& NullReturn() { static const _T s_ret = _T(); return s_ret; }
 
+template <class _T> _T defaultTo(_T _val, _T _default, _T _invalid = (_T)0)
+{
+	return _val == _invalid ? _default : _val;
+}
+
 /// Determine nth item in comma+space delimited string.
 std::string afterComma(char const* _s, unsigned _i);
 std::string demangled(char const* _n);

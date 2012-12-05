@@ -11,7 +11,8 @@ void BasicButtonBody::draw(Context const& _c)
 {
 	auto const& j = GUIApp::joint();
 
-	j.offsetScale = fRect(m_geometry).translated(_c.offset).asVector4();
+	auto transGeo = m_geometry.translated(_c.offset);
+	j.offsetScale = transGeo.asVector4();
 	j.color = m_isDown ? GUIApp::style().high.toRGBA() : GUIApp::style().back.toRGBA();
 
 	{
@@ -21,8 +22,8 @@ void BasicButtonBody::draw(Context const& _c)
 	}
 
 	auto const& f = m_isDown ? GUIApp::style().bold : GUIApp::style().regular;
-	f.draw(m_geometry.lerp(.5f, .5f) + fSize(0, -1), m_text, RGBA(0.f, 0.f, 0.f, .9f));
-	f.draw(m_geometry.lerp(.5f, .5f), m_text, RGBA(GUIApp::style().fore * 2.f));
+	f.draw(transGeo.lerp(.5f, .5f) + fSize(0, -1), m_text, RGBA(0.f, 0.f, 0.f, .9f));
+	f.draw(transGeo.lerp(.5f, .5f), m_text, RGBA(GUIApp::style().fore * 2.f));
 }
 
 bool BasicButtonBody::event(Event* _e)

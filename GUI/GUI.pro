@@ -15,7 +15,10 @@ SOURCES += \
     FontFace.cpp \
     Font.cpp \
     ToggleButton.cpp \
-    TextLabel.cpp
+    TextLabel.cpp \
+    Event.cpp \
+    Layout.cpp \
+    Tabs.cpp
 
 HEADERS += \
     View.h \
@@ -27,6 +30,9 @@ HEADERS += \
     FontFace.h \
     Font.h \
     ToggleButton.h \
-    TextLabel.h
+    TextLabel.h \
+    Event.h \
+    Layout.h \
+    Tabs.h
 OTHER_FILES += Shaders.resources View.frag View.vert \
     Fonts.resources

@@ -9,7 +9,7 @@ using namespace Lightbox;
 ViewBody::ViewBody():
 	m_parent(nullptr),
 	m_references(1),		// 1 allows it to alwys stay alive during the construction process, even if an intrusive_ptr is constructed with it. It decremented during the doCreate() method from which the constructor is always called.
-	m_layerout(nullptr),
+	m_layout(nullptr),
 	m_childIndex(0),
 	m_stretch(1.f),
 	m_padding(4.f, 4.f, 4.f, 4.f),
@@ -20,8 +20,8 @@ ViewBody::ViewBody():
 
 ViewBody::~ViewBody()
 {
-	delete m_layerout;
-	m_layerout = nullptr;
+	delete m_layout;
+	m_layout = nullptr;
 	for (auto const& c: m_children)
 		c->setParent(nullptr);
 }
@@ -65,7 +65,6 @@ void ViewBody::handleDraw(Context const& _c)
 		for (auto const& ch: m_children)
 			ch->handleDraw(c);
 
-//		drawOverlay(_c);
 		if (!m_isEnabled)
 		{
 			auto vm = GUIApp::joint();
@@ -122,17 +121,17 @@ bool ViewBody::handleEvent(Event* _e)
 
 void ViewBody::relayout()
 {
-	if (m_layerout)
+	if (m_layout)
 	{
-		m_layerout->layout(m_geometry.size());
+		m_layout->layout(m_geometry.size());
 		update();
 	}
 }
 
 fSize ViewBody::specifyMinimumSize() const
 {
-	if (m_layerout)
-		return m_layerout->minimumSize();
+	if (m_layout)
+		return m_layout->minimumSize();
 	else
 		return fSize(0, 0);
 }
@@ -155,116 +154,40 @@ void ViewBody::releasePointer(int _id)
 	GUIApp::get()->releasePointer(_id, this);
 }
 
-template <class _T> double lext(_T _v, _T _lower, _T _upper)
+namespace Lightbox
 {
-	return double(_v - _lower) / (_upper - _lower);
-}
 
-fSize HorizontalLayerout::minimumSize()
+View operator|(View const& _a, View const& _b)
 {
-	fSize ret(0, 0);
-	if (m_view)
-		for (auto const& c: m_view->children())
-		{
-			auto m = c->minimumSize();
-			auto p = c->padding();
-			ret = fSize(ret.w() + m.w() + p.x() + p.z(), max(ret.h(), m.h() + p.y() + p.w()));
-		}
-	return ret;
-}
-
-fSize VerticalLayerout::minimumSize()
-{
-	fSize ret(0, 0);
-	if (m_view)
-		for (auto const& c: m_view->children())
-		{
-			auto m = c->minimumSize();
-			auto p = c->padding();
-			ret = fSize(max(ret.w(), m.w() + p.x() + p.z()), ret.h() + m.h() + p.y() + p.w());
-		}
-	return ret;
-}
-
-template <class _T> _T defaultTo(_T _val, _T _default, _T _invalid = (_T)0)
-{
-	return _val == _invalid ? _default : _val;
-}
-
-std::vector<float> doLayout(float _total, std::vector<float> const& _stretch, std::vector<float> const& _size)
-{
-	std::vector<float> ret(_stretch.size(), -1.f);
-	float totalStretch = defaultTo(sumOf(_stretch), 1.f, 0.f);
-	float totalUnreserved = 1.f;
-	RESTART_OUTER:
-	for (unsigned i = 0; i < ret.size(); ++i)
-		if (ret[i] == -1.f && _total * _stretch[i] / totalStretch * totalUnreserved < _size[i])
-		{
-			totalStretch -= _stretch[i];
-			ret[i] = _size[i] / _total;
-			totalUnreserved -= ret[i];
-			// reset back to start of the loop since totalUnreserved has now changed -
-			// other children may need to reserve stretch space to honour their minimum.
-			goto RESTART_OUTER;
-		}
-
-	// normalStretch now has entries (0, 1] for each child such that:
-	//   minimum > stretch / totalStretch * totalUnreserved * totalPixels
-	// in that case, normalStretch = the normalized stretch factor for the
-	// child (i.e. minimum / totalPixels).
-	for (unsigned i = 0; i < ret.size(); ++i)
-		if (ret[i] == -1)
-			ret[i] = _stretch[i] / totalStretch * totalUnreserved;
-
-	return ret;
-}
-
-void VerticalLayerout::layout(fSize _s)
-{
-	if (m_view)
+	if (!!_a->children().size() == !!_b->children().size())
 	{
-		vector<float> stretch;
-		stretch.reserve(m_view->children().size());
-		vector<float> minima;
-		minima.reserve(m_view->children().size());
-		for (auto const& c: m_view->children())
-			stretch += c->stretch(),
-			minima += c->minimumSize().height() + c->padding().y() + c->padding().w();
-		vector<float> sizes = doLayout(_s.height(), stretch, minima);
-		fCoord cursor(0, 0);
-		auto i = sizes.begin();
-		for (auto const& c: m_view->children())
-		{
-			auto p = c->padding();
-			fSize s(_s.w() - p.x() - p.z(), _s.h() * *i - p.y() - p.w());
-			c->setGeometry(fRect(cursor, s).translated(fCoord(p.x(), p.y())));
-			cursor.setY(cursor.y() + s.h() + p.y() + p.w());
-			++i;
-		}
+		View ret = ViewBody::create();
+		_a->setParent(ret);
+		_b->setParent(ret);
+		return ret;
+	}
+	else if (_a->children().size())
+	{
+		_b->setParent(_a);
+		return _a;
+	}
+	else
+	{
+		_a->setParent(_b);
+		return _b;
 	}
 }
 
-void HorizontalLayerout::layout(fSize _s)
+void debugOut(View const& _v, std::string const& _indent)
 {
-	if (m_view)
-	{
-		vector<float> stretch;
-		stretch.reserve(m_view->children().size());
-		vector<float> minima;
-		minima.reserve(m_view->children().size());
-		for (auto const& c: m_view->children())
-			stretch += c->stretch(),
-			minima += c->minimumSize().width() + c->padding().x() + c->padding().z();
-		vector<float> sizes = doLayout(_s.width(), stretch, minima);
-		fCoord cursor(0, 0);
-		auto i = sizes.begin();
-		for (auto const& c: m_view->children())
-		{
-			auto p = c->padding();
-			fSize s(_s.w() * *i - p.x() - p.z(), _s.h() - p.y() - p.w());
-			c->setGeometry(fRect(cursor, s).translated(fCoord(p.x(), p.y())));
-			cursor.setX(cursor.x() + s.w() + p.x() + p.z());
-			++i;
-		}
-	}
+	std::stringstream out;
+	out << _indent;
+	out << demangled(typeid(_v.get()).name()) << ": ";
+	out << _v->minimumSize() << "  ";
+	out << _v->geometry();
+	cnote << out.str();
+	for (auto const& c: _v->children())
+		debugOut(c, _indent + "   ");
+}
+
 }
