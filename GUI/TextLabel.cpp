@@ -20,7 +20,7 @@ bool TextLabelBody::event(Event* _e)
 
 void TextLabelBody::draw(Context const& _c)
 {
-	auto transGeo = m_geometry.translated(_c.offset);
+	auto transGeo = geometry().translated(_c.offset);
 	auto const& f = m_font.isValid() ? m_font : GUIApp::style().regular;
 	f.draw(transGeo.lerp(.5f, .5f), m_text, RGBA(m_color.isValid() ? m_color : GUIApp::style().fore));
 }

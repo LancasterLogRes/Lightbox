@@ -18,7 +18,7 @@ TabsBody::~TabsBody()
 
 void TabsBody::addTab(std::string const& _title, View const& _page)
 {
-	_page->setVisible(!m_children.size());
+	_page->setVisible(!children().size());
 	_page->setProperty("_TabsBody:Title", _title);
 	_page->setParent(this);
 }
@@ -28,11 +28,11 @@ bool TabsBody::event(Event* _e)
 	if (TouchEvent* e = dynamic_cast<TouchDownEvent*>(_e))
 	{
 		fCoord pos = e->local - geometry().pos();
-		if (pos.y() > 0 && pos.y() < c_tabHeight && m_children.size())
+		if (pos.y() > 0 && pos.y() < c_tabHeight && children().size())
 		{
-			fSize tabSize(geometry().width() / m_children.size(), c_tabHeight);
+			fSize tabSize(geometry().width() / children().size(), c_tabHeight);
 			fCoord cursor(0, 0);
-			for (auto const& c: m_children)
+			for (auto const& c: children())
 			{
 				c->setVisible(fRect(cursor, tabSize).contains(pos));
 				cursor.setX(cursor.x() + tabSize.w());
@@ -47,10 +47,10 @@ bool TabsBody::event(Event* _e)
 void TabsBody::draw(Context const& _c)
 {
 	Super::draw(_c);
-	if (m_children.size())
+	if (children().size())
 	{
-		fRect tab(_c.offset + geometry().pos(), fSize(geometry().width() / m_children.size(), c_tabHeight));
-		for (auto const& c: m_children)
+		fRect tab(_c.offset + geometry().pos(), fSize(geometry().width() / children().size(), c_tabHeight));
+		for (auto const& c: children())
 		{
 			string title = c->property<string>("_TabsBody:Title");
 			bool isActive = c->isVisible();

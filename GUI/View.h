@@ -114,7 +114,7 @@ protected:
 
 	virtual fSize specifyMinimumSize() const;	// default is determined by layout.
 
-//private:
+private:
 	fRect m_geometry;					// Relative to the parent's coordinate system. (0, 0) is at parent's top left.
 	ViewBody* m_parent;					// Raw pointers are only allowed here because the parent will remove itself from here in its destructor.
 	unsigned m_references;
