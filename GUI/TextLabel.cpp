@@ -5,7 +5,7 @@
 using namespace std;
 using namespace Lightbox;
 
-TextLabelBody::TextLabelBody(std::string _text): m_text(_text), m_font(), m_color(NullColor)
+TextLabelBody::TextLabelBody(std::string const& _text, Color _color, Font const& _font): m_text(_text), m_font(_font), m_color(_color)
 {
 }
 

@@ -63,7 +63,7 @@ public:
 
 	bool compare(This _c) const { return m_x == _c.m_x && m_y == _c.m_y; }
 
-	T length() const { return sqrt(length()); }
+	T length() const { return sqrt(lengthSquared()); }
 	T lengthSquared() const { return x()*x() + y()*y(); }
 
 protected:

@@ -18,7 +18,8 @@ SOURCES += \
     TextLabel.cpp \
     Event.cpp \
     Layout.cpp \
-    Tabs.cpp
+    Tabs.cpp \
+    HuePicker.cpp
 
 HEADERS += \
     View.h \
@@ -33,8 +34,11 @@ HEADERS += \
     TextLabel.h \
     Event.h \
     Layout.h \
-    Tabs.h
+    Tabs.h \
+    HuePicker.h
 OTHER_FILES += Shaders.resources View.frag View.vert \
     Fonts.resources \
     Flat.frag \
-    Flat.vert
+    Flat.vert \
+    HueWheel.frag \
+    HueWheel.vert

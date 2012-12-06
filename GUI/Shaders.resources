@@ -4,3 +4,5 @@ Font.vert
 Font.frag
 Flat.vert
 Flat.frag
+HueWheel.vert
+HueWheel.frag

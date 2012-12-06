@@ -18,6 +18,7 @@ struct Joint
 	PagedUniform gradient;
 	PagedUniform color;
 	Buffer<float> unitQuad;
+	Buffer<float> unitCircle36;
 	Program flat;
 	Program shaded;
 	Attrib flatGeometry;

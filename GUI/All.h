@@ -9,3 +9,4 @@
 #include "FontFace.h"
 #include "TextLabel.h"
 #include "Tabs.h"
+#include "HuePicker.h"

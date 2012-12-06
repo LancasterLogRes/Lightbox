@@ -25,6 +25,7 @@ struct Context
 
 	void flat(fRect _r, Color _c) const;
 	void shaded(fRect _r, Color _c, float _gradient = -.1f) const;
+	void disc(fCoord _center, float _r, Color _c) const;
 };
 
 class ViewBody;
@@ -36,6 +37,14 @@ struct ViewSiblingsComparator
 };
 
 typedef std::set<View, ViewSiblingsComparator> ViewSet;
+
+class Views: public std::vector<View>
+{
+public:
+	Views& operator,(View const& _b) { push_back(_b); return *this; }
+};
+
+inline Views operator,(View const& _a, View const& _b) { Views r; r.push_back(_a); r.push_back(_b); return r; }
 
 class ViewBody: public boost::noncopyable
 {
@@ -91,6 +100,7 @@ public:
 	void noteLayoutDirty() { noteMetricsChanged(); relayout(); }
 
 	fSize minimumSize() const { return specifyMinimumSize(); }
+	fSize maximumSize() const { return specifyMaximumSize(); }
 
 //protected:
 //	virtual MemberMap propertyMap() const { return MemberMap(); }
@@ -113,6 +123,7 @@ protected:
 	virtual void resized() { relayout(); update(); }
 
 	virtual fSize specifyMinimumSize() const;	// default is determined by layout.
+	virtual fSize specifyMaximumSize() const;	// default is determined by layout.
 
 private:
 	fRect m_geometry;					// Relative to the parent's coordinate system. (0, 0) is at parent's top left.
@@ -158,6 +169,13 @@ View operator|(View const& _a, View const& _b);
 inline View const& operator+=(View const& _parent, View const& _b)
 {
 	_b->setParent(_parent);
+	return _parent;
+}
+
+inline View const& operator+=(View const& _parent, Views const& _b)
+{
+	for (auto const& c: _b)
+		c->setParent(_parent);
 	return _parent;
 }
 

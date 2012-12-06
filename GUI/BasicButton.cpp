@@ -7,6 +7,13 @@
 using namespace std;
 using namespace Lightbox;
 
+BasicButtonBody::BasicButtonBody(std::string const& _text):
+	m_text(_text),
+	m_isDown(false)
+{
+	setPadding(2.f);
+}
+
 void BasicButtonBody::draw(Context const& _c)
 {
 	_c.shaded(geometry(), m_isDown ? GUIApp::style().high : GUIApp::style().back);

@@ -16,6 +16,17 @@ void Context::flat(fRect _r, Color _c) const
 	u.triangleStrip(4);
 }
 
+void Context::disc(fCoord _center, float _r, Color _c) const
+{
+	auto vm = GUIApp::joint();
+	fCoord c = _center + offset;
+	vm.offsetScale = fVector4(c.x(), c.y(), _r, _r);
+	vm.color = RGBA(_c);
+	ProgramUser u(vm.flat);
+	vm.flatGeometry.setData(vm.unitCircle36, 2);
+	u.triangleFan(38);
+}
+
 void Context::shaded(fRect _r, Color _c, float _gradient) const
 {
 	auto vm = GUIApp::joint();
@@ -29,11 +40,11 @@ void Context::shaded(fRect _r, Color _c, float _gradient) const
 
 ViewBody::ViewBody():
 	m_parent(nullptr),
-	m_references(1),		// 1 allows it to alwys stay alive during the construction process, even if an intrusive_ptr is constructed with it. It decremented during the doCreate() method from which the constructor is always called.
+	m_references(1),		// 1 allows it to always stay alive during the construction process, even if an intrusive_ptr is constructed with it. It decremented during the doCreate() method from which the constructor is always called.
 	m_layout(nullptr),
 	m_childIndex(0),
 	m_stretch(1.f),
-	m_padding(4.f, 4.f, 4.f, 4.f),
+	m_padding(0, 0, 0, 0),
 	m_isVisible(true),
 	m_isEnabled(true)
 {
@@ -87,9 +98,7 @@ void ViewBody::handleDraw(Context const& _c)
 			ch->handleDraw(c);
 
 		if (!m_isEnabled)
-		{
 			_c.flat(m_geometry, Color(0, 0.5f));
-		}
 	}
 }
 
@@ -115,13 +124,18 @@ bool ViewBody::handleEvent(Event* _e)
 	if (auto e = dynamic_cast<TouchEvent*>(_e))
 		e->local -= p;
 
+	bool ret = false;
 	for (auto const& ch: m_children)
 		if (ch->sensesEvent(_e) && ch->handleEvent(_e))
-			return true;
+		{
+			ret = true;
+			break;
+		}
 
 	if (auto e = dynamic_cast<TouchEvent*>(_e))
 		e->local += p;
-	return false;
+
+	return ret;
 }
 
 void ViewBody::relayout()
@@ -138,14 +152,22 @@ fSize ViewBody::specifyMinimumSize() const
 	if (m_layout)
 		return m_layout->minimumSize();
 	else
-		return fSize(0, 0);
+		return fSize(0.f, 0.f);
+}
+
+fSize ViewBody::specifyMaximumSize() const
+{
+	if (m_layout)
+		return m_layout->maximumSize();
+	else
+		return fSize(32767.f, 32767.f);
 }
 
 fCoord ViewBody::globalPos() const
 {
-	fCoord ret = m_geometry.pos();
+	fCoord ret = geometry().pos();
 	for (View p = parent(); p; p = p->parent())
-		ret += p->globalPos();
+		ret += p->geometry().pos();
 	return ret;
 }
 
@@ -188,7 +210,8 @@ void debugOut(View const& _v, std::string const& _indent)
 	std::stringstream out;
 	out << _indent;
 	out << demangled(typeid(_v.get()).name()) << ": ";
-	out << _v->minimumSize() << "  ";
+	out << _v->minimumSize() << "  ->  ";
+	out << _v->maximumSize() << "  ";
 	out << _v->geometry();
 	cnote << out.str();
 	for (auto const& c: _v->children())

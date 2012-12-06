@@ -21,7 +21,7 @@ public:
 	virtual fSize specifyMinimumSize() const;
 	
 protected:
-	TextLabelBody(std::string _text = "");
+	TextLabelBody(std::string const& _text = "", Color _c = NullColor, Font const& _font = Font());
 
 	virtual bool event(Event* _e);
 	virtual void draw(Context const& _c);

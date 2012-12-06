@@ -1,6 +1,7 @@
 #include <GLES2/gl2.h>
 #include "Global.h"
 #include "ShaderFace.h"
+using namespace std;
 using namespace Lightbox;
 
 ShaderFace::ShaderFace(foreign_vector<uint8_t const> const& _code, bool _isFragment)
@@ -11,7 +12,8 @@ ShaderFace::ShaderFace(foreign_vector<uint8_t const> const& _code, bool _isFragm
 		GLchar const* c = (GLchar const*)_code.data();
 		GLint l = _code.size();
 		LIGHTBOX_GL(glShaderSource(m_id, 1, &c, &l));
-		compile();
+		if (!compile())
+			cnote << string(c, l);
 	}
 }
 
@@ -21,7 +23,7 @@ ShaderFace::~ShaderFace()
 		LIGHTBOX_GL(glDeleteShader(m_id));
 }
 
-void ShaderFace::compile()
+bool ShaderFace::compile()
 {
 	LIGHTBOX_GL(glCompileShader(m_id));
 	GLint compiled;
@@ -40,6 +42,8 @@ void ShaderFace::compile()
 				free(buf);
 			}
 		}
+		return false;
 	}
+	return true;
 }
 

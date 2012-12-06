@@ -12,7 +12,7 @@ public:
 	ShaderFace(foreign_vector<uint8_t const> const& _code, bool _isFragment);
 	~ShaderFace();
 
-	void compile();
+	bool compile();
 	GLenum id() const { return m_id; }
 
 protected:

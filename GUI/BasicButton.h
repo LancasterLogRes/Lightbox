@@ -13,13 +13,12 @@ class BasicButtonBody: public ViewCreator<ViewBody, BasicButtonBody>
 	friend class ViewBody;
 
 public:
-
 	virtual ~BasicButtonBody() {}
 	
 	std::string const& text() const { return m_text; }
 	BasicButton setText(std::string const& _s) { m_text = _s; update(); return this; }
 	template <class _T> BasicButton setOnTapped(_T const& _t) { m_onTapped = _t; return this; }
-	std::function<void(BasicButton)> onTapped() const { return m_onTapped; }
+	std::function<void(BasicButton)> const& onTapped() const { return m_onTapped; }
 
 	virtual void draw(Context const& _c);
 	virtual bool event(Event* _e);
@@ -27,7 +26,7 @@ public:
 	virtual fSize specifyMinimumSize() const;
 
 protected:
-	BasicButtonBody(std::string const& _text = std::string()): m_text(_text), m_isDown(false) {}
+	BasicButtonBody(std::string const& _text = std::string());
 
 	virtual void tapped();
 

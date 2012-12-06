@@ -6,6 +6,45 @@
 using namespace std;
 using namespace Lightbox;
 
+fSize HorizontalLayout::maximumSize()
+{
+	fSize ret(0, 0);
+	if (m_view)
+		for (auto const& c: m_view->children())
+		{
+			auto m = c->maximumSize();
+			auto p = c->padding();
+			ret = fSize(ret.w() + m.w() + p.x() + p.z(), max(ret.h(), m.h() + p.y() + p.w()));
+		}
+	return ret;
+}
+
+fSize OverlayLayout::maximumSize()
+{
+	fSize ret(0, 0);
+	if (m_view)
+		for (auto const& c: m_view->children())
+		{
+			auto m = c->maximumSize();
+			auto p = c->padding();
+			ret = fSize(max(ret.w(), m.w() + p.x() + p.z()), max(ret.h(), m.h() + p.y() + p.w()));
+		}
+	return ret;
+}
+
+fSize VerticalLayout::maximumSize()
+{
+	fSize ret(0, 0);
+	if (m_view)
+		for (auto const& c: m_view->children())
+		{
+			auto m = c->maximumSize();
+			auto p = c->padding();
+			ret = fSize(max(ret.w(), m.w() + p.x() + p.z()), ret.h() + m.h() + p.y() + p.w());
+		}
+	return ret;
+}
+
 fSize HorizontalLayout::minimumSize()
 {
 	fSize ret(0, 0);
@@ -45,17 +84,26 @@ fSize VerticalLayout::minimumSize()
 	return ret;
 }
 
-std::vector<float> doLayout(float _total, std::vector<float> const& _stretch, std::vector<float> const& _size)
+std::vector<float> doLayout(float _total, std::vector<float> const& _stretch, std::vector<float> const& _minima, std::vector<float> const& _maxima)
 {
 	std::vector<float> ret(_stretch.size(), -1.f);
 	float totalStretch = defaultTo(sumOf(_stretch), 1.f, 0.f);
 	float totalUnreserved = 1.f;
 	RESTART_OUTER:
 	for (unsigned i = 0; i < ret.size(); ++i)
-		if (ret[i] == -1.f && _total * _stretch[i] / totalStretch * totalUnreserved < _size[i])
+		if (ret[i] == -1.f && _total * _stretch[i] / totalStretch * totalUnreserved < _minima[i])
 		{
 			totalStretch -= _stretch[i];
-			ret[i] = _size[i] / _total;
+			ret[i] = _minima[i] / _total;
+			totalUnreserved -= ret[i];
+			// reset back to start of the loop since totalUnreserved has now changed -
+			// other children may need to reserve stretch space to honour their minimum.
+			goto RESTART_OUTER;
+		}
+		else if (ret[i] == -1.f && _total * _stretch[i] / totalStretch * totalUnreserved > _maxima[i])
+		{
+			totalStretch -= _stretch[i];
+			ret[i] = _maxima[i] / _total;
 			totalUnreserved -= ret[i];
 			// reset back to start of the loop since totalUnreserved has now changed -
 			// other children may need to reserve stretch space to honour their minimum.
@@ -81,10 +129,13 @@ void VerticalLayout::layout(fSize _s)
 		stretch.reserve(m_view->children().size());
 		vector<float> minima;
 		minima.reserve(m_view->children().size());
+		vector<float> maxima;
+		maxima.reserve(m_view->children().size());
 		for (auto const& c: m_view->children())
 			stretch += c->stretch(),
-			minima += c->minimumSize().height() + c->padding().y() + c->padding().w();
-		vector<float> sizes = doLayout(_s.height(), stretch, minima);
+			minima += c->minimumSize().height() + c->padding().y() + c->padding().w(),
+			maxima += c->maximumSize().height() + c->padding().y() + c->padding().w();
+		vector<float> sizes = doLayout(_s.height(), stretch, minima, maxima);
 		fCoord cursor(0, 0);
 		auto i = sizes.begin();
 		for (auto const& c: m_view->children())
@@ -101,15 +152,12 @@ void VerticalLayout::layout(fSize _s)
 void OverlayLayout::layout(fSize _s)
 {
 	if (m_view)
-	{
-		fCoord cursor(0, 0);
 		for (auto const& c: m_view->children())
 		{
 			auto p = c->padding();
 			fSize s(_s.w() - p.x() - p.z() - m_margins.x() - m_margins.z(), _s.h() - p.y() - p.w() - m_margins.w() - m_margins.y());
-			c->setGeometry(fRect(cursor, s).translated(fCoord(p.x() + m_margins.x(), p.y() + m_margins.y())));
+			c->setGeometry(fRect(fCoord(p.x() + m_margins.x(), p.y() + m_margins.y()), s));
 		}
-	}
 }
 
 void HorizontalLayout::layout(fSize _s)
@@ -120,10 +168,13 @@ void HorizontalLayout::layout(fSize _s)
 		stretch.reserve(m_view->children().size());
 		vector<float> minima;
 		minima.reserve(m_view->children().size());
+		vector<float> maxima;
+		maxima.reserve(m_view->children().size());
 		for (auto const& c: m_view->children())
 			stretch += c->stretch(),
-			minima += c->minimumSize().width() + c->padding().x() + c->padding().z();
-		vector<float> sizes = doLayout(_s.width(), stretch, minima);
+			minima += c->minimumSize().width() + c->padding().x() + c->padding().z(),
+			maxima += c->maximumSize().width() + c->padding().x() + c->padding().z();
+		vector<float> sizes = doLayout(_s.width(), stretch, minima, maxima);
 		fCoord cursor(0, 0);
 		auto i = sizes.begin();
 		for (auto const& c: m_view->children())
