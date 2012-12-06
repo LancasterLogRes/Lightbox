@@ -15,10 +15,13 @@ struct Joint
 	uSize displaySize;
 	UniformPage uniforms;
 	PagedUniform offsetScale;
+	PagedUniform gradient;
 	PagedUniform color;
 	Buffer<float> unitQuad;
-	Program program;
-	Attrib geometry;
+	Program flat;
+	Program shaded;
+	Attrib flatGeometry;
+	Attrib shadedGeometry;
 	Font defaultFont;
 };
 

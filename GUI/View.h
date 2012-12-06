@@ -8,6 +8,7 @@
 #include <boost/any.hpp>
 #include <Numeric/Rect.h>
 #include <Common/Pimpl.h>
+#include <Common/Color.h>
 #include <App/Display.h>
 #include <Common/MemberMap.h>
 #include "Global.h"
@@ -21,6 +22,9 @@ struct Context
 {
 	fRect clip;		// in root coords
 	fSize offset;	// from root topLeft.
+
+	void flat(fRect _r, Color _c) const;
+	void shaded(fRect _r, Color _c, float _gradient = -.1f) const;
 };
 
 class ViewBody;

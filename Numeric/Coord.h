@@ -32,7 +32,11 @@ public:
 	bool operator!=(Coord const& _c) const { return !compare(_c); }
 
 	Coord operator+(Size<Numeric> const& _c) const;
+	Coord operator-(Size<Numeric> const& _c) const;
 	Size<Numeric> operator-(Coord const& _c) const;
+
+	Coord& operator+=(Size<Numeric> const& _c);
+	Coord& operator-=(Size<Numeric> const& _c);
 };
 
 typedef Coord<float> XY;
@@ -88,6 +92,8 @@ typedef Size<unsigned> uSize;
 
 template <class Numeric> Coord<Numeric> Coord<Numeric>::operator+(Size<Numeric> const& _c) const { return Coord(x() + _c.w(), y() + _c.h()); }
 template <class Numeric> Size<Numeric> Coord<Numeric>::operator-(Coord const& _c) const { return Size<Numeric>(x() - _c.x(), y() - _c.y()); }
+template <class Numeric> Coord<Numeric>& Coord<Numeric>::operator+=(Size<Numeric> const& _c) { setX(x() + _c.w()); setY(y() + _c.h()); return *this; }
+template <class Numeric> Coord<Numeric>& Coord<Numeric>::operator-=(Size<Numeric> const& _c) { setX(x() - _c.w()); setY(y() - _c.h()); return *this; }
 
 template<class _S, class _T> _S& operator<<(_S& _out, Coord<_T> const& _me)
 {

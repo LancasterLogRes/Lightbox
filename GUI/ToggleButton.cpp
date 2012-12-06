@@ -79,18 +79,9 @@ ToggleButton ToggleButtonBody::getActive()
 
 void ToggleButtonBody::draw(Context const& _c)
 {
-	auto const& j = GUIApp::joint();
+	_c.shaded(m_geometry, m_isChecked ^ m_isDown ? GUIApp::style().high : GUIApp::style().back);
 
 	auto transGeo = m_geometry.translated(_c.offset);
-	j.offsetScale = transGeo.asVector4();
-	j.color = m_isChecked ^ m_isDown ? GUIApp::style().high.toRGBA() : GUIApp::style().back.toRGBA();
-
-	{
-		ProgramUser u(j.program);
-		j.geometry.setData(j.unitQuad, 2);
-		u.triangleStrip(4);
-	}
-
 	auto const& f = m_isChecked ? GUIApp::style().bold : GUIApp::style().regular;
 	f.draw(transGeo.lerp(.5f, .5f) + fSize(0, -1), m_text, RGBA(0.f, 0.f, 0.f, .9f));
 	f.draw(transGeo.lerp(.5f, .5f), m_text, RGBA(GUIApp::style().fore * 2.f));

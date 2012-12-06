@@ -6,6 +6,27 @@
 using namespace std;
 using namespace Lightbox;
 
+void Context::flat(fRect _r, Color _c) const
+{
+	auto vm = GUIApp::joint();
+	vm.offsetScale = _r.translated(offset).asVector4();
+	vm.color = RGBA(_c);
+	ProgramUser u(vm.flat);
+	vm.flatGeometry.setData(vm.unitQuad, 2);
+	u.triangleStrip(4);
+}
+
+void Context::shaded(fRect _r, Color _c, float _gradient) const
+{
+	auto vm = GUIApp::joint();
+	vm.offsetScale = _r.translated(offset).asVector4();
+	vm.color = RGBA(_c);
+	vm.gradient = _gradient;
+	ProgramUser u(vm.shaded);
+	vm.shadedGeometry.setData(vm.unitQuad, 2);
+	u.triangleStrip(4);
+}
+
 ViewBody::ViewBody():
 	m_parent(nullptr),
 	m_references(1),		// 1 allows it to alwys stay alive during the construction process, even if an intrusive_ptr is constructed with it. It decremented during the doCreate() method from which the constructor is always called.
@@ -67,30 +88,14 @@ void ViewBody::handleDraw(Context const& _c)
 
 		if (!m_isEnabled)
 		{
-			auto vm = GUIApp::joint();
-
-			vm.offsetScale = fRect(m_geometry).translated(_c.offset).asVector4();
-			vm.color = RGBA(0, 0.5f);
-
-			ProgramUser u(vm.program);
-			vm.geometry.setData(vm.unitQuad, 2);
-			u.triangleStrip(4);
+			_c.flat(m_geometry, Color(0, 0.5f));
 		}
 	}
 }
 
 void ViewBody::draw(Context const& _c)
 {
-	auto vm = GUIApp::joint();
-
-	vm.offsetScale = fRect(m_geometry).translated(_c.offset).asVector4();
-	vm.color = RGBA(GUIApp::style().back * .25f);
-
-	{
-		ProgramUser u(vm.program);
-		vm.geometry.setData(vm.unitQuad, 2);
-		u.triangleStrip(4);
-	}
+	_c.shaded(m_geometry, GUIApp::style().back * .25f);
 }
 
 bool ViewBody::sensesEvent(Event* _e)

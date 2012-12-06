@@ -35,4 +35,6 @@ HEADERS += \
     Layout.h \
     Tabs.h
 OTHER_FILES += Shaders.resources View.frag View.vert \
-    Fonts.resources
+    Fonts.resources \
+    Flat.frag \
+    Flat.vert

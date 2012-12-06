@@ -26,6 +26,7 @@ public:
 	std::function<void(ToggleButton)> onToggled() const { return m_onToggled; }
 
 	ToggleButton setExclusiveWith(ToggleButton const& _b);
+	ToggleButton setComplement(ToggleButton const& _b) { m_complement = _b; return this; }
 	ToggleButton getActive();
 
 protected:
@@ -33,13 +34,14 @@ protected:
 
 	virtual void draw(Context const& _c);
 	virtual void toggled() { if (m_onToggled) m_onToggled(this); if (m_isChecked && m_onChecked) m_onChecked(this); }
-	virtual void tapped() { if (m_members) setChecked(true); else toggle(); }
+	virtual void tapped() { if (m_members) if (m_complement && m_isChecked) m_complement->setChecked(true); else setChecked(true); else toggle(); }
 
 private:
 	typedef std::set<ToggleButtonBody*> MemberSet;	/// OK as the ~ToggleButton removes itself from its member set.
 	std::shared_ptr<MemberSet> m_members;
 	std::function<void(ToggleButton)> m_onToggled;
 	std::function<void(ToggleButton)> m_onChecked;
+	ToggleButton m_complement;
 	bool m_isChecked;
 };
 

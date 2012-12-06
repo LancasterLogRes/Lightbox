@@ -21,6 +21,7 @@ public:
 	
 	Vector4<Numeric>& asVector4() { return (Vector4<Numeric>&)*this; }
 
+	void translate(xSize _s) { m_pos += _s; }
 	void move(xCoord _pos) { m_pos = _pos; }
 	void resize(xSize _s) { m_size = _s; }
 	void alterTopLeft(xCoord _pos) { m_size += m_pos - _pos; m_pos = _pos; }

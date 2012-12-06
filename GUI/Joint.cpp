@@ -13,13 +13,18 @@ void Joint::init(Display& _d)
 
 	unitQuad = Buffer<float>({ 0.f, 1.f, 1.f, 1.f, 0.f, 0.f, 1.f, 0.f });
 
-	program = Program(Shader::vertex(LB_R(View_vert)), Shader::fragment(LB_R(View_frag)));
+	shaded = Program(Shader::vertex(LB_R(View_vert)), Shader::fragment(LB_R(View_frag)));
+	flat = Program(Shader::vertex(LB_R(Flat_vert)), Shader::fragment(LB_R(Flat_frag)));
 
-	program.tie(uniforms);
+	shaded.tie(uniforms);
+	flat.tie(uniforms);
+
 	uniforms["displaySize"] = (vec2)(fSize)_d.size();
 	offsetScale = uniforms["offsetScale"];
 	color = uniforms["color"];
+	gradient = uniforms["gradient"];
 
-	geometry = program.attrib("geometry");
+	flatGeometry = flat.attrib("geometry");
+	shadedGeometry = shaded.attrib("geometry");
 }
 
