@@ -24,8 +24,11 @@ struct Context
 	fRect clip;		// in root coords
 	fSize offset;	// from root topLeft.
 
-	void flat(fRect _r, Color _c) const;
-	void shaded(fRect _r, Color _c, float _gradient = -.1f) const;
+	void rect(fRect _r) const;
+	void rect(fRect _r, Color _c) const;
+	void rect(fRect _r, Color _c, float _gradient) const;
+	void rect(fRect _r, Program const& _p) const;
+	void disc(fCoord _center, float _r) const;
 	void disc(fCoord _center, float _r, Color _c) const;
 	void disc(fCoord _center, float _r, Program const& _p) const;
 };
@@ -112,7 +115,8 @@ protected:
 
 	template <class _Body, class ... _T> static boost::intrusive_ptr<_Body> doCreate(View const& _parent, _T ... _args)
 	{
-		auto ret = boost::intrusive_ptr<_Body>(new _Body(_args ...), false);
+		auto ret = boost::intrusive_ptr<_Body>(new _Body(_args ...));
+		ret->m_whileConstructing.reset();
 		ret->setParent(_parent);
 		return ret;
 	}
@@ -130,6 +134,7 @@ protected:
 private:
 	fRect m_geometry;					// Relative to the parent's coordinate system. (0, 0) is at parent's top left.
 	ViewBody* m_parent;					// Raw pointers are only allowed here because the parent will remove itself from here in its destructor.
+	View m_whileConstructing;
 	unsigned m_references;
 	ViewSet m_children;
 	std::unordered_map<std::string, boost::any> m_misc;

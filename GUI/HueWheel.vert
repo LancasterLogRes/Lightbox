@@ -33,7 +33,6 @@ vec4 hueToRgba(float hue)
 void main()
 {
     v_color = (geometry.x != 0.0 && geometry.y != 0.0) ? hueToRgba(atan(geometry.x, geometry.y) / (2.0 * 3.14159265) + 0.5) : vec4(0.5, 0.5, 0.5, 1.0);
-//    v_color = vec4(1.0, 0.0, 0.0, 1.0);
     gl_Position.zw = vec2(1.0);
     gl_Position.xy = (offsetScale.xy + geometry * offsetScale.zw) / halfDisplaySize - vec2(1.0, -1.0);
 }

@@ -170,8 +170,8 @@ win32 {
 }
 
 android: CONFIG += use_egl use_gles2
-x86: CONFIG += use_xlib use_egl use_gles2
-#x86: CONFIG += use_sdl use_gl
+#x86: CONFIG += use_xlib use_egl use_gles2
+x86: CONFIG += use_sdl use_gl
 
 use_egl {
     DEFINES += LIGHTBOX_USE_EGL=1

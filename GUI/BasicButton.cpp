@@ -16,7 +16,7 @@ BasicButtonBody::BasicButtonBody(std::string const& _text):
 
 void BasicButtonBody::draw(Context const& _c)
 {
-	_c.shaded(geometry(), m_isDown ? GUIApp::style().high : GUIApp::style().back);
+	_c.rect(geometry(), m_isDown ? GUIApp::style().high : GUIApp::style().back, -.1f);
 
 	auto transGeo = geometry().translated(_c.offset);
 	auto const& f = m_isDown ? GUIApp::style().bold : GUIApp::style().regular;

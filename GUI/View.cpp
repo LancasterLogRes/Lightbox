@@ -6,13 +6,31 @@
 using namespace std;
 using namespace Lightbox;
 
-void Context::flat(fRect _r, Color _c) const
+void Context::rect(fRect _r, Color _c) const
 {
 	auto vm = GUIApp::joint();
 	vm.offsetScale = _r.translated(offset).asVector4();
 	vm.color = RGBA(_c);
 	ProgramUser u(vm.flat);
 	vm.flatGeometry.setData(vm.unitQuad, 2);
+	u.triangleStrip(4);
+}
+
+void Context::rect(fRect _r, Program const& _p) const
+{
+	auto vm = GUIApp::joint();
+	vm.offsetScale = _r.translated(offset).asVector4();
+	ProgramUser u(_p);
+	_p.attrib("geometry").setData(vm.unitQuad, 2);
+	u.triangleStrip(4);
+}
+
+void Context::rect(fRect _r) const
+{
+	auto vm = GUIApp::joint();
+	vm.offsetScale = _r.translated(offset).asVector4();
+	ProgramUser u;
+	u.attrib("geometry").setData(vm.unitQuad, 2);
 	u.triangleStrip(4);
 }
 
@@ -37,7 +55,17 @@ void Context::disc(fCoord _center, float _r, Program const& _p) const
 	u.triangleFan(74);
 }
 
-void Context::shaded(fRect _r, Color _c, float _gradient) const
+void Context::disc(fCoord _center, float _r) const
+{
+	auto vm = GUIApp::joint();
+	fCoord c = _center + offset;
+	vm.offsetScale = fVector4(c.x(), c.y(), _r, _r);
+	ProgramUser u;
+	u.attrib("geometry").setData(vm.unitCircle72, 2);
+	u.triangleFan(74);
+}
+
+void Context::rect(fRect _r, Color _c, float _gradient) const
 {
 	auto vm = GUIApp::joint();
 	vm.offsetScale = _r.translated(offset).asVector4();
@@ -58,6 +86,7 @@ ViewBody::ViewBody():
 	m_isVisible(true),
 	m_isEnabled(true)
 {
+	m_whileConstructing = View(this, false);
 }
 
 ViewBody::~ViewBody()
@@ -88,16 +117,23 @@ void ViewBody::setParent(View const& _p)
 			else
 				m_childIndex = 0;
 			_p->m_children.insert(this);
+
+			// We can safely kill this safety measure now.
+			m_whileConstructing.reset();
 		}
 		if (op)
 			op->noteLayoutDirty();
 		if (m_parent)
 			m_parent->noteLayoutDirty();
 	}
+
 }
 
 void ViewBody::handleDraw(Context const& _c)
 {
+	// Safely kill this safety measure - we're definitely out of the constructor.
+	m_whileConstructing.reset();
+
 	if (m_isVisible)
 	{
 		draw(_c);
@@ -108,17 +144,20 @@ void ViewBody::handleDraw(Context const& _c)
 			ch->handleDraw(c);
 
 		if (!m_isEnabled)
-			_c.flat(m_geometry, Color(0, 0.5f));
+			_c.rect(m_geometry, Color(0, 0.5f));
 	}
 }
 
 void ViewBody::draw(Context const& _c)
 {
-	_c.shaded(m_geometry, GUIApp::style().back * .25f);
+//	_c.rect(m_geometry, GUIApp::style().back * .25f, -.1f);
 }
 
 bool ViewBody::sensesEvent(Event* _e)
 {
+	// Safely kill this safety measure - we're definitely out of the constructor.
+	m_whileConstructing.reset();
+
 	if (m_isVisible && m_isEnabled)
 		if (auto e = dynamic_cast<TouchEvent*>(_e))
 			return m_geometry.contains(e->local);

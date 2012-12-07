@@ -46,8 +46,9 @@ private:
 class ProgramUser: public boost::noncopyable
 {
 public:
-	ProgramUser(Program const& _p): m_p(_p) { assert(!ProgramFace::inUse()); m_p.use(); }
-	~ProgramUser() { m_p.drop(); }
+	ProgramUser(): m_p(ProgramFace::inUse()), m_owns(false) { assert(m_p); }
+	ProgramUser(Program const& _p): m_p(_p), m_owns(true) { assert(!ProgramFace::inUse()); m_p.use(); }
+	~ProgramUser() { if (m_owns) m_p.drop(); }
 
 	Attrib attrib(std::string const& _name) const { return Attrib(m_p, _name); }
 	Uniform uniform(std::string const& _name) const { return Uniform(m_p, _name); }
@@ -62,6 +63,7 @@ public:
 
 private:
 	Program m_p;
+	bool m_owns;
 };
 
 class PagedUniform;
@@ -107,7 +109,7 @@ public:
 
 	using UniformSetter::operator=;
 
-	template <class ... Params> void set(Params ... _p) const { setNV(_p ...); }
+	template <class ... Params> void set(Params ... _p) const { setNV(_p ...); if (ProgramFace::inUse()) m_p->setup(ProgramFace::inUse()); }
 
 //	template <class ... Params> void setNV(Params ... _p) { sharedPtr()->set(std::make_shared<std::function<void()> >([=](Uniform const& u){ u.set(_p ...); })); }
 	template <class T> void setNV(T _0) const { sharedPtr()->set(std::function<void(Uniform const&)>([=](Uniform const& u){ u.set(_0); })); }

@@ -10,3 +10,4 @@
 #include "TextLabel.h"
 #include "Tabs.h"
 #include "HuePicker.h"
+#include "LightPicker.h"

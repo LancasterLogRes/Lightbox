@@ -54,7 +54,7 @@ void TabsBody::draw(Context const& _c)
 		{
 			string title = c->property<string>("_TabsBody:Title");
 			bool isActive = c->isVisible();
-			_c.shaded(tab, isActive ? GUIApp::style().high : GUIApp::style().back);
+			_c.rect(tab, isActive ? GUIApp::style().high : GUIApp::style().back, -.1f);
 			Font const& f = (isActive ? GUIApp::style().bold : GUIApp::style().regular);
 			f.draw(tab.lerp(.5f, .5f) + fSize(0, -1), title, RGBA(0.f, 0.f, 0.f, .9f));
 			f.draw(tab.lerp(.5f, .5f), title, RGBA(GUIApp::style().fore * 2.f));

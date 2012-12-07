@@ -88,16 +88,17 @@ fVector4 Color::convertTo(ColorSpace _cc) const
 		if (m_sat <= 0.f)
 		{       // < is bogus, just shuts up warnings
 			if (isnan(m_hue))
-			{   // m_hue == NAN
-				x = m_value;
-				y = m_value;
-				z = m_value;
+			{
+				// error - should never happen
+				x = 0.f;
+				y = 0.f;
+				z = 0.f;
 				break;
 			}
-			// error - should never happen
-			x = 0.f;
-			y = 0.f;
-			z = 0.f;
+			// m_hue == NAN
+			x = m_value;
+			y = m_value;
+			z = m_value;
 			break;
 		}
 		hh = m_hue;

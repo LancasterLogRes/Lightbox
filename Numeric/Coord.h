@@ -91,6 +91,7 @@ typedef Size<int> iSize;
 typedef Size<unsigned> uSize;
 
 template <class Numeric> Coord<Numeric> Coord<Numeric>::operator+(Size<Numeric> const& _c) const { return Coord(x() + _c.w(), y() + _c.h()); }
+template <class Numeric> Coord<Numeric> Coord<Numeric>::operator-(Size<Numeric> const& _c) const { return Coord(x() - _c.w(), y() - _c.h()); }
 template <class Numeric> Size<Numeric> Coord<Numeric>::operator-(Coord const& _c) const { return Size<Numeric>(x() - _c.x(), y() - _c.y()); }
 template <class Numeric> Coord<Numeric>& Coord<Numeric>::operator+=(Size<Numeric> const& _c) { setX(x() + _c.w()); setY(y() + _c.h()); return *this; }
 template <class Numeric> Coord<Numeric>& Coord<Numeric>::operator-=(Size<Numeric> const& _c) { setX(x() - _c.w()); setY(y() - _c.h()); return *this; }

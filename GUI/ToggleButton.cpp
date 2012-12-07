@@ -79,7 +79,7 @@ ToggleButton ToggleButtonBody::getActive()
 
 void ToggleButtonBody::draw(Context const& _c)
 {
-	_c.shaded(geometry(), m_isChecked ^ m_isDown ? GUIApp::style().high : GUIApp::style().back);
+	_c.rect(geometry(), m_isChecked ^ m_isDown ? GUIApp::style().high : GUIApp::style().back, -.1f);
 
 	auto transGeo = geometry().translated(_c.offset);
 	auto const& f = m_isChecked ? GUIApp::style().bold : GUIApp::style().regular;

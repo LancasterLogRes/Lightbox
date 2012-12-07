@@ -19,7 +19,8 @@ SOURCES += \
     Event.cpp \
     Layout.cpp \
     Tabs.cpp \
-    HuePicker.cpp
+    HuePicker.cpp \
+    LightPicker.cpp
 
 HEADERS += \
     View.h \
@@ -35,10 +36,12 @@ HEADERS += \
     Event.h \
     Layout.h \
     Tabs.h \
-    HuePicker.h
+    HuePicker.h \
+    LightPicker.h
 OTHER_FILES += Shaders.resources View.frag View.vert \
     Fonts.resources \
     Flat.frag \
     Flat.vert \
     HueWheel.frag \
-    HueWheel.vert
+    HueWheel.vert \
+    LightBar.vert

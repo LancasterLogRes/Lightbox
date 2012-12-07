@@ -1,6 +1,6 @@
 #pragma once
 
-#include "View.h"
+#include "ToggleButton.h"
 
 namespace Lightbox
 {
@@ -8,16 +8,16 @@ namespace Lightbox
 class HuePickerBody;
 typedef boost::intrusive_ptr<HuePickerBody> HuePicker;
 
-class HuePickerBody: public ViewCreator<ViewBody, HuePickerBody>
+class HuePickerBody: public ViewCreator<ToggleButtonBody, HuePickerBody>
 {
 	friend class ViewBody;
 	
 public:
-	typedef ViewCreator<ViewBody, HuePickerBody> Super;
+	typedef ViewCreator<ToggleButtonBody, HuePickerBody> Super;
 	~HuePickerBody();
 
 	float hue() const { return m_hue; }
-	void setHue(float _h) { if (m_hue != _h) { m_hue = _h; update(); hueChanged(); } }
+	void setHue(float _h) { if (m_hue != _h) { m_hue = _h; hueChanged(); } }
 	template <class _T> HuePicker setOnHueChanged(_T const& _t) { m_onHueChanged = _t; return this; }
 	std::function<void(HuePicker const&)> const& onHueChanged() const { return m_onHueChanged; }
 
@@ -30,7 +30,7 @@ protected:
 	virtual fSize specifyMinimumSize() const;
 	virtual fSize specifyMaximumSize() const;
 
-	virtual void hueChanged() { if (m_onHueChanged) m_onHueChanged(this); }
+	virtual void hueChanged() { if (m_onHueChanged) m_onHueChanged(this); update(); }
 
 private:
 	float m_hue;
