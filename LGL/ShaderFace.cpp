@@ -1,4 +1,4 @@
-#include <GLES2/gl2.h>
+#include "GL.h"
 #include "Global.h"
 #include "ShaderFace.h"
 using namespace std;
@@ -6,12 +6,12 @@ using namespace Lightbox;
 
 ShaderFace::ShaderFace(foreign_vector<uint8_t const> const& _code, bool _isFragment)
 {
-	m_id = LIGHTBOX_GL_RET(glCreateShader(_isFragment ? GL_FRAGMENT_SHADER : GL_VERTEX_SHADER));
+	m_id = LB_GL_R(glCreateShader, _isFragment ? GL_FRAGMENT_SHADER : GL_VERTEX_SHADER);
 	if (m_id)
 	{
 		GLchar const* c = (GLchar const*)_code.data();
 		GLint l = _code.size();
-		LIGHTBOX_GL(glShaderSource(m_id, 1, &c, &l));
+		LB_GL(glShaderSource, m_id, 1, &c, &l);
 		if (!compile())
 			cnote << string(c, l);
 	}
@@ -20,24 +20,24 @@ ShaderFace::ShaderFace(foreign_vector<uint8_t const> const& _code, bool _isFragm
 ShaderFace::~ShaderFace()
 {
 	if (glIsShader(m_id))
-		LIGHTBOX_GL(glDeleteShader(m_id));
+		LB_GL(glDeleteShader, m_id);
 }
 
 bool ShaderFace::compile()
 {
-	LIGHTBOX_GL(glCompileShader(m_id));
+	LB_GL(glCompileShader, m_id);
 	GLint compiled;
-	LIGHTBOX_GL(glGetShaderiv(m_id, GL_COMPILE_STATUS, &compiled));
+	LB_GL(glGetShaderiv, m_id, GL_COMPILE_STATUS, &compiled);
 	if (!compiled)
 	{
 		GLint infoLen = 0;
-		LIGHTBOX_GL(glGetShaderiv(m_id, GL_INFO_LOG_LENGTH, &infoLen));
+		LB_GL(glGetShaderiv, m_id, GL_INFO_LOG_LENGTH, &infoLen);
 		if (infoLen)
 		{
 			char* buf = (char*) malloc(infoLen);
 			if (buf)
 			{
-				LIGHTBOX_GL(glGetShaderInfoLog(m_id, infoLen, NULL, buf));
+				LB_GL(glGetShaderInfoLog, m_id, infoLen, (int*)nullptr, buf);
 				cwarn << "Could not compile shader: " << buf;
 				free(buf);
 			}

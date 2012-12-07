@@ -18,7 +18,7 @@
  * along with Noted.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef LIGHTBOX_CROSSCOMPILATION_ANDROID
+#ifndef LIGHTBOX_ANDROID
 
 #include <cmath>
 #include <unistd.h>

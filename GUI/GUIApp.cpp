@@ -1,4 +1,4 @@
-#include <GLES2/gl2.h>
+#include <LGL/GL.h>
 #include <Common/Global.h>
 #include <LGL.h>
 #include <App.h>
@@ -32,10 +32,10 @@ void GUIApp::initGraphics(Display& _d)
 	cnote << "Renderer" << (char const*)glGetString(GL_RENDERER);
 	cnote << "Extensions" << (char const*)glGetString(GL_EXTENSIONS);
 
-	LIGHTBOX_GL(glEnable(GL_CULL_FACE));
-	LIGHTBOX_GL(glDisable(GL_DEPTH_TEST));
-	LIGHTBOX_GL(glEnable(GL_BLEND));
-	LIGHTBOX_GL(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+	LB_GL(glEnable, GL_CULL_FACE);
+	LB_GL(glDisable, GL_DEPTH_TEST);
+	LB_GL(glEnable, GL_BLEND);
+	LB_GL(glBlendFunc, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	m_joint.init(_d);
 	m_style.regular = Font(ubuntu_r_ttf, 16.f);
@@ -48,20 +48,23 @@ void GUIApp::initGraphics(Display& _d)
 
 void GUIApp::drawGraphics()
 {
-	LIGHTBOX_GL(glClearColor(0, 0, 0, 1.0f));
-	LIGHTBOX_GL(glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT));
+	LB_GL(glClearColor, 0, 0, 0, 1.0f);
+	LB_GL(glClear, GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 	m_root->handleDraw(Context());
 }
 
 bool GUIApp::motionEvent(int _id, iCoord _pos, int _direction)
 {
-	TouchEvent* ev;
+	TouchEvent* ev = nullptr;
 	if (_direction > 0)
 		ev = new TouchDownEvent(_id, _pos);
 	else if (_direction < 0)
 		ev = new TouchUpEvent(_id, _pos);
-	else
+	else if (m_pointerLock[_id])
 		ev = new TouchMoveEvent(_id, _pos);
+
+	if (!ev)
+		return false;
 
 	bool ret = false;
 	if (m_pointerLock[_id])

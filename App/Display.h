@@ -23,8 +23,7 @@ public:
 	unsigned height() const { return m_height; }
 	uSize size() const { return uSize(m_width, m_height); }
 
-#if LIGHTBOX_CROSSCOMPILATION_ANDROID
-#elif !defined(LIGHTBOX_CROSSCOMPILATION)
+#if LIGHTBOX_USE_XLIB
 	void* xDisplay() const { return m_xDisplay; }
 	unsigned long xWindow() const { return m_xWindow; }
 #endif
@@ -36,15 +35,16 @@ private:
 	int m_animators;
 	bool m_animating;
 
-	/*EGLDisplay*/ void* m_display;
-	/*EGLSurface*/ void* m_surface;
-	/*EGLContext*/ void* m_context;
-
 	unsigned m_width;
 	unsigned m_height;
 
-#if LIGHTBOX_CROSSCOMPILATION_ANDROID
-#elif !defined(LIGHTBOX_CROSSCOMPILATION)
+#if LIGHTBOX_USE_EGL
+	/*EGLDisplay*/ void* m_display;
+	/*EGLSurface*/ void* m_surface;
+	/*EGLContext*/ void* m_context;
+#endif
+
+#if LIGHTBOX_USE_XLIB
 	void* m_xDisplay;
 	unsigned long m_xWindow;
 #endif

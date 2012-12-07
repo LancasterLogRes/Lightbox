@@ -20,7 +20,7 @@
 
 #pragma once
 
-#ifndef LIGHTBOX_CROSSCOMPILATION_ANDROID
+#ifndef LIGHTBOX_ANDROID
 
 #include <vector>
 

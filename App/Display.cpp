@@ -1,12 +1,19 @@
-#if LIGHTBOX_CROSSCOMPILATION_ANDROID
+#include "Global.h"
+#if LIGHTBOX_ANDROID
 #include <android_native_app_glue.h>
-#elif !defined(LIGHTBOX_CROSSCOMPILATION)
+#endif
+#if LIGHTBOX_USE_XLIB
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #endif
-#include <sstream>
+#if LIGHTBOX_USE_SDL
+#include <SDL/SDL.h>
+#endif
+#if LIGHTBOX_USE_EGL
 #include <EGL/egl.h>
-#include <GLES2/gl2.h>
+#endif
+#include <sstream>
+#include <LGL/GL.h>
 #include <Common/Global.h>
 #include "AppEngine.h"
 #include "Display.h"
@@ -14,16 +21,18 @@ using namespace std;
 using namespace Lightbox;
 
 #define EGL_CHECK(X) if (!(X)) { cwarn << "FATAL:" << #X; exit(-1); } else void(0)
+#define SDL_CHECK(X) if (!(X)) { cwarn << "FATAL:" << #X << SDL_GetError(); SDL_Quit(); exit(-1); } else void(0)
 
-#if LIGHTBOX_CROSSCOMPILATION_ANDROID
-#elif !defined(LIGHTBOX_CROSSCOMPILATION)
+#if LIGHTBOX_ANDROID
+#elif !defined(LIGHTBOX_CROSS)
 #endif
 
 Lightbox::Display::Display()
 {
-#if LIGHTBOX_CROSSCOMPILATION_ANDROID
+#if LIGHTBOX_USE_EGL
+#if LIGHTBOX_ANDROID
 	EGL_CHECK(m_display = eglGetDisplay(EGL_DEFAULT_DISPLAY));
-#elif !defined(LIGHTBOX_CROSSCOMPILATION)
+#elif LIGHTBOX_USE_XLIB
 	char* displayName = nullptr;
 	::Display* xDisplay = XOpenDisplay(displayName);
 	EGL_CHECK(m_display = eglGetDisplay(xDisplay));
@@ -42,32 +51,25 @@ Lightbox::Display::Display()
 	EGLint numConfigs;
 	EGLConfig config;
 
-#if LIGHTBOX_CROSSCOMPILATION_ANDROID
+	const EGLint attribs[] = { EGL_SURFACE_TYPE, EGL_WINDOW_BIT, EGL_RED_SIZE, 8, EGL_GREEN_SIZE, 8, EGL_BLUE_SIZE, 8, EGL_DEPTH_SIZE, 16, EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT, EGL_NONE };
 
-	EGLint const attribs[] = { EGL_SURFACE_TYPE, EGL_WINDOW_BIT, EGL_BLUE_SIZE, 8, EGL_GREEN_SIZE, 8, EGL_RED_SIZE, 8, EGL_NONE };
 	EGL_CHECK(eglChooseConfig(m_display, attribs, &config, 1, &numConfigs));
-	eglGetConfigAttrib(m_display, config, EGL_NATIVE_VISUAL_ID, &format);
-	ANativeWindow_setBuffersGeometry(AppEngine::get()->androidApp()->window, 0, 0, format);
+	assert(config);
+	assert(numConfigs > 0);
+	EGL_CHECK(eglGetConfigAttrib(m_display, config, EGL_NATIVE_VISUAL_ID, &format));
 
+#if LIGHTBOX_ANDROID
+	ANativeWindow_setBuffersGeometry(AppEngine::get()->androidApp()->window, 0, 0, format);
 	auto win = AppEngine::get()->androidApp()->window;
 
-#elif !defined(LIGHTBOX_CROSSCOMPILATION)
-	const char* name = "OpenGL ES 2.x";
+#elif LIGHTBOX_USE_XLIB
+	const char* name = "OpenGL";
 	int x = 0;
 	int y = 0;
 	int width = 1024;
 	int height = 736;
 
-	static const EGLint attribs[] = { EGL_RED_SIZE, 1, EGL_GREEN_SIZE, 1, EGL_BLUE_SIZE, 1, EGL_DEPTH_SIZE, 1, EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT, EGL_NONE };
-
 	Window root = RootWindow(xDisplay, DefaultScreen(xDisplay));
-
-	EGL_CHECK(eglChooseConfig(m_display, attribs, &config, 1, &numConfigs));
-	assert(config);
-	assert(numConfigs > 0);
-
-	EGL_CHECK(eglGetConfigAttrib(m_display, config, EGL_NATIVE_VISUAL_ID, &format));
-
 	int numVisuals;
 	XVisualInfo visTemplate;
 	visTemplate.visualid = format;
@@ -114,7 +116,7 @@ Lightbox::Display::Display()
 	   assert(val & EGL_WINDOW_BIT);
 	}
 
-#if !defined(LIGHTBOX_CROSSCOMPILATION)
+#if LIGHTBOX_USE_XLIB
 	XFree(visInfo);
 	XMapWindow(xDisplay, win);
 
@@ -130,12 +132,73 @@ Lightbox::Display::Display()
 	eglQuerySurface(m_display, m_surface, EGL_HEIGHT, &h);
 	m_width = w;
 	m_height = h;
+#endif
 
+#if LIGHTBOX_USE_SDL
+	if (SDL_Init(SDL_INIT_VIDEO) < 0)
+	{
+		cwarn << "SDL initialization failed: " << SDL_GetError();
+		SDL_Quit();
+	}
+
+	auto info = SDL_GetVideoInfo();
+	SDL_CHECK(info);
+
+	int bpp = info->vfmt->BitsPerPixel;
+
+	SDL_GL_SetAttribute( SDL_GL_RED_SIZE, 8 );
+	SDL_GL_SetAttribute( SDL_GL_GREEN_SIZE, 8 );
+	SDL_GL_SetAttribute( SDL_GL_BLUE_SIZE, 8 );
+	SDL_GL_SetAttribute( SDL_GL_DEPTH_SIZE, 16 );
+	SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
+
+	int flags = SDL_OPENGL|SDL_HWSURFACE|SDL_DOUBLEBUF|SDL_OPENGLBLIT;
+
+	m_width = 1024;
+	m_height = 736;
+	SDL_CHECK(SDL_SetVideoMode(m_width, m_height, bpp, flags));
+
+#endif
 	glViewport(0, 0, m_width, m_height);
+#if 1
+	glClearColor(0, 0, 0, 1);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glEnableVertexAttribArray(0);
+
+	GLuint p = glCreateProgram();
+	GLuint vs = glCreateShader(GL_VERTEX_SHADER);
+	GLchar const* vsc = "attribute vec3 geometry; void main() { gl_Position.xyz = geometry; }";
+	glShaderSource(vs, 1, &vsc, nullptr);
+	glCompileShader(vs);
+	glAttachShader(p, vs);
+	GLuint fs = glCreateShader(GL_FRAGMENT_SHADER);
+	GLchar const* fsc = "precision mediump float; void main() { gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0); }";
+	glShaderSource(fs, 1, &fsc, nullptr);
+	glCompileShader(fs);
+	glAttachShader(p, fs);
+	glLinkProgram(p);
+	glUseProgram(p);
+
+	GLuint geom;
+	glGenBuffers(1, &geom);
+	glBindBuffer(GL_ARRAY_BUFFER, geom);
+	float geomdata[] = {0, -1, 0, -1, 1, 0, 1, 1, 0};
+	glBufferData(GL_ARRAY_BUFFER, sizeof(geomdata), geomdata, GL_STATIC_DRAW);
+	glVertexAttribPointer(glGetAttribLocation(p, "geometry"), 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+	glDrawArrays(GL_TRIANGLES, 0, 3);
+
+#if LIGHTBOX_USE_SDL
+	SDL_GL_SwapBuffers();
+#elif LIGHTBOX_USE_EGL
+	eglSwapBuffers(m_display, m_surface);
+#endif
+#endif
 }
 
 Lightbox::Display::~Display()
 {
+#if LIGHTBOX_USE_EGL
 	if (m_display != EGL_NO_DISPLAY)
 	{
 		eglMakeCurrent(m_display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
@@ -144,15 +207,24 @@ Lightbox::Display::~Display()
 		if (m_surface != EGL_NO_SURFACE)
 			eglDestroySurface(m_display, m_surface);
 		eglTerminate(m_display);
-#if !defined(LIGHTBOX_CROSSCOMPILATION)
+#if LIGHTBOX_USE_XLIB
 		XCloseDisplay((::Display*)m_xDisplay);
 #endif
 	}
+#endif
+#if LIGHTBOX_USE_SDL
+	SDL_Quit();
+#endif
 }
 
 void Lightbox::Display::update()
 {
+#if LIGHTBOX_USE_EGL
 	eglSwapBuffers(m_display, m_surface);
+#endif
+#if LIGHTBOX_USE_SDL
+	SDL_GL_SwapBuffers();
+#endif
 	m_animating = false;
 }
 

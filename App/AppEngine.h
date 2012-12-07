@@ -21,10 +21,10 @@
 #include <Common/Global.h>
 #include "Global.h"
 
-#if LIGHTBOX_CROSSCOMPILATION_ANDROID
+#if LIGHTBOX_ANDROID
 struct android_app;
 struct AInputEvent;
-#elif !defined(LIGHTBOX_CROSSCOMPILATION)
+#elif !defined(LIGHTBOX_CROSS)
 #endif
 
 namespace Lightbox
@@ -36,11 +36,11 @@ class App;
 class AppEngine
 {
 public:
-#if LIGHTBOX_CROSSCOMPILATION_ANDROID
+#if LIGHTBOX_ANDROID
 	AppEngine(struct android_app* _app);
 
 	struct android_app* androidApp() { return m_androidApp; }
-#elif !defined(LIGHTBOX_CROSSCOMPILATION)
+#elif !defined(LIGHTBOX_CROSS)
 	AppEngine();
 #endif
 
@@ -65,7 +65,7 @@ private:
 	std::shared_ptr<Display> m_display;
 	std::shared_ptr<App> m_app;
 
-#if LIGHTBOX_CROSSCOMPILATION_ANDROID
+#if LIGHTBOX_ANDROID
 	static int32_t engine_handle_input(struct android_app* app, AInputEvent* event);
 	int32_t handleInput(AInputEvent* _event);
 	static void engine_handle_cmd(struct android_app* app, int32_t cmd);
@@ -74,7 +74,7 @@ private:
 	std::array<iCoord, 5> m_pointerState;
 
 	struct android_app* m_androidApp;	///< The Android app object. Always valid.
-#elif !defined(LIGHTBOX_CROSSCOMPILATION)
+#elif !defined(LIGHTBOX_CROSS)
 #endif
 
 	static AppEngine* s_this;

@@ -3,7 +3,7 @@
 #include <set>
 #include <map>
 #include <list>
-#include <GLES2/gl2.h>
+#include "GL.h"
 #include "Texture2D.h"
 #include "Shader.h"
 
@@ -18,7 +18,7 @@ class ProgramFace: public boost::noncopyable
 	friend class Uniform;	// for m_nv
 
 public:
-	ProgramFace(): m_id(glCreateProgram()) {}
+	ProgramFace(): m_id(LB_GL_RE(glCreateProgram)) {}
 	~ProgramFace();
 
 	void setVertex(Shader const& _v) { m_v = _v; }
@@ -31,7 +31,7 @@ public:
 	void use(std::shared_ptr<ProgramFace> const& _this) const;
 	void drop() const;
 
-	int uniformLocation(std::string const& _name) const { return glGetUniformLocation(m_id, _name.c_str()); }
+	int uniformLocation(std::string const& _name) const { return LB_GL_R(glGetUniformLocation, m_id, _name.c_str()); }
 
 	int registerSampler(Texture2D const& _t);
 

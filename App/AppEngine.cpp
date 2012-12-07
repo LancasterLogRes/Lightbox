@@ -1,11 +1,15 @@
-#if LIGHTBOX_CROSSCOMPILATION_ANDROID
+#include "Global.h"
+#if LIGHTBOX_ANDROID
 #include <jni.h>
 #include <android_native_app_glue.h>
-#elif !defined(LIGHTBOX_CROSSCOMPILATION)
+#elif LIGHTBOX_USE_XLIB
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
+#elif LIGHTBOX_USE_SDL
+#include <SDL/SDL.h>
 #endif
 #include <fstream>
+#include <Common/Time.h>
 #include "App.h"
 #include "Display.h"
 #include "AppEngine.h"
@@ -14,7 +18,7 @@ using namespace Lightbox;
 
 AppEngine* AppEngine::s_this = nullptr;
 
-#if LIGHTBOX_CROSSCOMPILATION_ANDROID
+#if LIGHTBOX_ANDROID
 AppEngine::AppEngine(struct android_app* _app):m_androidApp(_app)
 {
 	app_dummy();
@@ -28,7 +32,7 @@ AppEngine::AppEngine(struct android_app* _app):m_androidApp(_app)
 	if (m_androidApp->savedState && m_app)
 		m_app->setState(foreign_vector<uint8_t>((unsigned char*)m_androidApp->savedState, m_androidApp->savedStateSize));
 }
-#elif !defined(LIGHTBOX_CROSSCOMPILATION)
+#elif LIGHTBOX_USE_XLIB | LIGHTBOX_USE_SDL
 AppEngine::AppEngine()
 {
 	s_this = this;
@@ -46,68 +50,103 @@ void AppEngine::setApp(App* _app)
 
 void AppEngine::exec()
 {
-#if !defined(LIGHTBOX_CROSSCOMPILATION)
+#if LIGHTBOX_USE_XLIB
 	gfxInit();
 	gfxDraw();
 	::Display* xDisplay = (::Display*)m_display->xDisplay();
 	::Window xWindow = m_display->xWindow();
-	XSelectInput(xDisplay, xWindow, ExposureMask | KeyPressMask | KeyReleaseMask | ButtonPressMask | ButtonReleaseMask);
+	XSelectInput(xDisplay, xWindow, ExposureMask | KeyPressMask | KeyReleaseMask | ButtonPressMask | ButtonReleaseMask | PointerMotionMask);
+#elif LIGHTBOX_USE_SDL
+	gfxInit();
+	gfxDraw();
 #endif
 
+	Time lastDraw;
 	for (bool carryOn = true; carryOn;)
 	{
 		if (m_display && m_display->isAnimating())
+		{
 			gfxDraw();
+			lastDraw = wallTime();
+		}
 		else
 			usleep(30);
-
-#if LIGHTBOX_CROSSCOMPILATION_ANDROID
-		// Read all pending events.
-		int ident;
-		int events;
-		struct android_poll_source* source;
 
 		// If not animating, we will block forever waiting for events.
 		// If animating, we loop until all events are read, then continue
 		// to draw the next frame of animation.
-		while ((ident = ALooper_pollAll((m_display && m_display->isAnimating()) ? 0 : -1, NULL, &events, (void**)&source)) >= 0)
+		for (bool hadEvent = true; carryOn && hadEvent && (!m_display || !m_display->isAnimating() || wallTime() - lastDraw < FromSeconds<1>::value / 60);)
 		{
-			// Process this event.
-			if (source)
-				source->process(m_androidApp, source);
-
-			if (m_androidApp->destroyRequested)
+#if LIGHTBOX_ANDROID
+			// Read all pending events.
+			int events;
+			struct android_poll_source* source;
+			hadEvent = ALooper_pollAll((m_display && m_display->isAnimating()) ? 0 : -1, NULL, &events, (void**)&source) > 0;
+			if (hadEvent)
 			{
-				carryOn = false;
-				break;
+				// Process this event.
+				if (source)
+					source->process(m_androidApp, source);
+
+				if (m_androidApp->destroyRequested)
+				{
+					carryOn = false;
+					break;
+				}
 			}
-		}
-#elif !defined(LIGHTBOX_CROSSCOMPILATION)
-		XEvent event;
-		XNextEvent(xDisplay, &event);
+#elif LIGHTBOX_USE_XLIB
+			if (XPending(xDisplay) > 0 || !(m_display && m_display->isAnimating()))
+			{
+				XEvent event;
+				XNextEvent(xDisplay, &event);
 
-		bool used = false;
-
-		switch (event.type)
-		{
-		case ButtonPress:
-			used = m_app->motionEvent(0, iCoord(event.xbutton.x, event.xbutton.y), 1);
-			break;
-		case ButtonRelease:
-			used = m_app->motionEvent(0, iCoord(event.xbutton.x, event.xbutton.y), -1);
-			break;
-		case MotionNotify:
-			used = m_app->motionEvent(0, iCoord(event.xmotion.x, event.xmotion.y), 0);
-			break;
-		case DestroyNotify:
-			carryOn = false;
-			break;
-		case Expose:
-			m_display->repaint();
-			break;
-		default:;
-		}
+				switch (event.type)
+				{
+				case ButtonPress:
+					m_app->motionEvent(0, iCoord(event.xbutton.x, event.xbutton.y), 1);
+					break;
+				case ButtonRelease:
+					m_app->motionEvent(0, iCoord(event.xbutton.x, event.xbutton.y), -1);
+					break;
+				case MotionNotify:
+					m_app->motionEvent(0, iCoord(event.xmotion.x, event.xmotion.y), 0);
+					break;
+				case DestroyNotify:
+					carryOn = false;
+					break;
+				case Expose:
+					m_display->repaint();
+					break;
+				default:;
+				}
+				hadEvent = true;
+			}
+			else
+				hadEvent = false;
+#elif LIGHTBOX_USE_SDL
+			SDL_Event ev;
+			if (m_display && m_display->isAnimating())
+				hadEvent = SDL_PollEvent(&ev);
+			else
+				SDL_WaitEvent(&ev);
+			if (hadEvent)
+				switch (ev.type)
+				{
+				case SDL_MOUSEBUTTONDOWN:
+				case SDL_MOUSEBUTTONUP:
+				{
+					SDL_MouseButtonEvent& mev = (SDL_MouseButtonEvent&)ev;
+					m_app->motionEvent(0, iCoord(mev.x, mev.y), ev.type == SDL_MOUSEBUTTONDOWN ? 1 : -1);
+				}
+				case SDL_MOUSEMOTION:
+				{
+					SDL_MouseMotionEvent& mev = (SDL_MouseMotionEvent&)ev;
+					m_app->motionEvent(0, iCoord(mev.x, mev.y), ev.type == 0);
+				}
+				default:;
+				}
 #endif
+		}
 	}
 	m_display.reset();
 }
@@ -137,7 +176,7 @@ void AppEngine::gfxFini()
 	m_display.reset();
 }
 
-#if LIGHTBOX_CROSSCOMPILATION_ANDROID
+#if LIGHTBOX_ANDROID
 int32_t AppEngine::engine_handle_input(struct android_app* app, AInputEvent* event)
 {
 	return ((AppEngine*)app->userData)->handleInput(event);
@@ -256,7 +295,7 @@ std::function<void(uint8_t*, size_t)> Lightbox::assetReader(std::string const& _
 		return nullptr;
 	}
 }
-#elif !defined(LIGHTBOX_CROSSCOMPILATION)
+#elif !defined(LIGHTBOX_CROSS)
 std::function<void(uint8_t*, size_t)> Lightbox::assetReader(std::string const& _filename)
 {
 	auto a = make_shared<ifstream>();

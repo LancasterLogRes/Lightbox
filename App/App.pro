@@ -2,8 +2,7 @@ CONFIG -= qt
 TARGET = App
 TEMPLATE = lib
 include ( ../Common.pri )
-LIBS += -lCommon -lEGL -lGLESv2
-x86: LIBS += -lX11
+LIBS += -lCommon $$GFX_LIBS
 android: LIBS += $$LIBSTL -llog -landroid
 
 SOURCES += AppEngine.cpp \

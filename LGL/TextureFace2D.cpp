@@ -9,22 +9,22 @@ using namespace Lightbox;
 void TextureFace2D::bindData(uSize const& _dims, foreign_vector<uint8_t> const& _data, GLenum _format, int _internalFormat, int _level)
 {
 	bind();
-	LIGHTBOX_GL(glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
-	LIGHTBOX_GL(glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
-	LIGHTBOX_GL(glTexImage2D(GL_TEXTURE_2D, _level, _internalFormat, _dims.w(), _dims.h(), 0, _format, GL_UNSIGNED_BYTE, _data.data()));
+	LB_GL(glTexParameterf, GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	LB_GL(glTexParameterf, GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	LB_GL(glTexImage2D, GL_TEXTURE_2D, _level, _internalFormat, _dims.w(), _dims.h(), 0, _format, GL_UNSIGNED_BYTE, _data.data());
 }
 
 void TextureFace2D::activate(uint _unit) const
 {
-	LIGHTBOX_GL(glActiveTexture(GL_TEXTURE0 + _unit));
+	LB_GL(glActiveTexture, GL_TEXTURE0 + _unit);
 	bind();
-	LIGHTBOX_GL(glActiveTexture(GL_TEXTURE0));
+	LB_GL(glActiveTexture, GL_TEXTURE0);
 }
 
 void TextureFace2D::deactivate(uint _unit) const
 {
-	LIGHTBOX_GL(glActiveTexture(GL_TEXTURE0 + _unit));
-	LIGHTBOX_GL(glBindTexture(GL_TEXTURE_2D, 0));
+	LB_GL(glActiveTexture, GL_TEXTURE0 + _unit);
+	LB_GL(glBindTexture, GL_TEXTURE_2D, 0);
 }
 
 static void readPngAux(png_structp png, png_bytep data, png_size_t size)

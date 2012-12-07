@@ -207,7 +207,7 @@ float Lightbox::bias(float _x, float _z)
 
 float Lightbox::powScale(float _x, float _z)
 {
-#ifdef LIGHTBOX_CROSSCOMPILATION_ANDROID
+#ifdef LIGHTBOX_ANDROID
 	return clamp(_x * exp(_z) / exp(10), -1.f, 1.f);
 #else
 	return clamp(_x * exp10(_z), -1.f, 1.f);

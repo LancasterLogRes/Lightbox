@@ -113,7 +113,7 @@ crosscompilation {
 
         message($$QMAKE_CXX)
 
-        DEFINES += LIGHTBOX_CROSSCOMPILATION_ANDROID
+        DEFINES += LIGHTBOX_ANDROID
     }
     pi {
         PI_TOOLS = /home/gav/Projects/lightbox/RPi/x-tools/arm-unknown-linux-gnueabi/bin
@@ -130,13 +130,13 @@ crosscompilation {
 
         QMAKE_CXXFLAGS += -O2 -pipe -march=armv6zk -mfpu=vfp -mfloat-abi=hard -mcpu=arm1176jzf-s
 
-        DEFINES += LIGHTBOX_CROSSCOMPILATION_PI
+        DEFINES += LIGHTBOX_PI
     }
     x86 {
         QMAKE_CXXFLAGS += -march=amdfam10 -O2 -pipe -mno-3dnow -mcx16 -mpopcnt -msse3 -msse4a -mmmx
-        DEFINES += LIGHTBOX_CROSSCOMPILATION_X86
+        DEFINES += LIGHTBOX_X86
     }
-    DEFINES += LIGHTBOX_CROSSCOMPILATION
+    DEFINES += LIGHTBOX_CROSS
 }
 !crosscompilation {
     QMAKE_CXXFLAGS += -march=native
@@ -167,6 +167,31 @@ win32 {
         FFTW3_LIBS = -lfftw3f
         SNDFILE_LIBS = -lsndfile
         GL_LIBS += -lGL -lGLU -lGLEW
+}
+
+android: CONFIG += use_egl use_gles2
+x86: CONFIG += use_xlib use_egl use_gles2
+#x86: CONFIG += use_sdl use_gl
+
+use_egl {
+    DEFINES += LIGHTBOX_USE_EGL=1
+    GFX_LIBS += -lEGL
+}
+use_xlib {
+    DEFINES += LIGHTBOX_USE_XLIB=1
+    GFX_LIBS += -lX11
+}
+use_sdl {
+    DEFINES += LIGHTBOX_USE_SDL=1
+    GFX_LIBS += -lSDL
+}
+use_gl {
+    DEFINES += LIGHTBOX_USE_GL=1
+    GFX_LIBS += -lGL
+}
+use_gles2 {
+    DEFINES += LIGHTBOX_USE_GLES2=1
+    GFX_LIBS += -lGLESv2
 }
 
 LIBS += -L$$DESTDIR -Wl,-rpath,$$DESTDIR

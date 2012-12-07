@@ -20,12 +20,7 @@
 
 #pragma once
 
-#if LIGHTBOX_CROSSCOMPILATION_ANDROID
-#define BOOST_NO_UNICODE_LITERALS 1
-#define CHRONO boost::chrono
-#define RATIO boost::ratio
-#include <boost/chrono.hpp>
-#else
+#if !LIGHTBOX_ANDROID
 #define CHRONO std::chrono
 #define RATIO std::ratio
 #include <chrono>
@@ -189,6 +184,8 @@ inline float decayed(float _f, Time _hl, Time _p)
 	return halfLifeDecay(_p, _hl, _f);
 }
 
+#ifndef LIGHTBOX_ANDROID
+// No timers on Android until we either have a boost_system library or C++11's chrono is properly supported.
 class Timer
 {
 	typedef CHRONO::high_resolution_clock Clock;
@@ -215,5 +212,6 @@ public:
 private:
 	Time& m_acc;
 };
+#endif
 
 }

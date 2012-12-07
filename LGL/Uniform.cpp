@@ -6,7 +6,7 @@ using namespace Lightbox;
 
 Uniform::Uniform(Program const& _p, std::string const& _name):
 	m_p			(_p.sharedPtr()),
-	m_location	(_p ? LIGHTBOX_GL_RET(glGetUniformLocation(_p.sharedPtr()->id(), _name.c_str())) : -1)
+	m_location	(_p ? LB_GL_R(glGetUniformLocation, _p.sharedPtr()->id(), _name.c_str()) : -1)
 {
 }
 

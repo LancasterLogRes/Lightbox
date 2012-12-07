@@ -2,7 +2,7 @@ CONFIG -= qt
 TARGET = LGL
 TEMPLATE = lib
 include ( ../Common.pri )
-LIBS += -lEGL -lGLESv2 -lCommon -lNumeric -lpng -lz
+LIBS += $$GFX_LIBS -lCommon -lNumeric -lpng -lz
 
 SOURCES += ProgramFace.cpp Program.cpp ShaderFace.cpp Uniform.cpp \
     Global.cpp \
@@ -18,7 +18,9 @@ HEADERS += ProgramFace.h ShaderFace.h Program.h \
     Attrib.h \
     Texture2D.h \
     TextureFace2D.h \
-    BufferFace.h Buffer.h
+    BufferFace.h Buffer.h \
+    GL.h \
+    GLMap.h
 
 RES += Shaders.resources
 

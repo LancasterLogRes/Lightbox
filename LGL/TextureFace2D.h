@@ -1,9 +1,9 @@
 #pragma once
 
 #include <vector>
-#include <GLES2/gl2.h>
 #include <Common/Global.h>
 #include <Numeric/Coord.h>
+#include "GL.h"
 #include "Global.h"
 
 namespace Lightbox
@@ -12,11 +12,11 @@ namespace Lightbox
 class TextureFace2D: public boost::noncopyable
 {
 public:
-	TextureFace2D() { LIGHTBOX_GL(glGenTextures(1, &m_id)); }
-	~TextureFace2D() { LIGHTBOX_GL(glDeleteTextures(1, &m_id)); }
+	TextureFace2D() { LB_GL(glGenTextures, 1, &m_id); }
+	~TextureFace2D() { LB_GL(glDeleteTextures, 1, &m_id); }
 
 	GLuint id() const { return m_id; }
-	void bind() const { LIGHTBOX_GL(glBindTexture(GL_TEXTURE_2D, m_id)); }
+	void bind() const { LB_GL(glBindTexture, GL_TEXTURE_2D, m_id); }
 
 	void bindData(uSize const& _dims, foreign_vector<uint8_t> const& _data, GLenum _format, int _internalFormat, int _level);
 

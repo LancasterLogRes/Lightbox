@@ -2,7 +2,7 @@ CONFIG -= qt
 TARGET = GUI
 TEMPLATE = lib
 include ( ../Common.pri )
-LIBS += -lApp -lLGL -lEGL -lGLESv2 -lNumeric -lCommon -lpng -lz
+LIBS += -lApp -lLGL $$GFX_LIBS -lNumeric -lCommon -lpng -lz
 
 PRE_TARGETDEPS += ../LGL ../App ../Numeric ../Common
 

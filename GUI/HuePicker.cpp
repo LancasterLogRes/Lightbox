@@ -21,13 +21,13 @@ bool HuePickerBody::event(Event* _e)
 {
 	if (TouchEvent* e = dynamic_cast<TouchEvent*>(_e))
 	{
+		if (dynamic_cast<TouchDownEvent*>(_e))
+			lockPointer(e->id);
 		float s = min(geometry().w(), geometry().h());
 		fVector2 off = e->local - geometry().lerp(.5f, .5f);
 		if (off.length() < s && off.length() > s / 8.5f)
 		{
 			setHue(atan2(off.x(), off.y()) / TwoPi + 0.5f);
-			if (dynamic_cast<TouchDownEvent*>(_e))
-				lockPointer(e->id);
 			return true;
 		}
 	}
@@ -36,16 +36,17 @@ bool HuePickerBody::event(Event* _e)
 
 void HuePickerBody::draw(Context const& _c)
 {
-	auto vm = GUIApp::joint();
 	float s = min(geometry().w(), geometry().h());
 	fRect geo(geometry().pos() + (geometry().size() - fSize(s, s)) / 2.f, fSize(s, s));
+/*	auto vm = GUIApp::joint();
 	vm.offsetScale = geo.translated(_c.offset).asVector4();
 	{
 		ProgramUser u(m_hueWheel);
 		u.attrib("geometry").setData(vm.unitQuad, 2);
 		u.triangleStrip(4);
 	}
-
+*/
+	_c.disc(geo.lerp(.5f, .5f), s / 2.f, m_hueWheel);
 	_c.disc(geo.lerp(.5f, .5f), s / 8.f, Color(0.f));
 	_c.disc(geo.lerp(.5f, .5f), s / 9.f, Color(m_hue, 1.f, 1.f));
 }

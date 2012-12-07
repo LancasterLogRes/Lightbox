@@ -23,8 +23,18 @@ void Context::disc(fCoord _center, float _r, Color _c) const
 	vm.offsetScale = fVector4(c.x(), c.y(), _r, _r);
 	vm.color = RGBA(_c);
 	ProgramUser u(vm.flat);
-	vm.flatGeometry.setData(vm.unitCircle36, 2);
-	u.triangleFan(38);
+	vm.flatGeometry.setData(vm.unitCircle72, 2);
+	u.triangleFan(74);
+}
+
+void Context::disc(fCoord _center, float _r, Program const& _p) const
+{
+	auto vm = GUIApp::joint();
+	fCoord c = _center + offset;
+	vm.offsetScale = fVector4(c.x(), c.y(), _r, _r);
+	ProgramUser u(_p);
+	_p.attrib("geometry").setData(vm.unitCircle72, 2);
+	u.triangleFan(74);
 }
 
 void Context::shaded(fRect _r, Color _c, float _gradient) const
