@@ -84,6 +84,17 @@ public:
 
 	fCoord globalPos() const;
 	ViewSet children() const { return m_children; }
+	template <class _T> std::vector<_T> find()
+	{
+		std::vector<_T> ret;
+		for (auto const& c: m_children)
+			if (auto p = dynamic_cast<decltype(_T().get())>(c.get()))
+				ret += _T(p);
+			else
+				ret += c->find<_T>();
+		return ret;
+	}
+
 	bool isEnabled() const { return m_isEnabled; }
 	bool isVisible() const { return m_isVisible; }
 	ChildIndex childIndex() const { return m_childIndex; }
@@ -106,8 +117,9 @@ public:
 	void noteMetricsChanged() { if (m_parent) m_parent->noteLayoutDirty(); }
 	void noteLayoutDirty() { noteMetricsChanged(); relayout(); }
 
-	fSize minimumSize() const { return specifyMinimumSize(); }
-	fSize maximumSize() const { return specifyMaximumSize(); }
+	fSize minimumSize(fSize _space = fSize(32768.f, 32768.f)) const { return specifyMinimumSize(_space); }
+	fSize maximumSize(fSize _space = fSize(32768.f, 32768.f)) const { return specifyMaximumSize(_space); }
+	fSize fit(fSize _space) const { return specifyFit(_space); }
 
 //protected:
 //	virtual MemberMap propertyMap() const { return MemberMap(); }
@@ -125,13 +137,15 @@ protected:
 
 	void lockPointer(int _id);
 	void releasePointer(int _id);
+	bool pointerLocked(int _id);
 
-	virtual void draw(Context const& _c);
+	virtual bool draw(Context const& _c);
 	virtual bool event(Event*) { return false; }
 	virtual void resized() { relayout(); update(); }
 
-	virtual fSize specifyMinimumSize() const;	// default is determined by layout.
-	virtual fSize specifyMaximumSize() const;	// default is determined by layout.
+	virtual fSize specifyMinimumSize(fSize) const;	// default is determined by layout.
+	virtual fSize specifyMaximumSize(fSize) const;	// default is determined by layout.
+	virtual fSize specifyFit(fSize _space) const;	// default is determined by layout.
 
 private:
 	fRect m_geometry;					// Relative to the parent's coordinate system. (0, 0) is at parent's top left.

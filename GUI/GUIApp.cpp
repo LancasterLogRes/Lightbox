@@ -93,6 +93,11 @@ GUIApp* GUIApp::get()
 	return dynamic_cast<GUIApp*>(AppEngine::get()->app());
 }
 
+bool GUIApp::pointerLocked(int _id, View const& _v) const
+{
+	return m_pointerLock[_id] == _v;
+}
+
 bool GUIApp::lockPointer(int _id, View const& _v)
 {
 	if (m_pointerLock[_id] == nullptr)

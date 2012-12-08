@@ -77,7 +77,7 @@ ToggleButton ToggleButtonBody::getActive()
 	return (ToggleButton)this;
 }
 
-void ToggleButtonBody::draw(Context const& _c)
+bool ToggleButtonBody::draw(Context const& _c)
 {
 	_c.rect(geometry(), m_isChecked ^ m_isDown ? GUIApp::style().high : GUIApp::style().back, -.1f);
 
@@ -85,4 +85,6 @@ void ToggleButtonBody::draw(Context const& _c)
 	auto const& f = m_isChecked ? GUIApp::style().bold : GUIApp::style().regular;
 	f.draw(transGeo.lerp(.5f, .5f) + fSize(0, -1), m_text, RGBA(0.f, 0.f, 0.f, .9f));
 	f.draw(transGeo.lerp(.5f, .5f), m_text, RGBA(GUIApp::style().fore * 2.f));
+
+	return true;
 }

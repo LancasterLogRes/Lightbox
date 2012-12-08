@@ -25,10 +25,11 @@ protected:
 	HuePickerBody();
 	
 	virtual bool event(Event* _e);
-	virtual void draw(Context const& _c);
+	virtual bool draw(Context const& _c);
 	
-	virtual fSize specifyMinimumSize() const;
-	virtual fSize specifyMaximumSize() const;
+	virtual fSize specifyMinimumSize(fSize) const;
+	virtual fSize specifyMaximumSize(fSize) const;
+	virtual fSize specifyFit(fSize _space) const;
 
 	virtual void hueChanged() { if (m_onHueChanged) m_onHueChanged(this); update(); }
 

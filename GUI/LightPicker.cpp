@@ -20,17 +20,19 @@ LightPickerBody::~LightPickerBody()
 
 bool LightPickerBody::event(Event* _e)
 {
-	if (TouchEvent* e = dynamic_cast<TouchEvent*>(_e))
+	TouchEvent* e = dynamic_cast<TouchEvent*>(_e);
+	if (dynamic_cast<TouchDownEvent*>(e))
+		lockPointer(e->id);
+	if (e && pointerLocked(e->id))
 	{
-		if (dynamic_cast<TouchDownEvent*>(_e))
-			lockPointer(e->id);
-		setLight(clamp(lext(e->local.y(), geometry().bottom(), geometry().top()), 0.f, 1.f));
+		fRect geo = geometry().inset(0.f, geometry().w() / 2 + 2);
+		setLight(clamp(lext(e->local.y(), geo.bottom(), geo.top()), 0.f, 1.f));
 		return true;
 	}
 	return Super::event(_e);
 }
 
-void LightPickerBody::draw(Context const& _c)
+bool LightPickerBody::draw(Context const& _c)
 {
 	fRect geo = geometry();
 	{
@@ -47,8 +49,16 @@ void LightPickerBody::draw(Context const& _c)
 		_c.rect(fRect(geo.lerp(0.f, .5f), fSize(geo.width(), geo.height() / 2.f)));
 	}
 	Color c = Color(m_middle.hue(), m_middle.sat() == 0.f ? 0.f : clamp(2.f - m_light * 2.f, 0.f, 1.f), m_middle.sat() == 0.f ? m_light : clamp(m_light * 2.f, 0.f, 1.f));
-	_c.rect(fRect(geo.lerp(0.f, 1.f - m_light) - fSize(0.f, 5.f), fSize(geo.w(), 11.f)), Black);
-	_c.rect(fRect(geo.lerp(0.f, 1.f - m_light) - fSize(0.f, 3.f), fSize(geo.w(), 7.f)), c);
+	geo = geo.inset(0.f, geo.w() / 2 + 2);
+	_c.rect(fRect(geo.lerp(0.f, 1.f - m_light) - fSize(0.f, geo.w() / 2 + 2), fSize(geo.w(), geo.w() + 5)), Black);
+	_c.rect(fRect(geo.lerp(0.f, 1.f - m_light) - fSize(0.f, geo.w() / 2 + 1), fSize(geo.w(), geo.w() + 3)), White);
+	_c.rect(fRect(geo.lerp(0.f, 1.f - m_light) - fSize(0.f, geo.w() / 2), fSize(geo.w(), geo.w() + 1)), c);
+
+	return true;
 }
 
-
+fSize LightPickerBody::specifyFit(fSize _space) const
+{
+	float w = min(_space.w(), _space.h() / 8);
+	return fSize(w, w * 8);
+}

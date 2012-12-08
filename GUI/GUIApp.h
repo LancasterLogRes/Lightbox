@@ -35,6 +35,7 @@ public:
 
 	bool lockPointer(int _id, View const& _v);
 	bool releasePointer(int _id, View const& _v);
+	bool pointerLocked(int _id, View const& _v) const;
 
 private:
 	View m_root;

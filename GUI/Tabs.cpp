@@ -44,9 +44,8 @@ bool TabsBody::event(Event* _e)
 	return Super::event(_e);
 }
 
-void TabsBody::draw(Context const& _c)
+bool TabsBody::draw(Context const& _c)
 {
-	Super::draw(_c);
 	if (children().size())
 	{
 		fRect tab(_c.offset + geometry().pos(), fSize(geometry().width() / children().size(), c_tabHeight));
@@ -61,6 +60,7 @@ void TabsBody::draw(Context const& _c)
 			tab.translate(fSize(tab.w(), 0));
 		}
 	}
+	return true;
 }
 
 

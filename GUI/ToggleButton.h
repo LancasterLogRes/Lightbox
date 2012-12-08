@@ -27,12 +27,13 @@ public:
 
 	ToggleButton setExclusiveWith(ToggleButton const& _b);
 	ToggleButton setComplement(ToggleButton const& _b) { m_complement = _b; return this; }
+	bool isExclusiveWith(ToggleButton const& _b) const { return m_members && m_members->count(_b.get()); }
 	ToggleButton getActive();
 
 protected:
 	ToggleButtonBody(std::string const& _text = std::string());
 
-	virtual void draw(Context const& _c);
+	virtual bool draw(Context const& _c);
 	virtual void toggled() { if (m_onToggled) m_onToggled(this); if (m_isChecked && m_onChecked) m_onChecked(this); }
 	virtual void tapped() { if (m_members) if (m_complement && m_isChecked) m_complement->setChecked(true); else setChecked(true); else toggle(); }
 

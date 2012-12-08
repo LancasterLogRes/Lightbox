@@ -18,14 +18,15 @@ bool TextLabelBody::event(Event* _e)
 	return Super::event(_e);
 }
 
-void TextLabelBody::draw(Context const& _c)
+bool TextLabelBody::draw(Context const& _c)
 {
 	auto transGeo = geometry().translated(_c.offset);
 	auto const& f = m_font.isValid() ? m_font : GUIApp::style().regular;
 	f.draw(transGeo.lerp(.5f, .5f), m_text, RGBA(m_color.isValid() ? m_color : GUIApp::style().fore));
+	return true;
 }
 
-fSize TextLabelBody::specifyMinimumSize() const
+fSize TextLabelBody::specifyMinimumSize(fSize) const
 {
 	auto const& f = m_font.isValid() ? m_font : GUIApp::style().regular;
 	return f.measure(m_text);

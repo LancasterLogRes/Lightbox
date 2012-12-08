@@ -19,7 +19,10 @@ HuePickerBody::~HuePickerBody()
 
 bool HuePickerBody::event(Event* _e)
 {
-	if (TouchEvent* e = dynamic_cast<TouchEvent*>(_e))
+	TouchEvent* e = dynamic_cast<TouchEvent*>(_e);
+	if (dynamic_cast<TouchDownEvent*>(e))
+		lockPointer(e->id);
+	if (e && pointerLocked(e->id))
 	{
 		if (dynamic_cast<TouchDownEvent*>(_e))
 			lockPointer(e->id);
@@ -35,7 +38,7 @@ bool HuePickerBody::event(Event* _e)
 	return Super::event(_e);
 }
 
-void HuePickerBody::draw(Context const& _c)
+bool HuePickerBody::draw(Context const& _c)
 {
 	float s = min(geometry().w(), geometry().h());
 	fRect geo(geometry().pos() + (geometry().size() - fSize(s, s)) / 2.f, fSize(s, s));
@@ -44,14 +47,22 @@ void HuePickerBody::draw(Context const& _c)
 	_c.disc(geo.lerp(.5f, .5f), s / 8.f, Color(0.f));
 	if (isChecked())
 		_c.disc(geo.lerp(.5f, .5f), s / 9.f, Color(m_hue, 1.f, 1.f));
+
+	return true;
 }
 
-fSize HuePickerBody::specifyMinimumSize() const
+fSize HuePickerBody::specifyMinimumSize(fSize _s) const
 {
-	return Super::specifyMinimumSize();
+	return Super::specifyMinimumSize(_s);
 }
 
-fSize HuePickerBody::specifyMaximumSize() const
+fSize HuePickerBody::specifyMaximumSize(fSize _s) const
 {
-	return Super::specifyMaximumSize();
+	return Super::specifyMaximumSize(_s);
+}
+
+fSize HuePickerBody::specifyFit(fSize _space) const
+{
+	float s = min(_space.w(), _space.h());
+	return fSize(s, s);
 }

@@ -159,9 +159,9 @@ void ViewBody::handleDraw(Context const& _c)
 	}
 }
 
-void ViewBody::draw(Context const& _c)
+bool ViewBody::draw(Context const&)
 {
-//	_c.rect(m_geometry, GUIApp::style().back * .25f, -.1f);
+	return false;
 }
 
 bool ViewBody::sensesEvent(Event* _e)
@@ -207,20 +207,28 @@ void ViewBody::relayout()
 	}
 }
 
-fSize ViewBody::specifyMinimumSize() const
+fSize ViewBody::specifyMinimumSize(fSize _s) const
 {
 	if (m_layout)
-		return m_layout->minimumSize();
+		return m_layout->minimumSize(_s);
 	else
 		return fSize(0.f, 0.f);
 }
 
-fSize ViewBody::specifyMaximumSize() const
+fSize ViewBody::specifyMaximumSize(fSize _s) const
 {
 	if (m_layout)
-		return m_layout->maximumSize();
+		return m_layout->maximumSize(_s);
 	else
-		return fSize(32767.f, 32767.f);
+		return _s;
+}
+
+fSize ViewBody::specifyFit(fSize _space) const
+{
+	if (m_layout)
+		return m_layout->fit(_space);
+	else
+		return _space;
 }
 
 fCoord ViewBody::globalPos() const
@@ -234,6 +242,11 @@ fCoord ViewBody::globalPos() const
 void ViewBody::lockPointer(int _id)
 {
 	GUIApp::get()->lockPointer(_id, this);
+}
+
+bool ViewBody::pointerLocked(int _id)
+{
+	return GUIApp::get()->pointerLocked(_id, this);
 }
 
 void ViewBody::releasePointer(int _id)

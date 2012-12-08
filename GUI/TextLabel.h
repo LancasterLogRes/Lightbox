@@ -18,13 +18,13 @@ class TextLabelBody: public ViewCreator<ViewBody, TextLabelBody>
 public:
 	virtual ~TextLabelBody();
 
-	virtual fSize specifyMinimumSize() const;
+	virtual fSize specifyMinimumSize(fSize) const;
 	
 protected:
 	TextLabelBody(std::string const& _text = "", Color _c = NullColor, Font const& _font = Font());
 
 	virtual bool event(Event* _e);
-	virtual void draw(Context const& _c);
+	virtual bool draw(Context const& _c);
 
 private:
 	std::string m_text;
