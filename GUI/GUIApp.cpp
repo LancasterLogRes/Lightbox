@@ -51,6 +51,9 @@ void GUIApp::drawGraphics()
 	LB_GL(glClearColor, 0, 0, 0, 1.0f);
 	LB_GL(glClear, GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 	m_root->handleDraw(Context());
+	string info = textualTime(AppEngine::get()->lastDrawTime());
+	fSize s = GUIApp::style().regular.measure(info);
+	GUIApp::style().regular.draw(fCoord(m_root->geometry().size() - s / 2.f - fSize(34, 34)), info, RGBA::Black);
 }
 
 bool GUIApp::motionEvent(int _id, iCoord _pos, int _direction)

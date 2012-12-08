@@ -57,11 +57,19 @@ int ProgramFace::registerSampler(Texture2D const& _t)
 	return i - m_reg.begin();
 }
 
+static GLuint s_idInUse = 0;
+
 void ProgramFace::use(shared_ptr<ProgramFace> const& _this) const
 {
 	if (s_inUse)
 		s_inUse->drop();
-	LB_GL(glUseProgram, m_id);
+
+	if (s_idInUse != m_id)
+	{
+		LB_GL(glUseProgram, m_id);
+		s_idInUse = m_id;
+	}
+
 	s_inUse = _this;
 
 	for (auto& p: m_uniformPages)
@@ -75,7 +83,7 @@ void ProgramFace::drop() const
 {
 	if (Assert(s_inUse.get() == this))
 	{
-		LB_GL(glUseProgram, 0);
+//		LB_GL(glUseProgram, 0);
 		m_reg.clear();
 		s_inUse = nullptr;
 	}

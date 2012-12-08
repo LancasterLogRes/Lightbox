@@ -61,12 +61,14 @@ void AppEngine::exec()
 	gfxDraw();
 #endif
 
-	Time lastDraw;
+	Time lastDraw = wallTime();
 	for (bool carryOn = true; carryOn;)
 	{
-		if (m_display && m_display->isAnimating())
+		if (m_display && m_display->isAnimating() && wallTime() - lastDraw >= FromSeconds<1>::value / 60)
 		{
+			lastDraw = wallTime();
 			gfxDraw();
+			m_lastDrawTime = wallTime() - lastDraw;
 			lastDraw = wallTime();
 		}
 		else
@@ -137,12 +139,20 @@ void AppEngine::exec()
 				{
 					SDL_MouseButtonEvent& mev = (SDL_MouseButtonEvent&)ev;
 					m_app->motionEvent(0, iCoord(mev.x, mev.y), ev.type == SDL_MOUSEBUTTONDOWN ? 1 : -1);
+					break;
 				}
 				case SDL_MOUSEMOTION:
 				{
 					SDL_MouseMotionEvent& mev = (SDL_MouseMotionEvent&)ev;
 					m_app->motionEvent(0, iCoord(mev.x, mev.y), ev.type == 0);
+					break;
 				}
+				case SDL_QUIT:
+					carryOn = false;
+					break;
+				case SDL_VIDEOEXPOSE:
+					m_display->repaint();
+					break;
 				default:;
 				}
 #endif
@@ -212,20 +222,20 @@ int32_t AppEngine::handleInput(AInputEvent* _event)
 			}
 			break;
 		case AMOTION_EVENT_ACTION_MOVE:
-			for (int index = 0; index < 5; ++index)
+			for (index = 0; index < 5; ++index)
 			{
 				id = AMotionEvent_getPointerId(_event, index);
 				if (id >= 0 && id < 5)
 				{
 					c = iCoord(AMotionEvent_getX(_event, index), AMotionEvent_getY(_event, index));
-					if (c != m_pointerState[index])
+					if (c != m_pointerState[index] && c.x() + c.y() > 4 && c.x() + c.y() < 2000)	//arbitrary limits to reduce blips on shitty touchscreens.
 					{
 						cnote << "(" << id << "[" << index << "] move" << m_pointerState[id] << "->" << c << ")";
 						break;
 					}
 				}
 			}
-			if (id >= 0 && id < 5)
+			if (index < 5 && id >= 0 && id < 5)
 			{
 				m_pointerState[id] = c;
 				ret = m_app->motionEvent(id, c, 0);

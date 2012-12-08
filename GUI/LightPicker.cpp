@@ -32,19 +32,20 @@ bool LightPickerBody::event(Event* _e)
 
 void LightPickerBody::draw(Context const& _c)
 {
-	ProgramUser u(m_lightBar);
-	auto top = u.uniform("topColor");
-	auto bottom = u.uniform("bottomColor");
 	fRect geo = geometry();
+	{
+		ProgramUser u(m_lightBar);
+		auto top = u.uniform("topColor");
+		auto bottom = u.uniform("bottomColor");
 
-	top = RGBA(1.f, 1.f, 1.f, 1.f);
-	bottom = RGBA(m_middle);
-	_c.rect(fRect(geo.pos(), fSize(geo.width(), geo.height() / 2.f)));
+		top = RGBA(1.f, 1.f, 1.f, 1.f);
+		bottom = RGBA(m_middle);
+		_c.rect(fRect(geo.pos(), fSize(geo.width(), geo.height() / 2.f)));
 
-	top = RGBA(m_middle);
-	bottom = RGBA(0.f, 0.f, 0.f, 1.f);
-	_c.rect(fRect(geo.lerp(0.f, .5f), fSize(geo.width(), geo.height() / 2.f)));
-
+		top = RGBA(m_middle);
+		bottom = RGBA(0.f, 0.f, 0.f, 1.f);
+		_c.rect(fRect(geo.lerp(0.f, .5f), fSize(geo.width(), geo.height() / 2.f)));
+	}
 	Color c = Color(m_middle.hue(), m_middle.sat() == 0.f ? 0.f : clamp(2.f - m_light * 2.f, 0.f, 1.f), m_middle.sat() == 0.f ? m_light : clamp(m_light * 2.f, 0.f, 1.f));
 	_c.rect(fRect(geo.lerp(0.f, 1.f - m_light) - fSize(0.f, 5.f), fSize(geo.w(), 11.f)), Black);
 	_c.rect(fRect(geo.lerp(0.f, 1.f - m_light) - fSize(0.f, 3.f), fSize(geo.w(), 7.f)), c);

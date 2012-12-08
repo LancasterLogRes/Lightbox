@@ -115,10 +115,17 @@ template <class _GL, class ... _Params> inline void GL_aux_N(char const* _gl, ch
 	checkGlError(_gl);
 }
 
+#ifdef DEBUG
 #define LB_GL_R(GL, ...) GL_aux_R(#GL, #__VA_ARGS__, &GL, __VA_ARGS__)
 #define LB_GL(GL, ...) GL_aux_N(#GL, #__VA_ARGS__, &GL, __VA_ARGS__)
 #define LB_GL_RE(GL) GL_aux_R(#GL, "", &GL)
 #define LB_GL_E(GL) GL_aux_N(#GL, "", &GL)
+#else
+#define LB_GL_R(GL, ...) GL(__VA_ARGS__)
+#define LB_GL(GL, ...) GL(__VA_ARGS__)
+#define LB_GL_RE(GL) GL()
+#define LB_GL_E(GL) GL()
+#endif
 
 //inline bool assert(bool _b) { return _b; }
 #define Assert(X) X

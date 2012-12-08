@@ -19,6 +19,7 @@
 #include <array>
 #include <Numeric/Coord.h>
 #include <Common/Global.h>
+#include <Common/Time.h>
 #include "Global.h"
 
 #if LIGHTBOX_ANDROID
@@ -50,6 +51,8 @@ public:
 	void setApp(App* _app);
 	Display& display() { return *m_display; }
 
+	Time lastDrawTime() const { return m_lastDrawTime; }
+
 	void exec();
 
 	static AppEngine* get() { assert(s_this); return s_this; }
@@ -64,6 +67,8 @@ private:
 
 	std::shared_ptr<Display> m_display;
 	std::shared_ptr<App> m_app;
+
+	Time m_lastDrawTime;
 
 #if LIGHTBOX_ANDROID
 	static int32_t engine_handle_input(struct android_app* app, AInputEvent* event);

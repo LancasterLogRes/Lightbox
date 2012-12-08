@@ -64,6 +64,8 @@ public:
 	template <class ... _T> static View create(_T ... _args) { return doCreate<ViewBody, _T ...>(nullptr, _args ...); }
 	template <class ... _T> static View spawn(View const& _parent, _T ... _args) { return doCreate<ViewBody, _T ...>(_parent, _args ...); }
 
+	void finalConstructor() { if (m_constructionReference) { m_references--; m_constructionReference = false; } }
+	View doneConstruction() { View ret = this; finalConstructor(); return ret; }
 	virtual ~ViewBody();
 
 	void setParent(View const& _p);
@@ -116,7 +118,7 @@ protected:
 	template <class _Body, class ... _T> static boost::intrusive_ptr<_Body> doCreate(View const& _parent, _T ... _args)
 	{
 		auto ret = boost::intrusive_ptr<_Body>(new _Body(_args ...));
-		ret->m_whileConstructing.reset();
+		ret->finalConstructor();
 		ret->setParent(_parent);
 		return ret;
 	}
@@ -134,8 +136,8 @@ protected:
 private:
 	fRect m_geometry;					// Relative to the parent's coordinate system. (0, 0) is at parent's top left.
 	ViewBody* m_parent;					// Raw pointers are only allowed here because the parent will remove itself from here in its destructor.
-	View m_whileConstructing;
 	unsigned m_references;
+	bool m_constructionReference;
 	ViewSet m_children;
 	std::unordered_map<std::string, boost::any> m_misc;
 	Layout* m_layout;

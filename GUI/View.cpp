@@ -78,7 +78,7 @@ void Context::rect(fRect _r, Color _c, float _gradient) const
 
 ViewBody::ViewBody():
 	m_parent(nullptr),
-	m_references(1),		// 1 allows it to always stay alive during the construction process, even if an intrusive_ptr is constructed with it. It decremented during the doCreate() method from which the constructor is always called.
+	m_references(0),
 	m_layout(nullptr),
 	m_childIndex(0),
 	m_stretch(1.f),
@@ -86,15 +86,26 @@ ViewBody::ViewBody():
 	m_isVisible(true),
 	m_isEnabled(true)
 {
-	m_whileConstructing = View(this, false);
+	// Allows it to always stay alive during the construction process, even if an intrusive_ptr
+	// is destructed within it. This must be explicitly decremented at some point afterwards,
+	// once we're sure there's another instrusive_ptr floating around (e.g. after construction
+	// in the doCreate method).
+	// NOTE: If you must subclass and use new directly outside of create, make sure you call
+	// doneConstruction() (and store the View object it returns) sometime after the new call
+	// or finalConstructor() at the end of the final constructor of the class.
+	m_references = 1;
+	m_constructionReference = true;
 }
 
 ViewBody::~ViewBody()
 {
 	delete m_layout;
 	m_layout = nullptr;
-	for (auto const& c: m_children)
-		c->setParent(nullptr);
+
+	// Mustn't use a for loop as the iterator will become invalid as the child removes
+	// itself from it in the setParent call.
+	while (m_children.size())
+		(*m_children.begin())->setParent(nullptr);
 }
 
 void ViewBody::update()
@@ -119,7 +130,7 @@ void ViewBody::setParent(View const& _p)
 			_p->m_children.insert(this);
 
 			// We can safely kill this safety measure now.
-			m_whileConstructing.reset();
+			finalConstructor();
 		}
 		if (op)
 			op->noteLayoutDirty();
@@ -132,7 +143,7 @@ void ViewBody::setParent(View const& _p)
 void ViewBody::handleDraw(Context const& _c)
 {
 	// Safely kill this safety measure - we're definitely out of the constructor.
-	m_whileConstructing.reset();
+	finalConstructor();
 
 	if (m_isVisible)
 	{
@@ -156,7 +167,7 @@ void ViewBody::draw(Context const& _c)
 bool ViewBody::sensesEvent(Event* _e)
 {
 	// Safely kill this safety measure - we're definitely out of the constructor.
-	m_whileConstructing.reset();
+	finalConstructor();
 
 	if (m_isVisible && m_isEnabled)
 		if (auto e = dynamic_cast<TouchEvent*>(_e))

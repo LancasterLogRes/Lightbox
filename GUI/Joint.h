@@ -23,7 +23,6 @@ struct Joint
 	Program shaded;
 	Attrib flatGeometry;
 	Attrib shadedGeometry;
-	Font defaultFont;
 };
 
 }
