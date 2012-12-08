@@ -1,4 +1,4 @@
 TEMPLATE = subdirs
 system(echo $$CONFIG)
 SUBDIRS = Common Numeric
-android|!crosscompilation: SUBDIRS += App LGL GUI Glow
+android|!cross: SUBDIRS += App LGL GUI Mark2

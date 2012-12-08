@@ -4,15 +4,15 @@ CONFIG += no_include_pwd
 CONFIG -= uic
 DEFINES += "LIGHTBOX_TARGET_NAME=$$TARGET"
 
-android: CONFIG += crosscompilation
-pi: CONFIG += crosscompilation
+android: CONFIG += cross
+pi: CONFIG += cross
 !pi: !android {
-    crosscompilation: CONFIG += amd
+    cross: CONFIG += amd
     CONFIG += x86
 }
 
 pi|amd: CONFIG += force_static
-!crosscompilation: CONFIG += force_shared
+!cross: CONFIG += force_shared
 
 message($$CONFIG)
 
@@ -60,7 +60,7 @@ QMAKE_EXTRA_COMPILERS += resource_compiler
 QMAKE_CXXFLAGS += -ffast-math -pipe -fexceptions
 mac: QMAKE_CXXFLAGS +=  -std=c++11
 !mac: QMAKE_CXXFLAGS +=  -std=c++0x
-crosscompilation {
+cross {
     android {
         NDK_PATH = /home/gav/Projects/lightbox/Android/android-ndk-r8b
         SDK_PATH = /home/gav/Projects/lightbox/Android/android-sdk-linux
@@ -100,7 +100,7 @@ crosscompilation {
                 cp '"$${DESTDIR}/lib$${TARGET}.so"' '"$${OBJECTS_DIR}wrap/libs/armeabi"' &&\
                 sed '\'s/"android.app.lib_name" android:value=""/"android.app.lib_name" android:value="$$TARGET"/\'' '$${ANDROID_MANIFEST}' > '"$${OBJECTS_DIR}wrap/AndroidManifest.xml"' &&\
                 mkdir -p '"$${OBJECTS_DIR}wrap/res/values"' &&\
-                echo '\'<?xml version="1.0" encoding="utf-8"?><resources><string name="app_name">Glow</string></resources>\'' > '$${OBJECTS_DIR}wrap/res/values/strings.xml' &&\
+                echo '\'<?xml version="1.0" encoding="utf-8"?><resources><string name="app_name">Mark2</string></resources>\'' > '$${OBJECTS_DIR}wrap/res/values/strings.xml' &&\
                 mkdir -p '"$${OBJECTS_DIR}wrap/assets"' &&\
                 for i in $${ANDROID_ASSETS}; do ln -s \$\$i' '"$${OBJECTS_DIR}wrap/assets"'; done &&\
                 $${SDK_PATH}/tools/android update project -p '$${OBJECTS_DIR}wrap' -t android-15 -n $$TARGET &&\
@@ -138,7 +138,7 @@ crosscompilation {
     }
     DEFINES += LIGHTBOX_CROSS
 }
-!crosscompilation {
+!cross {
     QMAKE_CXXFLAGS += -march=native
     DEFINES += LIGHTBOX_NATIVE
 }
