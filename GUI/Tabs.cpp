@@ -5,7 +5,9 @@
 using namespace std;
 using namespace Lightbox;
 
-static const float c_tabHeight = 40;
+static const float c_tabBodyHeight = 35;
+static const float c_tabTailHeight = 5;
+static const float c_tabHeight = c_tabBodyHeight + c_tabTailHeight;
 
 TabsBody::TabsBody()
 {
@@ -59,6 +61,7 @@ bool TabsBody::draw(Context const& _c)
 			f.draw(tab.lerp(.5f, .5f), title, RGBA(GUIApp::style().fore * 2.f));
 			tab.translate(fSize(tab.w(), 0));
 		}
+		_c.rect(fRect(geometry().pos() + fSize(0, c_tabBodyHeight), fSize(geometry().w(), c_tabTailHeight)), GUIApp::style().high * .9f);
 	}
 	return true;
 }

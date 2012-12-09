@@ -39,9 +39,17 @@ protected:
 	virtual void changed() { if (m_onChanged) m_onChanged(this); update(); }
 
 private:
+	float xC(float _sign) { return m_direction.x() + sin(Pi / 4.f) * _sign * m_radius.w() / 2; }
+	float yC(float _sign) { return m_direction.y() + sin(Pi / 4.f) * _sign * m_radius.h() / 2; }
+	float wC(float _xc) { return fabs(_xc - m_direction.x()) * 2 / sin(Pi / 4); }
+	float hC(float _yc) { return fabs(_yc - m_direction.y()) * 2 / sin(Pi / 4); }
+
 	fCoord m_direction;
 	fSize m_radius;
 	Mode m_mode;
+
+	iSize m_lastSign;
+	bool m_dragCenter;
 
 	std::function<void(DirectionPicker const&)> m_onChanged;
 };

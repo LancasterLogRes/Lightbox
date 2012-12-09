@@ -114,6 +114,12 @@ public:
 	R& operator-=(T _x) { sub(_x); return *(R*)this; }
 	R& operator*=(T _x) { scale(_x); return *(R*)this; }
 	R& operator/=(T _x) { slash(_x); return *(R*)this; }
+
+	T min() const { return std::min(Super::m_x, Super::m_y); }
+	T max() const { return std::max(Super::m_x, Super::m_y); }
+	R& clamp(T _min, T _max) { Super::m_x = (std::min(std::max((Super::m_x, _min), _max))); Super::m_y = (std::min(std::max(Super::m_y, _min), _max)); return *this; }
+	R clamped(T _min, T _max) const { return R(std::min(std::max(Super::m_x, _min), _max), std::min(std::max(Super::m_y, _min), _max)); }
+	R sign() const { return R(Super::m_x > 0 ? 1 : Super::m_x < 0 ? -1 : 0, Super::m_y > 0 ? 1 : Super::m_y < 0 ? -1 : 0); }
 };
 
 template<class T> class Quad;
