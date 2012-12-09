@@ -33,7 +33,7 @@ void GUIApp::initGraphics(Display& _d)
 	cnote << "Renderer" << (char const*)glGetString(GL_RENDERER);
 	cnote << "Extensions" << (char const*)glGetString(GL_EXTENSIONS);
 
-	LB_GL(glEnable, GL_CULL_FACE);
+	LB_GL(glDisable, GL_CULL_FACE);
 	LB_GL(glDisable, GL_DEPTH_TEST);
 	LB_GL(glEnable, GL_BLEND);
 	LB_GL(glBlendFunc, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -55,7 +55,7 @@ void GUIApp::drawGraphics()
 
 	string info = textualTime(AppEngine::get()->lastDrawTime());
 
-	Context().rect(fRect(fCoord(m_root->geometry().size()) - fCoord(200, 50), fSize(190, 40)), Color(1.f, .5f));
+	Context().rect(fRect(fCoord(m_root->geometry().size()) - fCoord(200, 54), fSize(190, 44)), Color(1.f, .5f));
 
 	fSize s = GUIApp::style().regular.measure(info);
 	GUIApp::style().regular.draw(fCoord(m_root->geometry().size() - s / 2.f - fSize(34, 34)), info, RGBA::Black);

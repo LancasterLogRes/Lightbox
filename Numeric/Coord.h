@@ -37,6 +37,9 @@ public:
 
 	Coord& operator+=(Size<Numeric> const& _c);
 	Coord& operator-=(Size<Numeric> const& _c);
+
+	Numeric min() const { return std::min(x(), y()); }
+	Numeric max() const { return std::max(x(), y()); }
 };
 
 typedef Coord<float> XY;
@@ -77,6 +80,9 @@ public:
 	bool operator>=(Size const& _c) const { return w() >= _c.w() && h() >= _c.h(); }
 	bool operator==(Size const& _c) const { return compare(_c); }
 	bool operator!=(Size const& _c) const { return !compare(_c); }
+
+	Numeric min() const { return std::min(w(), h()); }
+	Numeric max() const { return std::max(w(), h()); }
 
 private:
 	using Super::x;

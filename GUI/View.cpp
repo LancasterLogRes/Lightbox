@@ -45,6 +45,29 @@ void Context::disc(fCoord _center, float _r, Color _c) const
 	u.triangleFan(74);
 }
 
+void Context::disc(fCoord _center, fSize _r, Color _c) const
+{
+	auto vm = GUIApp::joint();
+	fCoord c = _center + offset;
+	vm.offsetScale = fVector4(c.x(), c.y(), _r.w(), _r.h());
+	vm.color = RGBA(_c);
+	ProgramUser u(vm.flat);
+	vm.flatGeometry.setData(vm.unitCircle72, 2);
+	u.triangleFan(74);
+}
+
+void Context::circle(fCoord _center, fSize _r, Color _c, float _size) const
+{
+	auto vm = GUIApp::joint();
+	fCoord c = _center + offset;
+	vm.offsetScale = fVector4(c.x(), c.y(), _r.w(), _r.h());
+	vm.color = RGBA(_c);
+	LB_GL(glLineWidth, _size);
+	ProgramUser u(vm.flat);
+	vm.flatGeometry.setData(vm.unitCircle72, 2, 0, 8);
+	u.lineLoop(72);
+}
+
 void Context::disc(fCoord _center, float _r, Program const& _p) const
 {
 	auto vm = GUIApp::joint();

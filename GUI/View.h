@@ -29,8 +29,10 @@ struct Context
 	void rect(fRect _r, Color _c, float _gradient) const;
 	void rect(fRect _r, Program const& _p) const;
 	void disc(fCoord _center, float _r) const;
+	void disc(fCoord _center, fSize _r, Color _c) const;
 	void disc(fCoord _center, float _r, Color _c) const;
 	void disc(fCoord _center, float _r, Program const& _p) const;
+	void circle(fCoord _center, fSize _r, Color _c, float _size = 1.f) const;
 };
 
 class ViewBody;

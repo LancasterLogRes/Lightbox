@@ -27,6 +27,9 @@ using namespace Lightbox;
 #elif !defined(LIGHTBOX_CROSS)
 #endif
 
+int c_defaultWidth = 800;
+int c_defaultHeight = 480;
+
 Lightbox::Display::Display()
 {
 #if LIGHTBOX_USE_EGL
@@ -66,8 +69,8 @@ Lightbox::Display::Display()
 	const char* name = "OpenGL";
 	int x = 0;
 	int y = 0;
-	int width = 1024;
-	int height = 736;
+	int width = c_defaultWidth;
+	int height = c_defaultHeight;
 
 	Window root = RootWindow(xDisplay, DefaultScreen(xDisplay));
 	int numVisuals;
@@ -154,8 +157,8 @@ Lightbox::Display::Display()
 
 	int flags = SDL_OPENGL|SDL_HWSURFACE|SDL_DOUBLEBUF|SDL_OPENGLBLIT;
 
-	m_width = 1024;
-	m_height = 736;
+	m_width = c_defaultWidth;
+	m_height = c_defaultHeight;
 	SDL_CHECK(SDL_SetVideoMode(m_width, m_height, bpp, flags));
 
 #endif
