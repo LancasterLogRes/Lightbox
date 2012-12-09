@@ -1,5 +1,6 @@
 #pragma once
 
+#include <LGL/Program.h>
 #include "ToggleButton.h"
 
 namespace Lightbox

@@ -18,6 +18,8 @@ public:
 	explicit Rect(xSize _size): m_pos(0, 0), m_size(_size) {}
 	Rect(Numeric _x, Numeric _y, Numeric _w, Numeric _h): m_pos(_x, _y), m_size(_w, _h) {}
 	template<class _N> explicit Rect(Rect<_N> _s): m_pos(_s.pos()), m_size(_s.size()) {}
+
+	static Rect square(xCoord _mid, Numeric _halfWidth) { return Rect(_mid - fCoord(_halfWidth, _halfWidth), fSize(_halfWidth, _halfWidth) * 2); }
 	
 	Vector4<Numeric>& asVector4() { return (Vector4<Numeric>&)*this; }
 

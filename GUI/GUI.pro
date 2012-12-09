@@ -20,7 +20,8 @@ SOURCES += \
     Layout.cpp \
     Tabs.cpp \
     HuePicker.cpp \
-    LightPicker.cpp
+    LightPicker.cpp \
+    PatternPicker.cpp
 
 HEADERS += \
     View.h \
@@ -37,7 +38,8 @@ HEADERS += \
     Layout.h \
     Tabs.h \
     HuePicker.h \
-    LightPicker.h
+    LightPicker.h \
+    PatternPicker.h
 OTHER_FILES += Shaders.resources View.frag View.vert \
     Fonts.resources \
     Flat.frag \
