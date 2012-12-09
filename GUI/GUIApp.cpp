@@ -1,4 +1,5 @@
 #include <LGL/GL.h>
+#include <Common/StreamIO.h>
 #include <Common/Global.h>
 #include <LGL.h>
 #include <App.h>
@@ -51,9 +52,18 @@ void GUIApp::drawGraphics()
 	LB_GL(glClearColor, 0, 0, 0, 1.0f);
 	LB_GL(glClear, GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 	m_root->handleDraw(Context());
+
 	string info = textualTime(AppEngine::get()->lastDrawTime());
+
+	Context().rect(fRect(fCoord(m_root->geometry().size()) - fCoord(200, 50), fSize(190, 40)), Color(1.f, .5f));
+
 	fSize s = GUIApp::style().regular.measure(info);
 	GUIApp::style().regular.draw(fCoord(m_root->geometry().size() - s / 2.f - fSize(34, 34)), info, RGBA::Black);
+	info = toString(g_metrics.m_useProgramCount) + "/" + toString(g_metrics.m_drawCount);
+	s = GUIApp::style().regular.measure(info);
+	GUIApp::style().regular.draw(fCoord(m_root->geometry().size() - s / 2.f - fSize(34, 14)), info, RGBA::Black);
+
+	g_metrics.reset();
 }
 
 bool GUIApp::motionEvent(int _id, iCoord _pos, int _direction)

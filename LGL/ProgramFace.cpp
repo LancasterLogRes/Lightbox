@@ -3,6 +3,7 @@
 #include "Texture2D.h"
 #include "Program.h"
 #include "ProgramFace.h"
+#include "Metrics.h"
 using namespace std;
 using namespace Lightbox;
 
@@ -67,6 +68,7 @@ void ProgramFace::use(shared_ptr<ProgramFace> const& _this) const
 	if (s_idInUse != m_id)
 	{
 		LB_GL(glUseProgram, m_id);
+		g_metrics.m_useProgramCount++;
 		s_idInUse = m_id;
 	}
 
@@ -83,7 +85,6 @@ void ProgramFace::drop() const
 {
 	if (Assert(s_inUse.get() == this))
 	{
-//		LB_GL(glUseProgram, 0);
 		m_reg.clear();
 		s_inUse = nullptr;
 	}

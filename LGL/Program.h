@@ -6,6 +6,7 @@
 #include <Common/Pimpl.h>
 #include <Common/Algorithms.h>
 #include "Uniform.h"
+#include "Metrics.h"
 #include "Attrib.h"
 #include "ProgramFace.h"
 
@@ -53,13 +54,13 @@ public:
 	Attrib attrib(std::string const& _name) const { return Attrib(m_p, _name); }
 	Uniform uniform(std::string const& _name) const { return Uniform(m_p, _name); }
 
-	void points(GLsizei _count, GLint _first = 0) { LB_GL(glDrawArrays, GL_POINTS, _first, _count); }
-	void lines(GLsizei _count, GLint _first = 0) { LB_GL(glDrawArrays, GL_LINES, _first, _count); }
-	void lineLoop(GLsizei _count, GLint _first = 0) { LB_GL(glDrawArrays, GL_LINE_LOOP, _first, _count); }
-	void lineStrip(GLsizei _count, GLint _first = 0) { LB_GL(glDrawArrays, GL_LINE_STRIP, _first, _count); }
-	void triangles(GLsizei _count, GLint _first = 0) { LB_GL(glDrawArrays, GL_TRIANGLES, _first, _count); }
-	void triangleStrip(GLsizei _count, GLint _first = 0) { LB_GL(glDrawArrays, GL_TRIANGLE_STRIP, _first, _count); }
-	void triangleFan(GLsizei _count, GLint _first = 0) { LB_GL(glDrawArrays, GL_TRIANGLE_FAN, _first, _count); }
+	void points(GLsizei _count, GLint _first = 0) { LB_GL(glDrawArrays, GL_POINTS, _first, _count); g_metrics.m_drawCount++; }
+	void lines(GLsizei _count, GLint _first = 0) { LB_GL(glDrawArrays, GL_LINES, _first, _count); g_metrics.m_drawCount++; }
+	void lineLoop(GLsizei _count, GLint _first = 0) { LB_GL(glDrawArrays, GL_LINE_LOOP, _first, _count); g_metrics.m_drawCount++; }
+	void lineStrip(GLsizei _count, GLint _first = 0) { LB_GL(glDrawArrays, GL_LINE_STRIP, _first, _count); g_metrics.m_drawCount++; }
+	void triangles(GLsizei _count, GLint _first = 0) { LB_GL(glDrawArrays, GL_TRIANGLES, _first, _count); g_metrics.m_drawCount++; }
+	void triangleStrip(GLsizei _count, GLint _first = 0) { LB_GL(glDrawArrays, GL_TRIANGLE_STRIP, _first, _count); g_metrics.m_drawCount++; }
+	void triangleFan(GLsizei _count, GLint _first = 0) { LB_GL(glDrawArrays, GL_TRIANGLE_FAN, _first, _count); g_metrics.m_drawCount++; }
 
 private:
 	Program m_p;
