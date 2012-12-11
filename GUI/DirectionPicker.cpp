@@ -52,7 +52,7 @@ bool DirectionPickerBody::event(Event* _e)
 	return Super::event(_e);
 }
 
-bool DirectionPickerBody::draw(Context const& _c)
+void DirectionPickerBody::draw(Context const& _c)
 {
 	// m_radius [0, 1]
 	// m_direction [0, 1]
@@ -75,8 +75,6 @@ bool DirectionPickerBody::draw(Context const& _c)
 	}
 
 	_c.disc(m_direction * geometry().size(), s / 10.f, Color(.5));
-
-	return true;
 }
 
 

@@ -11,3 +11,6 @@
 #include "Tabs.h"
 #include "HuePicker.h"
 #include "LightPicker.h"
+#include "DirectionPicker.h"
+#include "PatternPicker.h"
+#include "Frame.h"

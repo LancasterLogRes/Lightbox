@@ -33,7 +33,7 @@ public:
 protected:
 	ToggleButtonBody(std::string const& _text = std::string());
 
-	virtual bool draw(Context const& _c);
+	virtual void draw(Context const& _c);
 	virtual void toggled() { if (m_onToggled) m_onToggled(this); if (m_isChecked && m_onChecked) m_onChecked(this); }
 	virtual void tapped() { if (m_members) if (m_complement && m_isChecked) m_complement->setChecked(true); else setChecked(true); else toggle(); }
 

@@ -34,7 +34,7 @@ protected:
 	DirectionPickerBody();
 	
 	virtual bool event(Event* _e);
-	virtual bool draw(Context const& _c);
+	virtual void draw(Context const& _c);
 
 	virtual void changed() { if (m_onChanged) m_onChanged(this); update(); }
 

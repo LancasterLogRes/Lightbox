@@ -133,7 +133,7 @@ ViewBody::ViewBody():
 	m_isVisible(true),
 	m_isEnabled(true),
 	m_dirty(true),
-	m_draws(true)
+	m_isCorporal(true)
 {
 	// Allows it to always stay alive during the construction process, even if an intrusive_ptr
 	// is destructed within it. This must be explicitly decremented at some point afterwards,
@@ -203,13 +203,14 @@ void ViewBody::checkCache()
 		LB_GL(glViewport, 0, 0, s.w(), s.h());
 		LB_GL(glClear, GL_COLOR_BUFFER_BIT);
 		GUIApp::joint().u_displaySize = (fVector2)(fSize)s;
-		m_draws = draw(Context());
+		draw(Context());
 		m_dirty = false;
 	}
 }
+
 void ViewBody::cleanCache()
 {
-	if (m_draws)
+	if (m_isCorporal)
 		checkCache();
 	for (auto const& ch: m_children)
 		ch->cleanCache();
@@ -224,19 +225,19 @@ void ViewBody::handleDraw(Context const& _c)
 	{
 		Context c = _c;
 		c.offset += fSize(m_geometry.topLeft());
-		if (m_draws)	// could be modified
+		if (m_isCorporal)	// could be modified
 			c.blit(m_cache);
 		for (auto const& ch: m_children)
 			ch->handleDraw(c);
 
+		// TODO: shader for this while blitting...
 //		if (!m_isEnabled)
 //			_c.rect(m_geometry, Color(0, 0.5f));
 	}
 }
 
-bool ViewBody::draw(Context const&)
+void ViewBody::draw(Context const&)
 {
-	return false;
 }
 
 bool ViewBody::sensesEvent(Event* _e)
@@ -331,27 +332,6 @@ void ViewBody::releasePointer(int _id)
 
 namespace Lightbox
 {
-
-View operator|(View const& _a, View const& _b)
-{
-	if (!!_a->children().size() == !!_b->children().size())
-	{
-		View ret = ViewBody::create();
-		_a->setParent(ret);
-		_b->setParent(ret);
-		return ret;
-	}
-	else if (_a->children().size())
-	{
-		_b->setParent(_a);
-		return _a;
-	}
-	else
-	{
-		_a->setParent(_b);
-		return _b;
-	}
-}
 
 void debugOut(View const& _v, std::string const& _indent)
 {

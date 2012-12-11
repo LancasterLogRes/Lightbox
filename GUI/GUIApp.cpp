@@ -6,6 +6,7 @@
 #include "Fonts.h"
 #include "Global.h"
 #include "View.h"
+#include "Frame.h"
 #include "GUIApp.h"
 using namespace std;
 using namespace Lightbox;
@@ -19,7 +20,7 @@ void Style::generateColors(Color _fore)
 
 GUIApp::GUIApp()
 {
-	m_root = ViewBody::create();
+	m_root = FrameBody::create();
 }
 
 GUIApp::~GUIApp()

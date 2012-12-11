@@ -38,7 +38,7 @@ bool HuePickerBody::event(Event* _e)
 	return Super::event(_e);
 }
 
-bool HuePickerBody::draw(Context const& _c)
+void HuePickerBody::draw(Context const& _c)
 {
 	float s = min(geometry().w(), geometry().h());
 	fRect geo((geometry().size() - fSize(s, s)) / 2.f, fSize(s, s));
@@ -47,8 +47,6 @@ bool HuePickerBody::draw(Context const& _c)
 	_c.disc(geo.lerp(.5f, .5f), s / 8.f, Color(0.f));
 	if (isChecked())
 		_c.disc(geo.lerp(.5f, .5f), s / 9.f, Color(m_hue, 1.f, 1.f));
-
-	return true;
 }
 
 fSize HuePickerBody::specifyMinimumSize(fSize _s) const

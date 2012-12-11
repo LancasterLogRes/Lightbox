@@ -46,7 +46,7 @@ bool TabsBody::event(Event* _e)
 	return Super::event(_e);
 }
 
-bool TabsBody::draw(Context const& _c)
+void TabsBody::draw(Context const& _c)
 {
 	if (children().size())
 	{
@@ -62,7 +62,6 @@ bool TabsBody::draw(Context const& _c)
 		}
 		_c.rect(fRect(fCoord(0, c_tabBodyHeight), fSize(geometry().w(), c_tabTailHeight)), GUIApp::style().high * .9f);
 	}
-	return true;
 }
 
 

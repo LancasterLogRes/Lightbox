@@ -30,7 +30,7 @@ protected:
 	virtual void indexChanged() { if (m_onIndexChanged) m_onIndexChanged(this); update(); }
 	
 	virtual bool event(Event* _e);
-	virtual bool draw(Context const& _c);
+	virtual void draw(Context const& _c);
 	
 private:
 	int m_index;

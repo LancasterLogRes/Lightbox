@@ -18,12 +18,11 @@ bool TextLabelBody::event(Event* _e)
 	return Super::event(_e);
 }
 
-bool TextLabelBody::draw(Context const& _c)
+void TextLabelBody::draw(Context const& _c)
 {
 	fRect transGeo(fCoord(0, 0), geometry().size());
 	auto const& f = m_font.isValid() ? m_font : GUIApp::style().regular;
 	f.draw(transGeo.lerp(.5f, .5f), m_text, RGBA(m_color.isValid() ? m_color : GUIApp::style().fore));
-	return true;
 }
 
 fSize TextLabelBody::specifyMinimumSize(fSize) const

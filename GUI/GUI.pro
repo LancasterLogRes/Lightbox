@@ -22,7 +22,8 @@ SOURCES += \
     HuePicker.cpp \
     LightPicker.cpp \
     PatternPicker.cpp \
-    DirectionPicker.cpp
+    DirectionPicker.cpp \
+    Frame.cpp
 
 HEADERS += \
     View.h \
@@ -41,7 +42,8 @@ HEADERS += \
     HuePicker.h \
     LightPicker.h \
     PatternPicker.h \
-    DirectionPicker.h
+    DirectionPicker.h \
+    Frame.h
 OTHER_FILES += Shaders.resources View.frag View.vert \
     Fonts.resources \
     Flat.frag \

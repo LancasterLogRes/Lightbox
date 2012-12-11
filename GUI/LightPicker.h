@@ -29,7 +29,7 @@ protected:
 	LightPickerBody();
 	
 	virtual bool event(Event* _e);
-	virtual bool draw(Context const& _c);
+	virtual void draw(Context const& _c);
 	virtual fSize specifyFit(fSize _space) const;
 
 	void lightChanged() { if (m_onLightChanged) m_onLightChanged(this); update(); }

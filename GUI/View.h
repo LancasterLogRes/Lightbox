@@ -139,11 +139,12 @@ protected:
 		return ret;
 	}
 
+	void setCorporal(bool _enableDraw) { m_isCorporal = _enableDraw; }
 	void lockPointer(int _id);
 	void releasePointer(int _id);
 	bool pointerLocked(int _id);
 
-	virtual bool draw(Context const& _c);
+	virtual void draw(Context const& _c);
 	virtual bool event(Event*) { return false; }
 	virtual void resized() { relayout(); update(); }
 
@@ -169,7 +170,7 @@ private:
 	bool m_isEnabled;
 	Texture2D m_cache;
 	mutable bool m_dirty;
-	bool m_draws;
+	bool m_isCorporal;
 };
 
 void debugOut(View const& _v, std::string const& _indent);
@@ -196,8 +197,6 @@ public:
 };
 
 bool ViewSiblingsComparator::operator()(View const& _a, View const& _b) const { return _a->childIndex() < _b->childIndex(); }
-
-View operator|(View const& _a, View const& _b);
 
 inline View const& operator+=(View const& _parent, View const& _b)
 {

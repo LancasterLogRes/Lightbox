@@ -32,7 +32,7 @@ bool LightPickerBody::event(Event* _e)
 	return Super::event(_e);
 }
 
-bool LightPickerBody::draw(Context const& _c)
+void LightPickerBody::draw(Context const& _c)
 {
 	fRect geo = geometry();
 	{
@@ -53,8 +53,6 @@ bool LightPickerBody::draw(Context const& _c)
 	_c.rect(fRect(geo.lerp(0.f, 1.f - m_light) - fSize(0.f, geo.w() / 2 + 2), fSize(geo.w(), geo.w() + 5)), Black);
 	_c.rect(fRect(geo.lerp(0.f, 1.f - m_light) - fSize(0.f, geo.w() / 2 + 1), fSize(geo.w(), geo.w() + 3)), White);
 	_c.rect(fRect(geo.lerp(0.f, 1.f - m_light) - fSize(0.f, geo.w() / 2), fSize(geo.w(), geo.w() + 1)), c);
-
-	return true;
 }
 
 fSize LightPickerBody::specifyFit(fSize _space) const

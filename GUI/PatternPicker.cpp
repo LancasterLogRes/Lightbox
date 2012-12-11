@@ -29,7 +29,7 @@ bool PatternPickerBody::event(Event* _e)
 	return Super::event(_e);
 }
 
-bool PatternPickerBody::draw(Context const& _c)
+void PatternPickerBody::draw(Context const& _c)
 {
 	fSize spacing(geometry().size() / fSize(m_space));
 	int i = 0;
@@ -42,7 +42,6 @@ bool PatternPickerBody::draw(Context const& _c)
 			else
 				_c.rect(fRect::square(p, min(spacing.w(), spacing.h()) / 6.f), Color(0.25f));
 		}
-	return true;
 }
 
 
