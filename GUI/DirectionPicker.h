@@ -19,12 +19,12 @@ public:
 
 	~DirectionPickerBody();
 
-	void setDirection(fCoord _d) { if (m_direction != _d) { m_direction = _d; onChanged(); } }
-	void setRadius(fSize _s) { if (m_radius != _s) { m_radius = _s; onChanged(); } }
+	void setDirection(fCoord _d) { if (m_direction != _d) { m_direction = _d; changed(); } }
+	void setRadius(fSize _s) { if (m_radius != _s) { m_radius = _s; changed(); } }
 	fCoord direction() const { return m_direction; }
 	fSize radius() const { return m_radius; }
 
-	void setMode(Mode _m) { if (m_mode != _m) { m_mode = _m; onChanged(); } }
+	void setMode(Mode _m) { if (m_mode != _m) { m_mode = _m; changed(); } }
 	Mode mode() { return m_mode; }
 
 	template <class _T> DirectionPicker setOnChanged(_T const& _t) { m_onChanged = _t; return this; }

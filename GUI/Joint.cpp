@@ -21,14 +21,20 @@ void Joint::init(Display& _d)
 
 	shaded = Program(Shader::vertex(LB_R(View_vert)), Shader::fragment(LB_R(View_frag)));
 	flat = Program(Shader::vertex(LB_R(Flat_vert)), Shader::fragment(LB_R(Flat_frag)));
+	texture = Program(Shader::vertex(LB_R(Texture_vert)), Shader::fragment(LB_R(Texture_frag)));
 
 	shaded.tie(uniforms);
 	flat.tie(uniforms);
+	texture.tie(uniforms);
 
-	uniforms["displaySize"] = (vec2)(fSize)_d.size();
+	u_displaySize = uniforms["displaySize"];
+	u_minusY = uniforms["minusY"];
 	offsetScale = uniforms["offsetScale"];
 	color = uniforms["color"];
 	gradient = uniforms["gradient"];
+
+	u_displaySize = (vec2)(fSize)_d.size();
+	u_minusY = -1.f;
 
 	flatGeometry = flat.attrib("geometry");
 	shadedGeometry = shaded.attrib("geometry");

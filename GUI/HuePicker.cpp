@@ -41,7 +41,7 @@ bool HuePickerBody::event(Event* _e)
 bool HuePickerBody::draw(Context const& _c)
 {
 	float s = min(geometry().w(), geometry().h());
-	fRect geo(geometry().pos() + (geometry().size() - fSize(s, s)) / 2.f, fSize(s, s));
+	fRect geo((geometry().size() - fSize(s, s)) / 2.f, fSize(s, s));
 
 	_c.disc(geo.lerp(.5f, .5f), s / 2.f, m_hueWheel);
 	_c.disc(geo.lerp(.5f, .5f), s / 8.f, Color(0.f));

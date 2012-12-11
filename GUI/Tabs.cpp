@@ -50,18 +50,17 @@ bool TabsBody::draw(Context const& _c)
 {
 	if (children().size())
 	{
-		fRect tab(_c.offset + geometry().pos(), fSize(geometry().width() / children().size(), c_tabHeight));
+		fRect tab(fCoord(0, 0), fSize(geometry().width() / children().size(), c_tabHeight));
 		for (auto const& c: children())
 		{
 			string title = c->property<string>("_TabsBody:Title");
 			bool isActive = c->isVisible();
 			_c.rect(tab, isActive ? GUIApp::style().high : GUIApp::style().back, -.1f);
 			Font const& f = (isActive ? GUIApp::style().bold : GUIApp::style().regular);
-			f.draw(tab.lerp(.5f, .5f) + fSize(0, -1), title, RGBA(0.f, 0.f, 0.f, .9f));
-			f.draw(tab.lerp(.5f, .5f), title, RGBA(GUIApp::style().fore * 2.f));
+			f.draw(tab.lerp(.5f, .5f), title, RGBA::Black);
 			tab.translate(fSize(tab.w(), 0));
 		}
-		_c.rect(fRect(geometry().pos() + fSize(0, c_tabBodyHeight), fSize(geometry().w(), c_tabTailHeight)), GUIApp::style().high * .9f);
+		_c.rect(fRect(fCoord(0, c_tabBodyHeight), fSize(geometry().w(), c_tabTailHeight)), GUIApp::style().high * .9f);
 	}
 	return true;
 }

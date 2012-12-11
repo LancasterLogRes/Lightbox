@@ -1,5 +1,5 @@
 uniform vec2 displaySize;
-vec2 halfDisplaySize = vec2(displaySize.x, -displaySize.y) / vec2(2.0);
+vec2 halfDisplaySize = displaySize / vec2(2.0);
 
 attribute vec2 geometry;
 uniform vec4 offsetScale;
@@ -34,5 +34,5 @@ void main()
 {
     v_color = (geometry.x != 0.0 && geometry.y != 0.0) ? hueToRgba(atan(geometry.x, geometry.y) / (2.0 * 3.14159265) + 0.5) : vec4(0.5, 0.5, 0.5, 1.0);
     gl_Position.zw = vec2(1.0);
-    gl_Position.xy = (offsetScale.xy + geometry * offsetScale.zw) / halfDisplaySize - vec2(1.0, -1.0);
+    gl_Position.xy = (offsetScale.xy + geometry * offsetScale.zw) / halfDisplaySize - sign(displaySize);
 }

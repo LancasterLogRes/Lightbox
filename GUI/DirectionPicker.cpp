@@ -1,4 +1,5 @@
 #include <Common/Global.h>
+#include "GUIApp.h"
 #include "Global.h"
 #include "DirectionPicker.h"
 using namespace std;
@@ -58,24 +59,24 @@ bool DirectionPickerBody::draw(Context const& _c)
 	float s = geometry().size().max();
 	if (m_mode == Circle || m_mode == Fill)
 	{
-		_c.circle(m_direction * geometry().size() + geometry().pos(), m_radius / 2.f * geometry().size(), White);
-		_c.disc(fCoord(xC(m_lastSign.w()), yC(m_lastSign.h())) * geometry().size() + geometry().pos(), .1f * s, White);
+		_c.circle(m_direction * geometry().size(), m_radius / 2.f * geometry().size(), White);
+		_c.disc(fCoord(xC(m_lastSign.w()), yC(m_lastSign.h())) * geometry().size(), .1f * s, White);
 	}
 
 	if (m_mode == Fill)
-		_c.disc(m_direction * geometry().size() + geometry().pos(), m_radius / 2.f * geometry().size(), Color(1.f, .25f));
+		_c.disc(m_direction * geometry().size(), m_radius / 2.f * geometry().size(), Color(1.f, .25f));
 
 	if (m_mode >= Circle)
 	{
-		_c.disc(fCoord(xC(-1), yC(-1)) * geometry().size() + geometry().pos(), .025f * s, White);
-		_c.disc(fCoord(xC(-1), yC(1)) * geometry().size() + geometry().pos(), .025f * s, White);
-		_c.disc(fCoord(xC(1), yC(-1)) * geometry().size() + geometry().pos(), .025f * s, White);
-		_c.disc(fCoord(xC(1), yC(1)) * geometry().size() + geometry().pos(), .025f * s, White);
+		_c.disc(fCoord(xC(-1), yC(-1)) * geometry().size(), .025f * s, White);
+		_c.disc(fCoord(xC(-1), yC(1)) * geometry().size(), .025f * s, White);
+		_c.disc(fCoord(xC(1), yC(-1)) * geometry().size(), .025f * s, White);
+		_c.disc(fCoord(xC(1), yC(1)) * geometry().size(), .025f * s, White);
 	}
 
-	_c.disc(m_direction * geometry().size() + geometry().pos(), s / 10.f, White);
+	_c.disc(m_direction * geometry().size(), s / 10.f, Color(.5));
 
-	return Super::draw(_c);
+	return true;
 }
 
 

@@ -25,7 +25,7 @@ public:
 	virtual ~GUIApp();
 
 	static GUIApp* get();
-	static Joint const& joint() { return get()->m_joint; }
+	static Joint& joint() { return get()->m_joint; }
 	static View const& root() { return get()->m_root; }
 	static Style const& style() { return get()->m_style; }
 

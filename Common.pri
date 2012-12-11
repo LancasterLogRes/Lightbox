@@ -68,7 +68,7 @@ cross {
         CHAINPATH = "$$NDK_PATH/toolchains/arm-linux-androideabi-4.6/prebuilt/linux-x86/bin"
         PLATFORM = "arm-linux-androideabi"
 
-        SYSTEM_FLAGS = '-DNDEBUG -fpic -ffunction-sections -funwind-tables -fstack-protector -D__ARM_ARCH_5__ -D__ARM_ARCH_5T__ -D__ARM_ARCH_5E__ -D__ARM_ARCH_5TE__  -march=armv5te -mtune=xscale -msoft-float -mthumb -Os -fomit-frame-pointer -fno-strict-aliasing -finline-limit=64 -DANDROID  -Wa,--noexecstack
+        SYSTEM_FLAGS = -DNDEBUG -fpic -ffunction-sections -funwind-tables -fstack-protector -D__ARM_ARCH_5__ -D__ARM_ARCH_5T__ -D__ARM_ARCH_5E__ -D__ARM_ARCH_5TE__  -march=armv5te -mtune=xscale -msoft-float -mthumb -Os -fomit-frame-pointer -fno-strict-aliasing -finline-limit=64 -DANDROID  -Wa,--noexecstack
         SYSTEM_INCLUDES = "-I$$NDK_PATH/sources/android/native_app_glue" "-I$$NDK_PATH/sources/cxx-stl/gnu-libstdc++/4.6/include" "-I$$NDK_PATH/sources/cxx-stl/gnu-libstdc++/4.6/libs/armeabi/include" "-I$$NDK_PATH/platforms/android-14/arch-arm/usr/include -I../../Android/Boost/boost_1_49_0"
 
         QMAKE_CC		= "$$CHAINPATH/$$PLATFORM-gcc"

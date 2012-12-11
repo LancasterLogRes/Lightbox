@@ -10,6 +10,7 @@
 #include <Common/Pimpl.h>
 #include <Common/Color.h>
 #include <LGL/Global.h>
+#include <LGL/Texture2D.h>
 #include <App/Display.h>
 #include <Common/MemberMap.h>
 #include "Global.h"
@@ -33,6 +34,7 @@ struct Context
 	void disc(fCoord _center, float _r, Color _c) const;
 	void disc(fCoord _center, float _r, Program const& _p) const;
 	void circle(fCoord _center, fSize _r, Color _c, float _size = 1.f) const;
+	void blit(Texture2D const& _tex, fCoord _pos = fCoord(0, 0)) const;
 };
 
 class ViewBody;
@@ -150,6 +152,9 @@ protected:
 	virtual fSize specifyFit(fSize _space) const;	// default is determined by layout.
 
 private:
+	void checkCache();
+	void cleanCache();
+
 	fRect m_geometry;					// Relative to the parent's coordinate system. (0, 0) is at parent's top left.
 	ViewBody* m_parent;					// Raw pointers are only allowed here because the parent will remove itself from here in its destructor.
 	unsigned m_references;
@@ -162,6 +167,9 @@ private:
 	fVector4 m_padding;
 	bool m_isVisible;
 	bool m_isEnabled;
+	Texture2D m_cache;
+	mutable bool m_dirty;
+	bool m_draws;
 };
 
 void debugOut(View const& _v, std::string const& _indent);

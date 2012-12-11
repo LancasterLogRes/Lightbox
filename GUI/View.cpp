@@ -1,5 +1,7 @@
 #include <LGL.h>
 #include <App/Display.h>
+#include <App/AppEngine.h>
+#include <Common/StreamIO.h>
 #include "GUIApp.h"
 #include "View.h"
 #include "Shaders.h"
@@ -99,6 +101,28 @@ void Context::rect(fRect _r, Color _c, float _gradient) const
 	u.triangleStrip(4);
 }
 
+void Context::blit(Texture2D const& _tex, fCoord _pos) const
+{
+	ProgramUser u(GUIApp::joint().texture);
+	float ox = round(_pos.x() + offset.w());
+	float oy = round(_pos.y() + offset.h());
+	std::array<float, 4 * 4> quad =
+	{{
+		// top left.
+		0, 0, ox, oy,
+		// top right.
+		1, 0, ox + _tex.size().w(), oy,
+		// bottom left.
+		0, 1, ox, oy + _tex.size().h(),
+		// bottom right.
+		1, 1, ox + _tex.size().w(), oy + _tex.size().h()
+	}};
+	cnote << quad;
+	u.uniform("u_tex") = _tex;
+	u.attrib("a_texCoordPosition").setStaticData(quad.data(), 4, 0);
+	u.triangleStrip(4);
+}
+
 ViewBody::ViewBody():
 	m_parent(nullptr),
 	m_references(0),
@@ -107,7 +131,9 @@ ViewBody::ViewBody():
 	m_stretch(1.f),
 	m_padding(0, 0, 0, 0),
 	m_isVisible(true),
-	m_isEnabled(true)
+	m_isEnabled(true),
+	m_dirty(true),
+	m_draws(true)
 {
 	// Allows it to always stay alive during the construction process, even if an intrusive_ptr
 	// is destructed within it. This must be explicitly decremented at some point afterwards,
@@ -133,6 +159,7 @@ ViewBody::~ViewBody()
 
 void ViewBody::update()
 {
+	m_dirty = true;
 	GUIApp::joint().display->setOneOffAnimating();
 }
 
@@ -163,6 +190,31 @@ void ViewBody::setParent(View const& _p)
 
 }
 
+void ViewBody::checkCache()
+{
+	uSize s = (uSize)geometry().size();
+	if (m_cache.size() != s)
+		m_cache = Texture2D(s), m_dirty = true;
+	if (m_dirty)
+	{
+		Framebuffer fb;
+		FramebufferUser u(fb);
+		u.attachColor(m_cache);
+		LB_GL(glViewport, 0, 0, s.w(), s.h());
+		LB_GL(glClear, GL_COLOR_BUFFER_BIT);
+		GUIApp::joint().u_displaySize = (fVector2)(fSize)s;
+		m_draws = draw(Context());
+		m_dirty = false;
+	}
+}
+void ViewBody::cleanCache()
+{
+	if (m_draws)
+		checkCache();
+	for (auto const& ch: m_children)
+		ch->cleanCache();
+}
+
 void ViewBody::handleDraw(Context const& _c)
 {
 	// Safely kill this safety measure - we're definitely out of the constructor.
@@ -170,15 +222,15 @@ void ViewBody::handleDraw(Context const& _c)
 
 	if (m_isVisible)
 	{
-		draw(_c);
-
 		Context c = _c;
 		c.offset += fSize(m_geometry.topLeft());
+		if (m_draws)	// could be modified
+			c.blit(m_cache);
 		for (auto const& ch: m_children)
 			ch->handleDraw(c);
 
-		if (!m_isEnabled)
-			_c.rect(m_geometry, Color(0, 0.5f));
+//		if (!m_isEnabled)
+//			_c.rect(m_geometry, Color(0, 0.5f));
 	}
 }
 

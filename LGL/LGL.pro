@@ -10,7 +10,8 @@ SOURCES += ProgramFace.cpp Program.cpp ShaderFace.cpp Uniform.cpp \
     Texture2D.cpp \
     TextureFace2D.cpp \
     BufferFace.cpp Buffer.cpp \
-    Metrics.cpp
+    Metrics.cpp \
+    Framebuffer.cpp
 HEADERS += ProgramFace.h ShaderFace.h Program.h \
     Shader.h Uniform.h \
     Global.h \
@@ -22,7 +23,8 @@ HEADERS += ProgramFace.h ShaderFace.h Program.h \
     BufferFace.h Buffer.h \
     GL.h \
     GLMap.h \
-    Metrics.h
+    Metrics.h \
+    Framebuffer.h
 
 RES += Shaders.resources
 

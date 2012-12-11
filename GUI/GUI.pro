@@ -46,6 +46,10 @@ OTHER_FILES += Shaders.resources View.frag View.vert \
     Fonts.resources \
     Flat.frag \
     Flat.vert \
+    Font.frag \
+    Font.vert \
+    Texture.frag \
+    Texture.vert \
     HueWheel.frag \
     HueWheel.vert \
     LightBar.vert

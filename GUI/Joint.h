@@ -21,8 +21,11 @@ struct Joint
 	Buffer<float> unitCircle72;
 	Program flat;
 	Program shaded;
+	Program texture;
 	Attrib flatGeometry;
 	Attrib shadedGeometry;
+	PagedUniform u_displaySize;
+	PagedUniform u_minusY;
 };
 
 }

@@ -2,7 +2,7 @@
 using namespace Lightbox;
 
 RGBA const RGBA::Black(0.f, 0.f, 0.f, 1.f);
-RGBA const RGBA::White(0.f, 0.f, 0.f, 1.f);
+RGBA const RGBA::White(1.f, 1.f, 1.f, 1.f);
 RGBA const RGBA::Red(0.9f, 0.15f, 0.1f, 1.f);
 RGBA const RGBA::Orange(0.9f, 0.55f, 0.15f, 1.f);
 RGBA const RGBA::Yellow(0.9f, 0.85f, 0.05f, 1.f);

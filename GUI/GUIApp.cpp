@@ -49,20 +49,24 @@ void GUIApp::initGraphics(Display& _d)
 
 void GUIApp::drawGraphics()
 {
+	LB_GL(glBlendFunc, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+	LB_GL(glClearColor, 0.f, 0.f, 0.f, 0.f);
+	m_root->cleanCache();
+
+	LB_GL(glBlendFunc, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	LB_GL(glClearColor, 0, 0, 0, 1.0f);
-	LB_GL(glClear, GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+	LB_GL(glClear, GL_COLOR_BUFFER_BIT);
+	LB_GL(glViewport, 0, 0, GUIApp::joint().display->size().w(), GUIApp::joint().display->size().h());
+	GUIApp::joint().u_displaySize = (fVector2)(fSize)GUIApp::joint().display->size() * vec2(1, -1);
 	m_root->handleDraw(Context());
 
 	string info = textualTime(AppEngine::get()->lastDrawTime());
-
 	Context().rect(fRect(fCoord(m_root->geometry().size()) - fCoord(200, 54), fSize(190, 44)), Color(1.f, .5f));
-
 	fSize s = GUIApp::style().regular.measure(info);
 	GUIApp::style().regular.draw(fCoord(m_root->geometry().size() - s / 2.f - fSize(34, 34)), info, RGBA::Black);
 	info = toString(g_metrics.m_useProgramCount) + "/" + toString(g_metrics.m_drawCount);
 	s = GUIApp::style().regular.measure(info);
-	GUIApp::style().regular.draw(fCoord(m_root->geometry().size() - s / 2.f - fSize(34, 14)), info, RGBA::Black);
-
+	GUIApp::style().regular.draw(fCoord(m_root->geometry().size() - s / 2.f - fSize(33, 14)), info, RGBA::Black);
 	g_metrics.reset();
 }
 

@@ -46,6 +46,8 @@ class ShaderFace;
 class Texture2D;
 class TextureFace2D;
 class Uniform;
+class FramebufferFace;
+class Framebuffer;
 
 template <class _T> struct GLTypeTraits {};
 template <> struct GLTypeTraits<float> { static const GLenum typeEnum = GL_FLOAT; static const unsigned _arity = 1; };

@@ -12,6 +12,7 @@ void TextureFace2D::bindData(uSize const& _dims, foreign_vector<uint8_t> const& 
 	LB_GL(glTexParameterf, GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	LB_GL(glTexParameterf, GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	LB_GL(glTexImage2D, GL_TEXTURE_2D, _level, _internalFormat, _dims.w(), _dims.h(), 0, _format, GL_UNSIGNED_BYTE, _data.data());
+	m_dims = _dims;
 }
 
 void TextureFace2D::activate(uint _unit) const

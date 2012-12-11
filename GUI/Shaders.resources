@@ -7,3 +7,6 @@ Flat.frag
 HueWheel.vert
 HueWheel.frag
 LightBar.vert
+Texture.frag
+Texture.vert
+test.png

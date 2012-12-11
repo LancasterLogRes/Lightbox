@@ -17,13 +17,16 @@ public:
 
 	GLuint id() const { return m_id; }
 	void bind() const { LB_GL(glBindTexture, GL_TEXTURE_2D, m_id); }
+	uSize size() const { return m_dims; }
 
 	void bindData(uSize const& _dims, foreign_vector<uint8_t> const& _data, GLenum _format, int _internalFormat, int _level);
+	void framebufferColor(unsigned _index, unsigned _level) { LB_GL(glFramebufferTexture2D, GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + _index, GL_TEXTURE_2D, m_id, _level); }
 
 	void activate(unsigned _unit) const;
 	void deactivate(unsigned _unit) const;
 
 private:
+	uSize m_dims;
 	GLuint m_id;
 };
 
