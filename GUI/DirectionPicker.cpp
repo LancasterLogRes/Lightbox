@@ -64,7 +64,7 @@ void DirectionPickerBody::draw(Context const& _c)
 	}
 
 	if (m_mode == Fill)
-		_c.disc(m_direction * geometry().size(), m_radius / 2.f * geometry().size(), Color(1.f, .25f));
+		_c.disc(m_direction * geometry().size(), m_radius / 2.f * geometry().size(), Color(1.f, .5f));
 
 	if (m_mode >= Circle)
 	{
@@ -74,7 +74,7 @@ void DirectionPickerBody::draw(Context const& _c)
 		_c.disc(fCoord(xC(1), yC(1)) * geometry().size(), .025f * s, White);
 	}
 
-	_c.disc(m_direction * geometry().size(), s / 10.f, Color(.5));
+	_c.disc(m_direction * geometry().size(), s / 10.f, Color(1.f));
 }
 
 

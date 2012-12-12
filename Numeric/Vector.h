@@ -66,6 +66,13 @@ public:
 	T length() const { return sqrt(lengthSquared()); }
 	T lengthSquared() const { return x()*x() + y()*y(); }
 
+	T min() const { return std::min(m_x, m_y); }
+	T max() const { return std::max(m_x, m_y); }
+	This& clamp(T _min, T _max) { m_x = (std::min(std::max((m_x, _min), _max))); m_y = (std::min(std::max(m_y, _min), _max)); return *this; }
+	This clamped(T _min, T _max) const { return This(std::min(std::max(m_x, _min), _max), std::min(std::max(m_y, _min), _max)); }
+	This sign() const { return This(m_x > 0 ? 1 : m_x < 0 ? -1 : 0, m_y > 0 ? 1 : m_y < 0 ? -1 : 0); }
+	This rounded() const { return This(round(m_x), round(m_y)); }
+
 protected:
 	T m_x;
 	T m_y;
@@ -91,6 +98,13 @@ public:
 	using Super::scale;
 	using Super::sub;
 	using Super::slash;
+	using Super::min;
+	using Super::max;
+
+	R& clamp(T _min, T _max) { return Super::clamp(_min, _max); }
+	R clamped(T _min, T _max) const { return Super::clamped(_min, _max); }
+	R sign() const { return Super::sign(); }
+	R rounded() const { return Super::rounded(); }
 
 	R operator+(R _x) const { return R(summed(_x)); }
 	R operator-(R _x) const { return R(subbed(_x)); }
@@ -114,12 +128,6 @@ public:
 	R& operator-=(T _x) { sub(_x); return *(R*)this; }
 	R& operator*=(T _x) { scale(_x); return *(R*)this; }
 	R& operator/=(T _x) { slash(_x); return *(R*)this; }
-
-	T min() const { return std::min(Super::m_x, Super::m_y); }
-	T max() const { return std::max(Super::m_x, Super::m_y); }
-	R& clamp(T _min, T _max) { Super::m_x = (std::min(std::max((Super::m_x, _min), _max))); Super::m_y = (std::min(std::max(Super::m_y, _min), _max)); return *this; }
-	R clamped(T _min, T _max) const { return R(std::min(std::max(Super::m_x, _min), _max), std::min(std::max(Super::m_y, _min), _max)); }
-	R sign() const { return R(Super::m_x > 0 ? 1 : Super::m_x < 0 ? -1 : 0, Super::m_y > 0 ? 1 : Super::m_y < 0 ? -1 : 0); }
 };
 
 template<class T> class Quad;

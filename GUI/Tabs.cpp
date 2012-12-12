@@ -56,8 +56,7 @@ void TabsBody::draw(Context const& _c)
 			string title = c->property<string>("_TabsBody:Title");
 			bool isActive = c->isVisible();
 			_c.rect(tab, isActive ? GUIApp::style().high : GUIApp::style().back, -.1f);
-			Font const& f = (isActive ? GUIApp::style().bold : GUIApp::style().regular);
-			f.draw(tab.lerp(.5f, .5f), title, RGBA::Black);
+			_c.text(isActive ? GUIApp::style().bold : GUIApp::style().regular, tab.lerp(.5f, .5f), title, RGBA::Black);
 			tab.translate(fSize(tab.w(), 0));
 		}
 		_c.rect(fRect(fCoord(0, c_tabBodyHeight), fSize(geometry().w(), c_tabTailHeight)), GUIApp::style().high * .9f);

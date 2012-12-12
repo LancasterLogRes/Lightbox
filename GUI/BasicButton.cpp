@@ -18,8 +18,7 @@ void BasicButtonBody::draw(Context const& _c)
 {
 	fRect transGeo(fCoord(0, 0), geometry().size());
 	_c.rect(transGeo, m_isDown ? GUIApp::style().high : GUIApp::style().back, -.1f);
-	auto const& f = m_isDown ? GUIApp::style().bold : GUIApp::style().regular;
-	f.draw(transGeo.lerp(.5f, .5f) + fSize(0, -1), m_text, RGBA(0.f, 0.f, 0.f));
+	_c.text(m_isDown ? GUIApp::style().bold : GUIApp::style().regular, transGeo.lerp(.5f, .5f) + fSize(0, -1), m_text, RGBA(0.f, 0.f, 0.f));
 }
 
 bool BasicButtonBody::event(Event* _e)

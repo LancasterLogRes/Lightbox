@@ -31,7 +31,7 @@ public:
 	static Style const& style() { return get()->m_style; }
 
 	virtual void initGraphics(Display& _d);
-	virtual void drawGraphics();
+	virtual bool drawGraphics();
 	virtual bool motionEvent(int _id, iCoord _pos, int _direction);
 
 	bool lockPointer(int _id, View const& _v);
@@ -43,10 +43,16 @@ private:
 	Joint m_joint;
 	Style m_style;
 
+	struct CachePos
+	{
+		uRect pos;
+		unsigned index;
+	};
+
 	struct ImageCache
 	{
 		ImageCache();
-		bool fit(fRect _g, ViewBody* _v);
+		bool fit(iRect _g, ViewBody* _v);
 
 		Framebuffer fb;
 		Texture2D tx;
@@ -54,7 +60,7 @@ private:
 		std::vector<float> collated;
 		unsigned nextfree;
 		std::multimap<unsigned, std::pair<unsigned, unsigned> > rows; // rowheight -> (ypos, width)
-		std::map<ViewBody*, uRect> vs;
+		std::map<ViewBody*, CachePos> vs;
 	};
 	std::vector<ImageCache> m_cache;
 

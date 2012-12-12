@@ -35,6 +35,7 @@ struct Context
 	void disc(fCoord _center, float _r, Program const& _p) const;
 	void circle(fCoord _center, fSize _r, Color _c, float _size = 1.f) const;
 	void blit(Texture2D const& _tex, fCoord _pos = fCoord(0, 0)) const;
+	void text(Font const& _f, fCoord _anchor, std::string const& _text, RGBA _c = RGBA::Black) const;
 };
 
 class ViewBody;
@@ -55,12 +56,15 @@ public:
 
 inline Views operator,(View const& _a, View const& _b) { Views r; r.push_back(_a); r.push_back(_b); return r; }
 
+void debugOut(View const& _v, std::string const& _indent = "");
+
 class ViewBody: public boost::noncopyable
 {
 	template <class _T, class _I> friend class ViewCreator;
 	friend class GUIApp;
 	inline friend void intrusive_ptr_add_ref(ViewBody* _v);
 	inline friend void intrusive_ptr_release(ViewBody* _v);
+	friend void debugOut(View const& _v, std::string const& _indent);
 
 public:
 	typedef unsigned ChildIndex;
@@ -72,11 +76,13 @@ public:
 	View doneConstruction() { View ret = this; finalConstructor(); return ret; }
 	virtual ~ViewBody();
 
+	std::string name() const;
+
 	void setParent(View const& _p);
 	void setGeometry(fRect _geometry) { m_geometry = _geometry; resized(); }
 	void resize(fSize _size) { auto g = m_geometry; g.resize(_size); setGeometry(g); }
 	void setEnabled(bool _en) { m_isEnabled = _en; update(); }
-	void setVisible(bool _vi) { m_isVisible = _vi; visibilityChanged(); }
+	void setVisible(bool _vi) { if (m_isVisible != _vi) { m_isVisible = _vi; visibilityChanged(); } }
 	void setChildIndex(ChildIndex _i) { if (m_parent) { m_references++; m_parent->m_children.erase(this); m_childIndex = _i; m_parent->m_children.insert(this); m_references--; } else m_childIndex = _i; noteMetricsChanged(); }
 	void setLayout(Layout* _newLayout) { m_layout = _newLayout; m_layout->m_view = this; noteLayoutDirty(); }
 	void setStretch(float _stretch) { m_stretch = _stretch; noteMetricsChanged(); }
@@ -146,8 +152,8 @@ protected:
 
 	virtual void draw(Context const& _c);
 	virtual bool event(Event*) { return false; }
-	virtual void resized() { m_dirtySize = true; relayout(); update(); }
-	virtual void visibilityChanged() { m_dirtySize = true; update(); }
+	virtual void resized() { m_visibleLayoutChanged = true; relayout(); update(); }
+	virtual void visibilityChanged() { m_visibleLayoutChanged = true; update(); }
 
 	virtual fSize specifyMinimumSize(fSize) const;	// default is determined by layout.
 	virtual fSize specifyMaximumSize(fSize) const;	// default is determined by layout.
@@ -156,7 +162,7 @@ protected:
 private:
 	void checkCache();
 	void cleanCache();
-	void gatherDrawers(std::vector<ViewBody*>& _l, fCoord _o = fCoord(0, 0));
+	void gatherDrawers(std::vector<ViewBody*>& _l, fCoord _o = fCoord(0, 0), bool _ancestorVisibileLayoutChanged = false);
 
 	fRect m_geometry;					// Relative to the parent's coordinate system. (0, 0) is at parent's top left.
 	ViewBody* m_parent;					// Raw pointers are only allowed here because the parent will remove itself from here in its destructor.
@@ -171,12 +177,11 @@ private:
 	bool m_isVisible;
 	bool m_isEnabled;
 	mutable bool m_dirty;
-	mutable bool m_dirtySize;
+	mutable bool m_visibleLayoutChanged;
 	bool m_isCorporal;
-	fCoord m_globalPos;
+	fCoord m_globalPosAsOfLastGatherDrawers;
+	bool m_wasDirty;
 };
-
-void debugOut(View const& _v, std::string const& _indent);
 
 inline void intrusive_ptr_add_ref(ViewBody* _v)
 {

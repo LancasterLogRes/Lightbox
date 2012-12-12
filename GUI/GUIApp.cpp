@@ -60,7 +60,7 @@ GUIApp::ImageCache::ImageCache():
 	u.attachColor(tx);
 }
 
-bool GUIApp::ImageCache::fit(fRect _g, ViewBody* _v)
+bool GUIApp::ImageCache::fit(iRect _g, ViewBody* _v)
 {
 	// NOTE: should use a good algorithm really - http://cgi.csc.liv.ac.uk/~epa/surveyhtml.html
 	float tolerance = 1.2f;
@@ -72,7 +72,7 @@ bool GUIApp::ImageCache::fit(fRect _g, ViewBody* _v)
 		if (it == rows.end() || it->first > _g.height() * tolerance)
 		{
 			// no row exists that's good. make our own?
-			if (s_pageSize.height() - nextfree < _g.height())
+			if (int(s_pageSize.height() - nextfree) < _g.height())
 			{
 				// no - not enough space left.
 				if (tolerance != 1e8f)
@@ -89,20 +89,22 @@ bool GUIApp::ImageCache::fit(fRect _g, ViewBody* _v)
 			it = rows.insert(make_pair(_g.height(), make_pair(nextfree, 0)));
 			nextfree += _g.height();
 		}
-		if (s_pageSize.width() - it->second.second >= _g.width())
+		if (int(s_pageSize.width() - it->second.second) >= _g.width())
 		{
 			// yey - enough space on the row.
 			uRect tr = uRect(it->second.second, it->second.first, _g.width(), _g.height());
-			vs[_v] = tr;
+			vs[_v].pos = tr;
+			vs[_v].index = collated.size() / (6 * 4);
 			fRect ftr = fRect(tr) / fSize(s_pageSize);
+			fRect gr = fRect(_g);
 			array<float, 6 * 4> toCopy =
 			{{
-				ftr.left(), ftr.top(), _g.left(), _g.top(),
-				ftr.left(), ftr.bottom(), _g.left(), _g.bottom(),
-				ftr.right(), ftr.top(), _g.right(), _g.top(),
-				ftr.left(), ftr.bottom(), _g.left(), _g.bottom(),
-				ftr.right(), ftr.top(), _g.right(), _g.top(),
-				ftr.right(), ftr.bottom(), _g.right(), _g.bottom()
+				ftr.left(), ftr.top(), gr.left(), gr.top(),
+				ftr.left(), ftr.bottom(), gr.left(), gr.bottom(),
+				ftr.right(), ftr.top(), gr.right(), gr.top(),
+				ftr.left(), ftr.bottom(), gr.left(), gr.bottom(),
+				ftr.right(), ftr.top(), gr.right(), gr.top(),
+				ftr.right(), ftr.bottom(), gr.right(), gr.bottom()
 			}};
 			collated.resize(collated.size() + toCopy.size());
 			valcpy(&*collated.end() - toCopy.size(), toCopy.data(), toCopy.size());
@@ -113,32 +115,29 @@ bool GUIApp::ImageCache::fit(fRect _g, ViewBody* _v)
 	}
 }
 
-void GUIApp::drawGraphics()
+bool GUIApp::drawGraphics()
 {
+	bool stillDirty = false;
+
 	vector<ViewBody*> drawers;
 	m_root->gatherDrawers(drawers);
-	if (find_if(drawers.begin(), drawers.end(), [](ViewBody* v){ return v->m_dirtySize; }) != drawers.end())
+	if (find_if(drawers.begin(), drawers.end(), [](ViewBody* v){ return v->m_visibleLayoutChanged; }) != drawers.end())
 	{
-		// At least one resized drawer - clear cache first.
+		// At least one resized drawer - reset and redraw everything (in the future we might attempt a more evolutionary cache design).
 		m_cache.clear();
 
 		for (ViewBody* v: drawers)
 		{
-//			int page = 0;
+			v->m_dirty = true;
+			v->m_visibleLayoutChanged = false;
 			while (true)
 			{
 				int page = max(0, int(m_cache.size()) - 1);
-				if ((int)m_cache.size() > page)
-				{
-					// try to find a position in m_cache[page] and put it into pos...
-					if (m_cache[page].fit(fRect(v->m_globalPos, v->geometry().size()), v))
-						break;
-				}
-//				if (page == m_cache.size())
-				{
-					// End of cache - add a new page onto m_cache.
-					m_cache.push_back(ImageCache());
-				}
+				// assuming page is valid, try to find a position in m_cache[page] and put it into pos...
+				if ((int)m_cache.size() > page && m_cache[page].fit((iRect)fRect(v->m_globalPosAsOfLastGatherDrawers.rounded(), v->geometry().size().rounded()), v))
+					break;
+				// End of cache - add a new page onto m_cache.
+				m_cache.push_back(ImageCache());
 			}
 		}
 		for (auto& c: m_cache)
@@ -148,49 +147,96 @@ void GUIApp::drawGraphics()
 		}
 	}
 
-	if (find_if(drawers.begin(), drawers.end(), [](ViewBody* v){ return v->m_dirty || v->m_dirtySize; }) != drawers.end())
+	vector< vector<ViewBody*> > renderToFramebuffer(m_cache.size());
+
+	if (find_if(drawers.begin(), drawers.end(), [&](ViewBody* v){ return v->m_dirty; }) != drawers.end())
 	{
 		// At least one dirty drawer - set up for render-to-texture and rerender dirty parts.
 		LB_GL(glBlendFunc, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 		LB_GL(glClearColor, 0.f, 0.f, 0.f, 0.f);
 		LB_GL(glEnable, GL_SCISSOR_TEST);
 
+		unsigned ci = 0;
 		for (auto& c: m_cache)
-			if (find_if(c.vs.begin(), c.vs.end(), [](pair<ViewBody*, uRect> v){ return v.first->m_dirty || v.first->m_dirtySize; }) != c.vs.end())
+		{
+			bool willRenderToTexture = false;
+			for (auto const& v: c.vs)
+			{
+				if (v.first->m_dirty && v.first->m_wasDirty)
+					willRenderToTexture = true;
+				else if (v.first->m_dirty)
+				{
+					renderToFramebuffer[ci] += v.first;
+					v.first->m_wasDirty = stillDirty = true;
+				}
+			}
+			if (willRenderToTexture)
 			{
 				FramebufferUser u(c.fb);
 				for (auto const& v: c.vs)
-					if (v.first->m_dirty || v.first->m_dirtySize)
+					if (v.first->m_dirty)
 					{
-						LB_GL(glViewport, v.second.x(), v.second.y(), v.second.w(), v.second.h());
-						LB_GL(glScissor, v.second.x(), v.second.y(), v.second.w(), v.second.h());
+						uRect texRect = v.second.pos;
+						LB_GL(glViewport, texRect.x(), texRect.y(), texRect.w(), texRect.h());
+						LB_GL(glScissor, texRect.x(), texRect.y(), texRect.w(), texRect.h());
 						LB_GL(glClear, GL_COLOR_BUFFER_BIT);
-						GUIApp::joint().u_displaySize = (vec2)(fSize)v.second.size();
+						GUIApp::joint().u_displaySize = (vec2)(fSize)texRect.size();
 						v.first->draw(Context());
+						if (!v.first->m_isEnabled)
+							Context().rect(fRect(fCoord(0, 0), (fSize)texRect.size()), Color(0.f, .5f));
 						v.first->m_dirty = false;
-						v.first->m_dirtySize = false;
 					}
 			}
-
+			ci++;
+		}
 		LB_GL(glDisable, GL_SCISSOR_TEST);
 	}
 
 	// Cache up to date - now to composite.
-	LB_GL(glBlendFunc, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+	LB_GL(glBlendFunc, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	LB_GL(glClearColor, 0, 0, 0, 0);
 	LB_GL(glClear, GL_COLOR_BUFFER_BIT);
 	LB_GL(glViewport, 0, 0, GUIApp::joint().display->size().w(), GUIApp::joint().display->size().h());
 	GUIApp::joint().u_displaySize = (fVector2)(fSize)GUIApp::joint().display->size() * vec2(1, -1);
-	ProgramUser u(m_joint.texture);
-	for (auto& c: m_cache)
 	{
-		u.uniform("u_tex") = c.tx;
-		u.attrib("a_texCoordPosition").setData(c.geom, 4);
-		u.triangles(c.vs.size() * 6);
+		// geometry is guaranteed to be in composite-draw-order.
+		unsigned ci = 0;
+		for (auto& c: m_cache)
+		{
+			unsigned next = 0;
+			for (ViewBody* v: renderToFramebuffer[ci])
+			{
+				assert(c.vs.count(v));
+				CachePos const& cp = c.vs[v];
+				// render all before
+				if (next < cp.index)
+				{
+					ProgramUser u(m_joint.texture);
+					u.uniform("u_tex") = c.tx;
+					u.attrib("a_texCoordPosition").setData(c.geom, 4, 0, 6 * 4 * next * sizeof(float));
+					u.triangles((cp.index - next) * 6);
+				}
 
-		// TODO: fold in shading (graying?) of disabled stuff while blitting.
-//		if (!m_isEnabled)
-//			_c.rect(m_geometry, Color(0, 0.5f));
+				// draw our view directly to framebuffer.
+				Context c;
+				c.offset = v->m_globalPosAsOfLastGatherDrawers;
+				LB_GL(glEnable, GL_SCISSOR_TEST);
+				LB_GL(glScissor, 60, 60, 800, 600);
+				LB_GL(glScissor, round(v->m_globalPosAsOfLastGatherDrawers.x()), GUIApp::joint().display->size().h() - round(v->geometry().h()) - round(v->m_globalPosAsOfLastGatherDrawers.y()), round(v->geometry().w()), round(v->geometry().h()));
+				v->draw(c);
+				LB_GL(glDisable, GL_SCISSOR_TEST);
+				next = cp.index + 1;
+			}
+
+			// render from next to end.
+			if (next < c.vs.size())
+			{
+				ProgramUser u(m_joint.texture);
+				u.uniform("u_tex") = c.tx;
+				u.attrib("a_texCoordPosition").setData(c.geom, 4, 0, 6 * 4 * next * sizeof(float));
+				u.triangles((c.vs.size() - next) * 6);
+			}
+		}
 	}
 
 	string info = textualTime(AppEngine::get()->lastDrawTime());
@@ -201,6 +247,8 @@ void GUIApp::drawGraphics()
 	s = GUIApp::style().regular.measure(info);
 	GUIApp::style().regular.draw(fCoord(m_root->geometry().size() - s / 2.f - fSize(33, 14)), info, RGBA::Black);
 	g_metrics.reset();
+
+	return !stillDirty;
 }
 
 bool GUIApp::motionEvent(int _id, iCoord _pos, int _direction)

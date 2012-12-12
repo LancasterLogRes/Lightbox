@@ -102,7 +102,7 @@ cross {
                 mkdir -p '"$${OBJECTS_DIR}wrap/res/values"' &&\
                 echo '\'<?xml version="1.0" encoding="utf-8"?><resources><string name="app_name">Mark2</string></resources>\'' > '$${OBJECTS_DIR}wrap/res/values/strings.xml' &&\
                 mkdir -p '"$${OBJECTS_DIR}wrap/assets"' &&\
-                for i in $${ANDROID_ASSETS}; do ln -s \$\$i' '"$${OBJECTS_DIR}wrap/assets"'; done &&\
+                for i in $${ANDROID_ASSETS}; do ln -s '\$\$i' '"$${OBJECTS_DIR}wrap/assets"'; done &&\
                 $${SDK_PATH}/tools/android update project -p '$${OBJECTS_DIR}wrap' -t android-15 -n $$TARGET &&\
                 ant debug -buildfile '$${OBJECTS_DIR}wrap/build.xml' &&\
                 mv '$${OBJECTS_DIR}wrap/bin/$$TARGET-debug.apk' '$${DESTDIR}/$${TARGET}.apk' &&\

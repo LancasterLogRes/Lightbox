@@ -1,3 +1,4 @@
+#include <regex>
 #include <LGL.h>
 #include <App/Display.h>
 #include <App/AppEngine.h>
@@ -101,6 +102,11 @@ void Context::rect(fRect _r, Color _c, float _gradient) const
 	u.triangleStrip(4);
 }
 
+void Context::text(Font const& _f, fCoord _anchor, std::string const& _text, RGBA _c) const
+{
+	_f.draw(_anchor + offset, _text, _c);
+}
+
 void Context::blit(Texture2D const& _tex, fCoord _pos) const
 {
 	ProgramUser u(GUIApp::joint().texture);
@@ -160,6 +166,7 @@ ViewBody::~ViewBody()
 void ViewBody::update()
 {
 	m_dirty = true;
+	m_wasDirty = false;
 	GUIApp::joint().display->setOneOffAnimating();
 }
 
@@ -189,14 +196,32 @@ void ViewBody::setParent(View const& _p)
 	}
 }
 
-void ViewBody::gatherDrawers(std::vector<ViewBody*>& _l, fCoord _o)
+void ViewBody::gatherDrawers(std::vector<ViewBody*>& _l, fCoord _o, bool _ancestorVisibleLayoutChanged)
 {
-	m_globalPos = _o + geometry().pos();
+	m_globalPosAsOfLastGatherDrawers = _o + geometry().pos();
+
+	// Visibility is inherited, so if we draw and have not had our visibility changed directly
+	// but an ancestor has, we must inherit that invalidity.
+	// This is particularly important if the ancestor doesn't draw, since it will go unnoticed
+	// during the compositing stage otherwise.
+	_ancestorVisibleLayoutChanged |= m_visibleLayoutChanged;
+
 	if (m_isCorporal && m_isVisible)
+	{
+		// If we're going to draw, we need to flag ourselves as visible-layout-changed if us or
+		// any of our ancestors have had their layout visibly changed.
+		m_visibleLayoutChanged = _ancestorVisibleLayoutChanged;
 		_l += this;
+	}
+	else
+		// If it can't be reset by the compositor because it's not in the view tree, then we'll
+		// need to reset it here; if it's visible, then its attribute may yet alter its children.
+		// Otherwise, the tree traversal ends here.
+		m_visibleLayoutChanged = false;
+
 	if (m_isVisible)
 		for (auto const& ch: m_children)
-			ch->gatherDrawers(_l, m_globalPos);
+			ch->gatherDrawers(_l, m_globalPosAsOfLastGatherDrawers, _ancestorVisibleLayoutChanged);
 }
 
 void ViewBody::draw(Context const&)
@@ -293,16 +318,26 @@ void ViewBody::releasePointer(int _id)
 	GUIApp::get()->releasePointer(_id, this);
 }
 
+string ViewBody::name() const
+{
+	string ret = demangled(typeid(*this).name());
+	if (ret.substr(0, 10) == "Lightbox::")
+		ret = ret.substr(10);
+	if (ret.substr(ret.size() - 4) == "Body")
+		ret = ret.substr(0, ret.size() - 4);
+	return ret;
+}
+
 void Lightbox::debugOut(View const& _v, std::string const& _indent)
 {
 	std::stringstream out;
+	out << boolalpha << (_v->m_isEnabled ? "EN" : "--") << " " << (_v->m_isVisible ? "VIS" : "hid") << " " << (_v->m_isCorporal ? "DRAW" : "ndrw") << " [" << (_v->m_dirty ? "DIRTY" : "clean") << " " << (_v->m_visibleLayoutChanged ? "XLAYX" : " lay ") << "] ";
 	out << _indent;
-	out << demangled(typeid(_v.get()).name()) << ": ";
-	out << _v->minimumSize() << "  ->  ";
+	out << _v->name() << ": ";
+	out << _v->minimumSize() << " -> ";
 	out << _v->maximumSize() << "  ";
 	out << _v->geometry();
 	cnote << out.str();
 	for (auto const& c: _v->children())
 		debugOut(c, _indent + "   ");
 }
-

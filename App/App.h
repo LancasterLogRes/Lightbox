@@ -19,7 +19,7 @@ public:
 	virtual ~App() {}
 
 	virtual void initGraphics(Display&) {}
-	virtual void drawGraphics() {}
+	virtual bool drawGraphics() { return true; }
 	virtual foreign_vector<uint8_t const> state() { return foreign_vector<uint8_t const>(); }
 	virtual void setState(foreign_vector<uint8_t> const&) {}
 

@@ -82,6 +82,5 @@ void ToggleButtonBody::draw(Context const& _c)
 {
 	fRect transGeo(fCoord(0, 0), geometry().size());
 	_c.rect(transGeo, m_isChecked ^ m_isDown ? GUIApp::style().high : GUIApp::style().back, -.1f);
-	auto const& f = m_isChecked ? GUIApp::style().bold : GUIApp::style().regular;
-	f.draw(transGeo.lerp(.5f, .5f), m_text, RGBA::Black);
+	_c.text(m_isChecked ? GUIApp::style().bold : GUIApp::style().regular, transGeo.lerp(.5f, .5f), m_text, RGBA::Black);
 }
