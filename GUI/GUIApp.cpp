@@ -170,6 +170,9 @@ bool GUIApp::drawGraphics()
 					v.first->m_wasDirty = stillDirty = true;
 				}
 			}
+
+			sort(renderToFramebuffer[ci].begin(), renderToFramebuffer[ci].end(), [&](ViewBody* a, ViewBody* b) { return c.vs[a].index < c.vs[b].index; });
+
 			if (willRenderToTexture)
 			{
 				FramebufferUser u(c.fb);
@@ -220,8 +223,8 @@ bool GUIApp::drawGraphics()
 				// draw our view directly to framebuffer.
 				Context c;
 				c.offset = v->m_globalPosAsOfLastGatherDrawers;
+				debugOut(v);
 				LB_GL(glEnable, GL_SCISSOR_TEST);
-				LB_GL(glScissor, 60, 60, 800, 600);
 				LB_GL(glScissor, round(v->m_globalPosAsOfLastGatherDrawers.x()), GUIApp::joint().display->size().h() - round(v->geometry().h()) - round(v->m_globalPosAsOfLastGatherDrawers.y()), round(v->geometry().w()), round(v->geometry().h()));
 				v->draw(c);
 				LB_GL(glDisable, GL_SCISSOR_TEST);
