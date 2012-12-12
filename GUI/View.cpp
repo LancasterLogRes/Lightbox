@@ -187,53 +187,16 @@ void ViewBody::setParent(View const& _p)
 		if (m_parent)
 			m_parent->noteLayoutDirty();
 	}
-
 }
 
-void ViewBody::checkCache()
+void ViewBody::gatherDrawers(std::vector<ViewBody*>& _l, fCoord _o)
 {
-	uSize s = (uSize)geometry().size();
-	if (m_cache.size() != s)
-		m_cache = Texture2D(s), m_dirty = true;
-	if (m_dirty)
-	{
-		Framebuffer fb;
-		FramebufferUser u(fb);
-		u.attachColor(m_cache);
-		LB_GL(glViewport, 0, 0, s.w(), s.h());
-		LB_GL(glClear, GL_COLOR_BUFFER_BIT);
-		GUIApp::joint().u_displaySize = (fVector2)(fSize)s;
-		draw(Context());
-		m_dirty = false;
-	}
-}
-
-void ViewBody::cleanCache()
-{
-	if (m_isCorporal)
-		checkCache();
-	for (auto const& ch: m_children)
-		ch->cleanCache();
-}
-
-void ViewBody::handleDraw(Context const& _c)
-{
-	// Safely kill this safety measure - we're definitely out of the constructor.
-	finalConstructor();
-
+	m_globalPos = _o + geometry().pos();
+	if (m_isCorporal && m_isVisible)
+		_l += this;
 	if (m_isVisible)
-	{
-		Context c = _c;
-		c.offset += fSize(m_geometry.topLeft());
-		if (m_isCorporal)	// could be modified
-			c.blit(m_cache);
 		for (auto const& ch: m_children)
-			ch->handleDraw(c);
-
-		// TODO: shader for this while blitting...
-//		if (!m_isEnabled)
-//			_c.rect(m_geometry, Color(0, 0.5f));
-	}
+			ch->gatherDrawers(_l, m_globalPos);
 }
 
 void ViewBody::draw(Context const&)
@@ -330,10 +293,7 @@ void ViewBody::releasePointer(int _id)
 	GUIApp::get()->releasePointer(_id, this);
 }
 
-namespace Lightbox
-{
-
-void debugOut(View const& _v, std::string const& _indent)
+void Lightbox::debugOut(View const& _v, std::string const& _indent)
 {
 	std::stringstream out;
 	out << _indent;
@@ -346,4 +306,3 @@ void debugOut(View const& _v, std::string const& _indent)
 		debugOut(c, _indent + "   ");
 }
 
-}

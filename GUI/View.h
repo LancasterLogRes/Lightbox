@@ -76,7 +76,7 @@ public:
 	void setGeometry(fRect _geometry) { m_geometry = _geometry; resized(); }
 	void resize(fSize _size) { auto g = m_geometry; g.resize(_size); setGeometry(g); }
 	void setEnabled(bool _en) { m_isEnabled = _en; update(); }
-	void setVisible(bool _vi) { m_isVisible = _vi; update(); }
+	void setVisible(bool _vi) { m_isVisible = _vi; visibilityChanged(); }
 	void setChildIndex(ChildIndex _i) { if (m_parent) { m_references++; m_parent->m_children.erase(this); m_childIndex = _i; m_parent->m_children.insert(this); m_references--; } else m_childIndex = _i; noteMetricsChanged(); }
 	void setLayout(Layout* _newLayout) { m_layout = _newLayout; m_layout->m_view = this; noteLayoutDirty(); }
 	void setStretch(float _stretch) { m_stretch = _stretch; noteMetricsChanged(); }
@@ -146,7 +146,8 @@ protected:
 
 	virtual void draw(Context const& _c);
 	virtual bool event(Event*) { return false; }
-	virtual void resized() { relayout(); update(); }
+	virtual void resized() { m_dirtySize = true; relayout(); update(); }
+	virtual void visibilityChanged() { m_dirtySize = true; update(); }
 
 	virtual fSize specifyMinimumSize(fSize) const;	// default is determined by layout.
 	virtual fSize specifyMaximumSize(fSize) const;	// default is determined by layout.
@@ -155,6 +156,7 @@ protected:
 private:
 	void checkCache();
 	void cleanCache();
+	void gatherDrawers(std::vector<ViewBody*>& _l, fCoord _o = fCoord(0, 0));
 
 	fRect m_geometry;					// Relative to the parent's coordinate system. (0, 0) is at parent's top left.
 	ViewBody* m_parent;					// Raw pointers are only allowed here because the parent will remove itself from here in its destructor.
@@ -168,9 +170,10 @@ private:
 	fVector4 m_padding;
 	bool m_isVisible;
 	bool m_isEnabled;
-	Texture2D m_cache;
 	mutable bool m_dirty;
+	mutable bool m_dirtySize;
 	bool m_isCorporal;
+	fCoord m_globalPos;
 };
 
 void debugOut(View const& _v, std::string const& _indent);

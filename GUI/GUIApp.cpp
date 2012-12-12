@@ -6,6 +6,7 @@
 #include "Fonts.h"
 #include "Global.h"
 #include "View.h"
+#include "Shaders.h"
 #include "Frame.h"
 #include "GUIApp.h"
 using namespace std;
@@ -48,18 +49,149 @@ void GUIApp::initGraphics(Display& _d)
 	m_root->setGeometry(fRect(0, 0, _d.width(), _d.height()));
 }
 
+static const uSize s_pageSize(2048, 2048);
+
+GUIApp::ImageCache::ImageCache():
+	fb(Framebuffer::Create),
+	tx(s_pageSize),
+	nextfree(0)
+{
+	FramebufferUser u(fb);
+	u.attachColor(tx);
+}
+
+bool GUIApp::ImageCache::fit(fRect _g, ViewBody* _v)
+{
+	// NOTE: should use a good algorithm really - http://cgi.csc.liv.ac.uk/~epa/surveyhtml.html
+	float tolerance = 1.2f;
+
+	// find a position to fit _g in our page.
+	auto it = rows.lower_bound(_g.height());
+	while (true)
+	{
+		if (it == rows.end() || it->first > _g.height() * tolerance)
+		{
+			// no row exists that's good. make our own?
+			if (s_pageSize.height() - nextfree < _g.height())
+			{
+				// no - not enough space left.
+				if (tolerance != 1e8f)
+				{
+					// try restarting without tolerance
+					tolerance = 1e8f;
+					it = rows.lower_bound(_g.height());
+					continue;
+				}
+				else
+					return false;
+			}
+			// yes - add to bottom
+			it = rows.insert(make_pair(_g.height(), make_pair(nextfree, 0)));
+			nextfree += _g.height();
+		}
+		if (s_pageSize.width() - it->second.second >= _g.width())
+		{
+			// yey - enough space on the row.
+			uRect tr = uRect(it->second.second, it->second.first, _g.width(), _g.height());
+			vs[_v] = tr;
+			fRect ftr = fRect(tr) / fSize(s_pageSize);
+			array<float, 6 * 4> toCopy =
+			{{
+				ftr.left(), ftr.top(), _g.left(), _g.top(),
+				ftr.left(), ftr.bottom(), _g.left(), _g.bottom(),
+				ftr.right(), ftr.top(), _g.right(), _g.top(),
+				ftr.left(), ftr.bottom(), _g.left(), _g.bottom(),
+				ftr.right(), ftr.top(), _g.right(), _g.top(),
+				ftr.right(), ftr.bottom(), _g.right(), _g.bottom()
+			}};
+			collated.resize(collated.size() + toCopy.size());
+			valcpy(&*collated.end() - toCopy.size(), toCopy.data(), toCopy.size());
+			it->second.second += _g.width();
+			return true;
+		}
+		++it;
+	}
+}
+
 void GUIApp::drawGraphics()
 {
-	LB_GL(glBlendFunc, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-	LB_GL(glClearColor, 0.f, 0.f, 0.f, 0.f);
-	m_root->cleanCache();
+	vector<ViewBody*> drawers;
+	m_root->gatherDrawers(drawers);
+	if (find_if(drawers.begin(), drawers.end(), [](ViewBody* v){ return v->m_dirtySize; }) != drawers.end())
+	{
+		// At least one resized drawer - clear cache first.
+		m_cache.clear();
 
-	LB_GL(glBlendFunc, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	LB_GL(glClearColor, 0, 0, 0, 1.0f);
+		for (ViewBody* v: drawers)
+		{
+//			int page = 0;
+			while (true)
+			{
+				int page = max(0, int(m_cache.size()) - 1);
+				if ((int)m_cache.size() > page)
+				{
+					// try to find a position in m_cache[page] and put it into pos...
+					if (m_cache[page].fit(fRect(v->m_globalPos, v->geometry().size()), v))
+						break;
+				}
+//				if (page == m_cache.size())
+				{
+					// End of cache - add a new page onto m_cache.
+					m_cache.push_back(ImageCache());
+				}
+			}
+		}
+		for (auto& c: m_cache)
+		{
+			c.geom = Buffer<float>(c.collated);
+			c.collated.clear();
+		}
+	}
+
+	if (find_if(drawers.begin(), drawers.end(), [](ViewBody* v){ return v->m_dirty || v->m_dirtySize; }) != drawers.end())
+	{
+		// At least one dirty drawer - set up for render-to-texture and rerender dirty parts.
+		LB_GL(glBlendFunc, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+		LB_GL(glClearColor, 0.f, 0.f, 0.f, 0.f);
+		LB_GL(glEnable, GL_SCISSOR_TEST);
+
+		for (auto& c: m_cache)
+			if (find_if(c.vs.begin(), c.vs.end(), [](pair<ViewBody*, uRect> v){ return v.first->m_dirty || v.first->m_dirtySize; }) != c.vs.end())
+			{
+				FramebufferUser u(c.fb);
+				for (auto const& v: c.vs)
+					if (v.first->m_dirty || v.first->m_dirtySize)
+					{
+						LB_GL(glViewport, v.second.x(), v.second.y(), v.second.w(), v.second.h());
+						LB_GL(glScissor, v.second.x(), v.second.y(), v.second.w(), v.second.h());
+						LB_GL(glClear, GL_COLOR_BUFFER_BIT);
+						GUIApp::joint().u_displaySize = (vec2)(fSize)v.second.size();
+						v.first->draw(Context());
+						v.first->m_dirty = false;
+						v.first->m_dirtySize = false;
+					}
+			}
+
+		LB_GL(glDisable, GL_SCISSOR_TEST);
+	}
+
+	// Cache up to date - now to composite.
+	LB_GL(glBlendFunc, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+	LB_GL(glClearColor, 0, 0, 0, 0);
 	LB_GL(glClear, GL_COLOR_BUFFER_BIT);
 	LB_GL(glViewport, 0, 0, GUIApp::joint().display->size().w(), GUIApp::joint().display->size().h());
 	GUIApp::joint().u_displaySize = (fVector2)(fSize)GUIApp::joint().display->size() * vec2(1, -1);
-	m_root->handleDraw(Context());
+	ProgramUser u(m_joint.texture);
+	for (auto& c: m_cache)
+	{
+		u.uniform("u_tex") = c.tx;
+		u.attrib("a_texCoordPosition").setData(c.geom, 4);
+		u.triangles(c.vs.size() * 6);
+
+		// TODO: fold in shading (graying?) of disabled stuff while blitting.
+//		if (!m_isEnabled)
+//			_c.rect(m_geometry, Color(0, 0.5f));
+	}
 
 	string info = textualTime(AppEngine::get()->lastDrawTime());
 	Context().rect(fRect(fCoord(m_root->geometry().size()) - fCoord(200, 54), fSize(190, 44)), Color(1.f, .5f));

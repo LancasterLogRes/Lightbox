@@ -25,14 +25,19 @@ private:
 class Framebuffer: public Pimpl<FramebufferFace>
 {
 public:
-	Framebuffer(): Pimpl(new FramebufferFace) {}
+	enum CreateType { Create };
+	Framebuffer() {}
+	Framebuffer(CreateType): Pimpl(new FramebufferFace) {}
+
+	void bind() { m_p->bind(); }
+	void unbind() { m_p->unbind(); }
 };
 
 class FramebufferUser: public boost::noncopyable
 {
 public:
-	FramebufferUser(Framebuffer const& _p): m_p(_p) { m_p.sharedPtr()->bind(); }
-	~FramebufferUser() { m_p.sharedPtr()->unbind(); }
+	FramebufferUser(Framebuffer const& _p): m_p(_p) { m_p.bind(); }
+	~FramebufferUser() { m_p.unbind(); }
 
 	void attachColor(Texture2D const& _t, unsigned _index = 0, unsigned _level = 0) { _t.sharedPtr()->framebufferColor(_index, _level); }
 

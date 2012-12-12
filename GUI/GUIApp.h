@@ -1,5 +1,6 @@
 #pragma once
 
+#include <tuple>
 #include <App/App.h>
 #include <Common/Color.h>
 #include "Joint.h"
@@ -41,6 +42,21 @@ private:
 	View m_root;
 	Joint m_joint;
 	Style m_style;
+
+	struct ImageCache
+	{
+		ImageCache();
+		bool fit(fRect _g, ViewBody* _v);
+
+		Framebuffer fb;
+		Texture2D tx;
+		Buffer<float> geom;
+		std::vector<float> collated;
+		unsigned nextfree;
+		std::multimap<unsigned, std::pair<unsigned, unsigned> > rows; // rowheight -> (ypos, width)
+		std::map<ViewBody*, uRect> vs;
+	};
+	std::vector<ImageCache> m_cache;
 
 	std::array<View, s_maxPointers> m_pointerLock;
 };
