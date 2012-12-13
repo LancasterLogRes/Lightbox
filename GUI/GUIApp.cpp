@@ -227,6 +227,8 @@ bool GUIApp::drawGraphics()
 				LB_GL(glEnable, GL_SCISSOR_TEST);
 				LB_GL(glScissor, round(v->m_globalPosAsOfLastGatherDrawers.x()), GUIApp::joint().display->size().h() - round(v->geometry().h()) - round(v->m_globalPosAsOfLastGatherDrawers.y()), round(v->geometry().w()), round(v->geometry().h()));
 				v->draw(c);
+				if (!v->m_isEnabled)
+					c.rect(fRect(0, 0, round(v->geometry().w()), round(v->geometry().h())), Color(0.f, .5f));
 				LB_GL(glDisable, GL_SCISSOR_TEST);
 				next = cp.index + 1;
 			}

@@ -19,6 +19,7 @@ public:
 	BasicButton setText(std::string const& _s) { m_text = _s; update(); return this; }
 	template <class _T> BasicButton setOnTapped(_T const& _t) { m_onTapped = _t; return this; }
 	std::function<void(BasicButton)> const& onTapped() const { return m_onTapped; }
+	bool isDown() const { return m_isDown; }
 
 	virtual void draw(Context const& _c);
 	virtual bool event(Event* _e);

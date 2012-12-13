@@ -9,6 +9,8 @@
 namespace Lightbox
 {
 
+class FontFace;
+
 class Font: public Pimpl<FontFace>
 {
 public:
