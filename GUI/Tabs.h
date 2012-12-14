@@ -9,7 +9,7 @@ namespace Lightbox
 {
 
 class TabsBody;
-typedef std::shared_ptr<TabsBody> Tabs;
+typedef boost::intrusive_ptr<TabsBody> Tabs;
 
 class TabsBody: public ViewCreator<ViewBody, TabsBody>
 {

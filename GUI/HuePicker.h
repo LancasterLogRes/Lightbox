@@ -14,13 +14,14 @@ class HuePickerBody: public ViewCreator<ToggleButtonBody, HuePickerBody>
 	friend class ViewBody;
 	
 public:
-	typedef ViewCreator<ToggleButtonBody, HuePickerBody> Super;
-	~HuePickerBody();
+	virtual ~HuePickerBody();
 
 	float hue() const { return m_hue; }
-	void setHue(float _h) { if (m_hue != _h) { m_hue = _h; hueChanged(); } }
-	template <class _T> HuePicker setOnHueChanged(_T const& _t) { m_onHueChanged = _t; return this; }
-	std::function<void(HuePicker const&)> const& onHueChanged() const { return m_onHueChanged; }
+
+	void setHue(float _h, bool _userEvent = false) { if (m_hue != _h) { m_hue = _h; hueChanged(_userEvent); } }
+	void setOnHueChanged(EventHandler const& _t) { m_onHueChanged = _t; }
+
+	HuePicker withOnHueChanged(EventHandler const& _t) { setOnHueChanged(_t); return this; }
 
 protected:
 	HuePickerBody();
@@ -32,12 +33,12 @@ protected:
 	virtual fSize specifyMaximumSize(fSize) const;
 	virtual fSize specifyFit(fSize _space) const;
 
-	virtual void hueChanged() { if (m_onHueChanged) m_onHueChanged(this); update(); }
+	virtual void hueChanged(bool _userEvent) { if (m_onHueChanged && _userEvent) m_onHueChanged(this); update(); }
 
 private:
 	float m_hue;
 	Program m_hueWheel;
-	std::function<void(HuePicker const&)> m_onHueChanged;
+	EventHandler m_onHueChanged;
 };
 
 }

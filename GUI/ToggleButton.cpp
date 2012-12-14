@@ -17,23 +17,21 @@ ToggleButtonBody::~ToggleButtonBody()
 		m_members->erase(this);
 }
 
-ToggleButton ToggleButtonBody::setChecked(bool _c)
+void ToggleButtonBody::setChecked(bool _c, bool _userEvent)
 {
 	// only if there are members to this set - if not it stays checked.
 	if (m_isChecked != _c)
 	{
 		m_isChecked = _c;
-		update();
 		if (m_isChecked && m_members)
 			for (auto const& b: *m_members)
 				if (b && b != this)
-					b->setChecked(false);
-		toggled();
+					b->setChecked(false, _userEvent);
+		toggled(_userEvent);
 	}
-	return this;
 }
 
-ToggleButton ToggleButtonBody::setExclusiveWith(ToggleButton const& _b)
+void ToggleButtonBody::setExclusiveWith(ToggleButton const& _b)
 {
 	if (m_members)
 	{
@@ -66,10 +64,9 @@ ToggleButton ToggleButtonBody::setExclusiveWith(ToggleButton const& _b)
 			m_members->insert(_b.get());
 			_b->setChecked(false);
 		}
-	return this;
 }
 
-ToggleButton ToggleButtonBody::getActive()
+ToggleButton ToggleButtonBody::checkedExclusive()
 {
 	if (m_members)
 		for (auto const& b: *m_members)
@@ -81,6 +78,6 @@ ToggleButton ToggleButtonBody::getActive()
 void ToggleButtonBody::draw(Context const& _c)
 {
 	fRect transGeo(fCoord(0, 0), geometry().size());
-	_c.rect(transGeo, m_isChecked ^ m_isDown ? GUIApp::style().high : GUIApp::style().back, -.1f);
-	_c.text(m_isChecked ? GUIApp::style().bold : GUIApp::style().regular, transGeo.lerp(.5f, .5f), m_text, RGBA::Black);
+	_c.rect(transGeo, m_isChecked ^ isDown() ? GUIApp::style().high : GUIApp::style().back, -.1f);
+	_c.text(m_isChecked ? GUIApp::style().bold : GUIApp::style().regular, transGeo.lerp(.5f, .5f), text(), RGBA::Black);
 }

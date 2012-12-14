@@ -30,8 +30,8 @@ bool HuePickerBody::event(Event* _e)
 		fVector2 off = e->local - geometry().lerp(.5f, .5f);
 		if (off.length() < s && off.length() > s / 8.5f)
 		{
-			setChecked(true);
-			setHue(atan2(off.x(), off.y()) / TwoPi + 0.5f);
+			setChecked(true, true);
+			setHue(atan2(off.x(), off.y()) / TwoPi + 0.5f, true);
 			return true;
 		}
 	}

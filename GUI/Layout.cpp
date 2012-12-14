@@ -120,7 +120,7 @@ fSize HorizontalLayout::fit(fSize _space)
 		auto p = c->padding();
 		fSize s(sizes[i] - p.x() - p.z(), _space.height() - p.y() - p.w());
 		s = c->fit(s);
-		ret.setHeight(min(ret.height(), s.height()));
+		ret.setHeight(min(ret.height(), s.height() + p.y() + p.w()));
 		i++;
 	}
 	return ret;
@@ -136,7 +136,7 @@ fSize VerticalLayout::fit(fSize _space)
 		auto p = c->padding();
 		fSize s(_space.width() - p.x() - p.z(), sizes[i] - p.y() - p.w());
 		s = c->fit(s);
-		ret.setWidth(min(ret.width(), s.width()));
+		ret.setWidth(min(ret.width(), s.width() + p.x() + p.z()));
 		i++;
 	}
 	return ret;
@@ -147,15 +147,16 @@ void VerticalLayout::layout(fSize _s)
 	if (m_view)
 	{
 		vector<float> sizes = doLayout(_s, _s.height(), m_view->children(), [](View const& c, fSize s) { return s.height() + c->padding().y() + c->padding().w(); });
+		cdebug << "Sum/total:" << sumOf(sizes) << _s.height();
 		fCoord cursor(0, 0);
 		auto i = sizes.begin();
 		for (auto const& c: m_view->children())
 		{
 			auto p = c->padding();
 			fSize s(_s.w() - p.x() - p.z(), *i - p.y() - p.w());
-			s = c->fit(s);
-			c->setGeometry(fRect(cursor, s).translated(fCoord(p.x(), p.y())));
-			cursor.setY(cursor.y() + s.h() + p.y() + p.w());
+			fSize rs = c->fit(s);
+			c->setGeometry(fRect(cursor, rs).translated(fCoord(p.x(), p.y())));
+			cursor.setY(cursor.y() + *i);
 			++i;
 		}
 	}
@@ -172,9 +173,9 @@ void HorizontalLayout::layout(fSize _s)
 		{
 			auto p = c->padding();
 			fSize s(*i - p.x() - p.z(), _s.h() - p.y() - p.w());
-			s = c->fit(s);
-			c->setGeometry(fRect(cursor, s).translated(fCoord(p.x(), p.y())));
-			cursor.setX(cursor.x() + s.w() + p.x() + p.z());
+			fSize rs = c->fit(s);
+			c->setGeometry(fRect(cursor, rs).translated(fCoord(p.x(), p.y())));
+			cursor.setX(cursor.x() + *i);
 			++i;
 		}
 	}

@@ -328,16 +328,25 @@ string ViewBody::name() const
 	return ret;
 }
 
-void Lightbox::debugOut(View const& _v, std::string const& _indent)
+std::string Lightbox::toString(View const& _v, std::string const& _insert)
 {
 	std::stringstream out;
-	out << boolalpha << (_v->m_isEnabled ? "EN" : "--") << " " << (_v->m_isVisible ? "VIS" : "hid") << " " << (_v->m_isCorporal ? "DRAW" : "ndrw") << " [" << (_v->m_dirty ? "DIRTY" : "clean") << " " << (_v->m_visibleLayoutChanged ? "XLAYX" : " lay ") << "] ";
-	out << _indent;
-	out << _v->name() << ": ";
-	out << _v->minimumSize() << " -> ";
-	out << _v->maximumSize() << "  ";
-	out << _v->geometry();
-	cnote << out.str();
+	out << (_v->m_isEnabled ? "EN" : "--") << " "
+		<< (_v->m_isVisible ? "VIS" : "hid") << " "
+		<< (_v->m_isCorporal ? "DRAW" : "ndrw") << " ["
+		<< (_v->m_dirty ? "DIRTY" : "clean") << " "
+		<< (_v->m_visibleLayoutChanged ? "XLAYX" : " lay ") << "] "
+		<< _insert
+		<< _v->name() << ": "
+		<< _v->minimumSize() << " -> "
+		<< _v->maximumSize() << "  "
+		<< _v->geometry();
+	return out.str();
+}
+
+void Lightbox::debugOut(View const& _v, std::string const& _indent)
+{
+	cnote << toString(_v, _indent);
 	for (auto const& c: _v->children())
-		debugOut(c, _indent + "   ");
+		debugOut(c, _indent + "  ");
 }

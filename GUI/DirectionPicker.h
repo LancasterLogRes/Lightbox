@@ -19,24 +19,23 @@ public:
 
 	~DirectionPickerBody();
 
-	void setDirection(fCoord _d) { if (m_direction != _d) { m_direction = _d; changed(); } }
-	void setRadius(fSize _s) { if (m_radius != _s) { m_radius = _s; changed(); } }
 	fCoord direction() const { return m_direction; }
 	fSize radius() const { return m_radius; }
-
-	void setMode(Mode _m) { if (m_mode != _m) { m_mode = _m; changed(); } }
 	Mode mode() { return m_mode; }
 
-	template <class _T> DirectionPicker setOnChanged(_T const& _t) { m_onChanged = _t; return this; }
-	std::function<void(DirectionPicker const&)> const& onChanged() const { return m_onChanged; }
-	
+	void setDirection(fCoord _d, bool _userEvent = false) { if (m_direction != _d) { m_direction = _d; changed(_userEvent); } }
+	void setRadius(fSize _s, bool _userEvent = false) { if (m_radius != _s) { m_radius = _s; changed(_userEvent); } }
+	void setMode(Mode _m, bool _userEvent = false) { if (m_mode != _m) { m_mode = _m; changed(_userEvent); } }
+	void setOnChanged(EventHandler const& _t) { m_onChanged = _t; }
+
+	DirectionPicker withOnChanged(EventHandler const& _t) { setOnChanged(_t); return this; }
+
 protected:
 	DirectionPickerBody();
 	
 	virtual bool event(Event* _e);
 	virtual void draw(Context const& _c);
-
-	virtual void changed() { if (m_onChanged) m_onChanged(this); update(); }
+	virtual void changed(bool _userEvent) { if (m_onChanged && _userEvent) m_onChanged(this); update(); }
 
 private:
 	float xC(float _sign) { return m_direction.x() + sin(Pi / 4.f) * _sign * m_radius.w() / 2; }
@@ -51,7 +50,7 @@ private:
 	iSize m_lastSign;
 	bool m_dragCenter;
 
-	std::function<void(DirectionPicker const&)> m_onChanged;
+	EventHandler m_onChanged;
 };
 
 }

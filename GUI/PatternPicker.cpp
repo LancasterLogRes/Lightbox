@@ -22,8 +22,8 @@ bool PatternPickerBody::event(Event* _e)
 	if (e && pointerLocked(e->id))
 	{
 		iCoord place = (iCoord)fCoord(fSize(e->local - geometry().pos()) / fSize(geometry().size()) * fSize(m_space));
-		setChecked(true);
-		setIndex(clamp<int>(place.x(), 0u, m_space.w() - 1) + clamp<int>(place.y(), 0u, m_space.h() - 1) * m_space.w());
+		setChecked(true, true);
+		setIndex(clamp<int>(place.x(), 0u, m_space.w() - 1) + clamp<int>(place.y(), 0u, m_space.h() - 1) * m_space.w(), true);
 		return true;
 	}
 	return Super::event(_e);

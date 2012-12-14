@@ -18,12 +18,13 @@ public:
 	~LightPickerBody();
 
 	float light() const { return m_light; }
-	void setLight(float _l) { m_light = _l; lightChanged(); }
 	Color middle() const { return m_middle; }
-	void setMiddle(Color _c) { m_middle = _c; update(); }
 
-	template <class _T> LightPicker setOnLightChanged(_T const& _t) { m_onLightChanged = _t; return this; }
-	std::function<void(LightPicker const&)> const& onLightChanged() const { return m_onLightChanged; }
+	void setLight(float _l, bool _userEvent = false) { m_light = _l; lightChanged(_userEvent); }
+	void setMiddle(Color _c) { m_middle = _c; update(); }
+	void setOnLightChanged(EventHandler const& _t) { m_onLightChanged = _t; }
+
+	LightPicker withOnLightChanged(EventHandler const& _t) { setOnLightChanged(_t); return this; }
 
 protected:
 	LightPickerBody();
@@ -32,11 +33,11 @@ protected:
 	virtual void draw(Context const& _c);
 	virtual fSize specifyFit(fSize _space) const;
 
-	void lightChanged() { if (m_onLightChanged) m_onLightChanged(this); update(); }
+	void lightChanged(bool _userEvent) { if (m_onLightChanged && _userEvent) m_onLightChanged(this); update(); }
 	
 private:
 	Program m_lightBar;
-	std::function<void(LightPicker const&)> m_onLightChanged;
+	EventHandler m_onLightChanged;
 	float m_light;
 	Color m_middle;
 };

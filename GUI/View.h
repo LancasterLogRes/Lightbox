@@ -57,6 +57,31 @@ public:
 inline Views operator,(View const& _a, View const& _b) { Views r; r.push_back(_a); r.push_back(_b); return r; }
 
 void debugOut(View const& _v, std::string const& _indent = "");
+std::string toString(View const& _v, std::string const& _insert = std::string());
+
+template <class _T> _T& operator<<(_T& _out, View const& _v)
+{
+	_out << toString(_v);
+	return _out;
+}
+
+/* Inheriting a new type of View:
+ * - Always inherit from ViewCreator<SuperView, ThisView>
+ * - No getter method for event handlers.
+ * - Event handler setter method takes EventHandler const& (not templated).
+ * - Any setter may have corresponding with* method that have same prototype but return this.
+ * - Order of methods: getters, setters, with*, others.
+ * - All virtuals are protected.
+ * - All fields are private.
+ * - Will often have additional virtual "stateChanged" method(s):
+ *   - Should generally have a bool _userEvent parameter.
+ *   - Should generally call update() at end.
+ *   - Should only call event handler fields  when _userEvent is true.
+ *   - Should generally be called by public method that invokes action/changes state:
+ *   - Said public method, if a state-setter should check for equivalence between new/old state.
+ *   - Said public method should proxy a default-false _userEvent parameter.
+ *   - Said public method should be called from hardware event handler with true for _userEvent.
+ */
 
 class ViewBody: public boost::noncopyable
 {
@@ -65,6 +90,7 @@ class ViewBody: public boost::noncopyable
 	inline friend void intrusive_ptr_add_ref(ViewBody* _v);
 	inline friend void intrusive_ptr_release(ViewBody* _v);
 	friend void debugOut(View const& _v, std::string const& _indent);
+	friend std::string toString(View const& _v, std::string const& _insert);
 
 public:
 	typedef unsigned ChildIndex;
@@ -93,16 +119,38 @@ public:
 	View withStretch(float _stretch) { setStretch(_stretch); return this; }
 
 	fCoord globalPos() const;
+	View child(unsigned _i) const { for (View v: m_children) if (_i) _i--; else return v; return View(); }
 	ViewSet children() const { return m_children; }
 	template <class _T> std::vector<_T> find()
 	{
 		std::vector<_T> ret;
 		for (auto const& c: m_children)
-			if (auto p = dynamic_cast<decltype(_T().get())>(c.get()))
+			if (auto p = dynamic_cast<decltype(&*_T())>(c.get()))
 				ret += _T(p);
 			else
 				ret += c->find<_T>();
 		return ret;
+	}
+	template <class _T> _T findFirst()
+	{
+		for (auto const& c: m_children)
+			if (auto p = dynamic_cast<decltype(_T().get())>(c.get()))
+				return _T(p);
+			else if (_T r = c->findFirst<_T>())
+				return r;
+		return _T();
+	}
+	template <class _T, class _U> _T findFirst(std::string const& _propertyName, _U const& _propertyValue)
+	{
+		for (auto const& c: m_children)
+			if (auto p = dynamic_cast<decltype(_T().get())>(c.get()))
+			{
+				if (p->property<_U>(_propertyName) == _propertyValue)
+					return _T(p);
+			}
+			else if (_T r = c->findFirst<_T, _U>(_propertyName, _propertyValue))
+				return r;
+		return _T();
 	}
 
 	bool isEnabled() const { return m_isEnabled; }
@@ -115,6 +163,7 @@ public:
 	fVector4 padding() const { return m_padding; }
 
 	template <class _T> _T property(std::string const& _name) { try { return boost::any_cast<_T>(m_misc[_name]); } catch (...) { return _T(); } }
+	template <class _T> bool hasProperty(std::string const& _name) { if (m_misc.count(_name)) try { boost::any_cast<_T>(m_misc[_name]); return true; } catch (...) {} return false; }
 	template <class _T> View setProperty(std::string const& _name, _T const& _t) { m_misc[_name] = _t; return View(this); }
 
 	virtual bool sensesEvent(Event* _e);
@@ -198,6 +247,10 @@ template <class _Inherits, class _ViewBody>
 class ViewCreator: public _Inherits
 {
 public:
+	typedef std::function<void(_ViewBody*)> EventHandler;
+	typedef _ViewBody This;
+	typedef ViewCreator<_Inherits, _ViewBody> Super;
+
 	template <class ... _P> ViewCreator(_P ... _args): _Inherits(_args ... ) {}
 
 	template <class ... _T> static boost::intrusive_ptr<_ViewBody> create(_T ... _args) { return ViewBody::doCreate<_ViewBody, _T ...>(nullptr, _args ...); }

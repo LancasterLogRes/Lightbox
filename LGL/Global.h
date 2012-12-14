@@ -60,13 +60,15 @@ template <> struct GLTypeTraits<int32_t> { static const GLenum typeEnum = GL_INT
 template <class _T, size_t _z> struct GLTypeTraits<std::array<_T, _z> >: public GLTypeTraits<_T> { static const unsigned _arity = _z; };
 // TODO: Vector2/3/4
 
+static const unsigned SnoopGL = 100;
+
 void checkGlError(const char* op);
 char const* glSymbolString(int _s);
 
-template <class _T> _T GL_aux(_T _t, char const* _s) { cbug(69) << _s << "->" << _t; checkGlError(_s); return _t; }
+template <class _T> _T GL_aux(_T _t, char const* _s) { cbug(SnoopGL) << _s << "->" << _t; checkGlError(_s); return _t; }
 
 #define LIGHTBOX_GL_RET(X) GL_aux(X, #X)
-#define LIGHTBOX_GL(X) LIGHTBOX_BLOCK_TO_STATEMENT(cbug(69) << #X; X; checkGlError(#X);)
+#define LIGHTBOX_GL(X) LIGHTBOX_BLOCK_TO_STATEMENT(cbug(::Lightbox::SnoopGL) << #X; X; checkGlError(#X);)
 
 inline std::string argsToString(char const*) { return std::string(); }
 
@@ -105,14 +107,14 @@ template <class _P, class ... _Params> inline std::string argsToString(char cons
 template <class _GL, class ... _Params> inline GLuint GL_aux_R(char const* _gl, char const* _args, _GL _glf, _Params ... _p)
 {
 	auto r = (*_glf)(_p ...);
-	cbug(69) << _gl << "(" << argsToString(_args, _p ...) << ") ->" << r;
+	cbug(SnoopGL) << _gl << "(" << argsToString(_args, _p ...) << ") ->" << r;
 	checkGlError(_gl);
 	return r;
 }
 
 template <class _GL, class ... _Params> inline void GL_aux_N(char const* _gl, char const* _args, _GL _glf, _Params ... _p)
 {
-	cbug(69) << _gl << "(" << argsToString(_args, _p ...) << ")";
+	cbug(SnoopGL) << _gl << "(" << argsToString(_args, _p ...) << ")";
 	(*_glf)(_p ...);
 	checkGlError(_gl);
 }

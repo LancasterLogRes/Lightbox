@@ -26,7 +26,7 @@ bool LightPickerBody::event(Event* _e)
 	if (e && pointerLocked(e->id))
 	{
 		fRect geo = geometry().inset(0.f, geometry().w() / 2 + 2);
-		setLight(clamp(lext(e->local.y(), geo.bottom(), geo.top()), 0.f, 1.f));
+		setLight(clamp(lext(e->local.y(), geo.bottom(), geo.top()), 0.f, 1.f), true);
 		return true;
 	}
 	return Super::event(_e);

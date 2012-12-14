@@ -226,7 +226,7 @@ int32_t AppEngine::handleInput(AInputEvent* _event)
 			if (id >= 0 && id < 5)
 			{
 				ret = m_app->motionEvent(id, c, 1);
-				cnote << "(" << id << "down" << m_pointerState[id] << ")";
+				cnote << "(" << id << "down" << c << ")";
 				m_pointerState[id] = c;
 			}
 			break;
@@ -237,7 +237,7 @@ int32_t AppEngine::handleInput(AInputEvent* _event)
 				if (id >= 0 && id < 5)
 				{
 					c = iCoord(AMotionEvent_getX(_event, index), AMotionEvent_getY(_event, index));
-					if (c != m_pointerState[index] && c.x() + c.y() > 4 && c.x() + c.y() < 2000)	//arbitrary limits to reduce blips on shitty touchscreens.
+					if (c != m_pointerState[index] && c.x() + c.y() > 4 && c.x() + c.y() < 2000 && (m_pointerState[index] - c).length() < 150)	//arbitrary limits to reduce blips on shitty touchscreens.
 					{
 						cnote << "(" << id << "[" << index << "] move" << m_pointerState[id] << "->" << c << ")";
 						break;

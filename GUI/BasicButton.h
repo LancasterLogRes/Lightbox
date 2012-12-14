@@ -15,24 +15,26 @@ class BasicButtonBody: public ViewCreator<ViewBody, BasicButtonBody>
 public:
 	virtual ~BasicButtonBody() {}
 	
-	std::string const& text() const { return m_text; }
-	BasicButton setText(std::string const& _s) { m_text = _s; update(); return this; }
-	template <class _T> BasicButton setOnTapped(_T const& _t) { m_onTapped = _t; return this; }
-	std::function<void(BasicButton)> const& onTapped() const { return m_onTapped; }
 	bool isDown() const { return m_isDown; }
+	std::string const& text() const { return m_text; }
 
-	virtual void draw(Context const& _c);
-	virtual bool event(Event* _e);
+	void setOnTapped(EventHandler const& _t) { m_onTapped = _t; }
+	void setText(std::string const& _s) { m_text = _s; update(); }
 
-	virtual fSize specifyMinimumSize(fSize) const;
+	BasicButton withOnTapped(EventHandler const& _t) { setOnTapped(_t); return this; }
+	BasicButton withText(std::string const& _s) { setText(_s); return this; }
 
 protected:
 	BasicButtonBody(std::string const& _text = std::string());
 
+	virtual void draw(Context const& _c);
+	virtual bool event(Event* _e);
 	virtual void tapped();
+	virtual fSize specifyMinimumSize(fSize) const;
 
+private:
 	std::string m_text;
-	std::function<void(BasicButton)> m_onTapped;	// TODO: move to BasicButton; retrieve from parent.
+	EventHandler m_onTapped;
 
 	bool m_isDown;
 	int m_downPointer;
