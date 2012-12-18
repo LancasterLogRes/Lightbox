@@ -36,6 +36,7 @@ protected:
 	virtual bool event(Event* _e);
 	virtual void draw(Context const& _c);
 	virtual void changed(bool _userEvent) { if (m_onChanged && _userEvent) m_onChanged(this); update(); }
+	virtual fSize specifyFit(fSize _space) const;
 
 private:
 	float xC(float _sign) { return m_direction.x() + sin(Pi / 4.f) * _sign * m_radius.w() / 2; }

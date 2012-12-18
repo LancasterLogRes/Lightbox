@@ -134,7 +134,7 @@ public:
 	template <class _T> _T findFirst()
 	{
 		for (auto const& c: m_children)
-			if (auto p = dynamic_cast<decltype(_T().get())>(c.get()))
+			if (auto p = dynamic_cast<decltype(&*_T())>(c.get()))
 				return _T(p);
 			else if (_T r = c->findFirst<_T>())
 				return r;

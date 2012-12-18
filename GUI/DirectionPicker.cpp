@@ -77,4 +77,10 @@ void DirectionPickerBody::draw(Context const& _c)
 	_c.disc(m_direction * geometry().size(), s / 10.f, Color(1.f));
 }
 
+fSize DirectionPickerBody::specifyFit(fSize _space) const
+{
+	float s = min(_space.w(), _space.h());
+	return fSize(s, s);
+}
+
 
