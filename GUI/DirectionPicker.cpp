@@ -32,7 +32,7 @@ bool DirectionPickerBody::event(Event* _e)
 		if (pointerLocked(e->id))
 		{
 			if (m_dragCenter)
-				setDirection(p);
+				setDirection(p, true);
 			else
 			{
 				m_lastSign = iSize((p - m_direction).sign());
@@ -43,7 +43,7 @@ bool DirectionPickerBody::event(Event* _e)
 					r.setH(0.f);
 				if (r == fSize(0.f, 0.f))
 					r.setW(.05f);
-				setRadius(r);
+				setRadius(r, true);
 			}
 			update();
 			return true;

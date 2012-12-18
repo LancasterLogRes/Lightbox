@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Common/Global.h>
+#include <Common/UnitTesting.h>
 
 #define cross %
 #define dot *
@@ -354,11 +355,9 @@ public:
 	Vector3<T> crossed(Vector3<T> _b) const { return Vector3<T>(y() * _b.z() - z() * _b.y(), z() * _b.x() - x() * _b.z(), x() * _b.y() - y() * _b.x()); }
 	Vector3<T>& crossWith(Vector3<T> _b) { Quad<T>::set(y() * _b.z() - z() * _b.y(), z() * _b.x() - x() * _b.z(), x() * _b.y() - y() * _b.x()); return *this; }
 
-	void normalize() { normalise(); }
-	Vector3<T> normalized() const { return normalised(); }
-	Vector3<T> normalised() const { return Super::slashed(length()); }
-	void normalise() { Super::slash(length()); }
-	void normaliseTo(T _mag) { slash(length() / _mag); }
+	Vector3<T> normalized() const { return Super::slashed(length()); }
+	void normalize() { Super::slash(length()); }
+	void normalizeTo(T _mag) { slash(length() / _mag); }
 	
 //	const fVector2 toPolar() const { return fVector2(frac((abs(x()) > 0.0 ? atan2(z(), x()) : (z() > 0.0 ? PIBY2 : -PIBY2)) / PI2 + 1.0),  acos(y() / length()) / PI); }
 	Vector2<T> toPolar() const { return Vector2<T>(frac(atan2(z(), x()) / TwoPi + 1.0), acos(y() / length()) / Pi); }
@@ -519,5 +518,24 @@ inline std::string toString(fVector3 const& _v)
 	return ss.str();
 }
 
+LIGHTBOX_UNITTEST(1, "fVector3")
+{
+	require(!Xaxis.approximates(-Xaxis), "approximates");
+	require((Xaxis + Yaxis).approximates(fVector3(1, 1, 0)), "+");
+	require((Xaxis - Yaxis).approximates(fVector3(1, -1, 0)), "-");
+	require((Xaxis * 5).approximates(fVector3(5, 0, 0)), "*");
+	require((Xaxis / 5).approximates(fVector3(0.2, 0, 0)), "/");
+	fVector3 v = Zaxis;
+	v += Xaxis;
+	require(v.approximates(Zaxis + Xaxis), "+=");
+	v -= Xaxis;
+	require(v.approximates(Zaxis), "-=");
+	v *= 5;
+	require(v.approximates(Zaxis * 5), "*=");
+	v /= 5;
+	require(v.approximates(Zaxis), "/=");
+	require(Xaxis.isPerpendicularTo(Yaxis),"isPerpendicularTo");
+	require(Xaxis.isParallelTo(fVector3(-1,0,0)),"isParallelTo");
+}
 
 }

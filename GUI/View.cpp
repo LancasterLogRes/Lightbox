@@ -157,6 +157,11 @@ ViewBody::~ViewBody()
 	delete m_layout;
 	m_layout = nullptr;
 
+	clearChildren();
+}
+
+void ViewBody::clearChildren()
+{
 	// Mustn't use a for loop as the iterator will become invalid as the child removes
 	// itself from it in the setParent call.
 	while (m_children.size())

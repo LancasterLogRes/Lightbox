@@ -145,13 +145,15 @@ public:
 		for (auto const& c: m_children)
 			if (auto p = dynamic_cast<decltype(_T().get())>(c.get()))
 			{
-				if (p->property<_U>(_propertyName) == _propertyValue)
+				if (p->hasProperty<_U>(_propertyName) && p->property<_U>(_propertyName) == _propertyValue)
 					return _T(p);
 			}
 			else if (_T r = c->findFirst<_T, _U>(_propertyName, _propertyValue))
 				return r;
 		return _T();
 	}
+
+	void clearChildren();
 
 	bool isEnabled() const { return m_isEnabled; }
 	bool isVisible() const { return m_isVisible; }

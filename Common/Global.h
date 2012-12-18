@@ -337,15 +337,15 @@ public:
 static const std::vector<float> NullVectorFloat;
 
 extern bool g_debugEnabled[256];
-template <uint8_t _Channel> struct LogName { static char const* const name = "   "; };
+template <uint8_t _Channel> struct LogName { static const char constexpr* name = "   "; };
 static const uint8_t WarnChannel = 255;
 static const uint8_t NoteChannel = 254;
 static const uint8_t DebugChannel = 253;
 static const uint8_t LogChannel = 252;
-template <> struct LogName<WarnChannel> { static char const* const name = "!!!"; };
-template <> struct LogName<NoteChannel> { static char const* const name = "***"; };
-template <> struct LogName<DebugChannel> { static char const* const name = "---"; };
-template <> struct LogName<LogChannel> { static char const* const name = "LOG"; };
+template <> struct LogName<WarnChannel> { static const char constexpr* name = "!!!"; };
+template <> struct LogName<NoteChannel> { static const char constexpr* name = "***"; };
+template <> struct LogName<DebugChannel> { static const char constexpr*  name = "---"; };
+template <> struct LogName<LogChannel> { static const char constexpr* name = "LOG"; };
 
 extern std::function<void(std::string const&, unsigned char)> g_debugPost;
 extern std::function<void(char, std::string const&)> g_syslogPost;

@@ -19,7 +19,7 @@ public:
 	static Matrix4x4 const& id() { static const Matrix4x4<T> s_r(Quad<T>(1, 0, 0, 0), Quad<T>(0, 1, 0, 0), Quad<T>(0, 0, 1, 0), Quad<T>(0, 0, 0, 1)); return s_r; }
 	static Matrix4x4 rotation(T _th, Vector3<T> _d)
 	{
-		_d.normalise();
+		_d.normalize();
 		Matrix4x4 rot;
 		T* m = rot.data();
 		T b = _th;

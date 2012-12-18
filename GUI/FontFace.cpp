@@ -50,8 +50,9 @@ void FontFace::draw(fCoord _anchor, string const& _text, RGBA _c)
 	std::vector<std::array<GLubyte, 2> > size(_text.size() * 6);
 
 	float width = 0;
-	for (char c: _text)
-		width += ((stbtt_bakedchar*)m_charData)[c - s_charDataFirst].xadvance;
+	for (uint8_t c: _text)
+		if (c >= (int)s_charDataFirst && c < int(s_charDataFirst + s_charDataCount))
+			width += ((stbtt_bakedchar*)m_charData)[c - s_charDataFirst].xadvance;
 
 	float x = _anchor.x() - width / 2;
 	float y = _anchor.y() - ((m_above + m_below + 1) / 2 - m_above);
