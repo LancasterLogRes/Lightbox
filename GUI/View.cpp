@@ -201,8 +201,10 @@ void ViewBody::setParent(View const& _p)
 	}
 }
 
-void ViewBody::gatherDrawers(std::vector<ViewBody*>& _l, fCoord _o, bool _ancestorVisibleLayoutChanged)
+bool ViewBody::gatherDrawers(std::vector<ViewBody*>& _l, fCoord _o, bool _ancestorVisibleLayoutChanged)
 {
+	bool ret = m_visibleLayoutChanged;
+
 	m_globalPosAsOfLastGatherDrawers = _o + geometry().pos();
 
 	// Visibility is inherited, so if we draw and have not had our visibility changed directly
@@ -226,7 +228,9 @@ void ViewBody::gatherDrawers(std::vector<ViewBody*>& _l, fCoord _o, bool _ancest
 
 	if (m_isVisible)
 		for (auto const& ch: m_children)
-			ch->gatherDrawers(_l, m_globalPosAsOfLastGatherDrawers, _ancestorVisibleLayoutChanged);
+			ret = ch->gatherDrawers(_l, m_globalPosAsOfLastGatherDrawers, _ancestorVisibleLayoutChanged) || ret;
+
+	return ret;
 }
 
 void ViewBody::draw(Context const&)
@@ -345,7 +349,7 @@ std::string Lightbox::toString(View const& _v, std::string const& _insert)
 		<< _v->name() << ": "
 		<< _v->minimumSize() << " -> "
 		<< _v->maximumSize() << "  "
-		<< _v->geometry();
+		<< _v->geometry() << " (" << _v->m_children.size() << " children)";
 	return out.str();
 }
 

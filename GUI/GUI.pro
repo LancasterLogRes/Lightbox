@@ -23,7 +23,8 @@ SOURCES += \
     LightPicker.cpp \
     PatternPicker.cpp \
     DirectionPicker.cpp \
-    Frame.cpp
+    Frame.cpp \
+    Collated.cpp
 
 HEADERS += \
     View.h \

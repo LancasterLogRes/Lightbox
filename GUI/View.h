@@ -114,6 +114,8 @@ public:
 	void setStretch(float _stretch) { m_stretch = _stretch; noteMetricsChanged(); }
 	void setPadding(float _padding) { m_padding = fVector4(_padding, _padding, _padding, _padding); noteMetricsChanged(); }
 
+	View withChildIndex(ChildIndex _i) { setChildIndex(_i); return this; }
+	View withGeometry(fRect _geometry) { setGeometry(_geometry); return this; }
 	View withLayout(Layout* _newLayout) { setLayout(_newLayout); return this; }
 	View withPadding(float _padding) { setPadding(_padding); return this; }
 	View withStretch(float _stretch) { setStretch(_stretch); return this; }
@@ -131,6 +133,7 @@ public:
 				ret += c->find<_T>();
 		return ret;
 	}
+
 	template <class _T> _T findFirst()
 	{
 		for (auto const& c: m_children)
@@ -140,6 +143,7 @@ public:
 				return r;
 		return _T();
 	}
+
 	template <class _T, class _U> _T findFirst(std::string const& _propertyName, _U const& _propertyValue)
 	{
 		for (auto const& c: m_children)
@@ -213,7 +217,7 @@ protected:
 private:
 	void checkCache();
 	void cleanCache();
-	void gatherDrawers(std::vector<ViewBody*>& _l, fCoord _o = fCoord(0, 0), bool _ancestorVisibileLayoutChanged = false);
+	bool gatherDrawers(std::vector<ViewBody*>& _l, fCoord _o = fCoord(0, 0), bool _ancestorVisibileLayoutChanged = false);
 
 	fRect m_geometry;					// Relative to the parent's coordinate system. (0, 0) is at parent's top left.
 	ViewBody* m_parent;					// Raw pointers are only allowed here because the parent will remove itself from here in its destructor.

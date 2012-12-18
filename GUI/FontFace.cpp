@@ -43,6 +43,9 @@ FontFace::FontFace(uint8_t const* _ttfData, float _size)
 
 void FontFace::draw(fCoord _anchor, string const& _text, RGBA _c)
 {
+	if (_text == "")
+		return;
+
 	assert(m_program.isValid());
 
 	std::vector<std::array<GLshort, 2> > layout(_text.size() * 6);

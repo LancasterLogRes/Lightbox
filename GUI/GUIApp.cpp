@@ -120,14 +120,16 @@ bool GUIApp::drawGraphics()
 	bool stillDirty = false;
 
 	vector<ViewBody*> drawers;
-	m_root->gatherDrawers(drawers);
-	if (find_if(drawers.begin(), drawers.end(), [](ViewBody* v){ return v->m_visibleLayoutChanged; }) != drawers.end())
+	bool visibleLayoutChanged = m_root->gatherDrawers(drawers);
+	if (visibleLayoutChanged)
 	{
 		// At least one resized drawer - reset and redraw everything (in the future we might attempt a more evolutionary cache design).
 		m_cache.clear();
 
+		cnote << "Drawers changed:";
 		for (ViewBody* v: drawers)
 		{
+			cnote << View(v);
 			v->m_dirty = true;
 			v->m_visibleLayoutChanged = false;
 			while (true)
@@ -223,7 +225,6 @@ bool GUIApp::drawGraphics()
 				// draw our view directly to framebuffer.
 				Context c;
 				c.offset = v->m_globalPosAsOfLastGatherDrawers;
-				debugOut(v);
 				LB_GL(glEnable, GL_SCISSOR_TEST);
 				LB_GL(glScissor, round(v->m_globalPosAsOfLastGatherDrawers.x()), GUIApp::joint().display->size().h() - round(v->geometry().h()) - round(v->m_globalPosAsOfLastGatherDrawers.y()), round(v->geometry().w()), round(v->geometry().h()));
 				v->draw(c);
