@@ -23,7 +23,7 @@ protected:
 class OverlayLayout: public Layout
 {
 public:
-	OverlayLayout(fVector4 _margins): m_margins(_margins) {}
+	OverlayLayout(fVector4 _margins = fVector4(0, 0, 0, 0)): m_margins(_margins) {}
 	virtual void layout(fSize _s);
 	virtual fSize minimumSize(fSize);
 	virtual fSize maximumSize(fSize);

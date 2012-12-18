@@ -4,7 +4,7 @@
 #include <App/App.h>
 #include <Common/Color.h>
 #include "Joint.h"
-#include "View.h"
+#include "Frame.h"
 
 namespace Lightbox
 {
@@ -27,7 +27,7 @@ public:
 
 	static GUIApp* get();
 	static Joint& joint() { return get()->m_joint; }
-	static View const& root() { return get()->m_root; }
+	static Frame const& root() { return get()->m_root; }
 	static Style const& style() { return get()->m_style; }
 
 	virtual void initGraphics(Display& _d);
@@ -39,7 +39,7 @@ public:
 	bool pointerLocked(int _id, View const& _v) const;
 
 private:
-	View m_root;
+	Frame m_root;
 	Joint m_joint;
 	Style m_style;
 

@@ -337,7 +337,18 @@ public:
 static const std::vector<float> NullVectorFloat;
 
 extern bool g_debugEnabled[256];
+template <uint8_t _Channel> struct LogName { static char const* const name = "   "; };
+static const uint8_t WarnChannel = 255;
+static const uint8_t NoteChannel = 254;
+static const uint8_t DebugChannel = 253;
+static const uint8_t LogChannel = 252;
+template <> struct LogName<WarnChannel> { static char const* const name = "!!!"; };
+template <> struct LogName<NoteChannel> { static char const* const name = "***"; };
+template <> struct LogName<DebugChannel> { static char const* const name = "---"; };
+template <> struct LogName<LogChannel> { static char const* const name = "LOG"; };
+
 extern std::function<void(std::string const&, unsigned char)> g_debugPost;
+extern std::function<void(char, std::string const&)> g_syslogPost;
 
 void simpleDebugOut(std::string const&, unsigned char);
 
@@ -353,14 +364,36 @@ public:
 
 #define LB_R(X) foreign_vector<uint8_t const>(X, X ## _len)
 
+template <bool _AutoSpacing = true>
+class SysLogOutputStream
+{
+public:
+	SysLogOutputStream() {}
+	~SysLogOutputStream() { if (sstr.str().size()) g_syslogPost('C', sstr.str()); }
+	template <class T> SysLogOutputStream& operator<<(T const& _t) { if (_AutoSpacing && sstr.str().size() && sstr.str().back() != ' ') sstr << " "; sstr << _t; return *this; }
+	static void write(char _type, std::string const& _s) { g_syslogPost(_type, _s); }
+	template <class _T> static void writePod(char _type, _T const& _s) { char const* begin = (char const*)&_s; char const* end = (char const*)&_s + sizeof(_T); g_syslogPost(_type, std::string(begin, end)); }
+	std::stringstream sstr;
+};
+
 }
 
 // Dirties the global namespace, but oh so convenient...
+#define cnote Lightbox::DebugOutputStream<NoteChannel, true>()
+#define cwarn Lightbox::DebugOutputStream<WarnChannel, true>()
+
 #define nbug(X) if (true) {} else Lightbox::NullOutputStream()
 #define nsbug(X) if (true) {} else Lightbox::NullOutputStream()
 #define ndebug if (true) {} else Lightbox::NullOutputStream()
+
+#if DEBUG
 #define cbug(X) Lightbox::DebugOutputStream<X>()
 #define csbug(X) Lightbox::DebugOutputStream<X, false>()
-#define cdebug Lightbox::DebugOutputStream<253, true>()
-#define cnote Lightbox::DebugOutputStream<254, true>()
-#define cwarn Lightbox::DebugOutputStream<255, true>()
+#define cdebug Lightbox::DebugOutputStream<DebugChannel, true>()
+#else
+#define cbug(X) nbug(X)
+#define csbug(X) nsbug(X)
+#define cdebug ndebug
+#endif
+
+#define clog Lightbox::SysLogOutputStream<true>()

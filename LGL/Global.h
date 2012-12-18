@@ -61,6 +61,7 @@ template <class _T, size_t _z> struct GLTypeTraits<std::array<_T, _z> >: public 
 // TODO: Vector2/3/4
 
 static const unsigned SnoopGL = 100;
+template <> struct LogName<SnoopGL> { static char const* const name = "LGL"; };
 
 void checkGlError(const char* op);
 char const* glSymbolString(int _s);

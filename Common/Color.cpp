@@ -69,9 +69,9 @@ void Color::convertFrom(ColorSpace _cc, float _x, float _y, float _z, float _w)
 
 fVector4 Color::convertTo(ColorSpace _cc) const
 {
-	float x;
-	float y;
-	float z;
+	float x = 0.f;
+	float y = 0.f;
+	float z = 0.f;
 	float w = 1.f;
 
 	switch (_cc)
@@ -82,9 +82,6 @@ fVector4 Color::convertTo(ColorSpace _cc) const
 	case RGBSpace:
 	case RGB8Space:
 	{
-		double      hh, p, q, t, ff;
-		long        i;
-
 		if (m_sat <= 0.f)
 		{       // < is bogus, just shuts up warnings
 			if (isnan(m_hue))
@@ -101,15 +98,15 @@ fVector4 Color::convertTo(ColorSpace _cc) const
 			z = m_value;
 			break;
 		}
-		hh = m_hue;
+		float hh = m_hue;
 		if (hh >= 1.f)
 			hh = 0.f;
 		hh *= 6.f;
-		i = (long)hh;
-		ff = hh - i;
-		p = m_value * (1.f - m_sat);
-		q = m_value * (1.f - (m_sat * ff));
-		t = m_value * (1.f - (m_sat * (1.f - ff)));
+		int i = hh;
+		float ff = hh - i;
+		float p = m_value * (1.f - m_sat);
+		float q = m_value * (1.f - (m_sat * ff));
+		float t = m_value * (1.f - (m_sat * (1.f - ff)));
 
 		switch (i)
 		{
