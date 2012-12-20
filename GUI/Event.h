@@ -22,6 +22,12 @@ struct TouchDownEvent: public TouchEvent { TouchDownEvent(int _id, iCoord _globa
 struct TouchUpEvent: public TouchEvent { TouchUpEvent(int _id, iCoord _global): TouchEvent(_id, _global) {} };
 struct TouchMoveEvent: public TouchEvent { TouchMoveEvent(int _id, iCoord _global): TouchEvent(_id, _global) {} };
 
+struct BatteryEvent: public Event
+{
+	BatteryEvent(int _level): level(_level) {}
+	int level;
+};
+
 }
 
 

@@ -259,10 +259,10 @@ bool ViewBody::sensesEvent(Event* _e)
 	// Safely kill this safety measure - we're definitely out of the constructor.
 	finalConstructor();
 
-	if (m_isShown && m_isEnabled)
-		if (auto e = dynamic_cast<TouchEvent*>(_e))
-			return m_geometry.contains(e->local);
-	return false;
+	if (auto e = dynamic_cast<TouchEvent*>(_e))
+		return m_isShown && m_isEnabled && m_geometry.contains(e->local);
+	else
+		return true;
 }
 
 bool ViewBody::handleEvent(Event* _e)

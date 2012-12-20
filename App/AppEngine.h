@@ -14,6 +14,9 @@ struct AInputEvent;
 #elif !defined(LIGHTBOX_CROSS)
 #endif
 
+struct _JNIEnv;
+typedef _JNIEnv JNIEnv;
+
 namespace Lightbox
 {
 
@@ -67,6 +70,7 @@ private:
 	std::array<iCoord, 5> m_pointerState;
 
 	struct android_app* m_androidApp;	///< The Android app object. Always valid.
+	JNIEnv* m_jni;
 
 	std::function<void()> m_onDoneLastActivity;
 #elif !defined(LIGHTBOX_CROSS)

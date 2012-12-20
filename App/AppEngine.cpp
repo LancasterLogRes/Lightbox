@@ -28,6 +28,8 @@ AppEngine::AppEngine(struct android_app* _app):
 	m_androidApp->onAppCmd = engine_handle_cmd;
 	m_androidApp->onInputEvent = engine_handle_input;
 
+	m_androidApp->activity->vm->AttachCurrentThread(&m_jni, nullptr);
+
 	s_this = this;
 
 	if (m_androidApp->savedState && m_app)
@@ -42,6 +44,9 @@ AppEngine::AppEngine()
 
 AppEngine::~AppEngine()
 {
+#if LIGHTBOX_ANDROID
+	m_androidApp->activity->vm->DetachCurrentThread();
+#endif
 }
 
 void AppEngine::startActivity(string const& _app, string const& _intent, function<void()> const& _onDone)
@@ -70,15 +75,12 @@ void AppEngine::setApp(App* _app)
 	m_app = std::shared_ptr<App>(_app);
 }
 
-#if LIGHTBOX_ANDROID
 static const Time c_frameTime = FromSeconds<1>::value / 60;
-#else
-static const Time c_frameTime = FromSeconds<1>::value / 60;
-#endif
 
 void AppEngine::exec()
 {
 	m_app->go();
+	m_app->sendInitialEvents();
 
 #if LIGHTBOX_USE_XLIB
 	gfxInit();

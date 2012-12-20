@@ -100,16 +100,25 @@ cross {
                 cp '"$${DESTDIR}/lib$${TARGET}.so"' '"$${OBJECTS_DIR}wrap/libs/armeabi"' &&\
                 sed '\'s/"android.app.lib_name" android:value=""/"android.app.lib_name" android:value="$$TARGET"/\'' '$${ANDROID_MANIFEST}' > '"$${OBJECTS_DIR}wrap/AndroidManifest.xml"' &&\
                 mkdir -p '"$${OBJECTS_DIR}wrap/res/values"' &&\
+                mkdir -p '"$${OBJECTS_DIR}wrap/src/com/lancasterlogicresponse/wrapper"' &&
+            !isEmpty(ANDROID_JAVA_SOURCES) {
+                QMAKE_POST_LINK += cp '$${ANDROID_JAVA_SOURCES}' '"$${OBJECTS_DIR}wrap/src/com/lancasterlogicresponse/wrapper"' &&
+            }
+            isEmpty(ANDROID_JAVA_SOURCES) {
+                QMAKE_POST_LINK += mv '"$${OBJECTS_DIR}wrap/AndroidManifest.xml"' '"$${OBJECTS_DIR}wrap/AndroidManifest.xml.tmp"' && \
+                    sed '\'s/<application android:label="@string/app_name">/<application android:label="@string/app_name" android:hasCode="false">/\'' '"$${OBJECTS_DIR}wrap/AndroidManifest.xml.tmp"' > '"$${OBJECTS_DIR}wrap/AndroidManifest.xml"' &&
+            }
+            QMAKE_POST_LINK += \
                 echo '\'<?xml version="1.0" encoding="utf-8"?><resources><string name="app_name">Mark2</string></resources>\'' > '$${OBJECTS_DIR}wrap/res/values/strings.xml' &&\
                 mkdir -p '"$${OBJECTS_DIR}wrap/assets"' &&\
                 for i in $${ANDROID_ASSETS}; do ln -s '\$\$i' '"$${OBJECTS_DIR}wrap/assets"'; done &&\
                 $${SDK_PATH}/tools/android update project -p '$${OBJECTS_DIR}wrap' -t android-15 -n $$TARGET &&\
                 ant debug -buildfile '$${OBJECTS_DIR}wrap/build.xml' &&\
                 mv '$${OBJECTS_DIR}wrap/bin/$$TARGET-debug.apk' '$${DESTDIR}/$${TARGET}.apk' &&\
-                rm -rf '$${OBJECTS_DIR}wrap' &&\
                 echo DONE.
             QMAKE_CLEAN = '$${DESTDIR}$${TARGET}.apk'
         }
+#                rm -rf '$${OBJECTS_DIR}wrap' &&\
 
         message($$QMAKE_CXX)
 

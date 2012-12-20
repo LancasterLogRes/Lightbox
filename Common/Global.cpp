@@ -39,7 +39,7 @@ void simpleDebugOut(std::string const& _s, unsigned char _id)
 {
 	if (g_debugEnabled[_id])
 #if LIGHTBOX_ANDROID
-		(void)__android_log_print(_id == WarnChannel ? ANDROID_LOG_ERROR : _id == NoteChannel ? ANDROID_LOG_WARN : _id == DebugChannel ? ANDROID_LOG_INFO : ANDROID_LOG_INFO, LIGHTBOX_BITS_STRINGIFY("Lightbox"), "%s\n", _s.c_str());
+		(void)__android_log_print(_id == WarnChannel ? ANDROID_LOG_WARN : _id == NoteChannel ? ANDROID_LOG_INFO : _id == DebugChannel ? ANDROID_LOG_DEBUG : ANDROID_LOG_VERBOSE, LIGHTBOX_BITS_STRINGIFY("Lightbox"), "%s\n", _s.c_str());
 #else
 		std::cout << (g_debugName[_id] ? g_debugName[_id] : "   ") << " " << _s << std::endl << std::flush;
 #endif
