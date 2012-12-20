@@ -20,6 +20,10 @@ public:
 
 	virtual void initGraphics(Display&) {}
 	virtual bool drawGraphics() { return true; }
+	virtual void finiGraphics(Display&) {}
+
+	virtual void go() {}
+
 	virtual foreign_vector<uint8_t const> state() { return foreign_vector<uint8_t const>(); }
 	virtual void setState(foreign_vector<uint8_t> const&) {}
 

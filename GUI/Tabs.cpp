@@ -20,7 +20,7 @@ TabsBody::~TabsBody()
 
 void TabsBody::addTab(std::string const& _title, View const& _page)
 {
-	_page->setVisible(!children().size());
+	_page->show(!children().size());
 	_page->setProperty("_TabsBody:Title", _title);
 	_page->setParent(this);
 }
@@ -36,7 +36,7 @@ bool TabsBody::event(Event* _e)
 			fCoord cursor(0, 0);
 			for (auto const& c: children())
 			{
-				c->setVisible(fRect(cursor, tabSize).contains(pos));
+				c->show(fRect(cursor, tabSize).contains(pos));
 				cursor.setX(cursor.x() + tabSize.w());
 			}
 			update();
@@ -54,7 +54,7 @@ void TabsBody::draw(Context const& _c)
 		for (auto const& c: children())
 		{
 			string title = c->property<string>("_TabsBody:Title");
-			bool isActive = c->isVisible();
+			bool isActive = c->isShown();
 			_c.rect(tab, isActive ? GUIApp::style().high : GUIApp::style().back, -.1f);
 			_c.text(isActive ? GUIApp::style().bold : GUIApp::style().regular, tab.lerp(.5f, .5f), title, RGBA::Black);
 			tab.translate(fSize(tab.w(), 0));

@@ -28,7 +28,9 @@ protected:
 	
 	virtual bool event(Event* _e);
 	virtual void draw(Context const& _c);
-	
+	virtual void initGraphics();
+	virtual void finiGraphics();
+
 	virtual fSize specifyMinimumSize(fSize) const;
 	virtual fSize specifyMaximumSize(fSize) const;
 	virtual fSize specifyFit(fSize _space) const;

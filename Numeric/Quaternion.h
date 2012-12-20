@@ -54,7 +54,7 @@ public:
 	}
 
 	using Super::operator*=;
-	This operator*=(This _b) { set(w()*_b.x() + x()*_b.w() + y()*_b.z() - z()*_b.y(), w()*_b.y() - x()*_b.z() + y()*_b.w() + z()*_b.x(), w()*_b.z() + x()*_b.y() - y()*_b.x() + z()*_b.w(), w()*_b.w() - x()*_b.x() - y()*_b.y() - z()*_b.z()); return *this; }
+	This operator*=(This _b) { Super::set(w()*_b.x() + x()*_b.w() + y()*_b.z() - z()*_b.y(), w()*_b.y() - x()*_b.z() + y()*_b.w() + z()*_b.x(), w()*_b.z() + x()*_b.y() - y()*_b.x() + z()*_b.w(), w()*_b.w() - x()*_b.x() - y()*_b.y() - z()*_b.z()); return *this; }
 
 	bool operator==(This _c) const { return compare(_c); }
 	bool operator!=(This _c) const { return !compare(_c); }
@@ -119,10 +119,10 @@ public:
 	using Super::length3;
 	using Super::lengthSquared;
 
-	This normalized() const { return This(slashed(length())); }
-	This conjugate() const { return This(scaled(This(-1, -1, -1, 1))); }
-	void normalize() { slash(length()); }
-	void conjuggle() { scale(This(-1, -1, -1, 1)); }
+	This normalized() const { return This(Super::slashed(length())); }
+	This conjugate() const { return This(Super::scaled(This(-1, -1, -1, 1))); }
+	void normalize() { Super::slash(length()); }
+	void conjuggle() { Super::scale(This(-1, -1, -1, 1)); }
 
 	/**
 	 * Quaternions can be used as a compound vector stored as a unit length vector and a length.

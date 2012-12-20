@@ -2,6 +2,7 @@
 
 #include <Common/Global.h>
 #include <Common/UnitTesting.h>
+#include <Common/Maths.h>
 
 #define cross %
 #define dot *

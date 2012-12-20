@@ -26,6 +26,5 @@ void TextLabelBody::draw(Context const& _c)
 
 fSize TextLabelBody::specifyMinimumSize(fSize) const
 {
-	auto const& f = m_font.isValid() ? m_font : GUIApp::style().regular;
-	return f.measure(m_text);
+	return GUIApp::get() ? (m_font.isValid() ? m_font : GUIApp::style().regular).measure(m_text) : fSize(0, 0);
 }

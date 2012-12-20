@@ -30,6 +30,7 @@ GUIApp::~GUIApp()
 
 void GUIApp::initGraphics(Display& _d)
 {
+	cnote << "Initializing GUI graphics";
 	cnote << "Version" << (char const*)glGetString(GL_VERSION);
 	cnote << "Vendor" << (char const*)glGetString(GL_VENDOR);
 	cnote << "Renderer" << (char const*)glGetString(GL_RENDERER);
@@ -47,6 +48,18 @@ void GUIApp::initGraphics(Display& _d)
 	m_style.back = Color(RGBSpace, .4f, .5f, .6f, 1.f);
 	m_style.high = Color(RGB8Space, 0xf3, 0xa3, 0x19);
 	m_root->setGeometry(fRect(0, 0, _d.width(), _d.height()));
+	m_root->initGraphicsRecursive();
+	m_root->show(true);
+}
+
+void GUIApp::finiGraphics(Display&)
+{
+	cnote << "Finalizing GUI graphics";
+	m_root->finiGraphicsRecursive();
+	m_joint = Joint();
+	m_style = Style();
+	m_cache.clear();
+	m_root->show(false);
 }
 
 static const uSize s_pageSize(2048, 2048);
@@ -186,7 +199,7 @@ bool GUIApp::drawGraphics()
 						LB_GL(glScissor, texRect.x(), texRect.y(), texRect.w(), texRect.h());
 						LB_GL(glClear, GL_COLOR_BUFFER_BIT);
 						GUIApp::joint().u_displaySize = (vec2)(fSize)texRect.size();
-						v.first->draw(Context());
+						v.first->executeDraw(Context());
 						if (!v.first->m_isEnabled)
 							Context().rect(fRect(fCoord(0, 0), (fSize)texRect.size()), Color(0.f, .5f));
 						v.first->m_dirty = false;
@@ -227,7 +240,7 @@ bool GUIApp::drawGraphics()
 				c.offset = v->m_globalPosAsOfLastGatherDrawers;
 				LB_GL(glEnable, GL_SCISSOR_TEST);
 				LB_GL(glScissor, round(v->m_globalPosAsOfLastGatherDrawers.x()), GUIApp::joint().display->size().h() - round(v->geometry().h()) - round(v->m_globalPosAsOfLastGatherDrawers.y()), round(v->geometry().w()), round(v->geometry().h()));
-				v->draw(c);
+				v->executeDraw(c);
 				if (!v->m_isEnabled)
 					c.rect(fRect(0, 0, round(v->geometry().w()), round(v->geometry().h())), Color(0.f, .5f));
 				LB_GL(glDisable, GL_SCISSOR_TEST);

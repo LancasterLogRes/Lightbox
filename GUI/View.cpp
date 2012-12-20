@@ -136,10 +136,11 @@ ViewBody::ViewBody():
 	m_childIndex(0),
 	m_stretch(1.f),
 	m_padding(0, 0, 0, 0),
-	m_isVisible(true),
+	m_isShown(true),
 	m_isEnabled(true),
 	m_dirty(true),
-	m_isCorporal(true)
+	m_isCorporal(true),
+	m_graphicsInitialized(false)
 {
 	// Allows it to always stay alive during the construction process, even if an intrusive_ptr
 	// is destructed within it. This must be explicitly decremented at some point afterwards,
@@ -160,23 +161,39 @@ ViewBody::~ViewBody()
 	clearChildren();
 }
 
+void ViewBody::executeDraw(Context const& _c)
+{
+	if (!m_graphicsInitialized)
+	{
+		initGraphics();
+		m_graphicsInitialized = true;
+	}
+	draw(_c);
+}
+
 void ViewBody::clearChildren()
 {
 	// Mustn't use a for loop as the iterator will become invalid as the child removes
 	// itself from it in the setParent call.
 	while (m_children.size())
-		(*m_children.begin())->setParent(nullptr);
+	{
+		// The child must stay valid for the duration of the call...
+		View c = *m_children.begin();
+		c->setParent(nullptr);
+	}
 }
 
 void ViewBody::update()
 {
 	m_dirty = true;
 	m_wasDirty = false;
-	GUIApp::joint().display->setOneOffAnimating();
+	if (GUIApp::get() && GUIApp::joint().display)
+		GUIApp::joint().display->setOneOffAnimating();
 }
 
 void ViewBody::setParent(View const& _p)
 {
+//	cnote << "(" << View(this) << ")->setParent(" << _p << ")";
 	if (m_parent != _p)
 	{
 		auto op = m_parent;
@@ -213,7 +230,7 @@ bool ViewBody::gatherDrawers(std::vector<ViewBody*>& _l, fCoord _o, bool _ancest
 	// during the compositing stage otherwise.
 	_ancestorVisibleLayoutChanged |= m_visibleLayoutChanged;
 
-	if (m_isCorporal && m_isVisible)
+	if (m_isCorporal && m_isShown)
 	{
 		// If we're going to draw, we need to flag ourselves as visible-layout-changed if us or
 		// any of our ancestors have had their layout visibly changed.
@@ -226,7 +243,7 @@ bool ViewBody::gatherDrawers(std::vector<ViewBody*>& _l, fCoord _o, bool _ancest
 		// Otherwise, the tree traversal ends here.
 		m_visibleLayoutChanged = false;
 
-	if (m_isVisible)
+	if (m_isShown)
 		for (auto const& ch: m_children)
 			ret = ch->gatherDrawers(_l, m_globalPosAsOfLastGatherDrawers, _ancestorVisibleLayoutChanged) || ret;
 
@@ -242,7 +259,7 @@ bool ViewBody::sensesEvent(Event* _e)
 	// Safely kill this safety measure - we're definitely out of the constructor.
 	finalConstructor();
 
-	if (m_isVisible && m_isEnabled)
+	if (m_isShown && m_isEnabled)
 		if (auto e = dynamic_cast<TouchEvent*>(_e))
 			return m_geometry.contains(e->local);
 	return false;
@@ -341,7 +358,7 @@ std::string Lightbox::toString(View const& _v, std::string const& _insert)
 {
 	std::stringstream out;
 	out << (_v->m_isEnabled ? "EN" : "--") << " "
-		<< (_v->m_isVisible ? "VIS" : "hid") << " "
+		<< (_v->m_isShown ? "VIS" : "hid") << " "
 		<< (_v->m_isCorporal ? "DRAW" : "ndrw") << " ["
 		<< (_v->m_dirty ? "DIRTY" : "clean") << " "
 		<< (_v->m_visibleLayoutChanged ? "XLAYX" : " lay ") << "] "

@@ -14,4 +14,4 @@
 #include "PatternPicker.cpp"
 #include "DirectionPicker.cpp"
 #include "Frame.cpp"
-
+#include "ProgressBar.cpp"

@@ -32,6 +32,7 @@ public:
 
 	virtual void initGraphics(Display& _d);
 	virtual bool drawGraphics();
+	virtual void finiGraphics(Display& _d);
 	virtual bool motionEvent(int _id, iCoord _pos, int _direction);
 
 	bool lockPointer(int _id, View const& _v);

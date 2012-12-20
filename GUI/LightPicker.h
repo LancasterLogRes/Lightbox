@@ -33,7 +33,10 @@ protected:
 	virtual void draw(Context const& _c);
 	virtual fSize specifyFit(fSize _space) const;
 
-	void lightChanged(bool _userEvent) { if (m_onLightChanged && _userEvent) m_onLightChanged(this); update(); }
+	virtual void lightChanged(bool _userEvent) { if (m_onLightChanged && _userEvent) m_onLightChanged(this); update(); }
+
+	virtual void initGraphics();
+	virtual void finiGraphics();
 	
 private:
 	Program m_lightBar;

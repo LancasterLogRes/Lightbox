@@ -379,8 +379,8 @@ public:
 }
 
 // Dirties the global namespace, but oh so convenient...
-#define cnote Lightbox::DebugOutputStream<NoteChannel, true>()
-#define cwarn Lightbox::DebugOutputStream<WarnChannel, true>()
+#define cnote Lightbox::DebugOutputStream<Lightbox::NoteChannel, true>()
+#define cwarn Lightbox::DebugOutputStream<Lightbox::WarnChannel, true>()
 
 #define nbug(X) if (true) {} else Lightbox::NullOutputStream()
 #define nsbug(X) if (true) {} else Lightbox::NullOutputStream()
@@ -389,7 +389,7 @@ public:
 #if DEBUG
 #define cbug(X) Lightbox::DebugOutputStream<X>()
 #define csbug(X) Lightbox::DebugOutputStream<X, false>()
-#define cdebug Lightbox::DebugOutputStream<DebugChannel, true>()
+#define cdebug Lightbox::DebugOutputStream<Lightbox::DebugChannel, true>()
 #else
 #define cbug(X) nbug(X)
 #define csbug(X) nsbug(X)

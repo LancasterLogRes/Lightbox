@@ -9,12 +9,23 @@ using namespace Lightbox;
 
 HuePickerBody::HuePickerBody()
 {
-	m_hueWheel = Program(Shader::vertex(LB_R(HueWheel_vert)), Shader::fragment(LB_R(HueWheel_frag)));
-	m_hueWheel.tie(GUIApp::joint().uniforms);
 }
 
 HuePickerBody::~HuePickerBody()
 {
+}
+
+void HuePickerBody::initGraphics()
+{
+	cnote << "HuePicker::initGraphics";
+	m_hueWheel = Program(Shader::vertex(LB_R(HueWheel_vert)), Shader::fragment(LB_R(HueWheel_frag)));
+	m_hueWheel.tie(GUIApp::joint().uniforms);
+}
+
+void HuePickerBody::finiGraphics()
+{
+	cnote << "HuePicker::finiGraphics";
+	m_hueWheel = Program();
 }
 
 bool HuePickerBody::event(Event* _e)

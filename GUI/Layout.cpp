@@ -147,7 +147,7 @@ void VerticalLayout::layout(fSize _s)
 	if (m_view)
 	{
 		vector<float> sizes = doLayout(_s, _s.height(), m_view->children(), [](View const& c, fSize s) { return s.height() + c->padding().y() + c->padding().w(); });
-		cdebug << "Sum/total:" << sumOf(sizes) << _s.height();
+//		cdebug << "Sum/total:" << sumOf(sizes) << _s.height();
 		fCoord cursor(0, 0);
 		auto i = sizes.begin();
 		for (auto const& c: m_view->children())

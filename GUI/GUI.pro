@@ -24,7 +24,8 @@ SOURCES += \
     PatternPicker.cpp \
     DirectionPicker.cpp \
     Frame.cpp \
-    Collated.cpp
+    Collated.cpp \
+    ProgressBar.cpp
 
 HEADERS += \
     View.h \
@@ -44,7 +45,8 @@ HEADERS += \
     LightPicker.h \
     PatternPicker.h \
     DirectionPicker.h \
-    Frame.h
+    Frame.h \
+    ProgressBar.h
 OTHER_FILES += Shaders.resources View.frag View.vert \
     Fonts.resources \
     Flat.frag \

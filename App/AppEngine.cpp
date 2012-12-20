@@ -19,7 +19,8 @@ using namespace Lightbox;
 AppEngine* AppEngine::s_this = nullptr;
 
 #if LIGHTBOX_ANDROID
-AppEngine::AppEngine(struct android_app* _app):m_androidApp(_app)
+AppEngine::AppEngine(struct android_app* _app):
+	m_androidApp(_app)
 {
 	app_dummy();
 
@@ -43,6 +44,27 @@ AppEngine::~AppEngine()
 {
 }
 
+void AppEngine::startActivity(string const& _app, string const& _intent, function<void()> const& _onDone)
+{
+#if LIGHTBOX_ANDROID
+	char const* args[] = { "/system/bin/am", "start", "-a", _intent.c_str(), _app.c_str() };
+	cnote << "executing " << args[0] << args[1] << args[2] << args[3] << args[4];
+	if (!fork())
+	{
+		execvp(args[0], (char**)args);
+		exit(0);
+	}
+	m_onDoneLastActivity = _onDone;
+	/*	jclass appClass = mEnv->GetObjectClass();
+	jmethodID mid = mEnv->GetMethodID(appClass, "openURL", "(Ljava/lang/String;)V");
+	mEnv->CallVoidMethod(appClassObj, mid, mEnv->NewStringUTF(url));
+	appClassObj = m_androidApp->NewGlobalRef(thiz);*/
+#else
+	_onDone();
+#endif
+
+}
+
 void AppEngine::setApp(App* _app)
 {
 	m_app = std::shared_ptr<App>(_app);
@@ -56,6 +78,8 @@ static const Time c_frameTime = FromSeconds<1>::value / 60;
 
 void AppEngine::exec()
 {
+	m_app->go();
+
 #if LIGHTBOX_USE_XLIB
 	gfxInit();
 	gfxDraw();
@@ -192,6 +216,9 @@ void AppEngine::gfxDraw()
 
 void AppEngine::gfxFini()
 {
+	if (m_app)
+		m_app->finiGraphics(*m_display);
+
 	m_display.reset();
 }
 
@@ -263,6 +290,7 @@ void AppEngine::engine_handle_cmd(struct android_app* app, int32_t cmd)
 
 void AppEngine::handleCommand(int32_t _cmd)
 {
+	cnote << "Got command" << _cmd;
 	switch (_cmd)
 	{
 	case APP_CMD_SAVE_STATE:
@@ -278,6 +306,11 @@ void AppEngine::handleCommand(int32_t _cmd)
 		if (m_androidApp->window)
 		{
 			gfxInit();
+
+			if (m_onDoneLastActivity)
+				m_onDoneLastActivity();
+			m_onDoneLastActivity = nullptr;
+
 			gfxDraw();
 		}
 		break;

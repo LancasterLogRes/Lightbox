@@ -61,7 +61,10 @@ std::string toString(View const& _v, std::string const& _insert = std::string())
 
 template <class _T> _T& operator<<(_T& _out, View const& _v)
 {
-	_out << toString(_v);
+	if (_v)
+		_out << toString(_v);
+	else
+		_out << "View(0)";
 	return _out;
 }
 
@@ -108,7 +111,9 @@ public:
 	void setGeometry(fRect _geometry) { m_geometry = _geometry; resized(); }
 	void resize(fSize _size) { auto g = m_geometry; g.resize(_size); setGeometry(g); }
 	void setEnabled(bool _en) { m_isEnabled = _en; update(); }
-	void setVisible(bool _vi) { if (m_isVisible != _vi) { m_isVisible = _vi; visibilityChanged(); } }
+	void show(bool _vi) { if (m_isShown != _vi) { m_isShown = _vi; shownChanged(); if (!m_parent || m_parent->isVisible()) visibilityChangedRecursive(m_isShown); } }
+	void hide() { show(false); }
+
 	void setChildIndex(ChildIndex _i) { if (m_parent) { m_references++; m_parent->m_children.erase(this); m_childIndex = _i; m_parent->m_children.insert(this); m_references--; } else m_childIndex = _i; noteMetricsChanged(); }
 	void setLayout(Layout* _newLayout) { m_layout = _newLayout; m_layout->m_view = this; noteLayoutDirty(); }
 	void setStretch(float _stretch) { m_stretch = _stretch; noteMetricsChanged(); }
@@ -160,9 +165,12 @@ public:
 	void clearChildren();
 
 	bool isEnabled() const { return m_isEnabled; }
-	bool isVisible() const { return m_isVisible; }
+	bool isShown() const { return m_isShown; }
+	bool isHidden() const { return !m_isShown; }
+	bool isVisible() const { return m_isShown && (!m_parent || parent()->isVisible()); }
 	ChildIndex childIndex() const { return m_childIndex; }
 	fRect geometry() const { return m_geometry; }
+	fRect rect() const { return fRect(fCoord(0, 0), fSize(m_geometry.size())); }
 	View parent() const { return View(m_parent); }
 	Layout* layout() const { return m_layout; }
 	float stretch() const { return m_stretch; }
@@ -208,16 +216,25 @@ protected:
 	virtual void draw(Context const& _c);
 	virtual bool event(Event*) { return false; }
 	virtual void resized() { m_visibleLayoutChanged = true; relayout(); update(); }
-	virtual void visibilityChanged() { m_visibleLayoutChanged = true; update(); }
+	virtual void shownChanged() { m_visibleLayoutChanged = true; update(); }
+	virtual void visibilityChanged() {}
 
 	virtual fSize specifyMinimumSize(fSize) const;	// default is determined by layout.
 	virtual fSize specifyMaximumSize(fSize) const;	// default is determined by layout.
 	virtual fSize specifyFit(fSize _space) const;	// default is determined by layout.
 
+	virtual void initGraphics() {}
+	virtual void finiGraphics() {}
+
 private:
 	void checkCache();
 	void cleanCache();
 	bool gatherDrawers(std::vector<ViewBody*>& _l, fCoord _o = fCoord(0, 0), bool _ancestorVisibileLayoutChanged = false);
+
+	void executeDraw(Context const& _c);
+	void initGraphicsRecursive() { if (!m_graphicsInitialized) { initGraphics(); m_graphicsInitialized = true; } for (auto const& c: m_children) c->initGraphicsRecursive(); }
+	void finiGraphicsRecursive() { for (auto const& c: m_children) c->finiGraphicsRecursive(); if (m_graphicsInitialized) { finiGraphics(); m_graphicsInitialized = false; } }
+	void visibilityChangedRecursive(bool _newRootVisibility) { for (auto const& c: m_children) if (c->m_isShown) c->visibilityChangedRecursive(_newRootVisibility); visibilityChanged(); }
 
 	fRect m_geometry;					// Relative to the parent's coordinate system. (0, 0) is at parent's top left.
 	ViewBody* m_parent;					// Raw pointers are only allowed here because the parent will remove itself from here in its destructor.
@@ -229,13 +246,14 @@ private:
 	ChildIndex m_childIndex;
 	float m_stretch;
 	fVector4 m_padding;
-	bool m_isVisible;
+	bool m_isShown;
 	bool m_isEnabled;
 	mutable bool m_dirty;
 	mutable bool m_visibleLayoutChanged;
 	bool m_isCorporal;
 	fCoord m_globalPosAsOfLastGatherDrawers;
 	bool m_wasDirty;
+	bool m_graphicsInitialized;
 };
 
 inline void intrusive_ptr_add_ref(ViewBody* _v)

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <functional>
 #include <memory>
 #include <array>
 #include <Numeric/Coord.h>
@@ -36,6 +37,8 @@ public:
 	void setApp(App* _app);
 	Display& display() { return *m_display; }
 
+	void startActivity(std::string const& _application, std::string const& _intent, std::function<void()> const& _onDone);
+
 	Time lastDrawTime() const { return m_lastDrawTime; }
 
 	void exec();
@@ -64,6 +67,8 @@ private:
 	std::array<iCoord, 5> m_pointerState;
 
 	struct android_app* m_androidApp;	///< The Android app object. Always valid.
+
+	std::function<void()> m_onDoneLastActivity;
 #elif !defined(LIGHTBOX_CROSS)
 #endif
 

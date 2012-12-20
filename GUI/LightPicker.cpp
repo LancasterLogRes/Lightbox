@@ -10,12 +10,21 @@ LightPickerBody::LightPickerBody():
 	m_light(.5f),
 	m_middle(0.f, 0.f, .5f)
 {
-	m_lightBar = Program(Shader::vertex(LB_R(LightBar_vert)), Shader::fragment(LB_R(HueWheel_frag)));
-	m_lightBar.tie(GUIApp::joint().uniforms);
 }
 
 LightPickerBody::~LightPickerBody()
 {
+}
+
+void LightPickerBody::initGraphics()
+{
+	m_lightBar = Program(Shader::vertex(LB_R(LightBar_vert)), Shader::fragment(LB_R(HueWheel_frag)));
+	m_lightBar.tie(GUIApp::joint().uniforms);
+}
+
+void LightPickerBody::finiGraphics()
+{
+	m_lightBar = Program();
 }
 
 bool LightPickerBody::event(Event* _e)

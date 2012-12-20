@@ -56,5 +56,6 @@ void BasicButtonBody::tapped()
 
 fSize BasicButtonBody::specifyMinimumSize(fSize) const
 {
-	return GUIApp::style().bold.measure(m_text);
+	// Until Fonts work without renderer.
+	return GUIApp::get() ? GUIApp::style().bold.measure(m_text) : fSize(0, 0);
 }
