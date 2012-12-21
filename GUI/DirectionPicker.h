@@ -19,6 +19,7 @@ public:
 
 	~DirectionPickerBody();
 
+	fRect limits() const { return fRect(m_direction - m_radius / 2.f, m_radius * 2.f); }
 	fCoord direction() const { return m_direction; }
 	fSize radius() const { return m_radius; }
 	Mode mode() { return m_mode; }

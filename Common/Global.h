@@ -301,11 +301,12 @@ public:
 	foreign_vector(): m_data(nullptr), m_count(0) {}
 	foreign_vector(std::vector<typename std::remove_const<_T>::type>* _data): m_data(_data->data()), m_count(_data->size()) {}
 	foreign_vector(_T* _data, unsigned _count): m_data(_data), m_count(_count) {}
+	foreign_vector(std::shared_ptr<std::vector<typename std::remove_const<_T>::type> > const& _data): m_data(_data->data()), m_count(_data->size()), m_lock(_data) {}
 
 	explicit operator bool() const { return m_data && m_count; }
 
-	_T* data() { return m_data; }
-	_T const* data() const { return m_data; }
+	_T* data() const { return m_data; }
+//	_T const* data() const { return m_data; }
 	unsigned count() const { return m_count; }
 	unsigned size() const { return m_count; }
 	foreign_vector& tied(std::shared_ptr<void> const& _lock) { m_lock = _lock; return *this; }
