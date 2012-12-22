@@ -231,6 +231,17 @@ typedef double d4sf __attribute__ ((vector_size (32)));
 namespace Lightbox
 {
 
+template <unsigned _Size> struct Int {};
+template <unsigned _Size> struct Uint {};
+template <> struct Uint<1> { typedef uint8_t type; };
+template <> struct Int<1> { typedef int8_t type; };
+template <> struct Uint<2> { typedef uint16_t type; };
+template <> struct Int<2> { typedef int16_t type; };
+template <> struct Uint<4> { typedef uint32_t type; };
+template <> struct Int<4> { typedef int32_t type; };
+template <> struct Uint<8> { typedef uint64_t type; };
+template <> struct Int<8> { typedef int64_t type; };
+
 template <class _T> _T const& NullReturn() { static const _T s_ret = _T(); return s_ret; }
 
 template <class _T> _T defaultTo(_T _val, _T _default, _T _invalid = (_T)0)
@@ -305,13 +316,18 @@ public:
 
 	explicit operator bool() const { return m_data && m_count; }
 
+	std::vector<_T> toVector() const { return std::vector<_T>(m_data, m_data + m_count); }
+
 	_T* data() const { return m_data; }
 //	_T const* data() const { return m_data; }
 	unsigned count() const { return m_count; }
 	unsigned size() const { return m_count; }
 	foreign_vector& tied(std::shared_ptr<void> const& _lock) { m_lock = _lock; return *this; }
+	std::shared_ptr<void> const& tie() { return m_lock; }
 	foreign_vector<_T> next() const { return foreign_vector<_T>(m_data + m_count, m_count).tied(m_lock); }
 	foreign_vector<_T> cropped(unsigned _begin, unsigned _count) const { return foreign_vector<_T>(m_data + _begin, _count).tied(m_lock); }
+	void retarget(_T const* _d, size_t _s) { m_data = _d; m_count = _s; }
+	void retarget(std::vector<_T> const& _t) { m_data = _t.data(); m_count = _t.size(); }
 
 	_T* begin() { return m_data; }
 	_T* end() { return m_data + m_count; }
