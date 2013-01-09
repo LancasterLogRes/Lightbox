@@ -152,6 +152,11 @@ template <class T, class U> inline T clamp(T _v, std::pair<U, U> const& _minMax)
 	return _v < (T)_minMax.first ? (T)_minMax.first : _v < (T)_minMax.second ? _v : (T)_minMax.second;
 }
 
+template <class T> inline T clamp(T _v)
+{
+	return _v < (T)0 ? (T)0 : _v < (T)1 ? _v : (T)1;
+}
+
 template <class _T> _T cubed(_T _x) { return _x * _x * _x; }
 
 std::vector<float> solveQuadratic(float a, float b, float c);

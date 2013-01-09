@@ -1,5 +1,6 @@
 #pragma once
 
+#include <Numeric/Ellipse.h>
 #include "View.h"
 
 namespace Lightbox
@@ -19,40 +20,38 @@ public:
 
 	~DirectionPickerBody();
 
-	fRect limits() const { return fRect(m_direction - m_radius / 2.f, m_radius * 2.f); }
-	fCoord direction() const { return m_direction; }
-	fSize radius() const { return m_radius; }
+	fEllipse direction() const { return m_direction; }
 	Mode mode() { return m_mode; }
 
-	void setDirection(fCoord _d, bool _userEvent = false) { if (m_direction != _d) { m_direction = _d; changed(_userEvent); } }
-	void setRadius(fSize _s, bool _userEvent = false) { if (m_radius != _s) { m_radius = _s; changed(_userEvent); } }
-	void setMode(Mode _m, bool _userEvent = false) { if (m_mode != _m) { m_mode = _m; changed(_userEvent); } }
-	void setOnChanged(EventHandler const& _t) { m_onChanged = _t; }
+	void setDirection(fEllipse _e, bool _userEvent = false) { if (m_direction != _e) { m_direction = _e; directionChanged(_userEvent); } }
+	void setPos(fCoord _e, bool _userEvent = false) { if (m_direction.pos() != _e) { m_direction.setPos(_e); directionChanged(_userEvent); } }
+	void setRadii(fSize _e, bool _userEvent = false) { if (m_direction.radii() != _e) { m_direction.setRadii(_e); directionChanged(_userEvent); } }
+	void setMode(Mode _m, bool _userEvent = false) { if (m_mode != _m) { m_mode = _m; directionChanged(_userEvent); } }
+	void setOnDirectionChanged(EventHandler const& _t) { m_onDirectionChanged = _t; }
 
-	DirectionPicker withOnChanged(EventHandler const& _t) { setOnChanged(_t); return this; }
+	DirectionPicker withOnDirectionChanged(EventHandler const& _t) { setOnDirectionChanged(_t); return this; }
 
 protected:
 	DirectionPickerBody();
 	
 	virtual bool event(Event* _e);
 	virtual void draw(Context const& _c);
-	virtual void changed(bool _userEvent) { if (m_onChanged && _userEvent) m_onChanged(this); update(); }
+	virtual void directionChanged(bool _userEvent) { if (m_onDirectionChanged && _userEvent) m_onDirectionChanged(this); update(); }
 	virtual fSize specifyFit(fSize _space) const;
 
 private:
-	float xC(float _sign) { return m_direction.x() + sin(Pi / 4.f) * _sign * m_radius.w() / 2; }
-	float yC(float _sign) { return m_direction.y() + sin(Pi / 4.f) * _sign * m_radius.h() / 2; }
-	float wC(float _xc) { return fabs(_xc - m_direction.x()) * 2 / sin(Pi / 4); }
-	float hC(float _yc) { return fabs(_yc - m_direction.y()) * 2 / sin(Pi / 4); }
+	float xC(float _sign) { return m_direction.x() + sin(Pi / 4.f) * _sign * m_direction.rx(); }
+	float yC(float _sign) { return m_direction.y() + sin(Pi / 4.f) * _sign * m_direction.ry(); }
+	float wC(float _xc) { return fabs(_xc - m_direction.x()) / sin(Pi / 4); }
+	float hC(float _yc) { return fabs(_yc - m_direction.y()) / sin(Pi / 4); }
 
-	fCoord m_direction;
-	fSize m_radius;
+	fEllipse m_direction;
 	Mode m_mode;
 
 	iSize m_lastSign;
 	bool m_dragCenter;
 
-	EventHandler m_onChanged;
+	EventHandler m_onDirectionChanged;
 };
 
 }

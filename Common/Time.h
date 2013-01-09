@@ -203,15 +203,6 @@ public:
 private:
 	Clock::time_point m_start;
 };
-
-class AccTimer: public Timer
-{
-public:
-	AccTimer(Time& _acc): m_acc(_acc) {}
-	~AccTimer() { m_acc += elapsed(); }
-private:
-	Time& m_acc;
-};
 #endif
 
 }

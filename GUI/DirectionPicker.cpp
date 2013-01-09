@@ -6,8 +6,7 @@ using namespace std;
 using namespace Lightbox;
 
 DirectionPickerBody::DirectionPickerBody():
-	m_direction(0.5f, 0.5f),
-	m_radius(1.f, 1.f),
+	m_direction(0.5f, 0.5f, 0.5f),
 	m_mode(Point)
 {
 }
@@ -25,17 +24,17 @@ bool DirectionPickerBody::event(Event* _e)
 		if (dynamic_cast<TouchDownEvent*>(e))
 		{
 			lockPointer(e->id);
-			float dC = (m_direction - p).length() * .5f; // slight bonus, since the are inevitably easier to select.
+			float dC = (m_direction.pos() - p).length() * .5f; // slight bonus, since the are inevitably easier to select.
 			m_dragCenter = (m_mode == Point || ((dC < sqr(xC(1) - p.x()) + sqr(yC(1) - p.y())) && (dC < sqr(xC(-1) - p.x()) + sqr(yC(1) - p.y())) &&
 					(dC < sqr(xC(-1) - p.x()) + sqr(yC(-1) - p.y())) && (dC < sqr(xC(1) - p.x()) + sqr(yC(-1) - p.y()))));
 		}
 		if (pointerLocked(e->id))
 		{
 			if (m_dragCenter)
-				setDirection(p, true);
+				setPos(p, true);
 			else
 			{
-				m_lastSign = iSize((p - m_direction).sign());
+				m_lastSign = iSize((p - m_direction.pos()).sign());
 				fSize r(min(1.f, wC(p.x())), min(1.f, hC(p.y())));
 				if (fabs(r.w()) < .05f)
 					r.setW(0.f);
@@ -43,7 +42,7 @@ bool DirectionPickerBody::event(Event* _e)
 					r.setH(0.f);
 				if (r == fSize(0.f, 0.f))
 					r.setW(.05f);
-				setRadius(r, true);
+				setRadii(r, true);
 			}
 			update();
 			return true;
@@ -59,12 +58,12 @@ void DirectionPickerBody::draw(Context const& _c)
 	float s = geometry().size().max();
 	if (m_mode == Circle || m_mode == Fill)
 	{
-		_c.circle(m_direction * geometry().size(), m_radius / 2.f * geometry().size(), White);
+		_c.circle(m_direction * geometry().size(), White);
 		_c.disc(fCoord(xC(m_lastSign.w()), yC(m_lastSign.h())) * geometry().size(), .1f * s, White);
 	}
 
 	if (m_mode == Fill)
-		_c.disc(m_direction * geometry().size(), m_radius / 2.f * geometry().size(), Color(1.f, .5f));
+		_c.disc(m_direction * geometry().size(), Color(1.f, .5f));
 
 	if (m_mode >= Circle)
 	{
@@ -74,7 +73,7 @@ void DirectionPickerBody::draw(Context const& _c)
 		_c.disc(fCoord(xC(1), yC(1)) * geometry().size(), .025f * s, White);
 	}
 
-	_c.disc(m_direction * geometry().size(), s / 10.f, Color(1.f));
+	_c.disc(m_direction.pos() * geometry().size(), s / 10.f, Color(1.f));
 }
 
 fSize DirectionPickerBody::specifyFit(fSize _space) const

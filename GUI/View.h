@@ -7,6 +7,7 @@
 #include <boost/intrusive_ptr.hpp>
 #include <boost/any.hpp>
 #include <Numeric/Rect.h>
+#include <Numeric/Ellipse.h>
 #include <Common/Pimpl.h>
 #include <Common/Color.h>
 #include <LGL/Global.h>
@@ -31,9 +32,11 @@ struct Context
 	void rect(fRect _r, Program const& _p) const;
 	void disc(fCoord _center, float _r) const;
 	void disc(fCoord _center, fSize _r, Color _c) const;
+	void disc(fEllipse _r, Color _c) const { disc(_r.pos(), _r.radii(), _c); }
 	void disc(fCoord _center, float _r, Color _c) const;
 	void disc(fCoord _center, float _r, Program const& _p) const;
 	void circle(fCoord _center, fSize _r, Color _c, float _size = 1.f) const;
+	void circle(fEllipse _p, Color _c, float _size = 1.f) const { circle(_p.pos(), _p.radii(), _c, _size); }
 	void blit(Texture2D const& _tex, fCoord _pos = fCoord(0, 0)) const;
 	void text(Font const& _f, fCoord _anchor, std::string const& _text, RGBA _c = RGBA::Black) const;
 };
