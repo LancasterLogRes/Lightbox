@@ -1,8 +1,8 @@
 TEMPLATE = lib
 include ( ../Common.pri )
 
-LIBS += -lApp -lLGL $$GFX_LIBS -lNumeric -lCommon -lpng -lz
 PRE_TARGETDEPS += ../LGL ../App ../Numeric ../Common
+LIBS += -lApp -lLGL $$GFX_LIBS -lNumeric -lCommon -lpng -lz
 RES += Shaders.resources Fonts.resources
 SOURCES += \
     View.cpp \

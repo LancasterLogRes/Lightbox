@@ -1,6 +1,7 @@
 TEMPLATE = lib
 include ( ../Common.pri )
 
+PRE_TARGETDEPS += ../Common
 LIBS += -lCommon
 SOURCES += \
     Vector.cpp

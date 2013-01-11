@@ -1,6 +1,7 @@
 TEMPLATE = lib
 include ( ../Common.pri )
 
+PRE_TARGETDEPS += ../Common ../Numeric
 LIBS += $$GFX_LIBS -lCommon -lNumeric -lpng -lz
 SOURCES += ProgramFace.cpp Program.cpp ShaderFace.cpp Uniform.cpp \
     Global.cpp \

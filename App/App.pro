@@ -1,5 +1,7 @@
 TEMPLATE = lib
 include ( ../Common.pri )
+
+PRE_TARGETDEPS += ../Common
 LIBS += -lCommon $$GFX_LIBS
 android: LIBS += $$LIBSTL -llog -landroid
 

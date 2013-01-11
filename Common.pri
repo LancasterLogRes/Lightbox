@@ -26,8 +26,8 @@ unix:!mac: CONFIG += linux
 
 pi: ARCH = Pi
 x86: ARCH = x86
-native: ARCH = Native
 android: ARCH = Android
+native: ARCH = Native
 debug: BUILD_TYPE = Debug
 release: BUILD_TYPE = Release
 profile: BUILD_TYPE = Profile
