@@ -1,11 +1,8 @@
-CONFIG -= qt
-TARGET = GUI
 TEMPLATE = lib
 include ( ../Common.pri )
+
 LIBS += -lApp -lLGL $$GFX_LIBS -lNumeric -lCommon -lpng -lz
-
 PRE_TARGETDEPS += ../LGL ../App ../Numeric ../Common
-
 RES += Shaders.resources Fonts.resources
 SOURCES += \
     View.cpp \

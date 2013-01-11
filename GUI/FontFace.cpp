@@ -66,7 +66,7 @@ void FontFace::draw(fCoord _anchor, string const& _text, RGBA _c)
 		stbtt_GetBakedQuad((stbtt_bakedchar*)m_charData, 512, 512, _text[i] - s_charDataFirst, &x, &y, &q, 1);
 		for (int j = 0; j < 6; ++j)
 			layout[i * 6 + j] = {{(GLshort)q.x0, (GLshort)q.y0}},
-			source[i * 6 + j] = {{GLshort(q.s0 * 512), GLshort(q.t0 * 512)}},
+			source[i * 6 + j] = {{(GLushort)(q.s0 * 512), (GLushort)(q.t0 * 512)}},
 			size[i * 6 + j] = {{GLubyte(q.x1 - q.x0), GLubyte(q.y1 - q.y0)}};
 	}
 

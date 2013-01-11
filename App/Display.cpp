@@ -112,9 +112,9 @@ Lightbox::Display::Display()
 	{
 	   EGLint val;
 	   eglQuerySurface(m_display, m_surface, EGL_WIDTH, &val);
-	   assert(val == width);
+	   assert(val == (int)m_width);
 	   eglQuerySurface(m_display, m_surface, EGL_HEIGHT, &val);
-	   assert(val == height);
+	   assert(val == (int)m_height);
 	   assert(eglGetConfigAttrib(m_display, config, EGL_SURFACE_TYPE, &val));
 	   assert(val & EGL_WINDOW_BIT);
 	}

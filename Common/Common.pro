@@ -1,11 +1,3 @@
-#-------------------------------------------------
-#
-# Project created by QtCreator 2011-12-08T10:09:13
-#
-#-------------------------------------------------
-
-CONFIG -= qt
-TARGET = Common
 TEMPLATE = lib
 CONFIG += static
 include ( ../Common.pri )

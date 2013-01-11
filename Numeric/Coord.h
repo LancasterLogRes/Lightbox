@@ -24,6 +24,8 @@ public:
 
 	using Super::x;
 	using Super::y;
+	using Super::setX;
+	using Super::setY;
 	
 	bool operator<(Coord const& _c) const { return x() < _c.x() && y() < _c.y(); }
 	bool operator>(Coord const& _c) const { return x() > _c.x() && y() > _c.y(); }
@@ -38,6 +40,9 @@ public:
 
 	Coord& operator+=(Size<Numeric> const& _c);
 	Coord& operator-=(Size<Numeric> const& _c);
+
+private:
+	using Super::compare;
 };
 
 typedef Coord<float> XY;
@@ -84,6 +89,7 @@ private:
 	using Super::y;
 	using Super::setX;
 	using Super::setY;
+	using Super::compare;
 };
 
 typedef Size<float> fSize;

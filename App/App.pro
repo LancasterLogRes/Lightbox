@@ -1,5 +1,3 @@
-CONFIG -= qt
-TARGET = App
 TEMPLATE = lib
 include ( ../Common.pri )
 LIBS += -lCommon $$GFX_LIBS

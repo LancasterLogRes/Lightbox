@@ -67,6 +67,9 @@ public:
 	Ellipse operator-(Numeric _f) const { return shrunk(_f); }
 	Ellipse operator/(xSize _s) const { return dividedBy(_s); }
 	Ellipse operator*(xSize _s) const { return multipliedBy(_s); }
+
+private:
+	using Super::compare;
 };
 
 typedef Ellipse<float> fEllipse;

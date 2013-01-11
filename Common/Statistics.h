@@ -192,7 +192,7 @@ typename element_of<T>::type pInDistro(typename element_of<T>::type _v, T const&
 template <class T>
 typename element_of<T>::type pivotalBadness(T const& _distro, typename T::iterator _pivot, typename element_of<T>::type  _minSigma = 0)
 {
-	return max(_minSigma, sigma(_distro.begin(), _pivot)) + max(_minSigma, sigma(_pivot, _distro.end()));
+	return std::max(_minSigma, sigma(_distro.begin(), _pivot)) + std::max(_minSigma, sigma(_pivot, _distro.end()));
 }
 
 template <class T>

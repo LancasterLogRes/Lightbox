@@ -1,50 +1,87 @@
-DESTDIR = $$OUT_PWD/../built
+ANDROID_NDK_PATH = $$PWD/../Android/ndk
+ANDROID_NDK_VERSION = 14
+ANDROID_SDK_PATH = $$PWD/../Android/sdk
+ANDROID_TOOLCHAIN_VERSION = 4.7
+ANDROID_JDK_PATH = $$PWD/../Android/jdk
+PI_TOOLCHAIN_PATH = $$PWD/../Pi/x-tools/bin/
 
 CONFIG += no_include_pwd
-CONFIG -= uic
+CONFIG -= uic qt
 DEFINES += "LIGHTBOX_TARGET_NAME=$$TARGET"
 
-android: CONFIG += cross
-pi: CONFIG += cross
-!pi: !android {
-    cross: CONFIG += amd
-    CONFIG += x86
-}
+# Tidy up the debug/release flags.
+CONFIG(release, debug|release): CONFIG -= debug
+CONFIG(debug, debug|release): CONFIG -= release
+# one of {android, pi, amd} can be specified for cross-compilation; if none given will default to native.
+android|pi|amd: CONFIG += cross
+!cross: CONFIG += native
+amd|native: CONFIG += x86
+android|pi: CONFIG += arm
+unix:!mac: CONFIG += linux
+
+# Calculated flags:
+# cross | native (cross -> android | pi | amd)
+# arm | x86 (arm -> android | pi ; x86 -> amd | native)
+# native -> (win32 | mac | linux)
+
+pi: ARCH = Pi
+x86: ARCH = x86
+native: ARCH = Native
+android: ARCH = Android
+debug: BUILD_TYPE = Debug
+release: BUILD_TYPE = Release
+profile: BUILD_TYPE = Profile
 
 pi|amd: CONFIG += force_static
-!cross: CONFIG += force_shared
+native: CONFIG += force_shared
 
-message($$CONFIG)
+LLR_PATH = $$section(IN_PWD, "/", 0, -2)
+RELATIVE_DESTDIR = ../built
 
-CONFIG(release, debug|release) {
-	CONFIG += release ndebug
-	CONFIG -= debug
+!contains(TEMPLATE, subdirs): CONFIG += outputs
+
+PROJECT_NAME = $$section(IN_PWD, "/", -1, -1)
+!outputs {
+	SUBPROJECT_NAME = ""
+	PROJECT_PATH = $$PROJECT_NAME
+	TARGET = $$PROJECT_NAME
+	DESTDIR = /tmp
+}
+outputs {
+	SUBPROJECT_NAME = $$section(OUT_PWD, "/", -1, -1)
+	PROJECT_PATH = $$PROJECT_NAME/$$SUBPROJECT_NAME
+	TARGET = $$SUBPROJECT_NAME
+	DESTDIR = $$LLR_PATH/$$ARCH/$$PROJECT_NAME-$$BUILD_TYPE/built
+}
+
+#OUT_PWD = $$LLR_PATH/$$ARCH/$$PROJECT_NAME-$$BUILD_TYPE/$$SUBPROJECT_NAME
+
+message ( "TEMPLATE:" $$TEMPLATE "TARGET:" $$TARGET "PROJECT: $$PROJECT_NAME/$$SUBPROJECT_NAME" "CONFIG:" $$find(CONFIG, (outputs)|(pi)|(amd)|(android)|(x86)|(native)|(cross)) "PWD:" $$PWD "OUT_PWD:" $$OUT_PWD "IN_PWD:" $$IN_PWD "DESTDIR:" $$DESTDIR)
+
+release {
+	CONFIG += ndebug
 	profile: QMAKE_CXXFLAGS += -g3
 	!profile: QMAKE_CXXFLAGS += -g0 -fomit-frame-pointer -Wl,-strip-all
 	QMAKE_CXXFLAGS += -DRELEASE -O2
-	system (echo "Release build")
 }
-
-CONFIG(debug, debug|release) {
-	CONFIG -= release ndebug
+debug {
+	CONFIG -= ndebug
 	QMAKE_CXXFLAGS += -DDEBUG -g3 -fno-inline -O0 -Wall
 	!win32: QMAKE_CXXFLAGS += -fPIC
-	system (echo "Debug build")
 }
-
 profile {
     QMAKE_CXXFLAGS += -pg
     QMAKE_LFLAGS += -pg
 }
 
 pi {
-        TP = $$IN_PWD/../thirdparty-pi
+        TP = $$IN_PWD/../Pi/Thirdparty
 }
 android {
-        TP = $$IN_PWD/../thirdparty-android
+        TP = $$IN_PWD/../Android/Thirdparty
 }
 x86 {
-        TP = $$IN_PWD/../thirdparty-x86
+        TP = $$IN_PWD/../x86/Thirdparty
 }
 
 INCLUDEPATH += $${OUT_PWD}
@@ -57,101 +94,92 @@ resource_compiler.CONFIG += target_predeps
 resource_compiler.name = RESOURCE_COMPILER
 QMAKE_EXTRA_COMPILERS += resource_compiler
 
-QMAKE_CXXFLAGS += -ffast-math -pipe -fexceptions
-mac: QMAKE_CXXFLAGS +=  -std=c++11
-!mac: QMAKE_CXXFLAGS +=  -std=c++0x
+android {
+    TOOLCHAIN_PATH = "$$ANDROID_NDK_PATH/toolchains/arm-linux-androideabi-$$ANDROID_TOOLCHAIN_VERSION/prebuilt/linux-x86/bin/"
+    PLATFORM_OVERRIDE = "arm-linux-androideabi"
+
+    SYSTEM_FLAGS = -march=armv5te -mtune=xscale -msoft-float -mthumb -D__ARM_ARCH_5__ -D__ARM_ARCH_5T__ -D__ARM_ARCH_5E__ -D__ARM_ARCH_5TE__ -DANDROID -Wa,--noexecstack -fstack-protector -ffunction-sections
+    SYSTEM_INCLUDES = "-I$$ANDROID_NDK_PATH/sources/android/native_app_glue" "-I$$ANDROID_NDK_PATH/sources/cxx-stl/gnu-libstdc++/$$ANDROID_TOOLCHAIN_VERSION/include" "-I$$ANDROID_NDK_PATH/sources/cxx-stl/gnu-libstdc++/$$ANDROID_TOOLCHAIN_VERSION/libs/armeabi/include" "-I$$ANDROID_NDK_PATH/platforms/android-$$ANDROID_NDK_VERSION/arch-arm/usr/include -I$$TP/include"
+
+    QMAKE_CFLAGS		+= $$SYSTEM_FLAGS $$SYSTEM_INCLUDES
+    QMAKE_CXXFLAGS		+= $$SYSTEM_FLAGS $$SYSTEM_INCLUDES
+    QMAKE_CXXFLAGS_RELEASE      += -DNDEBUG -Os -fomit-frame-pointer -fno-strict-aliasing -fpic -funwind-tables -finline-limit=64
+
+    CONFIG -= qt
+
+	QMAKE_LFLAGS_SHLIB = -shared --sysroot=$$ANDROID_NDK_PATH/platforms/android-$$ANDROID_NDK_VERSION/arch-arm -Wl,--no-undefined -Wl,-z,noexecstack -Wl,-z,relro -Wl,-z,now -L$$ANDROID_NDK_PATH/platforms/android-$$ANDROID_NDK_VERSION/arch-arm/usr/lib
+    LIBS += -L$$TP/libpng -L$$TP/libzip
+    INCLUDEPATH += $$TP
+    LIBSTL = "$$ANDROID_NDK_PATH/sources/cxx-stl/gnu-libstdc++/$$ANDROID_TOOLCHAIN_VERSION/libs/armeabi/libgnustl_static.a"
+
+    contains(TEMPLATE, lib) {
+        CONFIG += static
+    }
+    contains(TEMPLATE, app) {
+        SOURCES += "$$ANDROID_NDK_PATH/sources/android/native_app_glue/android_native_app_glue.c"
+        TEMPLATE = lib
+        CONFIG += force_shared
+        QMAKE_POST_LINK = mkdir -p '"$${OBJECTS_DIR}wrap/libs/armeabi"' &&\
+            cp '"$${DESTDIR}/lib$${TARGET}.so"' '"$${OBJECTS_DIR}wrap/libs/armeabi"' &&\
+            sed '\'s/"android.app.lib_name" android:value=""/"android.app.lib_name" android:value="$$TARGET"/\'' '$${ANDROID_MANIFEST}' > '"$${OBJECTS_DIR}wrap/AndroidManifest.xml"' &&\
+            mkdir -p '"$${OBJECTS_DIR}wrap/res/values"' &&\
+            mkdir -p '"$${OBJECTS_DIR}wrap/src/com/lancasterlogicresponse/wrapper"' &&
+        !isEmpty(ANDROID_JAVA_SOURCES) {
+            QMAKE_POST_LINK += cp '$${ANDROID_JAVA_SOURCES}' '"$${OBJECTS_DIR}wrap/src/com/lancasterlogicresponse/wrapper"' &&
+        }
+        isEmpty(ANDROID_JAVA_SOURCES) {
+            QMAKE_POST_LINK += mv '"$${OBJECTS_DIR}wrap/AndroidManifest.xml"' '"$${OBJECTS_DIR}wrap/AndroidManifest.xml.tmp"' && \
+                sed '\'s/<application android:label="@string/app_name">/<application android:label="@string/app_name" android:hasCode="false">/\'' '"$${OBJECTS_DIR}wrap/AndroidManifest.xml.tmp"' > '"$${OBJECTS_DIR}wrap/AndroidManifest.xml"' &&
+        }
+        QMAKE_POST_LINK += \
+            echo '\'<?xml version="1.0" encoding="utf-8"?><resources><string name="app_name">$${TARGET}</string></resources>\'' > '$${OBJECTS_DIR}wrap/res/values/strings.xml' &&\
+            mkdir -p '"$${OBJECTS_DIR}wrap/assets"' &&\
+            for i in $${ANDROID_ASSETS}; do ln -s '\$\$i' '"$${OBJECTS_DIR}wrap/assets"'; done &&\
+			$${ANDROID_SDK_PATH}/tools/android update project -p '$${OBJECTS_DIR}wrap' -t 1 -n $$TARGET &&\
+			JAVA_HOME="$$ANDROID_JDK_PATH" ant debug -buildfile '$${OBJECTS_DIR}wrap/build.xml' &&\
+            mv '$${OBJECTS_DIR}wrap/bin/$${TARGET}-debug.apk' '$${DESTDIR}/$${TARGET}.apk' &&\
+            rm -rf '$${OBJECTS_DIR}wrap' &&\
+            echo DONE.
+        QMAKE_CLEAN = '$${DESTDIR}$${TARGET}.apk'
+    }
+
+    DEFINES += LIGHTBOX_ANDROID
+    system( echo "$${LITERAL_HASH}include \"$$[QT_INSTALL_DATA]/mkspecs/linux-g++/qplatformdefs.h\"" > /tmp/qplatformdefs.h )
+}
+pi {
+    # modified straight out of arm-none-linux-gnueabi's qmakespec
+    # /usr/share/qt4/mkspecs/qws/linux-arm-gnueabi-g++
+    TOOLCHAIN_PATH = "$$PI_TOOLCHAIN_PATH/"
+    PLATFORM_OVERRIDE = arm-unknown-linux-gnueabi
+    QMAKE_CXXFLAGS += -march=armv6zk -mfpu=vfp -mfloat-abi=hard -mcpu=arm1176jzf-s -I$$TP/include
+    QMAKE_LFLAGS += -L$$TP/lib
+
+    DEFINES += LIGHTBOX_PI
+    system( echo "$${LITERAL_HASH}include \"$$[QT_INSTALL_DATA]/mkspecs/linux-g++/qplatformdefs.h\"" > /tmp/qplatformdefs.h )
+}
+amd {
+    QMAKE_CXXFLAGS += -march=amdfam10 -pipe -mno-3dnow -mcx16 -mpopcnt -msse3 -msse4a -mmmx
+    DEFINES += LIGHTBOX_X86
+}
 cross {
-    android {
-        NDK_PATH = /home/gav/Projects/lightbox/Android/android-ndk-r8b
-        SDK_PATH = /home/gav/Projects/lightbox/Android/android-sdk-linux
-
-        CHAINPATH = "$$NDK_PATH/toolchains/arm-linux-androideabi-4.6/prebuilt/linux-x86/bin"
-        PLATFORM = "arm-linux-androideabi"
-
-        SYSTEM_FLAGS = -DNDEBUG -fpic -ffunction-sections -funwind-tables -fstack-protector -D__ARM_ARCH_5__ -D__ARM_ARCH_5T__ -D__ARM_ARCH_5E__ -D__ARM_ARCH_5TE__  -march=armv5te -mtune=xscale -msoft-float -mthumb -Os -fomit-frame-pointer -fno-strict-aliasing -finline-limit=64 -DANDROID  -Wa,--noexecstack
-        SYSTEM_INCLUDES = "-I$$NDK_PATH/sources/android/native_app_glue" "-I$$NDK_PATH/sources/cxx-stl/gnu-libstdc++/4.6/include" "-I$$NDK_PATH/sources/cxx-stl/gnu-libstdc++/4.6/libs/armeabi/include" "-I$$NDK_PATH/platforms/android-14/arch-arm/usr/include -I../../Android/Boost/boost_1_49_0"
-
-        QMAKE_CC		= "$$CHAINPATH/$$PLATFORM-gcc"
-        QMAKE_CXX               = "$$CHAINPATH/$$PLATFORM-g++"
-        QMAKE_LINK              = "$$CHAINPATH/$$PLATFORM-g++"
-        QMAKE_LINK_SHLIB        = "$$CHAINPATH/$$PLATFORM-g++"
-        QMAKE_AR                = "$$CHAINPATH/$$PLATFORM-ar crs"
-        QMAKE_OBJCOPY           = "$$CHAINPATH/$$PLATFORM-objcopy"
-        QMAKE_STRIP             = "$$CHAINPATH/$$PLATFORM-strip"
-
-        QMAKE_CFLAGS		= $$SYSTEM_FLAGS $$SYSTEM_INCLUDES
-        QMAKE_CXXFLAGS		= $$SYSTEM_FLAGS -std=gnu++0x -frtti $$SYSTEM_INCLUDES
-
-        CONFIG -= qt
-
-        QMAKE_LFLAGS_SHLIB = -shared --sysroot=$$NDK_PATH/platforms/android-14/arch-arm -Wl,--no-undefined -Wl,-z,noexecstack -Wl,-z,relro -Wl,-z,now -L$$NDK_PATH/platforms/android-14/arch-arm/usr/lib
-        LIBS += -L$$TP/libpng -L$$TP/libzip
-        INCLUDEPATH += $$TP
-        LIBSTL = "$$NDK_PATH/sources/cxx-stl/gnu-libstdc++/4.6/libs/armeabi/libgnustl_static.a"
-
-        contains(TEMPLATE, lib) {
-            CONFIG += static
-        }
-        contains(TEMPLATE, app) {
-            SOURCES += "$$NDK_PATH/sources/android/native_app_glue/android_native_app_glue.c"
-            TEMPLATE = lib
-            CONFIG += force_shared
-            QMAKE_POST_LINK = mkdir -p '"$${OBJECTS_DIR}wrap/libs/armeabi"' &&\
-                cp '"$${DESTDIR}/lib$${TARGET}.so"' '"$${OBJECTS_DIR}wrap/libs/armeabi"' &&\
-                sed '\'s/"android.app.lib_name" android:value=""/"android.app.lib_name" android:value="$$TARGET"/\'' '$${ANDROID_MANIFEST}' > '"$${OBJECTS_DIR}wrap/AndroidManifest.xml"' &&\
-                mkdir -p '"$${OBJECTS_DIR}wrap/res/values"' &&\
-                mkdir -p '"$${OBJECTS_DIR}wrap/src/com/lancasterlogicresponse/wrapper"' &&
-            !isEmpty(ANDROID_JAVA_SOURCES) {
-                QMAKE_POST_LINK += cp '$${ANDROID_JAVA_SOURCES}' '"$${OBJECTS_DIR}wrap/src/com/lancasterlogicresponse/wrapper"' &&
-            }
-            isEmpty(ANDROID_JAVA_SOURCES) {
-                QMAKE_POST_LINK += mv '"$${OBJECTS_DIR}wrap/AndroidManifest.xml"' '"$${OBJECTS_DIR}wrap/AndroidManifest.xml.tmp"' && \
-                    sed '\'s/<application android:label="@string/app_name">/<application android:label="@string/app_name" android:hasCode="false">/\'' '"$${OBJECTS_DIR}wrap/AndroidManifest.xml.tmp"' > '"$${OBJECTS_DIR}wrap/AndroidManifest.xml"' &&
-            }
-            QMAKE_POST_LINK += \
-                echo '\'<?xml version="1.0" encoding="utf-8"?><resources><string name="app_name">Mark2</string></resources>\'' > '$${OBJECTS_DIR}wrap/res/values/strings.xml' &&\
-                mkdir -p '"$${OBJECTS_DIR}wrap/assets"' &&\
-                for i in $${ANDROID_ASSETS}; do ln -s '\$\$i' '"$${OBJECTS_DIR}wrap/assets"'; done &&\
-                $${SDK_PATH}/tools/android update project -p '$${OBJECTS_DIR}wrap' -t android-15 -n $$TARGET &&\
-                ant debug -buildfile '$${OBJECTS_DIR}wrap/build.xml' &&\
-                mv '$${OBJECTS_DIR}wrap/bin/$$TARGET-debug.apk' '$${DESTDIR}/$${TARGET}.apk' &&\
-                echo DONE.
-            QMAKE_CLEAN = '$${DESTDIR}$${TARGET}.apk'
-        }
-#                rm -rf '$${OBJECTS_DIR}wrap' &&\
-
-        message($$QMAKE_CXX)
-
-        DEFINES += LIGHTBOX_ANDROID
-    }
-    pi {
-        PI_TOOLS = /home/gav/Projects/lightbox/RPi/x-tools/arm-unknown-linux-gnueabi/bin
-
-        # modified straight out of arm-none-linux-gnueabi's qmakespec
-        # /usr/share/qt4/mkspecs/qws/linux-arm-gnueabi-g++
-        QMAKE_CC                = $$PI_TOOLS/arm-unknown-linux-gnueabi-gcc
-        QMAKE_CXX               = $$PI_TOOLS/arm-unknown-linux-gnueabi-g++
-        QMAKE_LINK              = $$PI_TOOLS/arm-unknown-linux-gnueabi-g++
-        QMAKE_LINK_SHLIB        = $$PI_TOOLS/arm-unknown-linux-gnueabi-g++
-        QMAKE_AR                = $$PI_TOOLS/arm-unknown-linux-gnueabi-ar cqs
-        QMAKE_OBJCOPY           = $$PI_TOOLS/arm-unknown-linux-gnueabi-objcopy
-        QMAKE_STRIP             = $$PI_TOOLS/arm-unknown-linux-gnueabi-strip
-
-        QMAKE_CXXFLAGS += -O2 -pipe -march=armv6zk -mfpu=vfp -mfloat-abi=hard -mcpu=arm1176jzf-s
-
-        DEFINES += LIGHTBOX_PI
-    }
-    x86 {
-        QMAKE_CXXFLAGS += -march=amdfam10 -O2 -pipe -mno-3dnow -mcx16 -mpopcnt -msse3 -msse4a -mmmx
-        DEFINES += LIGHTBOX_X86
-    }
     DEFINES += LIGHTBOX_CROSS
 }
-!cross {
+native {
     QMAKE_CXXFLAGS += -march=native
     DEFINES += LIGHTBOX_NATIVE
 }
 
+!isEmpty(PLATFORM_OVERRIDE) {
+    QMAKE_CC                = "$$TOOLCHAIN_PATH$$PLATFORM_OVERRIDE-gcc"
+    QMAKE_CXX               = "$$TOOLCHAIN_PATH$$PLATFORM_OVERRIDE-g++"
+    QMAKE_LINK              = "$$TOOLCHAIN_PATH$$PLATFORM_OVERRIDE-g++"
+    QMAKE_LINK_SHLIB        = "$$TOOLCHAIN_PATH$$PLATFORM_OVERRIDE-g++"
+    QMAKE_AR                = "$$TOOLCHAIN_PATH$$PLATFORM_OVERRIDE-ar crs"
+    QMAKE_OBJCOPY           = "$$TOOLCHAIN_PATH$$PLATFORM_OVERRIDE-objcopy"
+    QMAKE_STRIP             = "$$TOOLCHAIN_PATH$$PLATFORM_OVERRIDE-strip"
+}
+
+QMAKE_CXXFLAGS += -pipe -fexceptions -std=gnu++11 -frtti -ffast-math
 QMAKE_CXXFLAGS_WARN_ON += -Wno-parentheses
 
 INCLUDEPATH += $$IN_PWD
@@ -249,4 +277,3 @@ for(p, LIGHTBOX_USES_PROJECTS) {
 win32: DESTDIR = $$ProjectPath(Lightbox)
 INCLUDEPATH += $$IncludePath($$LIGHTBOX_ROOT_PROJECT)
 DEPENDPATH = $INCLUDEPATH
-

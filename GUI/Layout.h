@@ -11,6 +11,8 @@ class Layout
 {
 	friend class ViewBody;
 public:
+	virtual ~Layout() {}
+
 	virtual void layout(fSize _s) = 0;
 	virtual fSize minimumSize(fSize) = 0;
 	virtual fSize maximumSize(fSize) = 0;
