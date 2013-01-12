@@ -1,10 +1,10 @@
 TEMPLATE = subdirs
 include (Common.pri)
 
-SUBDIRS = Common Numeric
+android|!cross: SUBDIRS += Mark2 App LGL GUI
 pi|x86|native: SUBDIRS += EventCompiler ExampleEventCompiler
-android|!cross: SUBDIRS += App LGL GUI Mark2
+SUBDIRS += Numeric Common
 
 android: QMAKE_EXTRA_TARGETS += deploy
-deploy.depends =
+deploy.depends = Mark2
 deploy.commands = cd Mark2 && make deploy && cd ..

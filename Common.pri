@@ -5,6 +5,8 @@ ANDROID_TOOLCHAIN_VERSION = 4.7
 ANDROID_JDK_PATH = $$PWD/../Android/jdk
 PI_TOOLCHAIN_PATH = $$PWD/../Pi/x-tools/bin/
 
+include (Lightbox.depends)
+
 CONFIG += no_include_pwd
 CONFIG -= uic qt
 DEFINES += "LIGHTBOX_TARGET_NAME=$$TARGET"
@@ -40,7 +42,8 @@ RELATIVE_DESTDIR = ../built
 
 !contains(TEMPLATE, subdirs): CONFIG += outputs
 
-PROJECT_NAME = $$section(IN_PWD, "/", -1, -1)
+isEmpty(LIGHTBOX_ROOT_PROJECT): LIGHTBOX_ROOT_PROJECT = Lightbox
+PROJECT_NAME = $$LIGHTBOX_ROOT_PROJECT
 !outputs {
 	SUBPROJECT_NAME = ""
 	PROJECT_PATH = $$PROJECT_NAME
@@ -249,7 +252,14 @@ force_static {
         system (echo "Static build")
 }
 
-isEmpty(LIGHTBOX_ROOT_PROJECT): LIGHTBOX_ROOT_PROJECT = Lightbox
+win32: LIBRARY_PREFIX =
+win32: shared: LIBRARY_SUFFIX = .dll
+win32: static: LIBRARY_SUFFIX = .lib
+unix: LIBRARY_PREFIX = lib
+mac: shared: LIBRARY_SUFFIX = .dylib
+linux: shared: LIBRARY_SUFFIX = .so
+unix: static: LIBRARY_SUFFIX = .a
+
 
 message ("$$LIGHTBOX_ROOT_PROJECT <- $$LIGHTBOX_USES_PROJECTS")
 
@@ -274,6 +284,53 @@ for(p, LIGHTBOX_USES_PROJECTS) {
     INCLUDEPATH += $$IncludePath($$p)
 }
 
+defineReplace(runique) {
+	for(d, 1) {
+		rdeps = $$d $$rdeps
+	}
+	rdeps = $$unique(rdeps)
+	for(d, rdeps) {
+		!contains(ret, $$d) {
+			ret = $$d $$ret
+		}
+	}
+	return($$ret)
+}
+# ten levels of recursion
+levels = 0 1 2 3 4 5 6 7 8 9
+outputs {
+	deps = $$eval($${TARGET}.depends)
+	for(dummy, levels) {
+		for(d, deps) {
+			deps += $$eval($${d}.depends)
+		}
+	}
+	deps = $$runique($$deps)
+	for(d, deps) {
+		LIBS += -l$$d
+	}
+}
+
+defineTest(tidy) {
+	SD = $$SUBDIRS
+	for(sd, SD) {
+		message ("Tidying $$sd (depends: " $$eval($${sd}.depends) ")" )
+		ds = $$eval($${sd}.depends)
+		for(d, ds) {
+			!exists($${OUT_PWD}/$${d}) {
+				message ("Killing $${d}...")
+				eval($${sd}.depends -= $$d)
+			}
+		}
+		export($${sd}.depends)
+		message ("Tidyied $$sd (depends: " $$eval($${sd}.depends) ")" )
+	}
+}
+
 win32: DESTDIR = $$ProjectPath(Lightbox)
 INCLUDEPATH += $$IncludePath($$LIGHTBOX_ROOT_PROJECT)
 DEPENDPATH = $INCLUDEPATH
+
+OTHER_FILES +=
+
+message ($$TARGET "deps:" $$deps)
