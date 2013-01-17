@@ -43,6 +43,45 @@ std::vector<float> doLayout(float _total, std::vector<float> const& _stretch, st
 	return ret;
 }
 
+/**
+ * The actual problem could be phrased as:
+ * class ElementTreeOrElement;
+ * typedef std::vector<ElementTreeOrElement> ElementTree;
+ * class ElementTreeOrElement : public EitherOr<Element, ElementTree> {};
+ * // ElementTree is a tree of Elements represented as a vector of items, each item being either an simple layout Element (leaf) or a sub-tree.
+ * void doLayout(fSize _totalSpace, ElementTree const& _elements);
+ *
+ * However, that exposes the tree as the data structure and creates data-interfacing issues (e.g. how to pass back the result).
+ * The algorithm may be expressible through two functions; first and probably foremost one that is able to compose a set of general (i.e. simple or composite) Elements, by laying them out, into a (composite) Element.
+ * Secondly one that, given a set of Elements and an area of space, is able to perform an optimal layout of the elements in that space.
+ *
+ * I've prototyped the Element class, however it may need altering according to the information required by the algorithm.
+ * The two functions shouldn't need altering.
+ */
+
+struct Element
+{
+	bool xyDependent;	///< Says that one dimension is specified in terms of the other.
+	float offset;		///< "c" in "y = mx + c". Used to translate between dimensions when xyDependent is true.
+	float scale;		///< "m" in "y = mx + c". Used to translate between dimensions when xyDependent is true.
+	float stretch;		///< Ideal ratio of area given to this element, assuming the elements' minima/maxima are unconstrained.
+	fSize minimum;		///< Minimum size to make the element.
+	fSize maximum;		///< Maximum size to make the element.
+};
+/**
+ * @brief doLayout Determine optimal horizontal layout of a set of GUI elements.
+ * @param _totalSpace The total space available for the layout.
+ * @param _elements The properties of each GUI element to be laid out.
+ * @return The set of sizes of GUI elements in the same order as @a _elements.
+ */
+std::vector<fSize> doLayout(fSize _totalSpace, std::vector<Element> const& _elements);
+/**
+ * @brief layoutToElement Express the set of elements as a horizontally-laid out Element.
+ * @param _elements The set of GUI elements to be amalgamated into a parent Element.
+ * @return The (composite) Element representing the set of Elements given when laid out horizontally. 'stretch' does not need to be defined.
+ */
+Element layoutToElement(std::vector<Element> const& _elements);
+
 template <class _Children, class _T> vector<float> doLayout(fSize _totalSize, float _total, _Children const& _ch, _T const& _spaceToSize)
 {
 	vector<float> stretch;
