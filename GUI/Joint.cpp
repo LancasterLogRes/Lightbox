@@ -9,7 +9,8 @@ using namespace Lightbox;
 void Joint::init(Display& _d)
 {
 	display = &_d;
-	displaySize = _d.size();
+	displaySizePixels = _d.sizePixels();
+	displaySizeMM = _d.sizeMM();
 
 	unitQuad = Buffer<float>({ 0.f, 1.f, 1.f, 1.f, 0.f, 0.f, 1.f, 0.f });
 	vector<float> uc(74 * 2);
@@ -33,7 +34,7 @@ void Joint::init(Display& _d)
 	color = uniforms["color"];
 	gradient = uniforms["gradient"];
 
-	u_displaySize = (vec2)(fSize)_d.size();
+	u_displaySize = (vec2)(fSize)_d.sizePixels();
 	u_minusY = -1.f;
 
 	flatGeometry = flat.attrib("geometry");

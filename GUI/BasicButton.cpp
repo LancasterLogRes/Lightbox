@@ -7,18 +7,22 @@
 using namespace std;
 using namespace Lightbox;
 
-BasicButtonBody::BasicButtonBody(std::string const& _text):
+BasicButtonBody::BasicButtonBody(std::string const& _text, Color _c):
 	m_text(_text),
+	m_color(_c),
 	m_isDown(false)
 {
-	setPadding(2.f);
 }
 
 void BasicButtonBody::draw(Context const& _c)
 {
-	fRect transGeo(fCoord(0, 0), geometry().size());
-	_c.rect(transGeo, m_isDown ? GUIApp::style().high : GUIApp::style().back, -.1f);
-	_c.text(m_isDown ? GUIApp::style().bold : GUIApp::style().regular, transGeo.lerp(.5f, .5f) + fSize(0, -1), m_text, RGBA(0.f, 0.f, 0.f));
+	iRect surround = _c.pixels(this);
+	iRect outer = surround.inset(_c.pixels(fSize(2, 2)));
+	iRect inner = outer.inset(_c.pixels(fSize(4, 4)));
+	_c.rect(surround, Color(0));
+	_c.rect(outer, m_isDown ? m_color : Color(m_color.hue(), .25f, .25f));
+	_c.rect(inner, Color(.125f), -.1f);
+	_c.text(GUIApp::style().bold, inner.lerp(.5f, .5f), m_text, (m_isDown ? m_color : Color(m_color.hue(), .125f, .625f)).toRGBA());
 }
 
 bool BasicButtonBody::event(Event* _e)

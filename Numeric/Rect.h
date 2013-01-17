@@ -61,8 +61,9 @@ public:
 	xCoord lerp(float _x, float _y) const { return m_pos + xSize(m_size.w() * _x, m_size.h() * _y); }
 
 	Rect expanded(Numeric _f) const { return Rect(m_pos - _f, m_size + 2 * _f); }
-	Rect shrunk(Numeric _f) const { return Rect(m_pos + fSize(_f, _f), m_size - 2 * _f); }
-	Rect inset(Numeric _x, Numeric _y) const { fSize s(_x, _y); return Rect(m_pos + s, m_size - 2 * s); }
+	Rect shrunk(Numeric _f) const { return Rect(m_pos + xSize(_f, _f), m_size - 2 * _f); }
+	Rect inset(Numeric _x, Numeric _y) const { return inset(xSize(_x, _y)); }
+	Rect inset(xSize _s) const { return Rect(m_pos + _s, m_size - 2 * _s); }
 	Rect translated(xSize _s) const { return Rect(m_pos + _s, m_size); }
 
 	Rect dividedBy(xSize _s) const { return Rect(m_pos / _s, m_size / _s); }

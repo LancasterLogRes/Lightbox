@@ -9,6 +9,22 @@
 using namespace std;
 using namespace Lightbox;
 
+iRect Context::pixels(ViewBody* _v) const
+{
+	fSize s = _v->geometry().size();
+	return iRect(iCoord(0, 0), GUIApp::joint().display->toPixels(s));
+}
+
+iSize Context::pixels(fSize _mm) const
+{
+	return GUIApp::joint().display->toPixels(_mm);
+}
+
+iCoord Context::pixels(fCoord _mm) const
+{
+	return GUIApp::joint().display->toPixels(_mm);
+}
+
 void Context::rect(fRect _r, Color _c) const
 {
 	auto vm = GUIApp::joint();
@@ -100,6 +116,37 @@ void Context::rect(fRect _r, Color _c, float _gradient) const
 	ProgramUser u(vm.shaded);
 	vm.shadedGeometry.setData(vm.unitQuad, 2);
 	u.triangleStrip(4);
+}
+
+iSize Context::offsetPixels() const
+{
+	return GUIApp::joint().display->toPixels(offset);
+}
+
+void Context::rect(iRect _r, Color _c) const
+{
+	auto vm = GUIApp::joint();
+	vm.offsetScale = fRect(_r.translated(offsetPixels())).asVector4();
+	vm.color = RGBA(_c);
+	ProgramUser u(vm.flat);
+	vm.flatGeometry.setData(vm.unitQuad, 2);
+	u.triangleStrip(4);
+}
+
+void Context::rect(iRect _r, Color _c, float _gradient) const
+{
+	auto vm = GUIApp::joint();
+	vm.offsetScale = fRect(_r.translated(offsetPixels())).asVector4();
+	vm.color = RGBA(_c);
+	vm.gradient = _gradient;
+	ProgramUser u(vm.shaded);
+	vm.shadedGeometry.setData(vm.unitQuad, 2);
+	u.triangleStrip(4);
+}
+
+void Context::text(Font const& _f, iCoord _anchor, std::string const& _text, RGBA _c) const
+{
+	_f.draw(_anchor + offsetPixels(), _text, _c);
 }
 
 void Context::text(Font const& _f, fCoord _anchor, std::string const& _text, RGBA _c) const

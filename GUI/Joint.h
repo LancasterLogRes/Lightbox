@@ -12,7 +12,8 @@ struct Joint
 	void init(Display& _d);
 
 	Display* display;
-	uSize displaySize;
+	uSize displaySizePixels;
+	fSize displaySizeMM;
 	UniformPage uniforms;
 	PagedUniform offsetScale;
 	PagedUniform gradient;

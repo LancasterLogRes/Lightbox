@@ -197,6 +197,9 @@ Lightbox::Display::Display()
 	eglSwapBuffers(m_display, m_surface);
 #endif
 #endif
+
+	m_widthMM = m_width;
+	m_heightMM = m_height;
 }
 
 Lightbox::Display::~Display()

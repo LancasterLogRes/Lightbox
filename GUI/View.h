@@ -23,13 +23,22 @@ namespace Lightbox
 
 struct Context
 {
-	fRect clip;		// in root coords
-	fSize offset;	// from root topLeft.
+	fSize offset;	// from root topLeft. In MM.
+	iSize offsetPixels() const;
 
+	iRect pixels(ViewBody* _v) const;
+	iSize pixels(fSize _mm) const;
+	iCoord pixels(fCoord _mm) const;
+
+	void rect(iRect _r, Color _c) const;
+	void rect(iRect _r, Color _c, float _gradient) const;
+	void text(Font const& _f, iCoord _anchor, std::string const& _text, RGBA _c = RGBA::Black) const;
+
+	// Deprecated - use iRect/iCoord/iEllipse versions instead
 	void rect(fRect _r) const;
 	void rect(fRect _r, Color _c) const;
-	void rect(fRect _r, Color _c, float _gradient) const;
 	void rect(fRect _r, Program const& _p) const;
+	void rect(fRect _r, Color _c, float _gradient) const;
 	void disc(fCoord _center, float _r) const;
 	void disc(fCoord _center, fSize _r, Color _c) const;
 	void disc(fEllipse _r, Color _c) const { disc(_r.pos(), _r.radii(), _c); }
@@ -173,7 +182,6 @@ public:
 	bool isVisible() const { return m_isShown && (!m_parent || parent()->isVisible()); }
 	ChildIndex childIndex() const { return m_childIndex; }
 	fRect geometry() const { return m_geometry; }
-	fRect rect() const { return fRect(fCoord(0, 0), fSize(m_geometry.size())); }
 	View parent() const { return View(m_parent); }
 	Layout* layout() const { return m_layout; }
 	float stretch() const { return m_stretch; }

@@ -35,7 +35,7 @@ bool DirectionPickerBody::event(Event* _e)
 			else
 			{
 				m_lastSign = iSize((p - m_direction.pos()).sign());
-				fSize r(min(1.f, wC(p.x())), min(1.f, hC(p.y())));
+				fSize r(min(.5f, wC(p.x())), min(.5f, hC(p.y())));
 				if (fabs(r.w()) < .05f)
 					r.setW(0.f);
 				if (fabs(r.h()) < .05f)

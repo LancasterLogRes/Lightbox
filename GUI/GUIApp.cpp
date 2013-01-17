@@ -214,8 +214,8 @@ bool GUIApp::drawGraphics()
 	LB_GL(glBlendFunc, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	LB_GL(glClearColor, 0, 0, 0, 0);
 	LB_GL(glClear, GL_COLOR_BUFFER_BIT);
-	LB_GL(glViewport, 0, 0, GUIApp::joint().display->size().w(), GUIApp::joint().display->size().h());
-	GUIApp::joint().u_displaySize = (fVector2)(fSize)GUIApp::joint().display->size() * vec2(1, -1);
+	LB_GL(glViewport, 0, 0, GUIApp::joint().display->sizePixels().w(), GUIApp::joint().display->sizePixels().h());
+	GUIApp::joint().u_displaySize = (fVector2)(fSize)GUIApp::joint().display->sizePixels() * vec2(1, -1);
 	{
 		// geometry is guaranteed to be in composite-draw-order.
 		unsigned ci = 0;
@@ -239,7 +239,7 @@ bool GUIApp::drawGraphics()
 				Context c;
 				c.offset = v->m_globalPosAsOfLastGatherDrawers;
 				LB_GL(glEnable, GL_SCISSOR_TEST);
-				LB_GL(glScissor, round(v->m_globalPosAsOfLastGatherDrawers.x()), GUIApp::joint().display->size().h() - round(v->geometry().h()) - round(v->m_globalPosAsOfLastGatherDrawers.y()), round(v->geometry().w()), round(v->geometry().h()));
+				LB_GL(glScissor, round(v->m_globalPosAsOfLastGatherDrawers.x()), GUIApp::joint().display->sizePixels().h() - round(v->geometry().h()) - round(v->m_globalPosAsOfLastGatherDrawers.y()), round(v->geometry().w()), round(v->geometry().h()));
 				v->executeDraw(c);
 				if (!v->m_isEnabled)
 					c.rect(fRect(0, 0, round(v->geometry().w()), round(v->geometry().h())), Color(0.f, .5f));

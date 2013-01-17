@@ -21,7 +21,13 @@ public:
 
 	unsigned width() const { return m_width; }
 	unsigned height() const { return m_height; }
-	uSize size() const { return uSize(m_width, m_height); }
+	float widthMM() const { return m_widthMM; }
+	float heightMM() const { return m_heightMM; }
+
+	uSize sizePixels() const { return uSize(m_width, m_height); }
+	fSize sizeMM() const { return fSize(m_widthMM, m_heightMM); }
+	iCoord toPixels(fCoord _mm) const { return iCoord(round(_mm.x() / m_widthMM * m_width), round(_mm.y() / m_heightMM * m_height)); }
+	iSize toPixels(fSize _mm) const { return iSize(ceil(_mm.w() / m_widthMM * m_width), ceil(_mm.h() / m_heightMM * m_height)); }
 
 #if LIGHTBOX_USE_XLIB
 	void* xDisplay() const { return m_xDisplay; }
@@ -37,6 +43,8 @@ private:
 
 	unsigned m_width;
 	unsigned m_height;
+	float m_widthMM;
+	float m_heightMM;
 
 #if LIGHTBOX_USE_EGL
 	/*EGLDisplay*/ void* m_display;
