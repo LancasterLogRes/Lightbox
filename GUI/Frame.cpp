@@ -6,7 +6,6 @@ using namespace Lightbox;
 
 FrameBody::FrameBody()
 {
-	setCorporal(false);
 }
 
 FrameBody::~FrameBody()

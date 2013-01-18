@@ -25,14 +25,16 @@ bool isNeighbour(View const& _v)
 static const float c_surroundWidth = 2;
 static const float c_lightWidth = 4;
 
-iMargin BasicButtonBody::prepareDraw(int)
+vector<iMargin> BasicButtonBody::prepareDraw()
 {
-	return iMargin(16, 16, 16, 16);
 	iSize lightWidth = GUIApp::joint().display->toPixels(fSize(c_lightWidth, c_lightWidth));
-	return iMargin(lightWidth / 2, lightWidth - lightWidth / 2);
+	vector<iMargin> ret;
+	ret += iMargin();
+	ret += iMargin(lightWidth / 2, lightWidth - lightWidth / 2);
+	return ret;
 }
 
-void BasicButtonBody::draw(Context const& _c, int)
+void BasicButtonBody::draw(Context const& _c, int _l)
 {
 	iSize surroundWidth = GUIApp::joint().display->toPixels(fSize(c_surroundWidth, c_surroundWidth));
 	iSize lightWidth = GUIApp::joint().display->toPixels(fSize(c_lightWidth, c_lightWidth));
@@ -45,16 +47,23 @@ void BasicButtonBody::draw(Context const& _c, int)
 	iRect surround = rect();
 	iRect outer = surround.inset(haveLeft ? 0 : surroundWidth.w(), haveTop ? 0 : surroundWidth.h(), haveRight ? 0 : surroundWidth.w(), haveBottom ? 0 : surroundWidth.h());
 	iRect inner = outer.inset(lightWidth.w() / (haveLeft ? 2 : 1), lightWidth.h() / (haveTop ? 2 : 1), lightWidth.w() - (haveRight ? lightWidth.w() / 2 : 0), lightWidth.h() - (haveBottom ? lightWidth.h() / 2 : 0));
-	_c.rect(surround, Color(0));
-	_c.rect(outer, m_isDown ? m_color : Color(m_color.hue(), .5f, .125f));
-	if (!m_isDown)
+	if (_l == 0)
 	{
-		_c.rect(inner.lerp(0, 0, 1, .35f), Color(.125f), -.2f);
-		_c.rect(inner.lerp(0, .35f, 1, 1), Color(0.0625f), -.1f);
+		_c.rect(surround, Color(0));
+		_c.rect(outer, Color(m_color.hue(), m_color.sat() * .5f, .125f));
+		if (!m_isDown)
+		{
+			_c.rect(inner.lerp(0, 0, 1, .35f), Color(.125f), -.2f);
+			_c.rect(inner.lerp(0, .35f, 1, 1), Color(0.0625f), -.1f);
+		}
+		else
+			_c.rect(inner, Color(0.0625f), -.1f);
+		_c.text(GUIApp::style().bold, inner.lerp(.5f, .5f), m_text, (m_isDown ? m_color : Color(m_color.hue(), .125f, .625f)).toRGBA());
 	}
-	else
-		_c.rect(inner, Color(0.0625f), -.1f);
-	_c.text(GUIApp::style().bold, inner.lerp(.5f, .5f), m_text, (m_isDown ? m_color : Color(m_color.hue(), .125f, .625f)).toRGBA());
+	else if (_l == 1 && m_isDown)
+	{
+		_c.rectOutline(inner, iMargin(lightWidth), m_color);
+	}
 }
 
 bool BasicButtonBody::event(Event* _e)

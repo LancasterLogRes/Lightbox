@@ -21,6 +21,7 @@ protected:
 	
 	virtual bool event(Event* _e);
 	virtual void draw(Context const& _c);
+	virtual std::vector<iMargin> prepareDraw() { return std::vector<iMargin>(); }
 	
 private:
 };

@@ -15,6 +15,7 @@ public:
 	typedef Size<Numeric> xSize;
 
 	Margin(): Super(0, 0, 0, 0) {}
+	explicit Margin(xSize _xy): Super(_xy.w(), _xy.h(), _xy.w(), _xy.h()) {}
 	Margin(xSize _tl, xSize _br): Super(_tl.w(), _tl.h(), _br.w(), _br.h()) {}
 	Margin(Numeric _left, Numeric _top, Numeric _right, Numeric _bottom): Super(_left, _top, _right, _bottom) {}
 
@@ -31,8 +32,16 @@ public:
 	void setRight(Numeric _v) { Super::m_z = _v; }
 	void setBottom(Numeric _v) { Super::m_w = _v; }
 
+	xSize extra() const { return xSize(m_x + m_z, m_y + m_w); }
+	Numeric extraWidth() const { return m_x + m_z; }
+	Numeric extraHeight() const { return m_y + m_w; }
+
 private:
 	using Super::compare;
+	using Super::m_x;
+	using Super::m_y;
+	using Super::m_z;
+	using Super::m_w;
 };
 
 typedef Margin<int> iMargin;

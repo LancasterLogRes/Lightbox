@@ -35,7 +35,7 @@ public:
 protected:
 	BasicButtonBody(std::string const& _text = std::string(), Color _c = White, Grouping _grouping = NoGrouping);
 
-	virtual iMargin prepareDraw(int);
+	virtual vector<iMargin> prepareDraw();
 	virtual void draw(Context const& _c, int _layer);
 	virtual bool event(Event* _e);
 	virtual void tapped();

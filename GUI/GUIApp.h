@@ -43,6 +43,7 @@ private:
 	Frame m_root;
 	Joint m_joint;
 	Style m_style;
+	typedef std::pair<ViewBody*, unsigned> ViewLayer;
 
 	struct CachePos
 	{
@@ -53,7 +54,7 @@ private:
 	struct ImageCache
 	{
 		ImageCache();
-		bool fit(iRect _g, ViewBody* _v);
+		bool fit(iRect _g, ViewLayer _v);
 
 		Framebuffer fb;
 		Texture2D tx;
@@ -61,7 +62,7 @@ private:
 		std::vector<float> collated;
 		unsigned nextfree;
 		std::multimap<unsigned, std::pair<unsigned, unsigned> > rows; // rowheight -> (ypos, width)
-		std::map<ViewBody*, CachePos> vs;
+		std::map<ViewLayer, CachePos> vs;
 	};
 	std::vector<ImageCache> m_cache;
 

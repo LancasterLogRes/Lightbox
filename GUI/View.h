@@ -32,7 +32,6 @@ struct Context
 	iRect canvas;	///< Full (overdrawn) view rect, in device coordinates. Zero top-left if it's drawing to texture.
 
 	Context() {}
-	Context(View const& _v);
 	Context(iRect _active, iRect _canvas): active(_active), canvas(_canvas) {}
 
 	iSize offsetPixels() const { return iSize(canvas.left(), canvas.top()); }
@@ -43,6 +42,7 @@ struct Context
 
 	void rect(iRect _r, Color _c) const;
 	void rect(iRect _r, Color _c, float _gradient) const;
+	void rectOutline(iRect _inner, iMargin _outset, Color _c) const;
 	void text(Font const& _f, iCoord _anchor, std::string const& _text, RGBA _c = RGBA::Black) const;
 
 	// Deprecated - use iRect/iCoord/iEllipse versions instead
@@ -106,7 +106,7 @@ template <class _T> _T& operator<<(_T& _out, View const& _v)
  *   - Said public method should be called from hardware event handler with true for _userEvent.
  */
 
-static unsigned const c_viewLayerCount = 1;
+static unsigned const c_viewLayerCount = 2;
 
 class ViewBody: public boost::noncopyable
 {
@@ -185,6 +185,7 @@ public:
 
 	void clearChildren();
 
+	bool draws() const { return m_overdraw.size(); }
 	bool isEnabled() const { return m_isEnabled; }
 	bool isShown() const { return m_isShown; }
 	bool isHidden() const { return !m_isShown; }
@@ -195,7 +196,7 @@ public:
 	Layout* layout() const { return m_layout; }
 	float stretch() const { return m_stretch; }
 	iRect rect() const { return iRect(iCoord(0, 0), m_globalRect.size()); }
-	iRect canvas() const { return rect().outset(m_overdraw); }
+	iRect canvas(unsigned _layer = 0) const { if (_layer < m_overdraw.size()) return rect().outset(m_overdraw[_layer]); else return iRect(); }
 
 	template <class _T> _T property(std::string const& _name) { try { return boost::any_cast<_T>(m_misc[_name]); } catch (...) { return _T(); } }
 	template <class _T> bool hasProperty(std::string const& _name) { if (m_misc.count(_name)) try { boost::any_cast<_T>(m_misc[_name]); return true; } catch (...) {} return false; }
@@ -205,7 +206,7 @@ public:
 	void handleDraw(Context const& _c);
 	bool handleEvent(Event* _e);
 
-	void update();
+	void update(int _layer = -1);
 	void relayout();
 
 	void noteMetricsChanged() { if (m_parent) m_parent->noteLayoutDirty(); }
@@ -229,12 +230,11 @@ protected:
 		return ret;
 	}
 
-	void setCorporal(bool _enableDraw) { m_isCorporal = _enableDraw; }
 	void lockPointer(int _id);
 	void releasePointer(int _id);
 	bool pointerLocked(int _id);
 
-	virtual iMargin prepareDraw(int _layer) { (void)_layer; return m_overdraw; }
+	virtual std::vector<iMargin> prepareDraw() { return std::vector<iMargin>(1); }
 	virtual void draw(Context const& _c, int _layer) { (void)_layer; draw(_c); }
 	virtual void draw(Context const& _c);
 	virtual bool event(Event*) { return false; }
@@ -252,7 +252,7 @@ protected:
 private:
 	void checkCache();
 	void cleanCache();
-	bool gatherDrawers(std::vector<ViewBody*>& _l, fCoord _o = fCoord(0, 0), bool _ancestorVisibileLayoutChanged = false);
+	bool gatherDrawers(std::vector<std::pair<ViewBody*, unsigned> >& _l, fCoord _o = fCoord(0, 0), bool _ancestorVisibileLayoutChanged = false);
 
 	void executeDraw(Context const& _c, int _layer);
 	void initGraphicsRecursive() { if (!m_graphicsInitialized) { initGraphics(); m_graphicsInitialized = true; } for (auto const& c: m_children) c->initGraphicsRecursive(); }
@@ -270,17 +270,17 @@ private:
 	float m_stretch;					///< Stretch factor - used in layout algorithms.
 	bool m_isShown;						///< Whether we would indeed draw ourselves should our parent be visible. Necessary but not sufficient for being visible.
 	bool m_isEnabled;					///< Whether we are interactive. Doesn't affect visibility.
-	mutable bool m_dirty;				///< True if a redraw would result in a different canvas to the last.
 	mutable bool m_visibleLayoutChanged;	///< True if our, or any of our ancestors', layout has been changed and said view is visible.
-	bool m_isCorporal;					///< True if our draw call does anything.
-	bool m_wasDirty;					///< True if we were dirty but have since been redrawn but not yet recached.
+
 	bool m_graphicsInitialized;			///< True if we have initialized graphics (with initGraphics()) and not subsequently finalized (with finiGraphics()).
 
-	iMargin m_overdraw;					///< The margin of overdraw that we wanted as of the last call to prepareDraw(), stored in pixels.
+	mutable std::vector<bool> m_layerDirty;	///< True if a redraw would result in a different canvas to the last.
+	std::vector<bool> m_readyForCache;	///< True if we had a direct redraw but the cache is still invalid.
+	std::vector<iMargin> m_overdraw;	///< The margin of overdraw that we wanted as of the last call to prepareDraw(), stored in pixels, for each active layer.
+	std::vector<iRect> m_globalLayer;	///< Our full footprint in device coordinates; includes overdraw. Up to date at time of last call to gatherDrawers().
 
 	fRect m_globalRectMM;				///< Our basic footprint in device coordinates in mm; this doesn't include overdraw. Up to date at time of last call to gatherDrawers().
 	iRect m_globalRect;					///< Our basic footprint in device coordinates; this doesn't include overdraw. Up to date at time of last call to gatherDrawers().
-	iRect m_globalCanvas;				///< Our full footprint in device coordinates; includes overdraw. Up to date at time of last call to gatherDrawers().
 };
 
 inline void intrusive_ptr_add_ref(ViewBody* _v)

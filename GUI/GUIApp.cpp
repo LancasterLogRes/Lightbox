@@ -73,7 +73,7 @@ GUIApp::ImageCache::ImageCache():
 	u.attachColor(tx);
 }
 
-bool GUIApp::ImageCache::fit(iRect _g, ViewBody* _v)
+bool GUIApp::ImageCache::fit(iRect _g, ViewLayer _v)
 {
 	// NOTE: should use a good algorithm really - http://cgi.csc.liv.ac.uk/~epa/surveyhtml.html
 	float tolerance = 1.2f;
@@ -132,22 +132,22 @@ bool GUIApp::drawGraphics()
 {
 	bool stillDirty = false;
 
-	vector<ViewBody*> drawers;
+	vector<ViewLayer> drawers;
 	bool visibleLayoutChanged = m_root->gatherDrawers(drawers);
 	if (visibleLayoutChanged)
 	{
 		// At least one resized drawer - reset and redraw everything (in the future we might attempt a more evolutionary cache design).
 		m_cache.clear();
 
-		for (ViewBody* v: drawers)
+		for (ViewLayer v: drawers)
 		{
-			v->m_dirty = true;
-			v->m_visibleLayoutChanged = false;
+			v.first->m_layerDirty[v.second] = true;
+			v.first->m_visibleLayoutChanged = false;
 			while (true)
 			{
 				int page = max(0, int(m_cache.size()) - 1);
 				// assuming page is valid, try to find a position in m_cache[page] and put it into pos...
-				if ((int)m_cache.size() > page && m_cache[page].fit(v->m_globalCanvas, v))
+				if ((int)m_cache.size() > page && m_cache[page].fit(v.first->m_globalLayer[v.second], v))
 					break;
 				// End of cache - add a new page onto m_cache.
 				m_cache.push_back(ImageCache());
@@ -160,9 +160,9 @@ bool GUIApp::drawGraphics()
 		}
 	}
 
-	vector< vector<ViewBody*> > renderToFramebuffer(m_cache.size());
+	vector< vector<ViewLayer> > renderToFramebuffer(m_cache.size());
 
-	if (find_if(drawers.begin(), drawers.end(), [&](ViewBody* v){ return v->m_dirty; }) != drawers.end())
+	if (find_if(drawers.begin(), drawers.end(), [&](ViewLayer v){ return v.first->m_layerDirty[v.second]; }) != drawers.end())
 	{
 		// At least one dirty drawer - set up for render-to-texture and rerender dirty parts.
 		LB_GL(glBlendFunc, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
@@ -175,35 +175,35 @@ bool GUIApp::drawGraphics()
 			bool willRenderToTexture = false;
 			for (auto const& v: c.vs)
 			{
-				if (v.first->m_dirty && v.first->m_wasDirty)
+				if (v.first.first->m_layerDirty[v.first.second] && v.first.first->m_readyForCache[v.first.second])
 					willRenderToTexture = true;
-				else if (v.first->m_dirty)
+				else if (v.first.first->m_layerDirty[v.first.second])
 				{
 					renderToFramebuffer[ci] += v.first;
-					v.first->m_wasDirty = stillDirty = true;
+					v.first.first->m_readyForCache[v.first.second] = stillDirty = true;
 				}
 			}
 
-			sort(renderToFramebuffer[ci].begin(), renderToFramebuffer[ci].end(), [&](ViewBody* a, ViewBody* b) { return c.vs[a].index < c.vs[b].index; });
+			sort(renderToFramebuffer[ci].begin(), renderToFramebuffer[ci].end(), [&](ViewLayer a, ViewLayer b) { return c.vs[a].index < c.vs[b].index; });
 
 			if (willRenderToTexture)
 			{
 				FramebufferUser u(c.fb);
 				for (auto const& v: c.vs)
-					if (v.first->m_dirty)
+					if (v.first.first->m_layerDirty[v.first.second])
 					{
 						uRect texRect = v.second.pos;
 						LB_GL(glViewport, texRect.x(), texRect.y(), texRect.w(), texRect.h());
 						LB_GL(glScissor, texRect.x(), texRect.y(), texRect.w(), texRect.h());
 						LB_GL(glClear, GL_COLOR_BUFFER_BIT);
 						GUIApp::joint().u_displaySize = (vec2)(fSize)texRect.size();
-						assert((iSize)texRect.size() == v.first->m_globalCanvas.size());
+						assert((iSize)texRect.size() == v.first.first->m_globalLayer[v.first.second].size());
 						iRect canvas(iCoord(0, 0), (iSize)texRect.size());
-						Context con(canvas.inset(v.first->m_overdraw), canvas);
-						v.first->executeDraw(con, 0);
-						if (!v.first->m_isEnabled)
+						Context con(canvas.inset(v.first.first->m_overdraw[v.first.second]), canvas);
+						v.first.first->executeDraw(con, v.first.second);
+						if (!v.first.first->m_isEnabled)
 							con.rect(canvas, Color(0.f, .5f));
-						v.first->m_dirty = false;
+						v.first.first->m_layerDirty[v.first.second] = false;
 					}
 			}
 			ci++;
@@ -223,7 +223,7 @@ bool GUIApp::drawGraphics()
 		for (auto& c: m_cache)
 		{
 			unsigned next = 0;
-			for (ViewBody* v: renderToFramebuffer[ci])
+			for (ViewLayer v: renderToFramebuffer[ci])
 			{
 				assert(c.vs.count(v));
 				CachePos const& cp = c.vs[v];
@@ -237,13 +237,14 @@ bool GUIApp::drawGraphics()
 				}
 
 				// draw our view directly to framebuffer.
-				Context c(v->m_globalRect, v->m_globalCanvas);
-				c.offset = joint().display->fromPixels(v->m_globalRect).topLeft();
+				auto globalLayer = v.first->m_globalLayer[v.second];
+				Context c(v.first->m_globalRect, globalLayer);
+				c.offset = joint().display->fromPixels(v.first->m_globalRect).topLeft();
 				LB_GL(glEnable, GL_SCISSOR_TEST);
-				LB_GL(glScissor, v->m_globalCanvas.x(), joint().display->sizePixels().h() - v->m_globalCanvas.bottom(), v->m_globalCanvas.w(), v->m_globalCanvas.h());
-				v->executeDraw(c, 0);
-				iRect canvas(iCoord(0, 0), v->m_globalCanvas.size());
-				if (!v->m_isEnabled)
+				LB_GL(glScissor, globalLayer.x(), joint().display->sizePixels().h() - globalLayer.bottom(), globalLayer.w(), globalLayer.h());
+				v.first->executeDraw(c, v.second);
+				iRect canvas(iCoord(0, 0), globalLayer.size());
+				if (!v.first->m_isEnabled && v.second == 0)
 					c.rect(canvas, Color(0.f, .5f));
 				LB_GL(glDisable, GL_SCISSOR_TEST);
 				next = cp.index + 1;
