@@ -21,10 +21,21 @@
 namespace Lightbox
 {
 
+class ViewBody;
+typedef boost::intrusive_ptr<ViewBody> View;
+
 struct Context
 {
-	fSize offset;	// from root topLeft. In MM.
-	iSize offsetPixels() const;
+	fSize offset;	///< from root topLeft. In MM. @deprecated Completely useless!
+
+	iRect active;	///< Basic (non-overdrawn) view rect, in device coordinates. If there's overdraw (or it's not drawing to texture), it'll have a positive topleft.
+	iRect canvas;	///< Full (overdrawn) view rect, in device coordinates. Zero top-left if it's drawing to texture.
+
+	Context() {}
+	Context(View const& _v);
+	Context(iRect _active, iRect _canvas): active(_active), canvas(_canvas) {}
+
+	iSize offsetPixels() const { return iSize(canvas.left(), canvas.top()); }
 
 	iRect pixels(ViewBody* _v) const;
 	iSize pixels(fSize _mm) const;
@@ -49,9 +60,6 @@ struct Context
 	void blit(Texture2D const& _tex, fCoord _pos = fCoord(0, 0)) const;
 	void text(Font const& _f, fCoord _anchor, std::string const& _text, RGBA _c = RGBA::Black) const;
 };
-
-class ViewBody;
-typedef boost::intrusive_ptr<ViewBody> View;
 
 struct ViewSiblingsComparator
 {
@@ -104,6 +112,7 @@ class ViewBody: public boost::noncopyable
 {
 	template <class _T, class _I> friend class ViewCreator;
 	friend class GUIApp;
+	friend class Context;
 	inline friend void intrusive_ptr_add_ref(ViewBody* _v);
 	inline friend void intrusive_ptr_release(ViewBody* _v);
 	friend void debugOut(View const& _v, std::string const& _indent);
@@ -185,6 +194,8 @@ public:
 	View parent() const { return View(m_parent); }
 	Layout* layout() const { return m_layout; }
 	float stretch() const { return m_stretch; }
+	iRect rect() const { return iRect(iCoord(0, 0), m_globalRect.size()); }
+	iRect canvas() const { return rect().outset(m_overdraw); }
 
 	template <class _T> _T property(std::string const& _name) { try { return boost::any_cast<_T>(m_misc[_name]); } catch (...) { return _T(); } }
 	template <class _T> bool hasProperty(std::string const& _name) { if (m_misc.count(_name)) try { boost::any_cast<_T>(m_misc[_name]); return true; } catch (...) {} return false; }
@@ -262,12 +273,14 @@ private:
 	mutable bool m_dirty;				///< True if a redraw would result in a different canvas to the last.
 	mutable bool m_visibleLayoutChanged;	///< True if our, or any of our ancestors', layout has been changed and said view is visible.
 	bool m_isCorporal;					///< True if our draw call does anything.
-	fCoord m_globalPosAsOfLastGatherDrawers;	///< Our global position - gets updated by gatherDrawers.
 	bool m_wasDirty;					///< True if we were dirty but have since been redrawn but not yet recached.
 	bool m_graphicsInitialized;			///< True if we have initialized graphics (with initGraphics()) and not subsequently finalized (with finiGraphics()).
 
 	iMargin m_overdraw;					///< The margin of overdraw that we wanted as of the last call to prepareDraw(), stored in pixels.
-	iRect m_canvas;						///< Where the canvas is located in GL space. (0, 0) corresponds to the top left of m_geometry. Size must be (pixels(geometry.size) + overdraw).
+
+	fRect m_globalRectMM;				///< Our basic footprint in device coordinates in mm; this doesn't include overdraw. Up to date at time of last call to gatherDrawers().
+	iRect m_globalRect;					///< Our basic footprint in device coordinates; this doesn't include overdraw. Up to date at time of last call to gatherDrawers().
+	iRect m_globalCanvas;				///< Our full footprint in device coordinates; includes overdraw. Up to date at time of last call to gatherDrawers().
 };
 
 inline void intrusive_ptr_add_ref(ViewBody* _v)

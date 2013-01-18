@@ -69,14 +69,14 @@ public:
 	Rect inset(xSize _s) const { return Rect(m_pos + _s, m_size - 2 * _s); }
 	Rect inset(xSize _tl, xSize _br) const { return inset(xMargin(_tl, _br)); }
 	Rect inset(Numeric _l, Numeric _t, Numeric _r, Numeric _b) const { return inset(xMargin(_l, _t, _r, _b)); }
-	Rect inset(xMargin _m) const { return Rect(m_pos.x() + _m.left(), m_pos.y() + _m.right(), m_size.w() - _m.left() - _m.right(), m_size.h() - _m.top() - _m.bottom()); }
+	Rect inset(xMargin _m) const { return Rect(m_pos.x() + _m.left(), m_pos.y() + _m.top(), m_size.w() - _m.left() - _m.right(), m_size.h() - _m.top() - _m.bottom()); }
 
 	Rect outset(Numeric _s) const { return outset(xMargin(_s, _s, _s, _s)); }
 	Rect outset(Numeric _x, Numeric _y) const { return outset(xSize(_x, _y)); }
 	Rect outset(xSize _s) const { return Rect(m_pos - _s, m_size + 2 * _s); }
 	Rect outset(xSize _tl, xSize _br) const { return outset(xMargin(_tl, _br)); }
 	Rect outset(Numeric _l, Numeric _t, Numeric _r, Numeric _b) const { return outset(xMargin(_l, _t, _r, _b)); }
-	Rect outset(xMargin _m) const { return Rect(m_pos.x() - _m.left(), m_pos.y() - _m.right(), m_size.w() + _m.left() + _m.right(), m_size.h() + _m.top() + _m.bottom()); }
+	Rect outset(xMargin _m) const { return Rect(m_pos.x() - _m.left(), m_pos.y() - _m.top(), m_size.w() + _m.left() + _m.right(), m_size.h() + _m.top() + _m.bottom()); }
 
 	Rect dividedBy(xSize _s) const { return Rect(m_pos / _s, m_size / _s); }
 

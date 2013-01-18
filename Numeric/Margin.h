@@ -18,6 +18,9 @@ public:
 	Margin(xSize _tl, xSize _br): Super(_tl.w(), _tl.h(), _br.w(), _br.h()) {}
 	Margin(Numeric _left, Numeric _top, Numeric _right, Numeric _bottom): Super(_left, _top, _right, _bottom) {}
 
+	bool operator==(Margin _c) const { return compare(_c); }
+	bool operator!=(Margin _c) const { return !compare(_c); }
+
 	Numeric left() const { return Super::m_x; }
 	Numeric top() const { return Super::m_y; }
 	Numeric right() const { return Super::m_z; }
@@ -27,6 +30,9 @@ public:
 	void setTop(Numeric _v) { Super::m_y = _v; }
 	void setRight(Numeric _v) { Super::m_z = _v; }
 	void setBottom(Numeric _v) { Super::m_w = _v; }
+
+private:
+	using Super::compare;
 };
 
 typedef Margin<int> iMargin;

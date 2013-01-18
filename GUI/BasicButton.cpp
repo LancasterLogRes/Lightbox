@@ -27,6 +27,7 @@ static const float c_lightWidth = 4;
 
 iMargin BasicButtonBody::prepareDraw(int)
 {
+	return iMargin(16, 16, 16, 16);
 	iSize lightWidth = GUIApp::joint().display->toPixels(fSize(c_lightWidth, c_lightWidth));
 	return iMargin(lightWidth / 2, lightWidth - lightWidth / 2);
 }
@@ -41,7 +42,7 @@ void BasicButtonBody::draw(Context const& _c, int)
 	bool haveTop = (m_grouping == Vertical && childIndex() > 0 && isNeighbour(parent()->child(childIndex() - 1)));
 	bool haveBottom = (m_grouping == Vertical && isNeighbour(parent()->child(childIndex() + 1)));
 
-	iRect surround = _c.pixels(this);
+	iRect surround = rect();
 	iRect outer = surround.inset(haveLeft ? 0 : surroundWidth.w(), haveTop ? 0 : surroundWidth.h(), haveRight ? 0 : surroundWidth.w(), haveBottom ? 0 : surroundWidth.h());
 	iRect inner = outer.inset(lightWidth.w() / (haveLeft ? 2 : 1), lightWidth.h() / (haveTop ? 2 : 1), lightWidth.w() - (haveRight ? lightWidth.w() / 2 : 0), lightWidth.h() - (haveBottom ? lightWidth.h() / 2 : 0));
 	_c.rect(surround, Color(0));

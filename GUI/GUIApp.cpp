@@ -62,7 +62,7 @@ void GUIApp::finiGraphics(Display&)
 	m_root->show(false);
 }
 
-static const uSize s_pageSize(2048, 2048);
+static const uSize s_pageSize(1024, 4096);
 
 GUIApp::ImageCache::ImageCache():
 	fb(Framebuffer::Create),
@@ -139,17 +139,15 @@ bool GUIApp::drawGraphics()
 		// At least one resized drawer - reset and redraw everything (in the future we might attempt a more evolutionary cache design).
 		m_cache.clear();
 
-		cnote << "Drawers changed:";
 		for (ViewBody* v: drawers)
 		{
-			cnote << View(v);
 			v->m_dirty = true;
 			v->m_visibleLayoutChanged = false;
 			while (true)
 			{
 				int page = max(0, int(m_cache.size()) - 1);
 				// assuming page is valid, try to find a position in m_cache[page] and put it into pos...
-				if ((int)m_cache.size() > page && m_cache[page].fit((iRect)fRect(v->m_globalPosAsOfLastGatherDrawers.rounded(), v->geometry().size().rounded()), v))
+				if ((int)m_cache.size() > page && m_cache[page].fit(v->m_globalCanvas, v))
 					break;
 				// End of cache - add a new page onto m_cache.
 				m_cache.push_back(ImageCache());
@@ -199,9 +197,12 @@ bool GUIApp::drawGraphics()
 						LB_GL(glScissor, texRect.x(), texRect.y(), texRect.w(), texRect.h());
 						LB_GL(glClear, GL_COLOR_BUFFER_BIT);
 						GUIApp::joint().u_displaySize = (vec2)(fSize)texRect.size();
-						v.first->executeDraw(Context(), 0);
+						assert((iSize)texRect.size() == v.first->m_globalCanvas.size());
+						iRect canvas(iCoord(0, 0), (iSize)texRect.size());
+						Context con(canvas.inset(v.first->m_overdraw), canvas);
+						v.first->executeDraw(con, 0);
 						if (!v.first->m_isEnabled)
-							Context().rect(fRect(fCoord(0, 0), (fSize)texRect.size()), Color(0.f, .5f));
+							con.rect(canvas, Color(0.f, .5f));
 						v.first->m_dirty = false;
 					}
 			}
@@ -215,7 +216,7 @@ bool GUIApp::drawGraphics()
 	LB_GL(glClearColor, 0, 0, 0, 0);
 	LB_GL(glClear, GL_COLOR_BUFFER_BIT);
 	LB_GL(glViewport, 0, 0, GUIApp::joint().display->sizePixels().w(), GUIApp::joint().display->sizePixels().h());
-	GUIApp::joint().u_displaySize = (fVector2)(fSize)GUIApp::joint().display->sizePixels() * vec2(1, -1);
+	joint().u_displaySize = (fVector2)(fSize)GUIApp::joint().display->sizePixels() * vec2(1, -1);
 	{
 		// geometry is guaranteed to be in composite-draw-order.
 		unsigned ci = 0;
@@ -236,13 +237,14 @@ bool GUIApp::drawGraphics()
 				}
 
 				// draw our view directly to framebuffer.
-				Context c;
-				c.offset = v->m_globalPosAsOfLastGatherDrawers;
+				Context c(v->m_globalRect, v->m_globalCanvas);
+				c.offset = joint().display->fromPixels(v->m_globalRect).topLeft();
 				LB_GL(glEnable, GL_SCISSOR_TEST);
-				LB_GL(glScissor, round(v->m_globalPosAsOfLastGatherDrawers.x()), GUIApp::joint().display->sizePixels().h() - round(v->geometry().h()) - round(v->m_globalPosAsOfLastGatherDrawers.y()), round(v->geometry().w()), round(v->geometry().h()));
+				LB_GL(glScissor, v->m_globalCanvas.x(), joint().display->sizePixels().h() - v->m_globalCanvas.bottom(), v->m_globalCanvas.w(), v->m_globalCanvas.h());
 				v->executeDraw(c, 0);
+				iRect canvas(iCoord(0, 0), v->m_globalCanvas.size());
 				if (!v->m_isEnabled)
-					c.rect(fRect(0, 0, round(v->geometry().w()), round(v->geometry().h())), Color(0.f, .5f));
+					c.rect(canvas, Color(0.f, .5f));
 				LB_GL(glDisable, GL_SCISSOR_TEST);
 				next = cp.index + 1;
 			}

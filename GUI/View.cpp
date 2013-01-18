@@ -9,10 +9,11 @@
 using namespace std;
 using namespace Lightbox;
 
+Context::Context(View const& _v): active(_v->m_globalRect), canvas(_v->m_globalCanvas) {}
+
 iRect Context::pixels(ViewBody* _v) const
 {
-	fSize s = _v->geometry().size();
-	return iRect(iCoord(0, 0), GUIApp::joint().display->toPixels(s));
+	return iRect(iCoord(0, 0), _v->m_globalRect.size());
 }
 
 iSize Context::pixels(fSize _mm) const
@@ -23,6 +24,32 @@ iSize Context::pixels(fSize _mm) const
 iCoord Context::pixels(fCoord _mm) const
 {
 	return GUIApp::joint().display->toPixels(_mm);
+}
+
+void Context::rect(iRect _r, Color _c) const
+{
+	auto vm = GUIApp::joint();
+	vm.offsetScale = fRect(_r.translated(active.pos())).asVector4();
+	vm.color = RGBA(_c);
+	ProgramUser u(vm.flat);
+	vm.flatGeometry.setData(vm.unitQuad, 2);
+	u.triangleStrip(4);
+}
+
+void Context::rect(iRect _r, Color _c, float _gradient) const
+{
+	auto vm = GUIApp::joint();
+	vm.offsetScale = fRect(_r.translated(active.pos())).asVector4();
+	vm.color = RGBA(_c);
+	vm.gradient = _gradient;
+	ProgramUser u(vm.shaded);
+	vm.shadedGeometry.setData(vm.unitQuad, 2);
+	u.triangleStrip(4);
+}
+
+void Context::text(Font const& _f, iCoord _anchor, std::string const& _text, RGBA _c) const
+{
+	_f.draw(_anchor + active.pos(), _text, _c);
 }
 
 void Context::rect(fRect _r, Color _c) const
@@ -116,37 +143,6 @@ void Context::rect(fRect _r, Color _c, float _gradient) const
 	ProgramUser u(vm.shaded);
 	vm.shadedGeometry.setData(vm.unitQuad, 2);
 	u.triangleStrip(4);
-}
-
-iSize Context::offsetPixels() const
-{
-	return GUIApp::joint().display->toPixels(offset);
-}
-
-void Context::rect(iRect _r, Color _c) const
-{
-	auto vm = GUIApp::joint();
-	vm.offsetScale = fRect(_r.translated(offsetPixels())).asVector4();
-	vm.color = RGBA(_c);
-	ProgramUser u(vm.flat);
-	vm.flatGeometry.setData(vm.unitQuad, 2);
-	u.triangleStrip(4);
-}
-
-void Context::rect(iRect _r, Color _c, float _gradient) const
-{
-	auto vm = GUIApp::joint();
-	vm.offsetScale = fRect(_r.translated(offsetPixels())).asVector4();
-	vm.color = RGBA(_c);
-	vm.gradient = _gradient;
-	ProgramUser u(vm.shaded);
-	vm.shadedGeometry.setData(vm.unitQuad, 2);
-	u.triangleStrip(4);
-}
-
-void Context::text(Font const& _f, iCoord _anchor, std::string const& _text, RGBA _c) const
-{
-	_f.draw(_anchor + offsetPixels(), _text, _c);
 }
 
 void Context::text(Font const& _f, fCoord _anchor, std::string const& _text, RGBA _c) const
@@ -266,9 +262,16 @@ void ViewBody::setParent(View const& _p)
 
 bool ViewBody::gatherDrawers(std::vector<ViewBody*>& _l, fCoord _o, bool _ancestorVisibleLayoutChanged)
 {
+	iMargin overdraw = prepareDraw(0);
+	if (m_overdraw != overdraw)
+		m_visibleLayoutChanged = true;	// actually just the overdraw that has changed so this overkill, but at least it'll work.
+	m_overdraw = overdraw;
+
 	bool ret = m_visibleLayoutChanged;
 
-	m_globalPosAsOfLastGatherDrawers = _o + geometry().pos();
+	m_globalRectMM = m_geometry.translated(_o);
+	m_globalRect = GUIApp::joint().display->toPixels(m_globalRectMM);
+	m_globalCanvas = m_globalRect.outset(m_overdraw);
 
 	// Visibility is inherited, so if we draw and have not had our visibility changed directly
 	// but an ancestor has, we must inherit that invalidity.
@@ -291,7 +294,7 @@ bool ViewBody::gatherDrawers(std::vector<ViewBody*>& _l, fCoord _o, bool _ancest
 
 	if (m_isShown)
 		for (auto const& ch: m_children)
-			ret = ch->gatherDrawers(_l, m_globalPosAsOfLastGatherDrawers, _ancestorVisibleLayoutChanged) || ret;
+			ret = ch->gatherDrawers(_l, m_globalRectMM.pos(), _ancestorVisibleLayoutChanged) || ret;
 
 	return ret;
 }

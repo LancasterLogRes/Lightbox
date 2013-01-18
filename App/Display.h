@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Numeric/Coord.h>
+#include <Numeric/Rect.h>
 
 namespace Lightbox
 {
@@ -28,6 +29,10 @@ public:
 	fSize sizeMM() const { return fSize(m_widthMM, m_heightMM); }
 	iCoord toPixels(fCoord _mm) const { return iCoord(round(_mm.x() / m_widthMM * m_width), round(_mm.y() / m_heightMM * m_height)); }
 	iSize toPixels(fSize _mm) const { return iSize(ceil(_mm.w() / m_widthMM * m_width), ceil(_mm.h() / m_heightMM * m_height)); }
+	iRect toPixels(fRect _mm) const { return iRect(iCoord(_mm.pos()), iSize(_mm.size())); }
+	fCoord fromPixels(iCoord _px) const { return fCoord(_px.x() * m_widthMM / m_width, _px.y() * m_heightMM / m_height); }
+	fSize fromPixels(iSize _px) const { return fSize(_px.w() * m_widthMM / m_width, _px.h() * m_heightMM / m_height); }
+	fRect fromPixels(iRect _px) const { return fRect(fCoord(_px.pos()), fSize(_px.size())); }
 
 #if LIGHTBOX_USE_XLIB
 	void* xDisplay() const { return m_xDisplay; }
