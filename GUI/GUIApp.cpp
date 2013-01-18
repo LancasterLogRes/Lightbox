@@ -262,7 +262,8 @@ bool GUIApp::drawGraphics()
 	}
 
 	string info = textualTime(AppEngine::get()->lastDrawTime());
-	Context().rect(fRect(fCoord(m_root->geometry().size()) - fCoord(200, 54), fSize(190, 44)), Color(1.f, .5f));
+	Context con(m_root->rect(), m_root->rect());
+	con.rect(iRect(m_root->rect().bottomRight() - iCoord(200, 54), iSize(190, 44)), Color(1.f, .5f));
 	fSize s = GUIApp::style().regular.measure(info);
 	GUIApp::style().regular.draw(fCoord(m_root->geometry().size() - s / 2.f - fSize(34, 34)), info, RGBA::Black);
 	info = toString(g_metrics.m_useProgramCount) + "/" + toString(g_metrics.m_drawCount);
