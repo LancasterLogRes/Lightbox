@@ -268,6 +268,8 @@ static const float Pi = 3.1415926535898;
 static const float TwoPi = Pi * 2.0;
 static const float HalfPi = Pi / 2.0;
 
+static const double s_tolerance = 1e-8;
+
 template <class _T>
 inline _T highestBitOnly(_T _w)
 {

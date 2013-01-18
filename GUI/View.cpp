@@ -182,7 +182,6 @@ ViewBody::ViewBody():
 	m_layout(nullptr),
 	m_childIndex(0),
 	m_stretch(1.f),
-	m_padding(0, 0, 0, 0),
 	m_isShown(true),
 	m_isEnabled(true),
 	m_dirty(true),
@@ -208,14 +207,14 @@ ViewBody::~ViewBody()
 	clearChildren();
 }
 
-void ViewBody::executeDraw(Context const& _c)
+void ViewBody::executeDraw(Context const& _c, int _layer)
 {
 	if (!m_graphicsInitialized)
 	{
 		initGraphics();
 		m_graphicsInitialized = true;
 	}
-	draw(_c);
+	draw(_c, _layer);
 }
 
 void ViewBody::clearChildren()

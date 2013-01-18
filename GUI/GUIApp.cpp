@@ -199,7 +199,7 @@ bool GUIApp::drawGraphics()
 						LB_GL(glScissor, texRect.x(), texRect.y(), texRect.w(), texRect.h());
 						LB_GL(glClear, GL_COLOR_BUFFER_BIT);
 						GUIApp::joint().u_displaySize = (vec2)(fSize)texRect.size();
-						v.first->executeDraw(Context());
+						v.first->executeDraw(Context(), 0);
 						if (!v.first->m_isEnabled)
 							Context().rect(fRect(fCoord(0, 0), (fSize)texRect.size()), Color(0.f, .5f));
 						v.first->m_dirty = false;
@@ -240,7 +240,7 @@ bool GUIApp::drawGraphics()
 				c.offset = v->m_globalPosAsOfLastGatherDrawers;
 				LB_GL(glEnable, GL_SCISSOR_TEST);
 				LB_GL(glScissor, round(v->m_globalPosAsOfLastGatherDrawers.x()), GUIApp::joint().display->sizePixels().h() - round(v->geometry().h()) - round(v->m_globalPosAsOfLastGatherDrawers.y()), round(v->geometry().w()), round(v->geometry().h()));
-				v->executeDraw(c);
+				v->executeDraw(c, 0);
 				if (!v->m_isEnabled)
 					c.rect(fRect(0, 0, round(v->geometry().w()), round(v->geometry().h())), Color(0.f, .5f));
 				LB_GL(glDisable, GL_SCISSOR_TEST);

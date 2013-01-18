@@ -98,6 +98,8 @@ template <class _T> _T& operator<<(_T& _out, View const& _v)
  *   - Said public method should be called from hardware event handler with true for _userEvent.
  */
 
+static unsigned const c_viewLayerCount = 1;
+
 class ViewBody: public boost::noncopyable
 {
 	template <class _T, class _I> friend class ViewCreator;
@@ -129,12 +131,10 @@ public:
 	void setChildIndex(ChildIndex _i) { if (m_parent) { m_references++; m_parent->m_children.erase(this); m_childIndex = _i; m_parent->m_children.insert(this); m_references--; } else m_childIndex = _i; noteMetricsChanged(); }
 	void setLayout(Layout* _newLayout) { m_layout = _newLayout; m_layout->m_view = this; noteLayoutDirty(); }
 	void setStretch(float _stretch) { m_stretch = _stretch; noteMetricsChanged(); }
-	void setPadding(float _padding) { m_padding = fVector4(_padding, _padding, _padding, _padding); noteMetricsChanged(); }
 
 	View withChildIndex(ChildIndex _i) { setChildIndex(_i); return this; }
 	View withGeometry(fRect _geometry) { setGeometry(_geometry); return this; }
 	View withLayout(Layout* _newLayout) { setLayout(_newLayout); return this; }
-	View withPadding(float _padding) { setPadding(_padding); return this; }
 	View withStretch(float _stretch) { setStretch(_stretch); return this; }
 
 	fCoord globalPos() const;
@@ -185,7 +185,6 @@ public:
 	View parent() const { return View(m_parent); }
 	Layout* layout() const { return m_layout; }
 	float stretch() const { return m_stretch; }
-	fVector4 padding() const { return m_padding; }
 
 	template <class _T> _T property(std::string const& _name) { try { return boost::any_cast<_T>(m_misc[_name]); } catch (...) { return _T(); } }
 	template <class _T> bool hasProperty(std::string const& _name) { if (m_misc.count(_name)) try { boost::any_cast<_T>(m_misc[_name]); return true; } catch (...) {} return false; }
@@ -224,6 +223,8 @@ protected:
 	void releasePointer(int _id);
 	bool pointerLocked(int _id);
 
+	virtual iMargin prepareDraw(int _layer) { (void)_layer; return m_overdraw; }
+	virtual void draw(Context const& _c, int _layer) { (void)_layer; draw(_c); }
 	virtual void draw(Context const& _c);
 	virtual bool event(Event*) { return false; }
 	virtual void resized() { m_visibleLayoutChanged = true; relayout(); update(); }
@@ -242,29 +243,31 @@ private:
 	void cleanCache();
 	bool gatherDrawers(std::vector<ViewBody*>& _l, fCoord _o = fCoord(0, 0), bool _ancestorVisibileLayoutChanged = false);
 
-	void executeDraw(Context const& _c);
+	void executeDraw(Context const& _c, int _layer);
 	void initGraphicsRecursive() { if (!m_graphicsInitialized) { initGraphics(); m_graphicsInitialized = true; } for (auto const& c: m_children) c->initGraphicsRecursive(); }
 	void finiGraphicsRecursive() { for (auto const& c: m_children) c->finiGraphicsRecursive(); if (m_graphicsInitialized) { finiGraphics(); m_graphicsInitialized = false; } }
 	void visibilityChangedRecursive(bool _newRootVisibility) { for (auto const& c: m_children) if (c->m_isShown) c->visibilityChangedRecursive(_newRootVisibility); visibilityChanged(); }
 
-	fRect m_geometry;					// Relative to the parent's coordinate system. (0, 0) is at parent's top left.
-	ViewBody* m_parent;					// Raw pointers are only allowed here because the parent will remove itself from here in its destructor.
-	unsigned m_references;
-	bool m_constructionReference;
-	ViewSet m_children;
-	std::unordered_map<std::string, boost::any> m_misc;
-	Layout* m_layout;
-	ChildIndex m_childIndex;
-	float m_stretch;
-	fVector4 m_padding;
-	bool m_isShown;
-	bool m_isEnabled;
-	mutable bool m_dirty;
-	mutable bool m_visibleLayoutChanged;
-	bool m_isCorporal;
-	fCoord m_globalPosAsOfLastGatherDrawers;
-	bool m_wasDirty;
-	bool m_graphicsInitialized;
+	fRect m_geometry;					///< Relative to the parent's coordinate system, in mm. (0, 0) is at parent's top left. Typically unused.
+	ViewBody* m_parent;					///< Raw pointers are only allowed here because the parent will remove itself from here in its destructor.
+	unsigned m_references;				///< Number of references held to this object.
+	bool m_constructionReference;		///< True if a reference in still held in order to guarantee the object isn't destructed over the course of its construction.
+	ViewSet m_children;					///< The set of children (ordered by m_childIndex).
+	std::unordered_map<std::string, boost::any> m_misc;	///< Miscellaneous properties.
+	Layout* m_layout;					///< The layout object used to layout the children of this View. Allowed to be nullptr, in which case the children are left alone.
+	ChildIndex m_childIndex;			///< Our index among our siblings. Used for layout ordering. Not necessarily contiguous between ordered siblings.
+	float m_stretch;					///< Stretch factor - used in layout algorithms.
+	bool m_isShown;						///< Whether we would indeed draw ourselves should our parent be visible. Necessary but not sufficient for being visible.
+	bool m_isEnabled;					///< Whether we are interactive. Doesn't affect visibility.
+	mutable bool m_dirty;				///< True if a redraw would result in a different canvas to the last.
+	mutable bool m_visibleLayoutChanged;	///< True if our, or any of our ancestors', layout has been changed and said view is visible.
+	bool m_isCorporal;					///< True if our draw call does anything.
+	fCoord m_globalPosAsOfLastGatherDrawers;	///< Our global position - gets updated by gatherDrawers.
+	bool m_wasDirty;					///< True if we were dirty but have since been redrawn but not yet recached.
+	bool m_graphicsInitialized;			///< True if we have initialized graphics (with initGraphics()) and not subsequently finalized (with finiGraphics()).
+
+	iMargin m_overdraw;					///< The margin of overdraw that we wanted as of the last call to prepareDraw(), stored in pixels.
+	iRect m_canvas;						///< Where the canvas is located in GL space. (0, 0) corresponds to the top left of m_geometry. Size must be (pixels(geometry.size) + overdraw).
 };
 
 inline void intrusive_ptr_add_ref(ViewBody* _v)

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Coord.h"
+#include "Margin.h"
 
 namespace Lightbox
 {
@@ -11,6 +12,7 @@ class Rect
 public:
 	typedef Coord<Numeric> xCoord;
 	typedef Size<Numeric> xSize;
+	typedef Margin<Numeric> xMargin;
 
 	Rect() {}
 	Rect(xCoord _min, xSize _size): m_pos(_min), m_size(_size) {}
@@ -24,6 +26,7 @@ public:
 	Vector4<Numeric>& asVector4() { return (Vector4<Numeric>&)*this; }
 
 	void translate(xSize _s) { m_pos += _s; }
+	Rect translated(xSize _s) const { return Rect(m_pos + _s, m_size); }
 	void move(xCoord _pos) { m_pos = _pos; }
 	void resize(xSize _s) { m_size = _s; }
 	void alterTopLeft(xCoord _pos) { m_size += m_pos - _pos; m_pos = _pos; }
@@ -59,17 +62,26 @@ public:
 	xCoord middle() const { return m_pos + m_size / 2; }
 
 	xCoord lerp(float _x, float _y) const { return m_pos + xSize(m_size.w() * _x, m_size.h() * _y); }
+	Rect lerp(float _xf, float _yf, float _xt, float _yt) const { xCoord o = lerp(_xf, _yf); return Rect(o, lerp(_xt, _yt) - o); }
 
-	Rect expanded(Numeric _f) const { return Rect(m_pos - _f, m_size + 2 * _f); }
-	Rect shrunk(Numeric _f) const { return Rect(m_pos + xSize(_f, _f), m_size - 2 * _f); }
+	Rect inset(Numeric _s) const { return inset(xMargin(_s, _s, _s, _s)); }
 	Rect inset(Numeric _x, Numeric _y) const { return inset(xSize(_x, _y)); }
 	Rect inset(xSize _s) const { return Rect(m_pos + _s, m_size - 2 * _s); }
-	Rect translated(xSize _s) const { return Rect(m_pos + _s, m_size); }
+	Rect inset(xSize _tl, xSize _br) const { return inset(xMargin(_tl, _br)); }
+	Rect inset(Numeric _l, Numeric _t, Numeric _r, Numeric _b) const { return inset(xMargin(_l, _t, _r, _b)); }
+	Rect inset(xMargin _m) const { return Rect(m_pos.x() + _m.left(), m_pos.y() + _m.right(), m_size.w() - _m.left() - _m.right(), m_size.h() - _m.top() - _m.bottom()); }
+
+	Rect outset(Numeric _s) const { return outset(xMargin(_s, _s, _s, _s)); }
+	Rect outset(Numeric _x, Numeric _y) const { return outset(xSize(_x, _y)); }
+	Rect outset(xSize _s) const { return Rect(m_pos - _s, m_size + 2 * _s); }
+	Rect outset(xSize _tl, xSize _br) const { return outset(xMargin(_tl, _br)); }
+	Rect outset(Numeric _l, Numeric _t, Numeric _r, Numeric _b) const { return outset(xMargin(_l, _t, _r, _b)); }
+	Rect outset(xMargin _m) const { return Rect(m_pos.x() - _m.left(), m_pos.y() - _m.right(), m_size.w() + _m.left() + _m.right(), m_size.h() + _m.top() + _m.bottom()); }
 
 	Rect dividedBy(xSize _s) const { return Rect(m_pos / _s, m_size / _s); }
 
-	Rect operator+(Numeric _f) const { return expanded(_f); }
-	Rect operator-(Numeric _f) const { return shrunk(_f); }
+	Rect operator+(Numeric _f) const { return outset(_f); }
+	Rect operator-(Numeric _f) const { return inset(_f); }
 	Rect operator/(xSize _s) const { return dividedBy(_s); }
 	bool contains(xCoord const& _p) const { return _p >= m_pos && _p <= bottomRight(); }
 	// TODO

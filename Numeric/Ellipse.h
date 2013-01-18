@@ -27,6 +27,7 @@ public:
 	Super& asQuad() { return (Super&)*this; }
 
 	void translate(xSize _s) { sum(Super(_s.x(), _s.y(), 0, 0)); }
+	Ellipse translated(xSize _s) const { return Ellipse(x() + _s.w(), y() + _s.h(), Super::z(), Super::w()); }
 	void move(xCoord _pos) { Super::setX(_pos.x()); Super::setY(_pos.y()); }
 	void setPos(xCoord _p) { move(_p); }
 	void setRadii(xSize _r) { Super::setZ(_r.w()); Super::setW(_r.h()); }
@@ -57,14 +58,14 @@ public:
 	xCoord bottomRight() const { return xCoord(right(), bottom()); }
 	xCoord middle() const { return fCoord(x(), y()); }
 
-	Ellipse expanded(Numeric _f) const { return Ellipse(x(), y(), Super::z() + _f, Super::w() + _f); }
-	Ellipse shrunk(Numeric _f) const { return Ellipse(x(), y(), Super::z() - _f, Super::w() - _f); }
+	Ellipse inset(Numeric _f) const { return Ellipse(x(), y(), Super::z() - _f, Super::w() - _f); }
 	Ellipse inset(Numeric _x, Numeric _y) const { return Ellipse(x(), y(), Super::z() - _x, Super::w() - _y); }
-	Ellipse translated(xSize _s) const { return Ellipse(x() + _s.w(), y() + _s.h(), Super::z(), Super::w()); }
+	Ellipse outset(Numeric _f) const { return Ellipse(x(), y(), Super::z() + _f, Super::w() + _f); }
+	Ellipse outset(Numeric _x, Numeric _y) const { return Ellipse(x(), y(), Super::z() + _x, Super::w() + _y); }
 	Ellipse multipliedBy(xSize _s) const { return Ellipse(x() * _s.w(), y() * _s.h(), Super::z() * _s.w(), Super::w() * _s.h()); }
 
-	Ellipse operator+(Numeric _f) const { return expanded(_f); }
-	Ellipse operator-(Numeric _f) const { return shrunk(_f); }
+	Ellipse operator+(Numeric _f) const { return outset(_f); }
+	Ellipse operator-(Numeric _f) const { return inset(_f); }
 	Ellipse operator/(xSize _s) const { return dividedBy(_s); }
 	Ellipse operator*(xSize _s) const { return multipliedBy(_s); }
 

@@ -23,7 +23,7 @@ void ProgressBarBody::draw(Context const& _c)
 {
 	iRect r(_c.pixels(this));
 	_c.rect(r, GUIApp::style().back, 0.1);
-	iRect t(r.shrunk(min(r.w(), r.h()) / 10));
+	iRect t(r.inset(min(r.w(), r.h()) / 10));
 	t.setWidth(m_progress * t.w());
 	_c.rect(t, GUIApp::style().high, -0.2);
 }

@@ -14,23 +14,29 @@ class BasicButtonBody: public ViewCreator<ViewBody, BasicButtonBody>
 
 public:
 	virtual ~BasicButtonBody() {}
+
+	enum Grouping { NoGrouping, Horizontal, Vertical };
 	
 	bool isDown() const { return m_isDown; }
 	std::string const& text() const { return m_text; }
 	Color color() const { return m_color; }
+	Grouping grouping() const { return m_grouping; }
 
 	void setOnTapped(EventHandler const& _t) { m_onTapped = _t; }
 	void setText(std::string const& _s) { m_text = _s; update(); }
 	void setColor(Color _c) { m_color = _c; update(); }
+	void setGrouping(Grouping _g) { m_grouping = _g; update(); }
 
 	BasicButton withOnTapped(EventHandler const& _t) { setOnTapped(_t); return this; }
 	BasicButton withText(std::string const& _s) { setText(_s); return this; }
 	BasicButton withColor(Color _c) { setColor(_c); return this; }
+	BasicButton withGrouping(Grouping _g) { setGrouping(_g); return this; }
 
 protected:
-	BasicButtonBody(std::string const& _text = std::string(), Color _c = White);
+	BasicButtonBody(std::string const& _text = std::string(), Color _c = White, Grouping _grouping = NoGrouping);
 
-	virtual void draw(Context const& _c);
+	virtual iMargin prepareDraw(int);
+	virtual void draw(Context const& _c, int _layer);
 	virtual bool event(Event* _e);
 	virtual void tapped();
 	virtual fSize specifyMinimumSize(fSize) const;
@@ -38,8 +44,9 @@ protected:
 private:
 	std::string m_text;
 	EventHandler m_onTapped;
-
 	Color m_color;
+	Grouping m_grouping;
+
 	bool m_isDown;
 	int m_downPointer;
 };
