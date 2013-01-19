@@ -213,7 +213,7 @@ void AppEngine::gfxDraw()
 
 	m_display->update();
 	if (stillDirty)
-		m_display->update();
+		m_display->repaint();
 }
 
 void AppEngine::gfxFini()

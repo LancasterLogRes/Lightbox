@@ -30,11 +30,12 @@ vector<iMargin> BasicButtonBody::prepareDraw()
 	iSize lightWidth = GUIApp::joint().display->toPixels(fSize(c_lightWidth, c_lightWidth));
 	vector<iMargin> ret;
 	ret += iMargin();
-	ret += iMargin(lightWidth / 2, lightWidth - lightWidth / 2);
+	if (isEnabled())
+		ret += iMargin(lightWidth / 2, lightWidth - lightWidth / 2);
 	return ret;
 }
 
-void BasicButtonBody::draw(Context const& _c, int _l)
+void BasicButtonBody::drawButton(Context const& _c, unsigned _l, bool _lit, bool _down)
 {
 	iSize surroundWidth = GUIApp::joint().display->toPixels(fSize(c_surroundWidth, c_surroundWidth));
 	iSize lightWidth = GUIApp::joint().display->toPixels(fSize(c_lightWidth, c_lightWidth));
@@ -50,20 +51,26 @@ void BasicButtonBody::draw(Context const& _c, int _l)
 	if (_l == 0)
 	{
 		_c.rect(surround, Color(0));
-		_c.rect(outer, Color(m_color.hue(), m_color.sat() * .5f, .125f));
-		if (!m_isDown)
+		_c.rect(outer, Color(m_color.hue(), m_color.sat(), .125f));
+		if (!_down)
 		{
 			_c.rect(inner.lerp(0, 0, 1, .35f), Color(.125f), -.2f);
 			_c.rect(inner.lerp(0, .35f, 1, 1), Color(0.0625f), -.1f);
 		}
 		else
 			_c.rect(inner, Color(0.0625f), -.1f);
-		_c.text(GUIApp::style().bold, inner.lerp(.5f, .5f), m_text, (m_isDown ? m_color : Color(m_color.hue(), .125f, .625f)).toRGBA());
+		_c.text(GUIApp::style().bold, inner.lerp(.5f, .5f), boost::algorithm::to_upper_copy(m_text), Color(m_color.hue(), m_color.sat() * .75f, 1.f).toRGBA());
+//		_c.text(GUIApp::style().bold, inner.lerp(.5f, .5f), m_text, m_color.toRGBA());
 	}
-	else if (_l == 1 && m_isDown)
+	else if (_l == 1 && _lit)
 	{
-		_c.rectOutline(inner, iMargin(lightWidth), m_color);
+		_c.rectOutline(inner.outset(lightWidth / 2), iMargin(lightWidth / 2), m_color);
 	}
+}
+
+void BasicButtonBody::draw(Context const& _c, unsigned _l)
+{
+	drawButton(_c, _l, m_isDown, m_isDown);
 }
 
 bool BasicButtonBody::event(Event* _e)

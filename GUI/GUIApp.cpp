@@ -42,8 +42,10 @@ void GUIApp::initGraphics(Display& _d)
 	LB_GL(glBlendFunc, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	m_joint.init(_d);
-	m_style.regular = Font(ubuntu_r_ttf, 16.f);
-	m_style.bold = Font(ubuntu_b_ttf, 16.f);
+	m_style.regular = Font(ubuntu_r_ttf, 20.f);
+	m_style.bold = Font(ubuntu_b_ttf, 20.f);
+	m_style.small = Font(ubuntu_r_ttf, 12.f);
+	m_style.smallBold = Font(ubuntu_b_ttf, 12.f);
 	m_style.fore = Color(RGB8Space, 0x86, 0x9f, 0xc3);
 	m_style.back = Color(RGBSpace, .4f, .5f, .6f, 1.f);
 	m_style.high = Color(RGB8Space, 0xf3, 0xa3, 0x19);

@@ -198,9 +198,10 @@ public:
 	iRect rect() const { return iRect(iCoord(0, 0), m_globalRect.size()); }
 	iRect canvas(unsigned _layer = 0) const { if (_layer < m_overdraw.size()) return rect().outset(m_overdraw[_layer]); else return iRect(); }
 
-	template <class _T> _T property(std::string const& _name) { try { return boost::any_cast<_T>(m_misc[_name]); } catch (...) { return _T(); } }
+	template <class _T> _T property(std::string const& _name, _T const& _default = _T()) { try { return boost::any_cast<_T>(m_misc[_name]); } catch (...) { return _default; } }
 	template <class _T> bool hasProperty(std::string const& _name) { if (m_misc.count(_name)) try { boost::any_cast<_T>(m_misc[_name]); return true; } catch (...) {} return false; }
-	template <class _T> View setProperty(std::string const& _name, _T const& _t) { m_misc[_name] = _t; return View(this); }
+	template <class _T> void setProperty(std::string const& _name, _T const& _t) { m_misc[_name] = _t; }
+	template <class _T> View withProperty(std::string const& _name, _T const& _t) { setProperty(_name, _t); return this; }
 
 	virtual bool sensesEvent(Event* _e);
 	void handleDraw(Context const& _c);
@@ -235,7 +236,7 @@ protected:
 	bool pointerLocked(int _id);
 
 	virtual std::vector<iMargin> prepareDraw() { return std::vector<iMargin>(1); }
-	virtual void draw(Context const& _c, int _layer) { (void)_layer; draw(_c); }
+	virtual void draw(Context const& _c, unsigned _layer) { (void)_layer; draw(_c); }
 	virtual void draw(Context const& _c);
 	virtual bool event(Event*) { return false; }
 	virtual void resized() { m_visibleLayoutChanged = true; relayout(); update(); }
@@ -254,7 +255,7 @@ private:
 	void cleanCache();
 	bool gatherDrawers(std::vector<std::pair<ViewBody*, unsigned> >& _l, fCoord _o = fCoord(0, 0), bool _ancestorVisibileLayoutChanged = false);
 
-	void executeDraw(Context const& _c, int _layer);
+	void executeDraw(Context const& _c, unsigned _layer);
 	void initGraphicsRecursive() { if (!m_graphicsInitialized) { initGraphics(); m_graphicsInitialized = true; } for (auto const& c: m_children) c->initGraphicsRecursive(); }
 	void finiGraphicsRecursive() { for (auto const& c: m_children) c->finiGraphicsRecursive(); if (m_graphicsInitialized) { finiGraphics(); m_graphicsInitialized = false; } }
 	void visibilityChangedRecursive(bool _newRootVisibility) { for (auto const& c: m_children) if (c->m_isShown) c->visibilityChangedRecursive(_newRootVisibility); visibilityChanged(); }

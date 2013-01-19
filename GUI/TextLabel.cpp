@@ -20,8 +20,16 @@ bool TextLabelBody::event(Event* _e)
 
 void TextLabelBody::draw(Context const& _c)
 {
-	fRect transGeo(fCoord(0, 0), geometry().size());
-	_c.text(m_font.isValid() ? m_font : GUIApp::style().regular, transGeo.lerp(.5f, .5f), m_text, RGBA(m_color.isValid() ? m_color : GUIApp::style().fore));
+	iRect geo = rect();
+	Font f = m_font.isValid() ? m_font : GUIApp::style().regular;
+	Color c = m_color.isValid() ? m_color : GUIApp::style().fore;
+	_c.text(f, geo.lerp(.5f, .5f), m_text, RGBA(c));
+	int w = (GUIApp::joint().display->toPixels(f.measure(m_text) + fSize(16, 0))).width() / 2;
+	if (m_rule)
+	{
+		_c.rect(geo.lerp(0, .5f, .5f, .5f).outset(0, 1, 0, 0).inset(0, 0, w, 0), c);
+		_c.rect(geo.lerp(.5f, .5f, 1.f, .5f).outset(0, 1, 0, 0).inset(w, 0, 0, 0), c);
+	}
 }
 
 fSize TextLabelBody::specifyMinimumSize(fSize) const

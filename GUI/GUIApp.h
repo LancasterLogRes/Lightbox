@@ -17,6 +17,8 @@ struct Style
 	Color high;		// usually complimentary to fore.
 	Font regular;
 	Font bold;
+	Font small;
+	Font smallBold;
 };
 
 class GUIApp: public App

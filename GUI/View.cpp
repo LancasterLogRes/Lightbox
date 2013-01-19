@@ -229,7 +229,7 @@ ViewBody::~ViewBody()
 	clearChildren();
 }
 
-void ViewBody::executeDraw(Context const& _c, int _layer)
+void ViewBody::executeDraw(Context const& _c, unsigned _layer)
 {
 	if (!m_graphicsInitialized)
 	{

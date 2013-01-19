@@ -24,6 +24,9 @@ public:
 	void setText(std::string const& _text) { m_text = _text; update(); }
 	void setFont(Font const& _font) { m_font = _font; update(); }
 	void setColor(Color const& _color) { m_color = _color; update(); }
+	void setRule(bool _enable = true) { m_rule = _enable; update(); }
+
+	TextLabel withRule(bool _enable = true) { setRule(_enable); return this; }
 
 protected:
 	TextLabelBody(std::string const& _text = "", Color _c = NullColor, Font const& _font = Font());
@@ -36,6 +39,7 @@ private:
 	std::string m_text;
 	Font m_font;
 	Color m_color;
+	bool m_rule;
 };
 
 }

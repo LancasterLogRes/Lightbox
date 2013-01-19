@@ -5,8 +5,8 @@
 using namespace std;
 using namespace Lightbox;
 
-ToggleButtonBody::ToggleButtonBody(std::string const& _text):
-	ViewCreator(_text),
+ToggleButtonBody::ToggleButtonBody(std::string const& _text, Color _c, Grouping _grouping):
+	ViewCreator(_text, _c, _grouping),
 	m_isChecked(true)
 {
 }
@@ -35,7 +35,7 @@ void ToggleButtonBody::setExclusiveWith(ToggleButton const& _b)
 {
 	if (m_members)
 	{
-		if (_b->m_members)
+		if (_b && _b->m_members)
 			for (auto const& b: *_b->m_members)
 				if (b)
 				{
@@ -46,11 +46,14 @@ void ToggleButtonBody::setExclusiveWith(ToggleButton const& _b)
 		else
 		{
 			m_members->insert(_b.get());
-			_b->m_members = m_members;
-			_b->setChecked(false);
+			if (_b)
+			{
+				_b->m_members = m_members;
+				_b->setChecked(false);
+			}
 		}
 	}
-	else
+	else if (_b)
 		if (_b->m_members)
 		{
 			_b->m_members->insert(this);
@@ -64,20 +67,28 @@ void ToggleButtonBody::setExclusiveWith(ToggleButton const& _b)
 			m_members->insert(_b.get());
 			_b->setChecked(false);
 		}
+	else
+	{
+		m_members = make_shared<MemberSet>();
+		m_members->insert(this);
+		m_members->insert(_b.get());
+	}
 }
 
 ToggleButton ToggleButtonBody::checkedExclusive()
 {
 	if (m_members)
+	{
 		for (auto const& b: *m_members)
 			if (b && b->m_isChecked)
 				return b;
-	return (ToggleButton)this;
+		if (m_members->count(nullptr))
+			return ToggleButton();
+	}
+	return ToggleButton(this);
 }
 
-void ToggleButtonBody::draw(Context const& _c)
+void ToggleButtonBody::draw(Context const& _c, unsigned _l)
 {
-	fRect transGeo(fCoord(0, 0), geometry().size());
-	_c.rect(transGeo, m_isChecked ^ isDown() ? GUIApp::style().high : GUIApp::style().back, -.1f);
-	_c.text(m_isChecked ? GUIApp::style().bold : GUIApp::style().regular, transGeo.lerp(.5f, .5f), text(), RGBA::Black);
+	drawButton(_c, _l, m_isChecked, isDown());
 }
