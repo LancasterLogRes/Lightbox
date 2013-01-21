@@ -295,7 +295,7 @@ void ViewBody::setParent(View const& _p)
 	}
 }
 
-bool ViewBody::gatherDrawers(std::vector<pair<ViewBody*, unsigned> >& _l, fCoord _o, bool _ancestorVisibleLayoutChanged)
+bool ViewBody::gatherDrawers(std::vector<pair<ViewBody*, unsigned> >& _l, unsigned _layer, fCoord _o, bool _ancestorVisibleLayoutChanged)
 {
 	vector<iMargin> overdraw = prepareDraw();
 	if (m_overdraw.size() != overdraw.size())
@@ -338,18 +338,8 @@ bool ViewBody::gatherDrawers(std::vector<pair<ViewBody*, unsigned> >& _l, fCoord
 		m_visibleLayoutChanged = false;
 
 	if (m_isShown)
-	{
-		unsigned activeLayers = 1;
 		for (auto const& ch: m_children)
-		{
-			ret = ch->gatherDrawers(_l, m_globalRectMM.pos(), _ancestorVisibleLayoutChanged) || ret;
-			activeLayers = max<unsigned>(activeLayers, ch->m_overdraw.size());
-		}
-		for (unsigned currentLayer = 1; currentLayer < activeLayers; ++currentLayer)
-			for (auto const& ch: m_children)
-				if (currentLayer < ch->m_overdraw.size())
-					_l += make_pair(ch.get(), currentLayer);
-	}
+			ret = ch->gatherDrawers(_l, _layer, m_globalRectMM.pos(), _ancestorVisibleLayoutChanged) || ret;
 	return ret;
 }
 

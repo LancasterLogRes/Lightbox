@@ -40,6 +40,7 @@ void GUIApp::initGraphics(Display& _d)
 	LB_GL(glDisable, GL_DEPTH_TEST);
 	LB_GL(glEnable, GL_BLEND);
 	LB_GL(glBlendFunc, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+//	LB_GL(glEnable, GL_MULTISAMPLE_ARB);
 
 	m_joint.init(_d);
 	m_style.regular = Font(ubuntu_r_ttf, 20.f);
@@ -135,7 +136,26 @@ bool GUIApp::drawGraphics()
 	bool stillDirty = false;
 
 	vector<ViewLayer> drawers;
-	bool visibleLayoutChanged = m_root->gatherDrawers(drawers);
+	bool visibleLayoutChanged = m_root->gatherDrawers(drawers, 0);
+
+	// Add in extra layers
+	unsigned firstLayerDrawers = drawers.size();
+	unsigned activeLayers = 1;
+	for (unsigned l = 0; l < activeLayers; ++l)
+	{
+		unsigned vi = 0;
+		for (ViewLayer v: drawers)
+			if (l == 0)
+				activeLayers = max<unsigned>(activeLayers, v.first->m_overdraw.size());
+			else if (l < v.first->m_overdraw.size())
+			{
+				drawers.push_back(make_pair(v.first, l));
+				++vi;
+				if (vi == firstLayerDrawers)
+					break;
+			}
+	}
+
 	if (visibleLayoutChanged)
 	{
 		// At least one resized drawer - reset and redraw everything (in the future we might attempt a more evolutionary cache design).
@@ -163,11 +183,10 @@ bool GUIApp::drawGraphics()
 	}
 
 	vector< vector<ViewLayer> > renderToFramebuffer(m_cache.size());
-
 	if (find_if(drawers.begin(), drawers.end(), [&](ViewLayer v){ return v.first->m_layerDirty[v.second]; }) != drawers.end())
 	{
 		// At least one dirty drawer - set up for render-to-texture and rerender dirty parts.
-		LB_GL(glBlendFunc, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+		LB_GL(glBlendFunc, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		LB_GL(glClearColor, 0.f, 0.f, 0.f, 0.f);
 		LB_GL(glEnable, GL_SCISSOR_TEST);
 
@@ -214,55 +233,88 @@ bool GUIApp::drawGraphics()
 	}
 
 	// Cache up to date - now to composite.
-	LB_GL(glBlendFunc, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	LB_GL(glClearColor, 0, 0, 0, 0);
 	LB_GL(glClear, GL_COLOR_BUFFER_BIT);
 	LB_GL(glViewport, 0, 0, GUIApp::joint().display->sizePixels().w(), GUIApp::joint().display->sizePixels().h());
 	joint().u_displaySize = (fVector2)(fSize)GUIApp::joint().display->sizePixels() * vec2(1, -1);
 	{
-		// geometry is guaranteed to be in composite-draw-order.
-		unsigned ci = 0;
-		for (auto& c: m_cache)
+		if (stillDirty)
 		{
-			unsigned next = 0;
-			for (ViewLayer v: renderToFramebuffer[ci])
+			// geometry is guaranteed to be in composite-draw-order.
+			unsigned ci = 0;
+			for (auto& c: m_cache)
 			{
-				assert(c.vs.count(v));
-				CachePos const& cp = c.vs[v];
-				// render all before
-				if (next < cp.index)
+				unsigned next = 0;
+				for (ViewLayer v: renderToFramebuffer[ci])
 				{
+					assert(c.vs.count(v));
+					CachePos const& cp = c.vs[v];
+					// render all before
+					if (next < cp.index)
+					{
+						LB_GL(glBlendFunc, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+						ProgramUser u(m_joint.texture);
+						u.uniform("u_tex") = c.tx;
+						u.attrib("a_texCoordPosition").setData(c.geom, 4, 0, 6 * 4 * next * sizeof(float));
+						u.triangles((cp.index - next) * 6);
+					}
+
+					// draw our view directly to framebuffer.
+					LB_GL(glBlendFunc, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+					auto globalLayer = v.first->m_globalLayer[v.second];
+					Context c(v.first->m_globalRect, globalLayer);
+					c.offset = joint().display->fromPixels(v.first->m_globalRect).topLeft();
+					LB_GL(glEnable, GL_SCISSOR_TEST);
+					LB_GL(glScissor, globalLayer.x(), joint().display->sizePixels().h() - globalLayer.bottom() - 1, globalLayer.w(), globalLayer.h());
+					v.first->executeDraw(c, v.second);
+					iRect canvas(iCoord(0, 0), globalLayer.size());
+					if (!v.first->m_isEnabled && v.second == 0)
+						c.rect(canvas, Color(0.f, .5f));
+					LB_GL(glDisable, GL_SCISSOR_TEST);
+					next = cp.index + 1;
+				}
+
+				// render from next to end.
+				if (next < c.vs.size())
+				{
+					LB_GL(glBlendFunc, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 					ProgramUser u(m_joint.texture);
 					u.uniform("u_tex") = c.tx;
 					u.attrib("a_texCoordPosition").setData(c.geom, 4, 0, 6 * 4 * next * sizeof(float));
-					u.triangles((cp.index - next) * 6);
+					u.triangles((c.vs.size() - next) * 6);
 				}
-
-				// draw our view directly to framebuffer.
-				auto globalLayer = v.first->m_globalLayer[v.second];
-				Context c(v.first->m_globalRect, globalLayer);
-				c.offset = joint().display->fromPixels(v.first->m_globalRect).topLeft();
-				LB_GL(glEnable, GL_SCISSOR_TEST);
-				LB_GL(glScissor, globalLayer.x(), joint().display->sizePixels().h() - globalLayer.bottom(), globalLayer.w(), globalLayer.h());
-				v.first->executeDraw(c, v.second);
-				iRect canvas(iCoord(0, 0), globalLayer.size());
-				if (!v.first->m_isEnabled && v.second == 0)
-					c.rect(canvas, Color(0.f, .5f));
-				LB_GL(glDisable, GL_SCISSOR_TEST);
-				next = cp.index + 1;
 			}
-
-			// render from next to end.
-			if (next < c.vs.size())
+		}
+		else
+		{
+			LB_GL(glEnable, GL_SCISSOR_TEST);
+			LB_GL(glBlendFunc, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+			for (auto& c: m_cache)
 			{
-				ProgramUser u(m_joint.texture);
-				u.uniform("u_tex") = c.tx;
-				u.attrib("a_texCoordPosition").setData(c.geom, 4, 0, 6 * 4 * next * sizeof(float));
-				u.triangles((c.vs.size() - next) * 6);
+				vector<ViewLayer> views;
+				views.reserve(c.vs.size());
+				for (auto const& vv: c.vs)
+					views.push_back(vv.first);
+				sort(views.begin(), views.end(), [&](ViewLayer a, ViewLayer b) { return c.vs[a].index < c.vs[b].index; });
+				for (auto const& v: views)
+				{
+					// draw our view directly to framebuffer.
+					auto globalLayer = v.first->m_globalLayer[v.second];
+					Context c(v.first->m_globalRect, globalLayer);
+					c.offset = joint().display->fromPixels(v.first->m_globalRect).topLeft();
+					LB_GL(glScissor, globalLayer.x(), joint().display->sizePixels().h() - globalLayer.bottom(), globalLayer.w(), globalLayer.h());
+					v.first->executeDraw(c, v.second);
+					iRect canvas(iCoord(0, 0), globalLayer.size());
+					if (!v.first->m_isEnabled && v.second == 0)
+						c.rect(canvas, Color(0.f, .5f));
+					cnote << v.first << globalLayer << v.second;
+				}
 			}
+			LB_GL(glDisable, GL_SCISSOR_TEST);
 		}
 	}
 
+	LB_GL(glBlendFunc, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	string info = textualTime(AppEngine::get()->lastDrawTime());
 	Context con(m_root->rect(), m_root->rect());
 	con.rect(iRect(m_root->rect().bottomRight() - iCoord(200, 54), iSize(190, 44)), Color(1.f, .5f));

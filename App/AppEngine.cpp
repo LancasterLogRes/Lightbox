@@ -96,7 +96,7 @@ void AppEngine::exec()
 	Time lastDraw = wallTime();
 	for (bool carryOn = true; carryOn;)
 	{
-		if ((m_display && (true || m_display->isAnimating())) && wallTime() - lastDraw >= c_frameTime)
+		if ((m_display && (/*true || */m_display->isAnimating())) && wallTime() - lastDraw >= c_frameTime)
 		{
 			lastDraw = wallTime();
 			gfxDraw();
@@ -115,7 +115,7 @@ void AppEngine::exec()
 			// Read all pending events.
 			int events;
 			struct android_poll_source* source;
-			hadEvent = ALooper_pollAll(true||(m_display && m_display->isAnimating()) ? 0 : -1, NULL, &events, (void**)&source) > 0;
+			hadEvent = ALooper_pollAll(/*true||*/(m_display && m_display->isAnimating()) ? 0 : -1, NULL, &events, (void**)&source) > 0;
 			if (hadEvent)
 			{
 				// Process this event.

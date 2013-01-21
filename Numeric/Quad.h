@@ -2,6 +2,9 @@
 
 #include <Common/Global.h>
 
+#undef _S
+#undef _T
+
 namespace Lightbox
 {
 

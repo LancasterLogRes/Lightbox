@@ -185,7 +185,7 @@ public:
 
 	void clearChildren();
 
-	bool draws() const { return m_overdraw.size(); }
+	bool draws(unsigned _layer = 0) const { return m_overdraw.size() > _layer; }
 	bool isEnabled() const { return m_isEnabled; }
 	bool isShown() const { return m_isShown; }
 	bool isHidden() const { return !m_isShown; }
@@ -253,7 +253,7 @@ protected:
 private:
 	void checkCache();
 	void cleanCache();
-	bool gatherDrawers(std::vector<std::pair<ViewBody*, unsigned> >& _l, fCoord _o = fCoord(0, 0), bool _ancestorVisibileLayoutChanged = false);
+	bool gatherDrawers(std::vector<std::pair<ViewBody*, unsigned> >& _l, unsigned _layer, fCoord _o = fCoord(0, 0), bool _ancestorVisibileLayoutChanged = false);
 
 	void executeDraw(Context const& _c, unsigned _layer);
 	void initGraphicsRecursive() { if (!m_graphicsInitialized) { initGraphics(); m_graphicsInitialized = true; } for (auto const& c: m_children) c->initGraphicsRecursive(); }

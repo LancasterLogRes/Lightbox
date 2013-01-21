@@ -54,7 +54,8 @@ Lightbox::Display::Display()
 	EGLint numConfigs;
 	EGLConfig config;
 
-	const EGLint attribs[] = { EGL_SURFACE_TYPE, EGL_WINDOW_BIT, EGL_RED_SIZE, 8, EGL_GREEN_SIZE, 8, EGL_BLUE_SIZE, 8, EGL_DEPTH_SIZE, 16, EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT, EGL_NONE };
+	const EGLint attribs[] = { EGL_SURFACE_TYPE, EGL_WINDOW_BIT, EGL_RED_SIZE, 8, EGL_GREEN_SIZE, 8, EGL_BLUE_SIZE, 8, EGL_DEPTH_SIZE, 16, EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT, EGL_SAMPLE_BUFFERS, 1, EGL_SAMPLES, 1, EGL_NONE };
+//	const EGLint attribs[] = { EGL_RED_SIZE, 1, EGL_GREEN_SIZE, 1, EGL_BLUE_SIZE, 1, EGL_DEPTH_SIZE, 1, EGL_SAMPLE_BUFFERS, 1, EGL_SAMPLES, 1, EGL_NONE };
 
 	EGL_CHECK(eglChooseConfig(m_display, attribs, &config, 1, &numConfigs));
 	assert(config);
@@ -154,6 +155,7 @@ Lightbox::Display::Display()
 	SDL_GL_SetAttribute( SDL_GL_BLUE_SIZE, 8 );
 	SDL_GL_SetAttribute( SDL_GL_DEPTH_SIZE, 16 );
 	SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
+	SDL_GL_SetAttribute( SDL_GL_MULTISAMPLESAMPLES, 4);
 
 	int flags = SDL_OPENGL|SDL_HWSURFACE|SDL_DOUBLEBUF|SDL_OPENGLBLIT;
 

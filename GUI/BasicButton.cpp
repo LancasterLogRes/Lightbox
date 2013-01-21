@@ -37,6 +37,12 @@ vector<iMargin> BasicButtonBody::prepareDraw()
 
 void BasicButtonBody::drawButton(Context const& _c, unsigned _l, bool _lit, bool _down)
 {
+/*	int sb;
+	int ss;
+	LB_GL(glGetIntegerv, GL_SAMPLE_BUFFERS, &sb);
+	LB_GL(glGetIntegerv, GL_SAMPLES, &ss);
+	cdebug << sb << ss;*/
+
 	iSize surroundWidth = GUIApp::joint().display->toPixels(fSize(c_surroundWidth, c_surroundWidth));
 	iSize lightWidth = GUIApp::joint().display->toPixels(fSize(c_lightWidth, c_lightWidth));
 
