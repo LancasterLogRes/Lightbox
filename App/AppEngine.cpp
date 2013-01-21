@@ -94,8 +94,15 @@ void AppEngine::exec()
 #endif
 
 	Time lastDraw = wallTime();
+	Time lastTick = wallTime();
 	for (bool carryOn = true; carryOn;)
 	{
+		if (wallTime() - lastTick >= FromSeconds<1>::value)
+		{
+			m_app->tick();
+			lastTick = wallTime();
+		}
+
 		if ((m_display && (/*true || */m_display->isAnimating())) && wallTime() - lastDraw >= c_frameTime)
 		{
 			lastDraw = wallTime();
@@ -115,7 +122,7 @@ void AppEngine::exec()
 			// Read all pending events.
 			int events;
 			struct android_poll_source* source;
-			hadEvent = ALooper_pollAll(/*true||*/(m_display && m_display->isAnimating()) ? 0 : -1, NULL, &events, (void**)&source) > 0;
+			hadEvent = ALooper_pollAll(/*true||*/(m_display && m_display->isAnimating()) ? 0 : 1000, NULL, &events, (void**)&source) > 0;
 			if (hadEvent)
 			{
 				// Process this event.
@@ -129,7 +136,9 @@ void AppEngine::exec()
 				}
 			}
 #elif LIGHTBOX_USE_XLIB
-			if (XPending(xDisplay) > 0 || !(m_display && m_display->isAnimating()))
+			for (; !(m_display && m_display->isAnimating()) && !XPending(xDisplay) && wallTime() - lastTick < FromSeconds<1>::value;)
+				usleep(20);
+			if (XPending(xDisplay) > 0)
 			{
 				XEvent event;
 				XNextEvent(xDisplay, &event);
@@ -159,10 +168,8 @@ void AppEngine::exec()
 				hadEvent = false;
 #elif LIGHTBOX_USE_SDL
 			SDL_Event ev;
-			if (m_display && m_display->isAnimating())
-				hadEvent = SDL_PollEvent(&ev);
-			else
-				SDL_WaitEvent(&ev);
+			for (hadEvent = SDL_PollEvent(&ev); !(m_display && m_display->isAnimating()) && !hadEvent && wallTime() - lastTick < FromSeconds<1>::value; hadEvent = SDL_PollEvent(&ev))
+				usleep(20);
 			if (hadEvent)
 				switch (ev.type)
 				{

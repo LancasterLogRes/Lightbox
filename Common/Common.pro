@@ -23,7 +23,8 @@ SOURCES += Common.cpp \
     Peaks.cpp \
     Time.cpp \
     RGBA8.cpp \
-    RGBA.cpp
+    RGBA.cpp \
+    thread.cpp
 HEADERS += Common.h Global.h \
     Time.h \
     GraphParameters.h \
@@ -47,4 +48,5 @@ HEADERS += Common.h Global.h \
     GL.h \
     RGBA8.h \
     RGBA8.h \
-    RGBA.h
+    RGBA.h \
+    thread.h

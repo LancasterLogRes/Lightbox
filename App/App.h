@@ -25,6 +25,8 @@ public:
 	virtual void go() {}
 	virtual void sendInitialEvents() {}
 
+	virtual void tick() {}
+
 	virtual foreign_vector<uint8_t const> state() { return foreign_vector<uint8_t const>(); }
 	virtual void setState(foreign_vector<uint8_t> const&) {}
 

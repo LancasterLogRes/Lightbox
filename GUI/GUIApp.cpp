@@ -22,6 +22,13 @@ void Style::generateColors(Color _fore)
 GUIApp::GUIApp()
 {
 	m_root = FrameBody::create();
+
+	//	m_style.fore = Color(RGB8Space, 0x86, 0x9f, 0xc3);
+	//	m_style.back = Color(RGBSpace, .4f, .5f, .6f, 1.f);
+	//	m_style.high = Color(RGB8Space, 0xf3, 0xa3, 0x19);
+	m_style.fore = Color(.5f);
+	m_style.back = Color(0.f);
+	m_style.high = Color(1.f);
 }
 
 GUIApp::~GUIApp()
@@ -45,14 +52,8 @@ void GUIApp::initGraphics(Display& _d)
 	m_joint.init(_d);
 	m_style.regular = Font(ubuntu_r_ttf, 20.f);
 	m_style.bold = Font(ubuntu_b_ttf, 20.f);
-	m_style.small = Font(ubuntu_r_ttf, 12.f);
-	m_style.smallBold = Font(ubuntu_b_ttf, 12.f);
-	//	m_style.fore = Color(RGB8Space, 0x86, 0x9f, 0xc3);
-	//	m_style.back = Color(RGBSpace, .4f, .5f, .6f, 1.f);
-	//	m_style.high = Color(RGB8Space, 0xf3, 0xa3, 0x19);
-	m_style.fore = Color(.5f);
-	m_style.back = Color(0.f);
-	m_style.high = Color(1.f);
+	m_style.small = Font(ubuntu_r_ttf, 15.f);
+	m_style.smallBold = Font(ubuntu_b_ttf, 15.f);
 	m_root->setGeometry(fRect(0, 0, _d.width(), _d.height()));
 	m_root->initGraphicsRecursive();
 	m_root->show(true);

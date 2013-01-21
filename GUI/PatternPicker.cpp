@@ -41,7 +41,7 @@ void PatternPickerBody::draw(Context const& _c, unsigned _layer)
 			{
 				fCoord p = fCoord(inner.pos()) + spacing * fCoord(x + .5f, y + .5f);
 				if (isChecked() && m_index == i)
-					_c.disc(p, min(spacing.w(), spacing.h()) / 1.5f, Color(1.f));
+					_c.disc(p, min(spacing.w(), spacing.h()) / 1.5f, color());
 				else
 					_c.rect(fRect::square(p, min(spacing.w(), spacing.h()) / 6.f), Color(0.25f));
 			}
