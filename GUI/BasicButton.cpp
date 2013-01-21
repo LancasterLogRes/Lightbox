@@ -18,7 +18,7 @@ BasicButtonBody::BasicButtonBody(std::string const& _text, Color _c, Grouping _g
 bool isNeighbour(View const& _v)
 {
 	if (BasicButtonBody* b = dynamic_cast<BasicButtonBody*>(_v.get()))
-		return b->grouping() != BasicButtonBody::NoGrouping;
+		return b->grouping() & HorizontalGrouping || b->grouping() & VerticalGrouping;
 	return false;
 }
 
@@ -37,19 +37,13 @@ vector<iMargin> BasicButtonBody::prepareDraw()
 
 void BasicButtonBody::drawButton(Context const& _c, unsigned _l, bool _lit, bool _down)
 {
-/*	int sb;
-	int ss;
-	LB_GL(glGetIntegerv, GL_SAMPLE_BUFFERS, &sb);
-	LB_GL(glGetIntegerv, GL_SAMPLES, &ss);
-	cdebug << sb << ss;*/
-
 	iSize surroundWidth = GUIApp::joint().display->toPixels(fSize(c_surroundWidth, c_surroundWidth));
 	iSize lightWidth = GUIApp::joint().display->toPixels(fSize(c_lightWidth, c_lightWidth));
 
-	bool haveLeft = (m_grouping == Horizontal && childIndex() > 0 && isNeighbour(parent()->child(childIndex() - 1)));
-	bool haveRight = (m_grouping == Horizontal && isNeighbour(parent()->child(childIndex() + 1)));
-	bool haveTop = (m_grouping == Vertical && childIndex() > 0 && isNeighbour(parent()->child(childIndex() - 1)));
-	bool haveBottom = (m_grouping == Vertical && isNeighbour(parent()->child(childIndex() + 1)));
+	bool haveLeft = m_grouping & ForceLeft || (m_grouping & HorizontalGrouping && childIndex() > 0 && isNeighbour(parent()->child(childIndex() - 1)));
+	bool haveRight = m_grouping & ForceRight || (m_grouping & HorizontalGrouping && isNeighbour(parent()->child(childIndex() + 1)));
+	bool haveTop = m_grouping & ForceAbove || (m_grouping & VerticalGrouping && childIndex() > 0 && isNeighbour(parent()->child(childIndex() - 1)));
+	bool haveBottom = m_grouping & ForceBelow || (m_grouping & VerticalGrouping && isNeighbour(parent()->child(childIndex() + 1)));
 
 	iRect surround = rect();
 	iRect outer = surround.inset(haveLeft ? 0 : surroundWidth.w(), haveTop ? 0 : surroundWidth.h(), haveRight ? 0 : surroundWidth.w(), haveBottom ? 0 : surroundWidth.h());

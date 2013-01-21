@@ -265,7 +265,7 @@ bool GUIApp::drawGraphics()
 					Context c(v.first->m_globalRect, globalLayer);
 					c.offset = joint().display->fromPixels(v.first->m_globalRect).topLeft();
 					LB_GL(glEnable, GL_SCISSOR_TEST);
-					LB_GL(glScissor, globalLayer.x(), joint().display->sizePixels().h() - globalLayer.bottom() - 1, globalLayer.w(), globalLayer.h());
+					LB_GL(glScissor, globalLayer.x(), joint().display->sizePixels().h() - globalLayer.bottom(), globalLayer.w(), globalLayer.h());
 					v.first->executeDraw(c, v.second);
 					iRect canvas(iCoord(0, 0), globalLayer.size());
 					if (!v.first->m_isEnabled && v.second == 0)
@@ -307,7 +307,7 @@ bool GUIApp::drawGraphics()
 					iRect canvas(iCoord(0, 0), globalLayer.size());
 					if (!v.first->m_isEnabled && v.second == 0)
 						c.rect(canvas, Color(0.f, .5f));
-					cnote << v.first << globalLayer << v.second;
+					cnote << View(v.first) << globalLayer << v.second;
 				}
 			}
 			LB_GL(glDisable, GL_SCISSOR_TEST);

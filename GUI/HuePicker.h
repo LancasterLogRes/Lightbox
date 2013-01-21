@@ -24,7 +24,7 @@ public:
 	HuePicker withOnHueChanged(EventHandler const& _t) { setOnHueChanged(_t); return this; }
 
 protected:
-	HuePickerBody();
+	HuePickerBody(Color _c = White, Grouping _grouping = NoGrouping);
 	
 	virtual bool event(Event* _e);
 	virtual void draw(Context const& _c);

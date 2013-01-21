@@ -1,3 +1,3 @@
 #include "Vector.h"
 
-static int generateALibraryPlease = 0;
+void generateALibraryPlease() {}

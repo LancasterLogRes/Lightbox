@@ -1,5 +1,6 @@
 #pragma once
 
+#include <Common/Flags.h>
 #include "View.h"
 
 namespace Lightbox
@@ -8,6 +9,11 @@ namespace Lightbox
 class BasicButtonBody;
 typedef boost::intrusive_ptr<BasicButtonBody> BasicButton;
 
+enum GroupingFlags { NoGrouping = 0, HorizontalGrouping = 1, VerticalGrouping = 2, ForceAbove = 4, ForceBelow = 8, ForceLeft = 16, ForceRight= 32 };
+typedef Flags<GroupingFlags> Grouping;
+
+LIGHTBOX_FLAGS_TYPE(GroupingFlags, Grouping);
+
 class BasicButtonBody: public ViewCreator<ViewBody, BasicButtonBody>
 {
 	friend class ViewBody;
@@ -15,8 +21,6 @@ class BasicButtonBody: public ViewCreator<ViewBody, BasicButtonBody>
 public:
 	virtual ~BasicButtonBody() {}
 
-	enum Grouping { NoGrouping, Horizontal, Vertical };
-	
 	bool isDown() const { return m_isDown; }
 	std::string const& text() const { return m_text; }
 	Color color() const { return m_color; }

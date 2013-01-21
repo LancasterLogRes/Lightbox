@@ -26,7 +26,7 @@ public:
 	PatternPicker withOnIndexChanged(EventHandler const& _t) { setOnIndexChanged(_t); return this; }
 
 protected:
-	PatternPickerBody();
+	PatternPickerBody(Color _c = White, Grouping _grouping = NoGrouping);
 
 	virtual void indexChanged(bool _userEvent) { if (m_onIndexChanged && _userEvent) m_onIndexChanged(this); update(); }
 	

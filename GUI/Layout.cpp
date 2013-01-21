@@ -147,7 +147,7 @@ fSize VerticalLayout::minimumSize(fSize)
 
 fSize HorizontalLayout::fit(fSize _space)
 {
-	vector<float> sizes = doLayout(_space, _space.width(), m_view->children(), [](View const& c, fSize s) { return s.width(); });
+	vector<float> sizes = doLayout(_space, _space.width(), m_view->children(), [](View const&, fSize s) { return s.width(); });
 	unsigned i = 0;
 	fSize ret = _space;
 	for (auto const& c: m_view->children())
@@ -162,7 +162,7 @@ fSize HorizontalLayout::fit(fSize _space)
 
 fSize VerticalLayout::fit(fSize _space)
 {
-	vector<float> sizes = doLayout(_space, _space.height(), m_view->children(), [](View const& c, fSize s) { return s.height(); });
+	vector<float> sizes = doLayout(_space, _space.height(), m_view->children(), [](View const&, fSize s) { return s.height(); });
 	unsigned i = 0;
 	fSize ret = _space;
 	for (auto const& c: m_view->children())
@@ -179,7 +179,7 @@ void VerticalLayout::layout(fSize _s)
 {
 	if (m_view)
 	{
-		vector<float> sizes = doLayout(_s, _s.height(), m_view->children(), [](View const& c, fSize s) { return s.height(); });
+		vector<float> sizes = doLayout(_s, _s.height(), m_view->children(), [](View const&, fSize s) { return s.height(); });
 //		cdebug << "Sum/total:" << sumOf(sizes) << _s.height();
 		fCoord cursor(0, 0);
 		auto i = sizes.begin();
@@ -198,7 +198,7 @@ void HorizontalLayout::layout(fSize _s)
 {
 	if (m_view)
 	{
-		vector<float> sizes = doLayout(_s, _s.width(), m_view->children(), [](View const& c, fSize s) { return s.width(); });
+		vector<float> sizes = doLayout(_s, _s.width(), m_view->children(), [](View const&, fSize s) { return s.width(); });
 		fCoord cursor(0, 0);
 		auto i = sizes.begin();
 		for (auto const& c: m_view->children())

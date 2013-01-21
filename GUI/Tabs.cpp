@@ -55,11 +55,20 @@ void TabsBody::draw(Context const& _c)
 		{
 			string title = c->property<string>("_TabsBody:Title");
 			bool isActive = c->isShown();
-			_c.rect(tab, isActive ? GUIApp::style().high : GUIApp::style().back, -.1f);
-			_c.text(isActive ? GUIApp::style().bold : GUIApp::style().regular, tab.lerp(.5f, .5f), title, RGBA::Black);
+			if (isActive)
+			{
+				_c.rect(tab, White);
+				_c.text(GUIApp::style().bold, tab.lerp(.5f, .5f), title, RGBA(0.f));
+			}
+			else
+			{
+				_c.rect(tab.lerp(0, 0, 1, .35f), Color(.125f), -.2f);
+				_c.rect(tab.lerp(0, .35f, 1, 1), Color(0.0625f), -.1f);
+				_c.text(GUIApp::style().regular, tab.lerp(.5f, .5f), title, RGBA(.25f));
+			}
 			tab.translate(fSize(tab.w(), 0));
 		}
-		_c.rect(fRect(fCoord(0, c_tabBodyHeight), fSize(geometry().w(), c_tabTailHeight)), GUIApp::style().high * .9f);
+		_c.rect(fRect(fCoord(0, c_tabBodyHeight), fSize(geometry().w(), c_tabTailHeight)), White);
 	}
 }
 
