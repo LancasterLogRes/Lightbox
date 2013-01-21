@@ -17,14 +17,12 @@ HuePickerBody::~HuePickerBody()
 
 void HuePickerBody::initGraphics()
 {
-	cnote << "HuePicker::initGraphics";
 	m_hueWheel = Program(Shader::vertex(LB_R(HueWheel_vert)), Shader::fragment(LB_R(HueWheel_frag)));
 	m_hueWheel.tie(GUIApp::joint().uniforms);
 }
 
 void HuePickerBody::finiGraphics()
 {
-	cnote << "HuePicker::finiGraphics";
 	m_hueWheel = Program();
 }
 
@@ -49,15 +47,17 @@ bool HuePickerBody::event(Event* _e)
 	return Super::event(_e);
 }
 
-void HuePickerBody::draw(Context const& _c)
+void HuePickerBody::draw(Context const& _c, unsigned _l)
 {
-	float s = min(geometry().w(), geometry().h());
-	fRect geo((geometry().size() - fSize(s, s)) / 2.f, fSize(s, s));
-
-	_c.disc(geo.lerp(.5f, .5f), s / 2.f, m_hueWheel);
-	_c.disc(geo.lerp(.5f, .5f), s / 8.f, Color(0.f));
-	if (isChecked())
-		_c.disc(geo.lerp(.5f, .5f), s / 9.f, Color(m_hue, 1.f, 1.f));
+	BasicButtonBody::drawButton(_c, _l, isChecked(), isDown(),
+	[&](iRect inner){
+		iEllipse e(inner);
+		_c.disc(e, m_hueWheel);
+		_c.disc(e.inset(e.radii() * 6 / 10), Color(0.f));
+		if (isChecked())
+			_c.disc(e.inset(e.radii() * 7 / 10), Color(m_hue, 1.f, 1.f));
+	}, false);
+	return;
 }
 
 fSize HuePickerBody::specifyMinimumSize(fSize _s) const

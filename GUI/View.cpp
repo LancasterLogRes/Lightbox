@@ -80,6 +80,22 @@ void Context::text(Font const& _f, iCoord _anchor, std::string const& _text, RGB
 	_f.draw(_anchor + active.pos(), _text, _c);
 }
 
+void Context::disc(iEllipse _e, Program const& _p) const
+{
+	auto vm = GUIApp::joint();
+	iCoord c = _e.middle() + active.pos();
+	vm.offsetScale = fVector4(c.x(), c.y(), _e.rx(), _e.ry());
+	ProgramUser u(_p);
+	_p.attrib("geometry").setData(vm.unitCircle72, 2);
+	u.triangleFan(74);
+}
+
+void Context::disc(iEllipse _e, Color _c) const
+{
+	GUIApp::joint().color = RGBA(_c);
+	disc(_e, GUIApp::joint().flat);
+}
+
 void Context::rect(fRect _r, Color _c) const
 {
 	auto vm = GUIApp::joint();

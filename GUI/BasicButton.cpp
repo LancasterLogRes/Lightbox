@@ -35,7 +35,7 @@ vector<iMargin> BasicButtonBody::prepareDraw()
 	return ret;
 }
 
-void BasicButtonBody::drawButton(Context const& _c, unsigned _l, bool _lit, bool _down)
+void BasicButtonBody::drawButton(Context const& _c, unsigned _l, bool _lit, bool _down, function<void(iRect)> const& _inner, bool _polish)
 {
 	iSize surroundWidth = GUIApp::joint().display->toPixels(fSize(c_surroundWidth, c_surroundWidth));
 	iSize lightWidth = GUIApp::joint().display->toPixels(fSize(c_lightWidth, c_lightWidth));
@@ -46,25 +46,27 @@ void BasicButtonBody::drawButton(Context const& _c, unsigned _l, bool _lit, bool
 	bool haveBottom = m_grouping & ForceBelow || (m_grouping & VerticalGrouping && isNeighbour(parent()->child(childIndex() + 1)));
 
 	iRect surround = rect();
-	iRect outer = surround.inset(haveLeft ? 0 : surroundWidth.w(), haveTop ? 0 : surroundWidth.h(), haveRight ? 0 : surroundWidth.w(), haveBottom ? 0 : surroundWidth.h());
-	iRect inner = outer.inset(lightWidth.w() / (haveLeft ? 2 : 1), lightWidth.h() / (haveTop ? 2 : 1), lightWidth.w() - (haveRight ? lightWidth.w() / 2 : 0), lightWidth.h() - (haveBottom ? lightWidth.h() / 2 : 0));
+	iMargin surroundMargin(haveLeft ? 0 : surroundWidth.w(), haveTop ? 0 : surroundWidth.h(), haveRight ? 0 : surroundWidth.w(), haveBottom ? 0 : surroundWidth.h());
+	iMargin lightMargin(lightWidth.w() / (haveLeft ? 2 : 1), lightWidth.h() / (haveTop ? 2 : 1), lightWidth.w() - (haveRight ? lightWidth.w() / 2 : 0), lightWidth.h() - (haveBottom ? lightWidth.h() / 2 : 0));
+	iRect outer = surround.inset(surroundMargin);
+	iRect inner = outer.inset(lightMargin);
 	if (_l == 0)
 	{
-		_c.rect(surround, Color(0));
-		_c.rect(outer, Color(m_color.hue(), m_color.sat(), .125f));
-		if (!_down)
-		{
-			_c.rect(inner.lerp(0, 0, 1, .35f), Color(.125f), -.2f);
-			_c.rect(inner.lerp(0, .35f, 1, 1), Color(0.0625f), -.1f);
-		}
+		_c.rectOutline(outer, surroundMargin, Color(0));
+		_c.rectOutline(inner, lightMargin, Color(m_color.hue(), m_color.sat(), .125f));
+		_c.rect(inner, Color(_down ? .05f : .1f), _down ? .05f : -.1f);
+		if (_inner)
+			_inner(inner);
 		else
-			_c.rect(inner, Color(0.0625f), -.1f);
-		_c.text(GUIApp::style().bold, inner.lerp(.5f, .5f), boost::algorithm::to_upper_copy(m_text), Color(m_color.hue(), m_color.sat() * .75f, 1.f).toRGBA());
-//		_c.text(GUIApp::style().bold, inner.lerp(.5f, .5f), m_text, m_color.toRGBA());
+			_c.text(GUIApp::style().bold, inner.lerp(.5f, .5f), boost::algorithm::to_upper_copy(m_text), Color(m_color.hue(), m_color.sat() * .75f, 1.f).toRGBA());
+		if (!_down && _polish)
+		{
+			_c.rect(inner.lerp(0, .35f, 1, 1), Color(0.f, .2f));
+		}
 	}
 	else if (_l == 1 && _lit)
 	{
-		_c.rectOutline(inner.outset(lightWidth / 2), iMargin(lightWidth / 2), m_color);
+		_c.rectOutline(inner.outset(lightWidth / 4), iMargin(lightWidth / 2), m_color);
 	}
 }
 

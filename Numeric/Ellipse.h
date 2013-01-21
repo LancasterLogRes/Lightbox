@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Coord.h"
+#include "Rect.h"
 
 namespace Lightbox
 {
@@ -12,6 +13,7 @@ class Ellipse: public Quad<Numeric>
 public:
 	typedef Coord<Numeric> xCoord;
 	typedef Size<Numeric> xSize;
+	typedef Rect<Numeric> xRect;
 
 	Ellipse() {}
 	Ellipse(xCoord _centre, xSize _radii): Super(_centre.x(), _centre.y(), _radii.w(), _radii.h()) {}
@@ -20,6 +22,7 @@ public:
 	Ellipse(Numeric _x, Numeric _y, Numeric _rx, Numeric _ry): Super(_x, _y, _rx, _ry) {}
 	Ellipse(Numeric _x, Numeric _y, Numeric _r): Super(_x, _y, _r, _r) {}
 	template<class _N> explicit Ellipse(Ellipse<_N> _s): Super(_s.x(), _s.y(), _s.rx(), _s.ry()) {}
+	explicit Ellipse(xRect _bound): Ellipse(_bound.lerp(.5f, .5f), _bound.size() / 2.f) {}
 
 	bool operator==(Ellipse _c) const { return compare(_c); }
 	bool operator!=(Ellipse _c) const { return !compare(_c); }
@@ -41,6 +44,7 @@ public:
 	using Super::y;
 
 	xCoord pos() const { return xCoord(x(), y()); }
+	xCoord center() const { return xCoord(x(), y()); }
 	xSize radii() const { return xSize(Super::z(), Super::w()); }
 	Numeric rx() const { return Super::z(); }
 	Numeric ry() const { return Super::w(); }
@@ -56,12 +60,14 @@ public:
 	xCoord topRight() const { return xCoord(right(), top()); }
 	xCoord bottomLeft() const { return xCoord(left(), bottom()); }
 	xCoord bottomRight() const { return xCoord(right(), bottom()); }
-	xCoord middle() const { return fCoord(x(), y()); }
+	xCoord middle() const { return xCoord(x(), y()); }
 
 	Ellipse inset(Numeric _f) const { return Ellipse(x(), y(), Super::z() - _f, Super::w() - _f); }
 	Ellipse inset(Numeric _x, Numeric _y) const { return Ellipse(x(), y(), Super::z() - _x, Super::w() - _y); }
+	Ellipse inset(xSize _xy) const { return inset(_xy.w(), _xy.h()); }
 	Ellipse outset(Numeric _f) const { return Ellipse(x(), y(), Super::z() + _f, Super::w() + _f); }
 	Ellipse outset(Numeric _x, Numeric _y) const { return Ellipse(x(), y(), Super::z() + _x, Super::w() + _y); }
+	Ellipse outset(xSize _xy) const { return outset(_xy.w(), _xy.h()); }
 	Ellipse multipliedBy(xSize _s) const { return Ellipse(x() * _s.w(), y() * _s.h(), Super::z() * _s.w(), Super::w() * _s.h()); }
 
 	Ellipse operator+(Numeric _f) const { return outset(_f); }

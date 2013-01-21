@@ -44,6 +44,8 @@ struct Context
 	void rect(iRect _r, Color _c, float _gradient) const;
 	void rectOutline(iRect _inner, iMargin _outset, Color _c) const;
 	void text(Font const& _f, iCoord _anchor, std::string const& _text, RGBA _c = RGBA::Black) const;
+	void disc(iEllipse _r, Program const& _p) const;
+	void disc(iEllipse _r, Color _c) const;
 
 	// Deprecated - use iRect/iCoord/iEllipse versions instead
 	void rect(fRect _r) const;

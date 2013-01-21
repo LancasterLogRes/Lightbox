@@ -1,5 +1,6 @@
 #pragma once
 
+#include <functional>
 #include <Common/Flags.h>
 #include "View.h"
 
@@ -39,7 +40,7 @@ public:
 protected:
 	BasicButtonBody(std::string const& _text = std::string(), Color _c = White, Grouping _grouping = NoGrouping);
 
-	void drawButton(Context const& _c, unsigned _l, bool _lit, bool _down);
+	void drawButton(Context const& _c, unsigned _l, bool _lit, bool _down, std::function<void(iRect)> const& _inner = std::function<void(iRect)>(), bool _polish = true);
 
 	virtual vector<iMargin> prepareDraw();
 	virtual void draw(Context const& _c, unsigned _layer);
