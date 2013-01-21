@@ -31,7 +31,7 @@ protected:
 	virtual void indexChanged(bool _userEvent) { if (m_onIndexChanged && _userEvent) m_onIndexChanged(this); update(); }
 	
 	virtual bool event(Event* _e);
-	virtual void draw(Context const& _c);
+	virtual void draw(Context const& _c, unsigned _layer);
 	
 private:
 	int m_index;

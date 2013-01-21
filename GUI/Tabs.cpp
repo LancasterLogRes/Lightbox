@@ -62,9 +62,9 @@ void TabsBody::draw(Context const& _c)
 			}
 			else
 			{
-				_c.rect(tab.lerp(0, 0, 1, .35f), Color(.125f), -.2f);
-				_c.rect(tab.lerp(0, .35f, 1, 1), Color(0.0625f), -.1f);
-				_c.text(GUIApp::style().regular, tab.lerp(.5f, .5f), title, RGBA(.25f));
+				_c.rect(tab, Color(.1f), -.1f);
+				_c.rect(tab.lerp(0, .35f, 1, 1), Color(0.f, .2f));
+				_c.text(GUIApp::style().regular, tab.lerp(.5f, .5f), title, RGBA(.5f));
 			}
 			tab.translate(fSize(tab.w(), 0));
 		}

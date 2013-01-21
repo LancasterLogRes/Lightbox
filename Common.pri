@@ -308,6 +308,7 @@ outputs {
 	deps = $$runique($$deps)
 	for(d, deps) {
 		LIBS += -l$$d
+		exists($${OUT_PWD}/$${d}): PRE_TARGETDEPS += $$d
 	}
 }
 

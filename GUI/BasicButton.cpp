@@ -61,7 +61,7 @@ void BasicButtonBody::drawButton(Context const& _c, unsigned _l, bool _lit, bool
 			_c.text(GUIApp::style().bold, inner.lerp(.5f, .5f), boost::algorithm::to_upper_copy(m_text), Color(m_color.hue(), m_color.sat() * .75f, 1.f).toRGBA());
 		if (!_down && _polish)
 		{
-			_c.rect(inner.lerp(0, .35f, 1, 1), Color(0.f, .2f));
+			_c.rect(inner.lerp(0, 0, 1, .35f), Color(1.f, .05f));
 		}
 	}
 	else if (_l == 1 && _lit)
@@ -93,6 +93,7 @@ bool BasicButtonBody::event(Event* _e)
 		{
 			if (geometry().contains(e->local))
 				tapped();
+
 			m_downPointer = -1;
 			m_isDown = false;
 			update();

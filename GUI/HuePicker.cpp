@@ -28,13 +28,10 @@ void HuePickerBody::finiGraphics()
 
 bool HuePickerBody::event(Event* _e)
 {
+	bool ret = Super::event(_e);
 	TouchEvent* e = dynamic_cast<TouchEvent*>(_e);
-	if (dynamic_cast<TouchDownEvent*>(e))
-		lockPointer(e->id);
 	if (e && pointerLocked(e->id))
 	{
-		if (dynamic_cast<TouchDownEvent*>(_e))
-			lockPointer(e->id);
 		float s = min(geometry().w(), geometry().h());
 		fVector2 off = e->local - geometry().lerp(.5f, .5f);
 		if (off.length() < s && off.length() > s / 8.5f)
@@ -44,12 +41,12 @@ bool HuePickerBody::event(Event* _e)
 			return true;
 		}
 	}
-	return Super::event(_e);
+	return ret;
 }
 
 void HuePickerBody::draw(Context const& _c, unsigned _l)
 {
-	BasicButtonBody::drawButton(_c, _l, isChecked(), isDown(),
+	BasicButtonBody::drawButton(_c, _l, isChecked(), isDown() || isChecked(),
 	[&](iRect inner){
 		iEllipse e(inner);
 		_c.disc(e, m_hueWheel);

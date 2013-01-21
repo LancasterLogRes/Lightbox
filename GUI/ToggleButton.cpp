@@ -90,5 +90,5 @@ ToggleButton ToggleButtonBody::checkedExclusive()
 
 void ToggleButtonBody::draw(Context const& _c, unsigned _l)
 {
-	drawButton(_c, _l, m_isChecked, isDown());
+	drawButton(_c, _l, isChecked(), isDown() || isChecked());
 }
