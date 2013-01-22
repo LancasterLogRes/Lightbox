@@ -23,9 +23,6 @@ GUIApp::GUIApp()
 {
 	m_root = FrameBody::create();
 
-	//	m_style.fore = Color(RGB8Space, 0x86, 0x9f, 0xc3);
-	//	m_style.back = Color(RGBSpace, .4f, .5f, .6f, 1.f);
-	//	m_style.high = Color(RGB8Space, 0xf3, 0xa3, 0x19);
 	m_style.fore = Color(.5f);
 	m_style.back = Color(0.f);
 	m_style.high = Color(1.f);
@@ -47,7 +44,6 @@ void GUIApp::initGraphics(Display& _d)
 	LB_GL(glDisable, GL_DEPTH_TEST);
 	LB_GL(glEnable, GL_BLEND);
 	LB_GL(glBlendFunc, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-//	LB_GL(glEnable, GL_MULTISAMPLE_ARB);
 
 	m_joint.init(_d);
 	m_style.regular = Font(ubuntu_r_ttf, 20.f);
@@ -64,7 +60,10 @@ void GUIApp::finiGraphics(Display&)
 	cnote << "Finalizing GUI graphics";
 	m_root->finiGraphicsRecursive();
 	m_joint = Joint();
-	m_style = Style();
+	m_style.regular = Font();
+	m_style.bold = Font();
+	m_style.small = Font();
+	m_style.smallBold = Font();
 	m_cache.clear();
 	m_root->show(false);
 }
