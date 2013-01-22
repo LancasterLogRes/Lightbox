@@ -7,7 +7,8 @@ using namespace Lightbox;
 
 DirectionPickerBody::DirectionPickerBody():
 	m_direction(0.5f, 0.5f, 0.5f),
-	m_mode(Point)
+	m_mode(Point),
+	m_lastSign(-1, -1)
 {
 }
 
@@ -53,27 +54,43 @@ bool DirectionPickerBody::event(Event* _e)
 
 void DirectionPickerBody::draw(Context const& _c)
 {
+	static const fSize c_thumbMM(20, 20);
+	fRect r = rectMM();
+	fRect inner(r.inset(3));
+
 	// m_radius [0, 1]
 	// m_direction [0, 1]
-	float s = geometry().size().max();
+
+	for (int i = 0; i < 9; ++i)
+		if (i % 4)
+		{
+			_c.xRule(inner, i / 8.f, 2, Color(.25f));
+			_c.yRule(inner, i / 8.f, 2, Color(.25f));
+		}
+	for (int i = 0; i < 9; i += 4)
+	{
+		_c.xRule(inner, i / 8.f, 2, Color(.5f));
+		_c.yRule(inner, i / 8.f, 2, Color(.5f));
+	}
+
 	if (m_mode == Circle || m_mode == Fill)
 	{
-		_c.circle(m_direction * geometry().size(), White);
-		_c.disc(fCoord(xC(m_lastSign.w()), yC(m_lastSign.h())) * geometry().size(), .1f * s, White);
+		_c.circle(m_direction.transformedInto(inner), White);
+		_c.disc(inner.lerp(xC(m_lastSign.w()), yC(m_lastSign.h())), c_thumbMM, White);
 	}
 
 	if (m_mode == Fill)
-		_c.disc(m_direction * geometry().size(), Color(1.f, .5f));
+		_c.disc(m_direction.transformedInto(inner), Color(1.f, .5f));
 
 	if (m_mode >= Circle)
 	{
-		_c.disc(fCoord(xC(-1), yC(-1)) * geometry().size(), .025f * s, White);
-		_c.disc(fCoord(xC(-1), yC(1)) * geometry().size(), .025f * s, White);
-		_c.disc(fCoord(xC(1), yC(-1)) * geometry().size(), .025f * s, White);
-		_c.disc(fCoord(xC(1), yC(1)) * geometry().size(), .025f * s, White);
+		_c.disc(inner.lerp(xC(-1), yC(-1)), c_thumbMM / 4, White);
+		_c.disc(inner.lerp(xC(-1), yC(1)), c_thumbMM / 4, White);
+		_c.disc(inner.lerp(xC(1), yC(-1)), c_thumbMM / 4, White);
+		_c.disc(inner.lerp(xC(1), yC(1)), c_thumbMM / 4, White);
 	}
 
-	_c.disc(m_direction.pos() * geometry().size(), s / 10.f, Color(1.f));
+	_c.disc(inner.lerp(m_direction.pos()), c_thumbMM, White);
 }
 
 fSize DirectionPickerBody::specifyFit(fSize _space) const

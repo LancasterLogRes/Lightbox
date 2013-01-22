@@ -5,7 +5,7 @@
 using namespace std;
 using namespace Lightbox;
 
-TextLabelBody::TextLabelBody(std::string const& _text, Color _color, Font const& _font): m_text(_text), m_font(_font), m_color(_color)
+TextLabelBody::TextLabelBody(std::string const& _text, Color _color, Font const& _font): m_text(_text), m_font(_font), m_color(_color), m_rule(false)
 {
 }
 
@@ -21,7 +21,7 @@ bool TextLabelBody::event(Event* _e)
 void TextLabelBody::draw(Context const& _c)
 {
 	iRect geo = rect();
-	Font f = m_font.isValid() ? m_font : GUIApp::style().regular;
+	Font f = m_font.isValid() ? m_font : GUIApp::style().small;
 	Color c = m_color.isValid() ? m_color : GUIApp::style().fore;
 	_c.text(f, geo.lerp(.5f, .5f), m_text, RGBA(c));
 	int w = (GUIApp::joint().display->toPixels(f.measure(m_text) + fSize(16, 0))).width() / 2;
@@ -34,5 +34,5 @@ void TextLabelBody::draw(Context const& _c)
 
 fSize TextLabelBody::specifyMinimumSize(fSize) const
 {
-	return GUIApp::get() ? (m_font.isValid() ? m_font : GUIApp::style().regular).measure(m_text) : fSize(0, 0);
+	return GUIApp::get() ? (m_font.isValid() ? m_font : GUIApp::style().small).measure(m_text) : fSize(0, 0);
 }

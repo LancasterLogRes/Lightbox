@@ -30,9 +30,49 @@ using namespace Lightbox;
 int c_defaultWidth = 800;
 int c_defaultHeight = 480;
 
+#define Assert(X) Lightbox::doAssert(X, #X, __FILE__, __LINE__, false);
+#undef assert
+#define assert(X) Lightbox::doAssert(X, #X, __FILE__, __LINE__, true);
+#define assertEqual(X, Y) Lightbox::doAssertEqual(X, Y, #X, #Y, __FILE__, __LINE__, true);
+
+namespace Lightbox
+{
+
+inline bool doAssert(bool _x, char const* _s, char const* _file, unsigned _line, bool _fail)
+{
+	if (!_x)
+	{
+		cwarn << "Assertion failed (" << _file << ":" << _line << "): " << _s;
+		if (_fail)
+		{
+			int x = 1 / (int)sqrt(0);
+			exit(x - 1);
+		}
+	}
+	return _x;
+}
+
+template <class _T> inline bool doAssertEqual(_T const& _x, _T const& _y, char const* _sx, char const* _sy, char const* _file, unsigned _line, bool _fail)
+{
+	bool v = (_x == _y);
+	if (!v)
+	{
+		cwarn << "Assertion failed (" << _file << ":" << _line << "):" << _sx << "!=" << _sy << "(i.e." << _x << "!=" << _y << ")";
+		if (_fail)
+		{
+			int x = 1 / (int)sqrt(0);
+			exit(x - 1);
+		}
+	}
+	return v;
+}
+
+}
+
 Lightbox::Display::Display()
 {
 #if LIGHTBOX_USE_EGL
+	cnote << "Setting up EGL...";
 #if LIGHTBOX_ANDROID
 	EGL_CHECK(m_display = eglGetDisplay(EGL_DEFAULT_DISPLAY));
 #elif LIGHTBOX_USE_XLIB
@@ -54,8 +94,8 @@ Lightbox::Display::Display()
 	EGLint numConfigs;
 	EGLConfig config;
 
-	const EGLint attribs[] = { EGL_SURFACE_TYPE, EGL_WINDOW_BIT, EGL_RED_SIZE, 8, EGL_GREEN_SIZE, 8, EGL_BLUE_SIZE, 8, EGL_DEPTH_SIZE, 16, EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT, EGL_SAMPLE_BUFFERS, 1, EGL_SAMPLES, 1, EGL_NONE };
-//	const EGLint attribs[] = { EGL_RED_SIZE, 1, EGL_GREEN_SIZE, 1, EGL_BLUE_SIZE, 1, EGL_DEPTH_SIZE, 1, EGL_SAMPLE_BUFFERS, 1, EGL_SAMPLES, 1, EGL_NONE };
+//	const EGLint attribs[] = { EGL_SURFACE_TYPE, EGL_WINDOW_BIT, EGL_RED_SIZE, 8, EGL_GREEN_SIZE, 8, EGL_BLUE_SIZE, 8, EGL_DEPTH_SIZE, 16, EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT, EGL_SAMPLE_BUFFERS, 1, EGL_SAMPLES, 1, EGL_NONE };
+	const EGLint attribs[] = { EGL_RED_SIZE, 1, EGL_GREEN_SIZE, 1, EGL_BLUE_SIZE, 1, EGL_DEPTH_SIZE, 1, EGL_SAMPLE_BUFFERS, 1, EGL_SAMPLES, 1, EGL_NONE };
 
 	EGL_CHECK(eglChooseConfig(m_display, attribs, &config, 1, &numConfigs));
 	assert(config);
@@ -106,16 +146,16 @@ Lightbox::Display::Display()
 	{
 	   EGLint val;
 	   eglQueryContext(m_display, m_context, EGL_CONTEXT_CLIENT_VERSION, &val);
-	   assert(val == 2);
+	   assertEqual(val, 2);
 	}
 
 	EGL_CHECK(m_surface = eglCreateWindowSurface(m_display, config, win, nullptr));
 	{
 	   EGLint val;
 	   eglQuerySurface(m_display, m_surface, EGL_WIDTH, &val);
-	   assert(val == (int)m_width);
+	   m_width = val;
 	   eglQuerySurface(m_display, m_surface, EGL_HEIGHT, &val);
-	   assert(val == (int)m_height);
+	   m_height = val;
 	   assert(eglGetConfigAttrib(m_display, config, EGL_SURFACE_TYPE, &val));
 	   assert(val & EGL_WINDOW_BIT);
 	}
@@ -130,12 +170,7 @@ Lightbox::Display::Display()
 
 	EGL_CHECK(eglMakeCurrent(m_display, m_surface, m_surface, m_context));
 
-	EGLint w;
-	EGLint h;
-	eglQuerySurface(m_display, m_surface, EGL_WIDTH, &w);
-	eglQuerySurface(m_display, m_surface, EGL_HEIGHT, &h);
-	m_width = w;
-	m_height = h;
+	cnote << "EGL Setup OK";
 #endif
 
 #if LIGHTBOX_USE_SDL

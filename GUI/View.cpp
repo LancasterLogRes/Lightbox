@@ -96,6 +96,16 @@ void Context::disc(iEllipse _e, Color _c) const
 	disc(_e, GUIApp::joint().flat);
 }
 
+void Context::xRule(fRect _r, float _y, float _h, Color _c) const
+{
+	rect(_r.lerp(0, _y, 1, _y).outset(0, _h / 2), _c);
+}
+
+void Context::yRule(fRect _r, float _x, float _w, Color _c) const
+{
+	rect(_r.lerp(_x, 0, _x, 1).outset(_w / 2, 0), _c);
+}
+
 void Context::rect(fRect _r, Color _c) const
 {
 	auto vm = GUIApp::joint();

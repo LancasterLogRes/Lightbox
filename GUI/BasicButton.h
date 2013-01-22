@@ -42,7 +42,7 @@ protected:
 
 	void drawButton(Context const& _c, unsigned _l, bool _lit, bool _down, std::function<void(iRect)> const& _inner = std::function<void(iRect)>(), bool _polish = true);
 
-	virtual vector<iMargin> prepareDraw();
+	virtual std::vector<iMargin> prepareDraw();
 	virtual void draw(Context const& _c, unsigned _layer);
 	virtual bool event(Event* _e);
 	virtual void tapped();

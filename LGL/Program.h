@@ -9,6 +9,7 @@
 #include "Metrics.h"
 #include "Attrib.h"
 #include "ProgramFace.h"
+#include "Global.h"
 
 namespace Lightbox
 {

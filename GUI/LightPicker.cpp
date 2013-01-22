@@ -66,6 +66,7 @@ void LightPickerBody::draw(Context const& _c)
 
 fSize LightPickerBody::specifyFit(fSize _space) const
 {
-	float w = min(_space.w(), _space.h() / 8);
-	return fSize(w, w * 8);
+	return Super::specifyFit(_space);
+	float w = min(_space.w(), _space.h() / 6);
+	return fSize(w, w * 6);
 }

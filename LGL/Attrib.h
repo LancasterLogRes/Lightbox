@@ -6,6 +6,8 @@
 #include "Buffer.h"
 #include "Global.h"
 
+#undef _T
+
 namespace Lightbox
 {
 

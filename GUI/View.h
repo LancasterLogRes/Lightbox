@@ -47,7 +47,13 @@ struct Context
 	void disc(iEllipse _r, Program const& _p) const;
 	void disc(iEllipse _r, Color _c) const;
 
-	// Deprecated - use iRect/iCoord/iEllipse versions instead
+	void xRule(fRect _r, float _y, float _h, Color _c) const;
+	void yRule(fRect _r, float _x, float _w, Color _c) const;
+
+	// Deprecated - use iRect/iCoord/iEllipse versions instead.
+	// Actually, no... - these are good for AA interiors; however naming convention needs to be
+	// made to separate pixel-level functions (currently iRect/iCoord/iEllipse) from mm-level functions
+	// (currently fRect, fCoord, fEllipse).
 	void rect(fRect _r) const;
 	void rect(fRect _r, Color _c) const;
 	void rect(fRect _r, Program const& _p) const;
@@ -197,6 +203,8 @@ public:
 	View parent() const { return View(m_parent); }
 	Layout* layout() const { return m_layout; }
 	float stretch() const { return m_stretch; }
+
+	fRect rectMM() const { return fRect(fCoord(0, 0), m_geometry.size()); }
 	iRect rect() const { return iRect(iCoord(0, 0), m_globalRect.size()); }
 	iRect canvas(unsigned _layer = 0) const { if (_layer < m_overdraw.size()) return rect().outset(m_overdraw[_layer]); else return iRect(); }
 

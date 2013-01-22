@@ -6,6 +6,9 @@
 #include "Texture2D.h"
 #include "Global.h"
 
+#undef Assert
+#define Assert(X) X
+
 namespace Lightbox
 {
 

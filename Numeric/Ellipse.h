@@ -69,6 +69,7 @@ public:
 	Ellipse outset(Numeric _x, Numeric _y) const { return Ellipse(x(), y(), Super::z() + _x, Super::w() + _y); }
 	Ellipse outset(xSize _xy) const { return outset(_xy.w(), _xy.h()); }
 	Ellipse multipliedBy(xSize _s) const { return Ellipse(x() * _s.w(), y() * _s.h(), Super::z() * _s.w(), Super::w() * _s.h()); }
+	Ellipse transformedInto(xRect _s) const { return Ellipse(x() * _s.w() + _s.x(), y() * _s.h() + _s.y(), Super::z() * _s.w(), Super::w() * _s.h()); }
 
 	Ellipse operator+(Numeric _f) const { return outset(_f); }
 	Ellipse operator-(Numeric _f) const { return inset(_f); }

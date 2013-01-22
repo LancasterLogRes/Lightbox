@@ -4080,3 +4080,4 @@ static const std::map<unsigned, char const*> g_symbolStrings =
     {0x90BA, "GL_SCALED_RESOLVE_FASTEST_EXT"},
     {0x90BB, "GL_SCALED_RESOLVE_NICEST_EXT"}
 };
+

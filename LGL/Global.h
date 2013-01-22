@@ -5,6 +5,11 @@
 #include <Common/Global.h>
 #include "GL.h"
 
+#undef _0
+#undef _1
+#undef _2
+#undef _3
+#undef _4
 #undef _A
 #undef _B
 #undef _C
@@ -133,6 +138,7 @@ template <class _GL, class ... _Params> inline void GL_aux_N(char const* _gl, ch
 #endif
 
 //inline bool assert(bool _b) { return _b; }
+#undef Assert
 #define Assert(X) X
 
 }
