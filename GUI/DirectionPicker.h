@@ -33,10 +33,11 @@ public:
 	DirectionPicker withOnDirectionChanged(EventHandler const& _t) { setOnDirectionChanged(_t); return this; }
 
 protected:
-	explicit DirectionPickerBody(Color _c = White);
+	explicit DirectionPickerBody(Color _c = White, Grouping _grouping = NoGrouping);
 	
 	virtual bool event(Event* _e);
-	virtual void draw(Context const& _c);
+	virtual std::vector<iMargin> prepareDraw();
+	virtual void draw(Context const& _c, unsigned _l);
 	virtual void directionChanged(bool _userEvent) { if (m_onDirectionChanged && _userEvent) m_onDirectionChanged(this); update(); }
 	virtual fSize specifyFit(fSize _space) const;
 
@@ -49,6 +50,7 @@ private:
 	fEllipse m_direction;
 	Mode m_mode;
 	Color m_color;
+	Grouping m_grouping;
 
 	iSize m_lastSign;
 	bool m_dragCenter;

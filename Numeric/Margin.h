@@ -32,6 +32,11 @@ public:
 	void setRight(Numeric _v) { Super::m_z = _v; }
 	void setBottom(Numeric _v) { Super::m_w = _v; }
 
+	Margin withLeft(Numeric _v) const { return Margin(_v, m_y, m_z, m_w); }
+	Margin withTop(Numeric _v) const { return Margin(m_x, _v, m_z, m_w); }
+	Margin withRight(Numeric _v) const { return Margin(m_x, m_y, _v, m_w); }
+	Margin withBottom(Numeric _v) const { return Margin(m_x, m_y, m_z, _v); }
+
 	xSize extra() const { return xSize(m_x + m_z, m_y + m_w); }
 	Numeric extraWidth() const { return m_x + m_z; }
 	Numeric extraHeight() const { return m_y + m_w; }

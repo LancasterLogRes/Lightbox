@@ -18,8 +18,9 @@ class Coord: public CalcPair<Numeric, Coord<Numeric> >
 public:
 	Coord() {}
 	Coord(Pair<Numeric> _q): Super(_q) {}
-	Coord(Super _q): Super(_q) {}
 	Coord(Numeric _x, Numeric _y): Super(_x, _y) {}
+
+	explicit Coord(Super _q): Super(_q) {}
 	template <class _N> explicit Coord(Coord<_N> _s): CalcPair<Numeric, Coord<Numeric>>(_s) {}
 
 	using Super::x;
@@ -60,8 +61,10 @@ class Size: public CalcPair<Numeric, Size<Numeric> >
 public:
 	Size() {}
 	Size(Pair<Numeric> _q): Super(_q) {}
-	Size(Super _q): Super(_q) {}
 	Size(Numeric _w, Numeric _h): Super(_w, _h) {}
+
+	explicit Size(Super _q): Super(_q) {}
+	explicit Size(Numeric _s): Super(_s, _s) {}
 	explicit Size(Coord<Numeric> _c): Super((Super)_c) {}
 	template<class _N> explicit Size(Size<_N> _s): CalcPair<Numeric, Size<Numeric>>(_s) {}
 

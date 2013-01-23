@@ -42,6 +42,7 @@ struct Context
 
 	void rect(iRect _r, Color _c) const;
 	void rect(iRect _r, Color _c, float _gradient) const;
+	void rectInline(iRect _outer, iMargin _inset, Color _c) const { rectOutline(_outer.inset(_inset), _inset, _c); }
 	void rectOutline(iRect _inner, iMargin _outset, Color _c) const;
 	void text(Font const& _f, iCoord _anchor, std::string const& _text, RGBA _c = RGBA::Black) const;
 	void disc(iEllipse _r, Program const& _p) const;

@@ -5,10 +5,11 @@
 using namespace std;
 using namespace Lightbox;
 
-DirectionPickerBody::DirectionPickerBody(Color _c):
+DirectionPickerBody::DirectionPickerBody(Color _c, Grouping _grouping):
 	m_direction(0.5f, 0.5f, 0.5f),
 	m_mode(Point),
 	m_color(_c),
+	m_grouping(_grouping),
 	m_lastSign(-1, -1)
 {
 }
@@ -56,60 +57,79 @@ bool DirectionPickerBody::event(Event* _e)
 //static const float c_surroundWidth = 2;
 //static const float c_lightWidth = 4;
 
-void DirectionPickerBody::draw(Context const& _c)
+vector<iMargin> DirectionPickerBody::prepareDraw()
+{
+	iSize lightWidth = GUIApp::joint().display->toPixels(fSize(c_lightWidth, c_lightWidth));
+	vector<iMargin> ret;
+	ret += iMargin();
+	if (isEnabled())
+		ret += iMargin(lightWidth / 2, lightWidth - lightWidth / 2);
+	return ret;
+}
+
+void DirectionPickerBody::draw(Context const& _c, unsigned _l)
 {
 	iSize surroundWidth = GUIApp::joint().display->toPixels(fSize(c_surroundWidth, c_surroundWidth));
 	iSize lightWidth = GUIApp::joint().display->toPixels(fSize(c_lightWidth, c_lightWidth));
 
-	iRect surround = rect();
-	iMargin surroundMargin(surroundWidth);
-	iMargin lightMargin(lightWidth);
-	iRect outer = surround.inset(surroundMargin);
-	iRect enner = outer.inset(lightMargin);
-	_c.rectOutline(outer, surroundMargin, Color(0));
-	_c.rectOutline(enner, lightMargin, Color(m_color.hue(), m_color.sat(), .125f));
-	_c.rectOutline(enner.outset(lightWidth / 4), iMargin(lightWidth / 2), m_color);
+	bool haveLeft = m_grouping & ForceLeft;
+	bool haveRight = m_grouping & ForceRight;
+	bool haveTop = m_grouping & ForceAbove;
+	bool haveBottom = m_grouping & ForceBelow;
+
+	iRect surroundPx = rect();
+	iMargin surroundMargin(haveLeft ? 0 : surroundWidth.w(), haveTop ? 0 : surroundWidth.h(), haveRight ? 0 : surroundWidth.w(), haveBottom ? 0 : surroundWidth.h());
+	iMargin lightMargin(lightWidth.w() / (haveLeft ? 2 : 1), lightWidth.h() / (haveTop ? 2 : 1), lightWidth.w() - (haveRight ? lightWidth.w() / 2 : 0), lightWidth.h() - (haveBottom ? lightWidth.h() / 2 : 0));
+	iRect outerPx = surroundPx.inset(surroundMargin);
+	iRect innerPx = outerPx.inset(lightMargin);
 
 	static const fSize c_thumbMM(20, 20);
-	fRect inner(GUIApp::joint().display->fromPixels(enner));
+	fRect innerMM(GUIApp::joint().display->fromPixels(innerPx));
 
-	// m_radius [0, 1]
-	// m_direction [0, 1]
+	if (_l == 0)
+	{
+		for (int i = 0; i < 9; ++i)
+			if (i % 4)
+			{
+				_c.xRule(innerMM, i / 8.f, 2, m_color.attenuated(.25f));
+				_c.yRule(innerMM, i / 8.f, 2, m_color.attenuated(.25f));
+			}
 
-	for (int i = 0; i < 9; ++i)
-		if (i % 4)
+		_c.xRule(innerMM, .5f, 2, m_color.attenuated(.5f));
+		_c.yRule(innerMM, .5f, 2, m_color.attenuated(.5f));
+
+		if (m_mode == Circle || m_mode == Fill)
 		{
-			_c.xRule(inner, i / 8.f, 2, m_color.attenuated(.25f));
-			_c.yRule(inner, i / 8.f, 2, m_color.attenuated(.25f));
+			_c.circle(m_direction.transformedInto(innerMM), White, 4.f);
+			_c.disc(innerMM.lerp(xC(m_lastSign.w()), yC(m_lastSign.h())), c_thumbMM, White);
 		}
 
-	_c.xRule(inner, .5f, 2, m_color.attenuated(.5f));
-	_c.yRule(inner, .5f, 2, m_color.attenuated(.5f));
+		if (m_mode == Fill)
+			_c.disc(m_direction.transformedInto(innerMM), Color(1.f, .5f));
 
-	if (m_mode == Circle || m_mode == Fill)
-	{
-		_c.circle(m_direction.transformedInto(inner), White);
-		_c.disc(inner.lerp(xC(m_lastSign.w()), yC(m_lastSign.h())), c_thumbMM, White);
+		if (m_mode >= Circle)
+		{
+			_c.disc(innerMM.lerp(xC(-1), yC(-1)), c_thumbMM / 4, White);
+			_c.disc(innerMM.lerp(xC(-1), yC(1)), c_thumbMM / 4, White);
+			_c.disc(innerMM.lerp(xC(1), yC(-1)), c_thumbMM / 4, White);
+			_c.disc(innerMM.lerp(xC(1), yC(1)), c_thumbMM / 4, White);
+		}
+
+		_c.disc(innerMM.lerp(m_direction.pos()), c_thumbMM, White);
+
+		_c.rectOutline(outerPx, surroundMargin, Color(0));
+		_c.rectOutline(innerPx, lightMargin, Color(m_color.hue(), m_color.sat(), .125f));
 	}
-
-	if (m_mode == Fill)
-		_c.disc(m_direction.transformedInto(inner), Color(1.f, .5f));
-
-	if (m_mode >= Circle)
+	else if (_l == 1)
 	{
-		_c.disc(inner.lerp(xC(-1), yC(-1)), c_thumbMM / 4, White);
-		_c.disc(inner.lerp(xC(-1), yC(1)), c_thumbMM / 4, White);
-		_c.disc(inner.lerp(xC(1), yC(-1)), c_thumbMM / 4, White);
-		_c.disc(inner.lerp(xC(1), yC(1)), c_thumbMM / 4, White);
+		_c.rectOutline(innerPx.outset(lightWidth / 4), iMargin(lightWidth / 2), m_color);
 	}
-
-	_c.disc(inner.lerp(m_direction.pos()), c_thumbMM, White);
 }
 
 fSize DirectionPickerBody::specifyFit(fSize _space) const
 {
-	float s = min(_space.w(), _space.h());
-	return fSize(s, s);
+	float s = min(_space.w(), _space.h()) * 1.25f;
+	return fSize(min(_space.w(), s), min(_space.h(), s));
 }
 
 

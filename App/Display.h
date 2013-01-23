@@ -28,6 +28,7 @@ public:
 	uSize sizePixels() const { return uSize(m_width, m_height); }
 	fSize sizeMM() const { return fSize(m_widthMM, m_heightMM); }
 	iCoord toPixels(fCoord _mm) const { return iCoord(round(_mm.x() / m_widthMM * m_width), round(_mm.y() / m_heightMM * m_height)); }
+	iSize toUnalignedPixels(fSize _mm) const { return iSize(round(_mm.w() / m_widthMM * m_width), round(_mm.h() / m_heightMM * m_height)); }
 	iRect toPixels(fRect _mm) const { return iRect(toPixels(_mm.topLeft()), toPixels(_mm.bottomRight())); }
 	fCoord fromPixels(iCoord _px) const { return fCoord(_px.x() * m_widthMM / m_width, _px.y() * m_heightMM / m_height); }
 	fSize fromPixels(iSize _px) const { return fSize(_px.w() * m_widthMM / m_width, _px.h() * m_heightMM / m_height); }
