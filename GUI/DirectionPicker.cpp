@@ -5,9 +5,10 @@
 using namespace std;
 using namespace Lightbox;
 
-DirectionPickerBody::DirectionPickerBody():
+DirectionPickerBody::DirectionPickerBody(Color _c):
 	m_direction(0.5f, 0.5f, 0.5f),
 	m_mode(Point),
+	m_color(_c),
 	m_lastSign(-1, -1)
 {
 }
@@ -52,11 +53,25 @@ bool DirectionPickerBody::event(Event* _e)
 	return Super::event(_e);
 }
 
+//static const float c_surroundWidth = 2;
+//static const float c_lightWidth = 4;
+
 void DirectionPickerBody::draw(Context const& _c)
 {
+	iSize surroundWidth = GUIApp::joint().display->toPixels(fSize(c_surroundWidth, c_surroundWidth));
+	iSize lightWidth = GUIApp::joint().display->toPixels(fSize(c_lightWidth, c_lightWidth));
+
+	iRect surround = rect();
+	iMargin surroundMargin(surroundWidth);
+	iMargin lightMargin(lightWidth);
+	iRect outer = surround.inset(surroundMargin);
+	iRect enner = outer.inset(lightMargin);
+	_c.rectOutline(outer, surroundMargin, Color(0));
+	_c.rectOutline(enner, lightMargin, Color(m_color.hue(), m_color.sat(), .125f));
+	_c.rectOutline(enner.outset(lightWidth / 4), iMargin(lightWidth / 2), m_color);
+
 	static const fSize c_thumbMM(20, 20);
-	fRect r = rectMM();
-	fRect inner(r.inset(3));
+	fRect inner(GUIApp::joint().display->fromPixels(enner));
 
 	// m_radius [0, 1]
 	// m_direction [0, 1]
@@ -64,14 +79,12 @@ void DirectionPickerBody::draw(Context const& _c)
 	for (int i = 0; i < 9; ++i)
 		if (i % 4)
 		{
-			_c.xRule(inner, i / 8.f, 2, Color(.25f));
-			_c.yRule(inner, i / 8.f, 2, Color(.25f));
+			_c.xRule(inner, i / 8.f, 2, m_color.attenuated(.25f));
+			_c.yRule(inner, i / 8.f, 2, m_color.attenuated(.25f));
 		}
-	for (int i = 0; i < 9; i += 4)
-	{
-		_c.xRule(inner, i / 8.f, 2, Color(.5f));
-		_c.yRule(inner, i / 8.f, 2, Color(.5f));
-	}
+
+	_c.xRule(inner, .5f, 2, m_color.attenuated(.5f));
+	_c.yRule(inner, .5f, 2, m_color.attenuated(.5f));
 
 	if (m_mode == Circle || m_mode == Fill)
 	{

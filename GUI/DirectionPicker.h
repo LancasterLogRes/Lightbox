@@ -28,11 +28,12 @@ public:
 	void setRadii(fSize _e, bool _userEvent = false) { if (m_direction.radii() != _e) { m_direction.setRadii(_e); directionChanged(_userEvent); } }
 	void setMode(Mode _m, bool _userEvent = false) { if (m_mode != _m) { m_mode = _m; directionChanged(_userEvent); } }
 	void setOnDirectionChanged(EventHandler const& _t) { m_onDirectionChanged = _t; }
+	void setColor(Color _c) { m_color = _c; update(); }
 
 	DirectionPicker withOnDirectionChanged(EventHandler const& _t) { setOnDirectionChanged(_t); return this; }
 
 protected:
-	DirectionPickerBody();
+	explicit DirectionPickerBody(Color _c = White);
 	
 	virtual bool event(Event* _e);
 	virtual void draw(Context const& _c);
@@ -47,6 +48,7 @@ private:
 
 	fEllipse m_direction;
 	Mode m_mode;
+	Color m_color;
 
 	iSize m_lastSign;
 	bool m_dragCenter;
