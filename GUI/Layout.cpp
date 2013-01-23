@@ -106,7 +106,7 @@ fSize HorizontalLayout::maximumSize(fSize)
 			auto m = c->maximumSize();
 			ret = fSize(ret.w() + m.w(), max(ret.h(), m.h()));
 		}
-	return ret;
+	return ret + dead();
 }
 
 fSize VerticalLayout::maximumSize(fSize)
@@ -118,7 +118,7 @@ fSize VerticalLayout::maximumSize(fSize)
 			auto m = c->maximumSize();
 			ret = fSize(max(ret.w(), m.w()), ret.h() + m.h());
 		}
-	return ret;
+	return ret + dead();
 }
 
 fSize HorizontalLayout::minimumSize(fSize)
@@ -130,7 +130,7 @@ fSize HorizontalLayout::minimumSize(fSize)
 			auto m = c->minimumSize();
 			ret = fSize(ret.w() + m.w(), max(ret.h(), m.h()));
 		}
-	return ret;
+	return ret + dead();
 }
 
 fSize VerticalLayout::minimumSize(fSize)
@@ -142,11 +142,12 @@ fSize VerticalLayout::minimumSize(fSize)
 			auto m = c->minimumSize();
 			ret = fSize(max(ret.w(), m.w()), ret.h() + m.h());
 		}
-	return ret;
+	return ret + dead();
 }
 
 fSize HorizontalLayout::fit(fSize _space)
 {
+	_space -= dead();
 	vector<float> sizes = doLayout(_space, _space.width(), m_view->children(), [](View const&, fSize s) { return s.width(); });
 	unsigned i = 0;
 	fSize ret = _space;
@@ -162,6 +163,7 @@ fSize HorizontalLayout::fit(fSize _space)
 
 fSize VerticalLayout::fit(fSize _space)
 {
+	_space -= dead();
 	vector<float> sizes = doLayout(_space, _space.height(), m_view->children(), [](View const&, fSize s) { return s.height(); });
 	unsigned i = 0;
 	fSize ret = _space;
@@ -177,39 +179,51 @@ fSize VerticalLayout::fit(fSize _space)
 
 void VerticalLayout::layout(fSize _s)
 {
+	_s -= dead();
 	if (m_view)
 	{
 		vector<float> sizes = doLayout(_s, _s.height(), m_view->children(), [](View const&, fSize s) { return s.height(); });
 //		cdebug << "Sum/total:" << sumOf(sizes) << _s.height();
-		fCoord cursor(0, 0);
+		fCoord cursor(m_margin.left(), m_margin.top());
 		auto i = sizes.begin();
 		for (auto const& c: m_view->children())
 		{
 			fSize s(_s.w(), *i);
 			fSize rs = c->fit(s);
 			c->setGeometry(fRect(cursor, rs));
-			cursor.setY(cursor.y() + *i);
+			cursor.setY(cursor.y() + *i + m_spacing);
 			++i;
 		}
 	}
 }
 
+fSize VerticalLayout::dead() const
+{
+	return m_margin.extra() + fSize(0, max(0, m_view ? (int)m_view->children().size() - 1 : 0) * m_spacing);
+}
+
 void HorizontalLayout::layout(fSize _s)
 {
+	_s -= dead();
 	if (m_view)
 	{
 		vector<float> sizes = doLayout(_s, _s.width(), m_view->children(), [](View const&, fSize s) { return s.width(); });
-		fCoord cursor(0, 0);
+		fCoord cursor(m_margin.left(), m_margin.top());
 		auto i = sizes.begin();
 		for (auto const& c: m_view->children())
 		{
 			fSize s(*i, _s.h());
 			fSize rs = c->fit(s);
 			c->setGeometry(fRect(cursor, rs));
-			cursor.setX(cursor.x() + *i);
+			cursor.setX(cursor.x() + *i + m_spacing);
 			++i;
 		}
 	}
+}
+
+fSize HorizontalLayout::dead() const
+{
+	return m_margin.extra() + fSize(max(0, m_view ? (int)m_view->children().size() - 1 : 0) * m_spacing, 0);
 }
 
 fSize OverlayLayout::maximumSize(fSize)
@@ -246,8 +260,8 @@ void OverlayLayout::layout(fSize _s)
 	if (m_view)
 		for (auto const& c: m_view->children())
 		{
-			fSize s(_s.w() - m_margins.x() - m_margins.z(), _s.h() - m_margins.w() - m_margins.y());
-			c->setGeometry(fRect(fCoord(m_margins.x(), m_margins.y()), s));
+			fSize s = _s - m_margin.extra();
+			c->setGeometry(fRect(fCoord(m_margin.left(), m_margin.top()), s));
 		}
 }
 

@@ -11,7 +11,7 @@ static const float c_tabHeight = c_tabBodyHeight + c_tabTailHeight;
 
 TabsBody::TabsBody()
 {
-	setLayout(new OverlayLayout(fVector4(0, c_tabHeight, 0, 0)));
+	setLayout(new OverlayLayout(fMargin(0, c_tabHeight, 0, 0)));
 }
 
 TabsBody::~TabsBody()
