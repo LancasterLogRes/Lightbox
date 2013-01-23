@@ -100,7 +100,7 @@ void DirectionPickerBody::draw(Context const& _c, unsigned _l)
 
 		if (m_mode == Circle || m_mode == Fill)
 		{
-			_c.circle(m_direction.transformedInto(innerMM), White, 4.f);
+			_c.circle(m_direction.transformedInto(innerMM), White, m_mode == Circle ? 2.f : 1.f);
 			_c.disc(innerMM.lerp(xC(m_lastSign.w()), yC(m_lastSign.h())), c_thumbMM, White);
 		}
 
