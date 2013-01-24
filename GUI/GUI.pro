@@ -8,7 +8,6 @@ SOURCES += \
     BasicButton.cpp \
     GUIApp.cpp \
     Joint.cpp \
-    FontFace.cpp \
     Font.cpp \
     ToggleButton.cpp \
     TextLabel.cpp \
@@ -21,7 +20,9 @@ SOURCES += \
     DirectionPicker.cpp \
     Frame.cpp \
     Collated.cpp \
-    ProgressBar.cpp
+    ProgressBar.cpp \
+    FontManager.cpp \
+    BakedFont.cpp
 
 HEADERS += \
     View.h \
@@ -30,7 +31,6 @@ HEADERS += \
     GUIApp.h \
     All.h \
     Joint.h \
-    FontFace.h \
     Font.h \
     ToggleButton.h \
     TextLabel.h \
@@ -42,7 +42,9 @@ HEADERS += \
     PatternPicker.h \
     DirectionPicker.h \
     Frame.h \
-    ProgressBar.h
+    ProgressBar.h \
+    FontManager.h \
+    BakedFont.h
 OTHER_FILES += Shaders.resources View.frag View.vert \
     Fonts.resources \
     Flat.frag \

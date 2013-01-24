@@ -21,11 +21,18 @@ void Style::generateColors(Color _fore)
 
 GUIApp::GUIApp()
 {
+	m_fontManager.registerData(FontDefinition("Ubuntu", false), LB_R(ubuntu_r_ttf));
+	m_fontManager.registerData(FontDefinition("Ubuntu", true), LB_R(ubuntu_b_ttf));
+
 	m_root = FrameBody::create();
 
 	m_style.fore = Color(.5f);
 	m_style.back = Color(0.f);
 	m_style.high = Color(1.f);
+	m_style.regular = Font(15, FontDefinition("Ubuntu", false));
+	m_style.bold = Font(15, FontDefinition("Ubuntu", true));
+	m_style.small = Font(10, FontDefinition("Ubuntu", false));
+	m_style.smallBold = Font(10, FontDefinition("Ubuntu", true));
 }
 
 GUIApp::~GUIApp()
@@ -43,7 +50,7 @@ void GUIApp::initGraphics(Display& _d)
 //#if LIGHTBOX_USE_SDL
 	// Wierd, but SDL/GL3 implementation requires that a font be drawn first.
 	// Presumably some initialization I'm not doing, but can't isolate the magic call.
-	Font(ubuntu_r_ttf, 20.f).draw(fCoord(60, 60), " ");
+//	Font(ubuntu_r_ttf, 20.f).draw(fCoord(60, 60), " ");
 //#endif
 
 	LB_GL(glDisable, GL_CULL_FACE);
@@ -52,10 +59,7 @@ void GUIApp::initGraphics(Display& _d)
 	LB_GL(glBlendFunc, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	m_joint.init(_d);
-	m_style.regular = Font(ubuntu_r_ttf, 20.f);
-	m_style.bold = Font(ubuntu_b_ttf, 20.f);
-	m_style.small = Font(ubuntu_r_ttf, 15.f);
-	m_style.smallBold = Font(ubuntu_b_ttf, 15.f);
+	m_fontManager.initGraphics();
 	m_root->setGeometry(fRect(0, 0, _d.widthMM(), _d.heightMM()));
 	m_root->initGraphicsRecursive();
 	m_root->show(true);
@@ -65,11 +69,8 @@ void GUIApp::finiGraphics(Display&)
 {
 	cnote << "Finalizing GUI graphics";
 	m_root->finiGraphicsRecursive();
+	m_fontManager.finiGraphics();
 	m_joint = Joint();
-	m_style.regular = Font();
-	m_style.bold = Font();
-	m_style.small = Font();
-	m_style.smallBold = Font();
 	m_cache.clear();
 	m_root->show(false);
 }
@@ -327,11 +328,11 @@ bool GUIApp::drawGraphics()
 	iRect rr = m_root->rect();
 	Context con(rr, rr);
 	con.rect(iRect(rr.bottomRight() - iCoord(200, 54), iSize(190, 44)), Color(1.f, .5f));
-	iSize s = GUIApp::style().regular.measurePx(info);
-	GUIApp::style().regular.draw(iCoord(rr.size() - s / 2.f - iSize(34, 34)), info, RGBA::Black);
+	iSize s = GUIApp::style().small.measurePx(info);
+	GUIApp::style().small.draw(iCoord(rr.size() - s / 2.f - iSize(34, 34)), info, RGBA::Black);
 	info = toString(g_metrics.m_useProgramCount) + "/" + toString(g_metrics.m_drawCount);
-	s = GUIApp::style().regular.measurePx(info);
-	GUIApp::style().regular.draw(iCoord(rr.size() - s / 2.f - iSize(33, 14)), info, RGBA::Black);
+	s = GUIApp::style().small.measurePx(info);
+	GUIApp::style().small.draw(iCoord(rr.size() - s / 2.f - iSize(33, 14)), info, RGBA::Black);
 	g_metrics.reset();
 
 	return !stillDirty;

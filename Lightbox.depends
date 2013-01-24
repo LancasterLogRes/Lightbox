@@ -4,4 +4,4 @@ ExampleEventCompiler.depends = EventCompiler
 App.depends = Common
 LGL.depends = Numeric
 GUI.depends = App LGL
-Mark2.depends = GUI
+TestGUI.depends = GUI

@@ -3,6 +3,7 @@
 #include <tuple>
 #include <App/App.h>
 #include <Common/Color.h>
+#include "FontManager.h"
 #include "Joint.h"
 #include "Frame.h"
 
@@ -31,6 +32,7 @@ public:
 	static Joint& joint() { return get()->m_joint; }
 	static Frame const& root() { return get()->m_root; }
 	static Style const& style() { return get()->m_style; }
+	static FontManager& fontManager() { return get()->m_fontManager; }
 
 	virtual void initGraphics(Display& _d);
 	virtual bool drawGraphics();
@@ -45,6 +47,8 @@ private:
 	Frame m_root;
 	Joint m_joint;
 	Style m_style;
+	FontManager m_fontManager;
+
 	typedef std::pair<ViewBody*, unsigned> ViewLayer;
 
 	struct CachePos

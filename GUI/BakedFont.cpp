@@ -1,6 +1,6 @@
 #define STB_TRUETYPE_IMPLEMENTATION
 #include "stb_truetype.h"
-#include "FontFace.h"
+#include "BakedFont.h"
 #include "Shaders.h"
 #include "GUIApp.h"
 using namespace std;
@@ -10,7 +10,7 @@ static const unsigned s_maxAtOnce = 64;
 static const unsigned s_charDataFirst = 32;
 static const unsigned s_charDataCount = 96;
 
-FontFace::FontFace(uint8_t const* _ttfData, float _size)
+BakedFont::BakedFont(Font const& _f, uint8_t const* _ttfData): m_f(_f), m_pxSize(GUIApp::joint().display->toUnalignedPixels(fSize(0, _f.mmSize())).height())
 {
 	m_program = Program(Shader::vertex(LB_R(Font_vert)), Shader::fragment(LB_R(Font_frag)));
 	m_program.tie(GUIApp::joint().uniforms);
@@ -25,7 +25,8 @@ FontFace::FontFace(uint8_t const* _ttfData, float _size)
 	unsigned char temp_bitmap[512*512];
 
 	m_charData = new stbtt_bakedchar[s_charDataCount];
-	stbtt_BakeFontBitmap(_ttfData,0, _size, temp_bitmap,512,512, s_charDataFirst,s_charDataCount, (stbtt_bakedchar*)m_charData);
+
+	stbtt_BakeFontBitmap(_ttfData, 0, m_pxSize, temp_bitmap, 512, 512, s_charDataFirst, s_charDataCount, (stbtt_bakedchar*)m_charData);
 	m_above = 0;
 	m_below = 0;
 	for (unsigned i = 0; i < s_charDataCount; ++i)
@@ -41,7 +42,11 @@ FontFace::FontFace(uint8_t const* _ttfData, float _size)
 		m_buffer.set(corners.data(), corners.size(), i * corners.size());
 }
 
-void FontFace::draw(fCoord _anchor, string const& _text, RGBA _c)
+BakedFont::~BakedFont()
+{
+}
+
+void BakedFont::draw(fCoord _anchor, string const& _text, RGBA _c)
 {
 	if (_text == "")
 		return;
@@ -80,7 +85,7 @@ void FontFace::draw(fCoord _anchor, string const& _text, RGBA _c)
 	u.triangles(_text.size() * 6);
 }
 
-fSize FontFace::measure(std::string const& _text) const
+fSize BakedFont::measure(std::string const& _text) const
 {
 	float width = 0;
 	for (char c: _text)

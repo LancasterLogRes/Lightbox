@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <memory>
 #include <Common/Global.h>
 #include <Common/RGBA.h>
 #include <LGL/Attrib.h>
@@ -9,21 +10,24 @@
 #include <LGL/Texture2D.h>
 #include <LGL/Buffer.h>
 #include "Global.h"
+#include "Font.h"
 
 namespace Lightbox
 {
 
-class FontFace
+class BakedFont
 {
 public:
-	FontFace(uint8_t const* _ttfData, float _size);
-
+	BakedFont(Font const& _f, uint8_t const* _ttfData);
+	~BakedFont();
+	
 	fSize measure(std::string const& _text) const;
 	void draw(fCoord _anchor, std::string const& _text, RGBA _c);
 
-	static void initForDisplay(uSize _s);
-
 private:
+	Font m_f;
+	float m_pxSize;
+
 	Program m_program;
 	Attrib m_index;
 	Attrib m_layout;
@@ -40,4 +44,7 @@ private:
 	int m_below;
 };
 
+typedef std::shared_ptr<BakedFont> BakedFontPtr;
+
 }
+
