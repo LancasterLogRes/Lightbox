@@ -328,11 +328,11 @@ bool GUIApp::drawGraphics()
 	iRect rr = m_root->rect();
 	Context con(rr, rr);
 	con.rect(iRect(rr.bottomRight() - iCoord(200, 54), iSize(190, 44)), Color(1.f, .5f));
-	iSize s = GUIApp::style().small.measurePx(info);
-	GUIApp::style().small.draw(iCoord(rr.size() - s / 2.f - iSize(34, 34)), info, RGBA::Black);
+	iSize s = GUIApp::style().regular.measurePx(info);
+	GUIApp::style().regular.draw(iCoord(rr.size() - s / 2.f - iSize(34, 34)), info, RGBA::Black);
 	info = toString(g_metrics.m_useProgramCount) + "/" + toString(g_metrics.m_drawCount);
-	s = GUIApp::style().small.measurePx(info);
-	GUIApp::style().small.draw(iCoord(rr.size() - s / 2.f - iSize(33, 14)), info, RGBA::Black);
+	s = GUIApp::style().regular.measurePx(info);
+	GUIApp::style().regular.draw(iCoord(rr.size() - s / 2.f - iSize(33, 14)), info, RGBA::Black);
 	g_metrics.reset();
 
 	return !stillDirty;
