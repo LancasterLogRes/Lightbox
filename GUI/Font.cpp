@@ -23,3 +23,8 @@ fSize Font::measure(std::string const& _text) const
 {
 	return m_p ? m_p->measure(_text) : fSize(0, 0);
 }
+
+iSize Font::measurePx(std::string const& _text) const
+{
+	return m_p ? (iSize)m_p->measure(_text) : iSize(0, 0);
+}

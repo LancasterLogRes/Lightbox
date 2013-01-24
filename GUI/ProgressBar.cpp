@@ -21,11 +21,9 @@ bool ProgressBarBody::event(Event* _e)
 
 void ProgressBarBody::draw(Context const& _c)
 {
-	iRect r(_c.pixels(this));
-	_c.rect(r, GUIApp::style().back, 0.1);
-	iRect t(r.inset(min(r.w(), r.h()) / 10));
-	t.setWidth(m_progress * t.w());
-	_c.rect(t, GUIApp::style().high, -0.2);
+	_c.rect(rect(), GUIApp::style().back, 0.1);
+	iRect inner = rect().inset(GUIApp::joint().display->toPixels(fSize(5, 5)));
+	_c.rect(inner.lerp(0, 0, m_progress, 1), GUIApp::style().high, -0.2);
 }
 
 

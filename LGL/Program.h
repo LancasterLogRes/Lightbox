@@ -49,7 +49,7 @@ class ProgramUser: public boost::noncopyable
 {
 public:
 	ProgramUser(): m_p(ProgramFace::inUse()), m_owns(false) { assert(m_p); }
-	ProgramUser(Program const& _p): m_p(_p), m_owns(true) { assert(!ProgramFace::inUse()); m_p.use(); }
+	ProgramUser(Program const& _p): m_p(_p ? _p : ProgramFace::inUse()), m_owns(!!_p) { if (m_owns) { assert(!ProgramFace::inUse()); m_p.use(); } else assert(m_p); }
 	~ProgramUser() { if (m_owns) m_p.drop(); }
 
 	Attrib attrib(std::string const& _name) const { return Attrib(m_p, _name); }

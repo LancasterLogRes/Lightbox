@@ -27,8 +27,10 @@ using namespace Lightbox;
 #elif !defined(LIGHTBOX_CROSS)
 #endif
 
-int c_defaultWidth = 800;
-int c_defaultHeight = 480;
+int c_defaultWidth = 1200;
+int c_defaultHeight = 720;
+int c_defaultWidthMM = 800;
+int c_defaultHeightMM = 480;
 
 #define Assert(X) Lightbox::doAssert(X, #X, __FILE__, __LINE__, false);
 #undef assert
@@ -94,8 +96,11 @@ Lightbox::Display::Display()
 	EGLint numConfigs;
 	EGLConfig config;
 
-//	const EGLint attribs[] = { EGL_SURFACE_TYPE, EGL_WINDOW_BIT, EGL_RED_SIZE, 8, EGL_GREEN_SIZE, 8, EGL_BLUE_SIZE, 8, EGL_DEPTH_SIZE, 16, EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT, EGL_SAMPLE_BUFFERS, 1, EGL_SAMPLES, 1, EGL_NONE };
+#if LIGHTBOX_ANDROID
 	const EGLint attribs[] = { EGL_RED_SIZE, 1, EGL_GREEN_SIZE, 1, EGL_BLUE_SIZE, 1, EGL_DEPTH_SIZE, 1, EGL_SAMPLE_BUFFERS, 1, EGL_SAMPLES, 1, EGL_NONE };
+#else
+	const EGLint attribs[] = { EGL_SURFACE_TYPE, EGL_WINDOW_BIT, EGL_RED_SIZE, 8, EGL_GREEN_SIZE, 8, EGL_BLUE_SIZE, 8, EGL_DEPTH_SIZE, 16, EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT, EGL_NONE };
+#endif
 
 	EGL_CHECK(eglChooseConfig(m_display, attribs, &config, 1, &numConfigs));
 	assert(config);
@@ -199,6 +204,15 @@ Lightbox::Display::Display()
 	SDL_CHECK(SDL_SetVideoMode(m_width, m_height, bpp, flags));
 
 #endif
+
+#if LIGHTBOX_ANDROID
+	m_widthMM = m_width;
+	m_heightMM = m_height;
+#else
+	m_widthMM = c_defaultWidthMM;
+	m_heightMM = c_defaultHeightMM;
+#endif
+
 	glViewport(0, 0, m_width, m_height);
 #if 0
 	glClearColor(0, 0, 0, 1);
@@ -234,9 +248,6 @@ Lightbox::Display::Display()
 	eglSwapBuffers(m_display, m_surface);
 #endif
 #endif
-
-	m_widthMM = m_width;
-	m_heightMM = m_height;
 }
 
 Lightbox::Display::~Display()

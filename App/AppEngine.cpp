@@ -75,7 +75,7 @@ void AppEngine::setApp(App* _app)
 	m_app = std::shared_ptr<App>(_app);
 }
 
-static const Time c_frameTime = FromSeconds<1>::value / 60;
+static const Lightbox::Time c_frameTime = FromSeconds<1>::value / 60;
 
 void AppEngine::exec()
 {

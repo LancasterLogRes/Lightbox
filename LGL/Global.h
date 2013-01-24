@@ -86,6 +86,7 @@ template <class _P> inline std::string argsToString(char const*, _P _p1)
 }
 
 std::string argsToString(char const* _as, int _p1);
+inline std::string argsToString(char const* _as, unsigned int _p1) { return argsToString(_as, (int)_p1); }
 
 inline std::pair<std::string, char const*> splitOnParam(char const* _as)
 {

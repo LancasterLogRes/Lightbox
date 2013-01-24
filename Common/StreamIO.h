@@ -58,6 +58,7 @@ template <class T> void fromString(T& _t, std::string const& _s)
 void fromString(std::string& _t, std::string const& _s);
 
 template <class S, class T> struct StreamOut { static S& bypass(S& _out, T const& _t) { return _out << _t; } };
+template <class S> struct StreamOut<S, uint8_t> { static S& bypass(S& _out, uint8_t const& _t) { return _out << (int)_t; } };
 
 template <class S, class T>
 inline S& streamout(S& _out, std::vector<T> const& _e)
@@ -71,6 +72,7 @@ inline S& streamout(S& _out, std::vector<T> const& _e)
 	}
 	return _out << "]";
 }
+
 template <class T> inline std::ostream& operator<<(std::ostream& _out, std::vector<T> const& _e) { streamout(_out, _e); return _out; }
 
 template <class S, class T, unsigned Z>

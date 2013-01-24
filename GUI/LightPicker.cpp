@@ -41,9 +41,14 @@ bool LightPickerBody::event(Event* _e)
 	return Super::event(_e);
 }
 
+static const fSize c_thumbMM(20, 20);
+static const float c_thumbOutlineMM = 1;
+static const float c_innerMM = 10;
+
 void LightPickerBody::draw(Context const& _c)
 {
-	fRect geo = geometry();
+	fRect outer = fRect(fSize(c_thumbMM.width(), geometry().height()));
+	fRect inner = outer.inset((c_thumbMM.w() - c_innerMM) / 2, c_thumbMM.h() / 2);
 	{
 		ProgramUser u(m_lightBar);
 		auto top = u.uniform("topColor");
@@ -51,22 +56,21 @@ void LightPickerBody::draw(Context const& _c)
 
 		top = RGBA(1.f, 1.f, 1.f, 1.f);
 		bottom = RGBA(m_middle);
-		_c.rect(fRect(geo.pos(), fSize(geo.width(), geo.height() / 2.f)));
+		_c.rect(inner.lerp(0, 0, 1, .5f));
 
 		top = RGBA(m_middle);
 		bottom = RGBA(0.f, 0.f, 0.f, 1.f);
-		_c.rect(fRect(geo.lerp(0.f, .5f), fSize(geo.width(), geo.height() / 2.f)));
+		_c.rect(inner.lerp(0, 0.5f, 1, 1));
 	}
+
+	fEllipse thumb(inner.lerp(.5f, 1.f - m_light), c_thumbMM / 2);
+	_c.disc(thumb, White);
+
 	Color c = Color(m_middle.hue(), m_middle.sat() == 0.f ? 0.f : clamp(2.f - m_light * 2.f, 0.f, 1.f), m_middle.sat() == 0.f ? m_light : clamp(m_light * 2.f, 0.f, 1.f));
-	geo = geo.inset(0.f, geo.w() / 2 + 2);
-	_c.rect(fRect(geo.lerp(0.f, 1.f - m_light) - fSize(0.f, geo.w() / 2 + 2), fSize(geo.w(), geo.w() + 5)), Black);
-	_c.rect(fRect(geo.lerp(0.f, 1.f - m_light) - fSize(0.f, geo.w() / 2 + 1), fSize(geo.w(), geo.w() + 3)), White);
-	_c.rect(fRect(geo.lerp(0.f, 1.f - m_light) - fSize(0.f, geo.w() / 2), fSize(geo.w(), geo.w() + 1)), c);
+	_c.disc(thumb.inset(c_thumbOutlineMM), c);
 }
 
 fSize LightPickerBody::specifyFit(fSize _space) const
 {
-	return Super::specifyFit(_space);
-	float w = min(_space.w(), _space.h() / 6);
-	return fSize(w, w * 6);
+	return fSize(c_thumbMM.width(), _space.height());
 }

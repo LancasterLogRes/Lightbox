@@ -40,6 +40,12 @@ void GUIApp::initGraphics(Display& _d)
 	cnote << "Renderer" << (char const*)glGetString(GL_RENDERER);
 	cnote << "Extensions" << (char const*)glGetString(GL_EXTENSIONS);
 
+//#if LIGHTBOX_USE_SDL
+	// Wierd, but SDL/GL3 implementation requires that a font be drawn first.
+	// Presumably some initialization I'm not doing, but can't isolate the magic call.
+	Font(ubuntu_r_ttf, 20.f).draw(fCoord(60, 60), " ");
+//#endif
+
 	LB_GL(glDisable, GL_CULL_FACE);
 	LB_GL(glDisable, GL_DEPTH_TEST);
 	LB_GL(glEnable, GL_BLEND);
@@ -50,7 +56,7 @@ void GUIApp::initGraphics(Display& _d)
 	m_style.bold = Font(ubuntu_b_ttf, 20.f);
 	m_style.small = Font(ubuntu_r_ttf, 15.f);
 	m_style.smallBold = Font(ubuntu_b_ttf, 15.f);
-	m_root->setGeometry(fRect(0, 0, _d.width(), _d.height()));
+	m_root->setGeometry(fRect(0, 0, _d.widthMM(), _d.heightMM()));
 	m_root->initGraphicsRecursive();
 	m_root->show(true);
 }
@@ -68,11 +74,9 @@ void GUIApp::finiGraphics(Display&)
 	m_root->show(false);
 }
 
-static const uSize s_pageSize(1024, 4096);
-
-GUIApp::ImageCache::ImageCache():
+GUIApp::ImageCache::ImageCache(uSize _ps):
 	fb(Framebuffer::Create),
-	tx(s_pageSize),
+	tx(_ps),
 	nextfree(0)
 {
 	FramebufferUser u(fb);
@@ -91,7 +95,7 @@ bool GUIApp::ImageCache::fit(iRect _g, ViewLayer _v)
 		if (it == rows.end() || it->first > _g.height() * tolerance)
 		{
 			// no row exists that's good. make our own?
-			if (int(s_pageSize.height() - nextfree) < _g.height())
+			if (int(tx.size().height() - nextfree) < _g.height())
 			{
 				// no - not enough space left.
 				if (tolerance != 1e8f)
@@ -108,13 +112,13 @@ bool GUIApp::ImageCache::fit(iRect _g, ViewLayer _v)
 			it = rows.insert(make_pair(_g.height(), make_pair(nextfree, 0)));
 			nextfree += _g.height();
 		}
-		if (int(s_pageSize.width() - it->second.second) >= _g.width())
+		if (int(tx.size().width() - it->second.second) >= _g.width())
 		{
 			// yey - enough space on the row.
 			uRect tr = uRect(it->second.second, it->second.first, _g.width(), _g.height());
 			vs[_v].pos = tr;
 			vs[_v].index = collated.size() / (6 * 4);
-			fRect ftr = fRect(tr) / fSize(s_pageSize);
+			fRect ftr = fRect(tr) / fSize(tx.size());
 			fRect gr = fRect(_g);
 			array<float, 6 * 4> toCopy =
 			{{
@@ -175,7 +179,8 @@ bool GUIApp::drawGraphics()
 				if ((int)m_cache.size() > page && m_cache[page].fit(v.first->m_globalLayer[v.second], v))
 					break;
 				// End of cache - add a new page onto m_cache.
-				m_cache.push_back(ImageCache());
+				uSize ps(joint().display->width(), 4096);
+				m_cache.push_back(ImageCache(ps));
 			}
 		}
 		for (auto& c: m_cache)
@@ -236,7 +241,7 @@ bool GUIApp::drawGraphics()
 	}
 
 	// Cache up to date - now to composite.
-	LB_GL(glClearColor, 0, 0, 0, 0);
+	LB_GL(glClearColor, 0.f, 0.f, 0.f, 0);
 	LB_GL(glClear, GL_COLOR_BUFFER_BIT);
 	LB_GL(glViewport, 0, 0, GUIApp::joint().display->sizePixels().w(), GUIApp::joint().display->sizePixels().h());
 	joint().u_displaySize = (fVector2)(fSize)GUIApp::joint().display->sizePixels() * vec2(1, -1);
@@ -319,13 +324,14 @@ bool GUIApp::drawGraphics()
 
 	LB_GL(glBlendFunc, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	string info = textualTime(AppEngine::get()->lastDrawTime());
-	Context con(m_root->rect(), m_root->rect());
-	con.rect(iRect(m_root->rect().bottomRight() - iCoord(200, 54), iSize(190, 44)), Color(1.f, .5f));
-	fSize s = GUIApp::style().regular.measure(info);
-	GUIApp::style().regular.draw(fCoord(m_root->geometry().size() - s / 2.f - fSize(34, 34)), info, RGBA::Black);
+	iRect rr = m_root->rect();
+	Context con(rr, rr);
+	con.rect(iRect(rr.bottomRight() - iCoord(200, 54), iSize(190, 44)), Color(1.f, .5f));
+	iSize s = GUIApp::style().regular.measurePx(info);
+	GUIApp::style().regular.draw(iCoord(rr.size() - s / 2.f - iSize(34, 34)), info, RGBA::Black);
 	info = toString(g_metrics.m_useProgramCount) + "/" + toString(g_metrics.m_drawCount);
-	s = GUIApp::style().regular.measure(info);
-	GUIApp::style().regular.draw(fCoord(m_root->geometry().size() - s / 2.f - fSize(33, 14)), info, RGBA::Black);
+	s = GUIApp::style().regular.measurePx(info);
+	GUIApp::style().regular.draw(iCoord(rr.size() - s / 2.f - iSize(33, 14)), info, RGBA::Black);
 	g_metrics.reset();
 
 	return !stillDirty;
@@ -335,11 +341,11 @@ bool GUIApp::motionEvent(int _id, iCoord _pos, int _direction)
 {
 	TouchEvent* ev = nullptr;
 	if (_direction > 0)
-		ev = new TouchDownEvent(_id, _pos);
+		ev = new TouchDownEvent(_id, joint().display->fromPixels(_pos), _pos);
 	else if (_direction < 0)
-		ev = new TouchUpEvent(_id, _pos);
+		ev = new TouchUpEvent(_id, joint().display->fromPixels(_pos), _pos);
 	else if (m_pointerLock[_id])
-		ev = new TouchMoveEvent(_id, _pos);
+		ev = new TouchMoveEvent(_id, joint().display->fromPixels(_pos), _pos);
 
 	if (!ev)
 		return false;

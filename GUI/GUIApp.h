@@ -55,7 +55,7 @@ private:
 
 	struct ImageCache
 	{
-		ImageCache();
+		explicit ImageCache(uSize _ps);
 		bool fit(iRect _g, ViewLayer _v);
 
 		Framebuffer fb;

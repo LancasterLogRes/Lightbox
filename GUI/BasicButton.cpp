@@ -66,6 +66,8 @@ void BasicButtonBody::drawButton(Context const& _c, unsigned _l, bool _lit, bool
 	}
 	else if (_l == 1 && _lit)
 	{
+		if (_inner)
+			_inner(inner);
 		_c.rectOutline(inner.outset(lightWidth / 4), iMargin(lightWidth / 2), m_color);
 	}
 }

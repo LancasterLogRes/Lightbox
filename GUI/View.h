@@ -11,6 +11,7 @@
 #include <Common/Pimpl.h>
 #include <Common/Color.h>
 #include <LGL/Global.h>
+#include <LGL/Program.h>
 #include <LGL/Texture2D.h>
 #include <App/Display.h>
 #include <Common/MemberMap.h>
@@ -39,14 +40,29 @@ struct Context
 	iRect pixels(ViewBody* _v) const;
 	iSize pixels(fSize _mm) const;
 	iCoord pixels(fCoord _mm) const;
+	fSize pixelsF(fSize _mm) const;
+	fCoord pixelsF(fCoord _mm) const;
 
-	void rect(iRect _r, Color _c) const;
-	void rect(iRect _r, Color _c, float _gradient) const;
+	fCoord toDevice(fCoord _mm) const { return pixelsF(_mm) + fCoord(active.pos()); }
+
+	// Pixel functions - TODO split into proxy and px float param.
 	void rectInline(iRect _outer, iMargin _inset, Color _c) const { rectOutline(_outer.inset(_inset), _inset, _c); }
 	void rectOutline(iRect _inner, iMargin _outset, Color _c) const;
 	void text(Font const& _f, iCoord _anchor, std::string const& _text, RGBA _c = RGBA::Black) const;
-	void disc(iEllipse _r, Program const& _p) const;
-	void disc(iEllipse _r, Color _c) const;
+
+	// Pixel proxy functions.
+	void rect(iRect _r) const { pxRect(fRect(_r)); }
+	void rect(iRect _r, Color _c) const { pxRect(fRect(_r), _c); }
+	void rect(iRect _r, Color _c, float _gradient) const { pxRect(fRect(_r), _c, _gradient); }
+	void disc(iEllipse _r) const { pxDisc(fEllipse(_r)); }
+	void disc(iEllipse _r, Color _c) const { pxDisc(fEllipse(_r), _c); }
+
+	// Pixel functions that take float params.
+	void pxRect(fRect _r) const;
+	void pxRect(fRect _r, Color _c) const;
+	void pxRect(fRect _r, Color _c, float _gradient) const;
+	void pxDisc(fEllipse _r) const;
+	void pxDisc(fEllipse _r, Color _c) const;
 
 	void xRule(fRect _r, float _y, float _h, Color _c) const;
 	void yRule(fRect _r, float _x, float _w, Color _c) const;
@@ -55,17 +71,13 @@ struct Context
 	// Actually, no... - these are good for AA interiors; however naming convention needs to be
 	// made to separate pixel-level functions (currently iRect/iCoord/iEllipse) from mm-level functions
 	// (currently fRect, fCoord, fEllipse).
-	void rect(fRect _r) const;
+	void rect(fRect _r, Program const& _p = Program()) const;
 	void rect(fRect _r, Color _c) const;
-	void rect(fRect _r, Program const& _p) const;
 	void rect(fRect _r, Color _c, float _gradient) const;
-	void disc(fCoord _center, float _r) const;
-	void disc(fCoord _center, fSize _r, Color _c) const;
-	void disc(fEllipse _r, Color _c) const { disc(_r.pos(), _r.radii(), _c); }
-	void disc(fCoord _center, float _r, Color _c) const;
-	void disc(fCoord _center, float _r, Program const& _p) const;
-	void circle(fCoord _center, fSize _r, Color _c, float _size = 1.f) const;
-	void circle(fEllipse _p, Color _c, float _size = 1.f) const { circle(_p.pos(), _p.radii(), _c, _size); }
+	void disc(fEllipse _r, Color _c) const;
+	void disc(fEllipse _r, Program const& _p) const;
+	void circle(fEllipse _r, float _size, Color _c) const;
+	void circle(fEllipse _r, float _size, Program const& _p) const;
 	void blit(Texture2D const& _tex, fCoord _pos = fCoord(0, 0)) const;
 	void text(Font const& _f, fCoord _anchor, std::string const& _text, RGBA _c = RGBA::Black) const;
 };

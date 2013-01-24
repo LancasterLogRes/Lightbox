@@ -100,8 +100,8 @@ void DirectionPickerBody::draw(Context const& _c, unsigned _l)
 
 		if (m_mode == Circle || m_mode == Fill)
 		{
-			_c.circle(m_direction.transformedInto(innerMM), White, m_mode == Circle ? 2.f : 1.f);
-			_c.disc(innerMM.lerp(xC(m_lastSign.w()), yC(m_lastSign.h())), c_thumbMM, White);
+			_c.circle(m_direction.transformedInto(innerMM), m_mode == Circle ? 2.f : 1.f, White);
+			_c.disc(fEllipse(innerMM.lerp(xC(m_lastSign.w()), yC(m_lastSign.h())), c_thumbMM / 2), White);
 		}
 
 		if (m_mode == Fill)
@@ -109,13 +109,13 @@ void DirectionPickerBody::draw(Context const& _c, unsigned _l)
 
 		if (m_mode >= Circle)
 		{
-			_c.disc(innerMM.lerp(xC(-1), yC(-1)), c_thumbMM / 4, White);
-			_c.disc(innerMM.lerp(xC(-1), yC(1)), c_thumbMM / 4, White);
-			_c.disc(innerMM.lerp(xC(1), yC(-1)), c_thumbMM / 4, White);
-			_c.disc(innerMM.lerp(xC(1), yC(1)), c_thumbMM / 4, White);
+			_c.disc(fEllipse(innerMM.lerp(xC(-1), yC(-1)), c_thumbMM / 8), White);
+			_c.disc(fEllipse(innerMM.lerp(xC(-1), yC(1)), c_thumbMM / 8), White);
+			_c.disc(fEllipse(innerMM.lerp(xC(1), yC(-1)), c_thumbMM / 8), White);
+			_c.disc(fEllipse(innerMM.lerp(xC(1), yC(1)), c_thumbMM / 8), White);
 		}
 
-		_c.disc(innerMM.lerp(m_direction.pos()), c_thumbMM, White);
+		_c.disc(fEllipse(innerMM.lerp(m_direction.pos()), c_thumbMM / 2), White);
 
 		_c.rectOutline(outerPx, surroundMargin, Color(0));
 		_c.rectOutline(innerPx, lightMargin, Color(m_color.hue(), m_color.sat(), .125f));

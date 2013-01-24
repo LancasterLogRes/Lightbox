@@ -20,6 +20,7 @@ public:
 	void draw(fCoord _anchor, std::string const& _text, RGBA _c = RGBA::Black) const;
 	void draw(iCoord _anchor, std::string const& _text, RGBA _c = RGBA::Black) const;
 	fSize measure(std::string const& _text) const;
+	iSize measurePx(std::string const& _text) const;
 };
 
 }

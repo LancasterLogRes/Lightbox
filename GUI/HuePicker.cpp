@@ -49,7 +49,10 @@ void HuePickerBody::draw(Context const& _c, unsigned _l)
 	BasicButtonBody::drawButton(_c, _l, isChecked(), isDown() || isChecked(),
 	[&](iRect inner){
 		iEllipse e(inner);
-		_c.disc(e, m_hueWheel);
+		{
+			ProgramUser u(m_hueWheel);
+			_c.disc(e);
+		}
 		_c.disc(e.inset(e.radii() * 6 / 10), Color(0.f));
 		if (isChecked())
 			_c.disc(e.inset(e.radii() * 7 / 10), Color(m_hue, 1.f, 1.f));

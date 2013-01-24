@@ -24,14 +24,14 @@ iCoord Context::pixels(fCoord _mm) const
 	return GUIApp::joint().display->toPixels(_mm);
 }
 
-void Context::rect(iRect _r, Color _c) const
+fSize Context::pixelsF(fSize _mm) const
 {
-	auto vm = GUIApp::joint();
-	vm.offsetScale = fRect(_r.translated(active.pos())).asVector4();
-	vm.color = RGBA(_c);
-	ProgramUser u(vm.flat);
-	vm.flatGeometry.setData(vm.unitQuad, 2);
-	u.triangleStrip(4);
+	return GUIApp::joint().display->toPixelsF(_mm);
+}
+
+fCoord Context::pixelsF(fCoord _mm) const
+{
+	return GUIApp::joint().display->toPixelsF(_mm);
 }
 
 void Context::rectOutline(iRect _inner, iMargin _outset, Color _c) const
@@ -64,36 +64,50 @@ void Context::rectOutline(iRect _inner, iMargin _outset, Color _c) const
 	u.triangleStrip(4);
 }
 
-void Context::rect(iRect _r, Color _c, float _gradient) const
+void Context::pxRect(fRect _r) const
 {
 	auto vm = GUIApp::joint();
-	vm.offsetScale = fRect(_r.translated(active.pos())).asVector4();
-	vm.color = RGBA(_c);
-	vm.gradient = _gradient;
-	ProgramUser u(vm.shaded);
-	vm.shadedGeometry.setData(vm.unitQuad, 2);
+	vm.offsetScale = _r.translated(fCoord(active.pos())).asVector4();
+	ProgramUser u;
+	u.attrib("geometry").setData(vm.unitQuad, 2);
 	u.triangleStrip(4);
+}
+
+void Context::pxRect(fRect _r, Color _c) const
+{
+	GUIApp::joint().color = RGBA(_c);
+	ProgramUser u(GUIApp::joint().flat);
+	pxRect(_r);
+}
+
+void Context::pxRect(fRect _r, Color _c, float _gradient) const
+{
+	GUIApp::joint().color = RGBA(_c);
+	GUIApp::joint().gradient = _gradient;
+	ProgramUser u(GUIApp::joint().shaded);
+	pxRect(_r);
+}
+
+void Context::pxDisc(fEllipse _e) const
+{
+	auto vm = GUIApp::joint();
+	fCoord c = _e.middle() + fCoord(active.pos());
+	vm.offsetScale = fVector4(c.x(), c.y(), _e.rx(), _e.ry());
+	ProgramUser u;
+	u.attrib("geometry").setData(vm.unitCircle72, 2);
+	u.triangleFan(74);
+}
+
+void Context::pxDisc(fEllipse _e, Color _c) const
+{
+	GUIApp::joint().color = RGBA(_c);
+	ProgramUser u(GUIApp::joint().flat);
+	pxDisc(_e);
 }
 
 void Context::text(Font const& _f, iCoord _anchor, std::string const& _text, RGBA _c) const
 {
 	_f.draw(_anchor + active.pos(), _text, _c);
-}
-
-void Context::disc(iEllipse _e, Program const& _p) const
-{
-	auto vm = GUIApp::joint();
-	iCoord c = _e.middle() + active.pos();
-	vm.offsetScale = fVector4(c.x(), c.y(), _e.rx(), _e.ry());
-	ProgramUser u(_p);
-	_p.attrib("geometry").setData(vm.unitCircle72, 2);
-	u.triangleFan(74);
-}
-
-void Context::disc(iEllipse _e, Color _c) const
-{
-	GUIApp::joint().color = RGBA(_c);
-	disc(_e, GUIApp::joint().flat);
 }
 
 void Context::xRule(fRect _r, float _y, float _h, Color _c) const
@@ -106,97 +120,62 @@ void Context::yRule(fRect _r, float _x, float _w, Color _c) const
 	rect(_r.lerp(_x, 0, _x, 1).outset(_w / 2, 0), _c);
 }
 
-void Context::rect(fRect _r, Color _c) const
-{
-	auto vm = GUIApp::joint();
-	vm.offsetScale = _r.translated(offset).asVector4();
-	vm.color = RGBA(_c);
-	ProgramUser u(vm.flat);
-	vm.flatGeometry.setData(vm.unitQuad, 2);
-	u.triangleStrip(4);
-}
-
 void Context::rect(fRect _r, Program const& _p) const
 {
-	auto vm = GUIApp::joint();
-	vm.offsetScale = _r.translated(offset).asVector4();
+	fCoord c = toDevice(_r.pos());
+	fSize s = pixelsF(_r.size());
+	GUIApp::joint().offsetScale = fVector4(c.x(), c.y(), s.w(), s.h());
 	ProgramUser u(_p);
-	_p.attrib("geometry").setData(vm.unitQuad, 2);
+	u.attrib("geometry").setData(GUIApp::joint().unitQuad, 2);
 	u.triangleStrip(4);
 }
 
-void Context::rect(fRect _r) const
+void Context::rect(fRect _r, Color _c) const
 {
-	auto vm = GUIApp::joint();
-	vm.offsetScale = _r.translated(offset).asVector4();
-	ProgramUser u;
-	u.attrib("geometry").setData(vm.unitQuad, 2);
-	u.triangleStrip(4);
+	GUIApp::joint().color = RGBA(_c);
+	rect(_r, GUIApp::joint().flat);
 }
 
-void Context::disc(fCoord _center, float _r, Color _c) const
+void Context::rect(fRect _r, Color _c, float _gradient) const
 {
-	auto vm = GUIApp::joint();
-	fCoord c = _center + offset;
-	vm.offsetScale = fVector4(c.x(), c.y(), _r, _r);
-	vm.color = RGBA(_c);
-	ProgramUser u(vm.flat);
-	vm.flatGeometry.setData(vm.unitCircle72, 2);
-	u.triangleFan(74);
+	GUIApp::joint().color = RGBA(_c);
+	GUIApp::joint().gradient = _gradient;
+	rect(_r, GUIApp::joint().shaded);
 }
 
-void Context::disc(fCoord _center, fSize _r, Color _c) const
+void Context::disc(fEllipse _e, Color _c) const
 {
-	auto vm = GUIApp::joint();
-	fCoord c = _center + offset;
-	vm.offsetScale = fVector4(c.x(), c.y(), _r.w(), _r.h());
-	vm.color = RGBA(_c);
-	ProgramUser u(vm.flat);
-	vm.flatGeometry.setData(vm.unitCircle72, 2);
-	u.triangleFan(74);
+	GUIApp::joint().color = RGBA(_c);
+	disc(_e, GUIApp::joint().flat);
 }
 
-void Context::circle(fCoord _center, fSize _r, Color _c, float _size) const
+void Context::disc(fEllipse _e, Program const& _p) const
 {
 	auto vm = GUIApp::joint();
-	fCoord c = _center + offset;
-	vm.offsetScale = fVector4(c.x(), c.y(), _r.w(), _r.h());
-	vm.color = RGBA(_c);
-	LB_GL(glLineWidth, _size);
-	ProgramUser u(vm.flat);
-	vm.flatGeometry.setData(vm.unitCircle72, 2, 0, 8);
-	u.lineLoop(72);
-}
-
-void Context::disc(fCoord _center, float _r, Program const& _p) const
-{
-	auto vm = GUIApp::joint();
-	fCoord c = _center + offset;
-	vm.offsetScale = fVector4(c.x(), c.y(), _r, _r);
+	fCoord c = toDevice(_e.center());
+	fSize s = pixelsF(_e.radii());
+	vm.offsetScale = fVector4(c.x(), c.y(), s.w(), s.h());
 	ProgramUser u(_p);
 	_p.attrib("geometry").setData(vm.unitCircle72, 2);
 	u.triangleFan(74);
 }
 
-void Context::disc(fCoord _center, float _r) const
+void Context::circle(fEllipse _e, float _size, Color _c) const
 {
-	auto vm = GUIApp::joint();
-	fCoord c = _center + offset;
-	vm.offsetScale = fVector4(c.x(), c.y(), _r, _r);
-	ProgramUser u;
-	u.attrib("geometry").setData(vm.unitCircle72, 2);
-	u.triangleFan(74);
+	GUIApp::joint().color = RGBA(_c);
+	circle(_e, _size, GUIApp::joint().flat);
 }
 
-void Context::rect(fRect _r, Color _c, float _gradient) const
+void Context::circle(fEllipse _e, float _size, Program const& _p) const
 {
 	auto vm = GUIApp::joint();
-	vm.offsetScale = _r.translated(offset).asVector4();
-	vm.color = RGBA(_c);
-	vm.gradient = _gradient;
-	ProgramUser u(vm.shaded);
-	vm.shadedGeometry.setData(vm.unitQuad, 2);
-	u.triangleStrip(4);
+	fCoord c = toDevice(_e.center());
+	fSize s = pixelsF(_e.radii());
+	vm.offsetScale = fVector4(c.x(), c.y(), s.w(), s.h());
+	glLineWidth(_size);
+	ProgramUser u(_p);
+	_p.attrib("geometry").setData(vm.unitCircle72, 2, 0, 8);
+	u.lineLoop(72);
 }
 
 void Context::text(Font const& _f, fCoord _anchor, std::string const& _text, RGBA _c) const
