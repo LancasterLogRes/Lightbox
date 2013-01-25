@@ -29,10 +29,14 @@ GUIApp::GUIApp()
 	m_style.fore = Color(.5f);
 	m_style.back = Color(0.f);
 	m_style.high = Color(1.f);
+	m_style.big = Font(20, FontDefinition("Ubuntu", false));
+	m_style.bigBold = Font(20, FontDefinition("Ubuntu", true));
 	m_style.regular = Font(15, FontDefinition("Ubuntu", false));
 	m_style.bold = Font(15, FontDefinition("Ubuntu", true));
 	m_style.small = Font(10, FontDefinition("Ubuntu", false));
 	m_style.smallBold = Font(10, FontDefinition("Ubuntu", true));
+	m_style.thumbSize = fSize(40, 40);
+	m_style.thumbOutline = 2;
 }
 
 GUIApp::~GUIApp()
@@ -328,10 +332,10 @@ bool GUIApp::drawGraphics()
 	iRect rr = m_root->rect();
 	Context con(rr, rr);
 	con.rect(iRect(rr.bottomRight() - iCoord(200, 54), iSize(190, 44)), Color(1.f, .5f));
-	iSize s = GUIApp::style().regular.measurePx(info);
+	iSize s = (iSize)GUIApp::style().regular.measurePx(info).size();
 	GUIApp::style().regular.draw(iCoord(rr.size() - s / 2.f - iSize(34, 34)), info, RGBA::Black);
 	info = toString(g_metrics.m_useProgramCount) + "/" + toString(g_metrics.m_drawCount);
-	s = GUIApp::style().regular.measurePx(info);
+	s = (iSize)GUIApp::style().regular.measurePx(info).size();
 	GUIApp::style().regular.draw(iCoord(rr.size() - s / 2.f - iSize(33, 14)), info, RGBA::Black);
 	g_metrics.reset();
 

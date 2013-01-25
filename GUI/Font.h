@@ -4,13 +4,27 @@
 #include <Common/Pimpl.h>
 #include <Common/Global.h>
 #include <Common/RGBA.h>
-#include <Numeric/Coord.h>
+#include <Common/Flags.h>
+#include <Numeric/Rect.h>
 #include "Global.h"
 
 namespace Lightbox
 {
 
 LIGHTBOX_STRUCT(2, FontDefinition, std::string, family, bool, bold);
+
+enum AnchorFlags
+{
+	AtCenter = 0,
+	AtTop = 1,
+	AtBottom = 2,
+	AtBaseline = 4,
+	AtLeft = 16,
+	AtRight = 32,
+	TightVertical = 256
+};
+
+LIGHTBOX_FLAGS_TYPE(AnchorFlags, AnchorType);
 
 class BakedFont;
 typedef std::shared_ptr<BakedFont> BakedFontPtr;
@@ -26,10 +40,10 @@ public:
 	FontDefinition const& definition() const { return m_definition; }
 	float mmSize() const { return m_mm; }
 
-	void draw(fCoord _anchor, std::string const& _text, RGBA _c = RGBA::Black) const;
-	void draw(iCoord _anchor, std::string const& _text, RGBA _c = RGBA::Black) const;
-	fSize measure(std::string const& _text) const;
-	iSize measurePx(std::string const& _text) const;
+	void draw(fCoord _anchor, std::string const& _text, RGBA _c = RGBA::Black, AnchorType _t = AtCenter) const;
+	void draw(iCoord _anchor, std::string const& _text, RGBA _c = RGBA::Black, AnchorType _t = AtCenter) const;
+	fRect measure(std::string const& _text, bool _tight = false) const;
+	fRect measurePx(std::string const& _text, bool _tight = false) const;
 
 	bool isValid() const { return m_mm > 0; }
 	bool isNull() const { return m_mm == 0; }

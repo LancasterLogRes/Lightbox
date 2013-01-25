@@ -83,7 +83,6 @@ void DirectionPickerBody::draw(Context const& _c, unsigned _l)
 	iRect outerPx = surroundPx.inset(surroundMargin);
 	iRect innerPx = outerPx.inset(lightMargin);
 
-	static const fSize c_thumbMM(20, 20);
 	fRect innerMM(GUIApp::joint().display->fromPixels(innerPx));
 
 	if (_l == 0)
@@ -98,24 +97,28 @@ void DirectionPickerBody::draw(Context const& _c, unsigned _l)
 		_c.xRule(innerMM, .5f, 2, m_color.attenuated(.5f));
 		_c.yRule(innerMM, .5f, 2, m_color.attenuated(.5f));
 
-		if (m_mode == Circle || m_mode == Fill)
-		{
-			_c.circle(m_direction.transformedInto(innerMM), m_mode == Circle ? 2.f : 1.f, White);
-			_c.disc(fEllipse(innerMM.lerp(xC(m_lastSign.w()), yC(m_lastSign.h())), c_thumbMM / 2), White);
-		}
-
 		if (m_mode == Fill)
 			_c.disc(m_direction.transformedInto(innerMM), Color(1.f, .5f));
 
+		if (m_mode == Circle || m_mode == Fill)
+			_c.circle(m_direction.transformedInto(innerMM), m_mode == Circle ? 2.f : 1.f, m_color);
+
 		if (m_mode >= Circle)
 		{
-			_c.disc(fEllipse(innerMM.lerp(xC(-1), yC(-1)), c_thumbMM / 8), White);
-			_c.disc(fEllipse(innerMM.lerp(xC(-1), yC(1)), c_thumbMM / 8), White);
-			_c.disc(fEllipse(innerMM.lerp(xC(1), yC(-1)), c_thumbMM / 8), White);
-			_c.disc(fEllipse(innerMM.lerp(xC(1), yC(1)), c_thumbMM / 8), White);
+			_c.disc(fEllipse(innerMM.lerp(xC(-1), yC(-1)), GUIApp::style().thumbSize / 8), m_color);
+			_c.disc(fEllipse(innerMM.lerp(xC(-1), yC(1)), GUIApp::style().thumbSize / 8), m_color);
+			_c.disc(fEllipse(innerMM.lerp(xC(1), yC(-1)), GUIApp::style().thumbSize / 8), m_color);
+			_c.disc(fEllipse(innerMM.lerp(xC(1), yC(1)), GUIApp::style().thumbSize / 8), m_color);
 		}
 
-		_c.disc(fEllipse(innerMM.lerp(m_direction.pos()), c_thumbMM / 2), White);
+		if (m_mode == Circle || m_mode == Fill)
+		{
+			_c.disc(fEllipse(innerMM.lerp(xC(m_lastSign.w()), yC(m_lastSign.h())), GUIApp::style().thumbSize / 2 + GUIApp::style().thumbOutline), White);
+			_c.disc(fEllipse(innerMM.lerp(xC(m_lastSign.w()), yC(m_lastSign.h())), GUIApp::style().thumbSize / 2), m_color);
+		}
+
+		_c.disc(fEllipse(innerMM.lerp(m_direction.pos()), GUIApp::style().thumbSize / 2 + GUIApp::style().thumbOutline), White);
+		_c.disc(fEllipse(innerMM.lerp(m_direction.pos()), GUIApp::style().thumbSize / 2), m_color);
 
 		_c.rectOutline(outerPx, surroundMargin, Color(0));
 		_c.rectOutline(innerPx, lightMargin, Color(m_color.hue(), m_color.sat(), .125f));

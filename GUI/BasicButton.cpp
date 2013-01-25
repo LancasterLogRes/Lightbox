@@ -58,7 +58,7 @@ void BasicButtonBody::drawButton(Context const& _c, unsigned _l, bool _lit, bool
 		if (_inner)
 			_inner(inner);
 		else
-			_c.text(GUIApp::style().bold, inner.lerp(.5f, .5f), boost::algorithm::to_upper_copy(m_text), Color(m_color.hue(), m_color.sat() * .75f, 1.f).toRGBA());
+			_c.text(GUIApp::style().bigBold, inner.lerp(.5f, .5f), boost::algorithm::to_upper_copy(m_text), Color(m_color.hue(), m_color.sat() * .75f, 1.f).toRGBA());
 		if (!_down && _polish)
 		{
 			_c.rect(inner.lerp(0, 0, 1, .35f), Color(1.f, .05f));
@@ -114,5 +114,5 @@ void BasicButtonBody::tapped()
 fSize BasicButtonBody::specifyMinimumSize(fSize) const
 {
 	// Until Fonts work without renderer.
-	return GUIApp::get() ? GUIApp::style().bold.measure(m_text) : fSize(0, 0);
+	return GUIApp::get() ? GUIApp::style().bold.measure(m_text).size() : fSize(0, 0);
 }

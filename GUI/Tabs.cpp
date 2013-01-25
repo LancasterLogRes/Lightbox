@@ -47,7 +47,7 @@ bool TabsBody::event(Event* _e)
 	return Super::event(_e);
 }
 
-void TabsBody::draw(Context const& _c)
+void TabsBody::draw(Context const& _c, unsigned)
 {
 	if (children().size())
 	{
@@ -68,14 +68,14 @@ void TabsBody::draw(Context const& _c)
 				iMargin sm(selRectPx.width(), selRectPx.height(), selRectPx.width(), 0);
 				iRect usefulTab = tabPx.inset(m);
 //				_c.rect(usefulTab.inset(sm), White);
-				_c.text(GUIApp::style().bold, usefulTab.lerp(.5f, .5f), title, RGBA(1.f));
+				_c.text(GUIApp::style().bigBold, usefulTab.lerp(.5f, .5f), title, RGBA(1.f));
 			}
 			else
 			{
 				iRect usefulTabPx = tabPx.inset(0, 0, 0, tailSizePx.height());
 				_c.rect(usefulTabPx, Color(.1f), -.1f);
 				_c.rect(usefulTabPx.lerp(0, .35f, 1, 1), Color(0.f, .2f));
-				_c.text(GUIApp::style().regular, usefulTabPx.lerp(.5f, .5f), title, RGBA(.5f));
+				_c.text(GUIApp::style().big, usefulTabPx.lerp(.5f, .5f), title, RGBA(.5f));
 			}
 			tab.translate(fSize(tab.w(), 0));
 		}

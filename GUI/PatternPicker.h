@@ -22,6 +22,7 @@ public:
 	void setSpace(uSize _s) { m_space = _s; update(); }
 	void setIndex(int _i, bool _userEvent = false) { if (m_index != _i) { m_index = _i; indexChanged(_userEvent); } }
 	void setOnIndexChanged(EventHandler const& _t) { m_onIndexChanged = _t; }
+	void setMiddle(Color _c) { if (m_middle != _c) { m_middle = _c; update(); } }
 
 	PatternPicker withOnIndexChanged(EventHandler const& _t) { setOnIndexChanged(_t); return this; }
 
@@ -36,6 +37,7 @@ protected:
 private:
 	int m_index;
 	uSize m_space;
+	Color m_middle;
 	EventHandler m_onIndexChanged;
 };
 

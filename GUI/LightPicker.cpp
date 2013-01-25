@@ -41,36 +41,34 @@ bool LightPickerBody::event(Event* _e)
 	return Super::event(_e);
 }
 
-static const fSize c_thumbMM(20, 20);
-static const float c_thumbOutlineMM = 1;
 static const float c_innerMM = 10;
 
-void LightPickerBody::draw(Context const& _c)
+void LightPickerBody::draw(Context const& _c, unsigned)
 {
-	fRect outer = fRect(fSize(c_thumbMM.width(), geometry().height()));
-	fRect inner = outer.inset((c_thumbMM.w() - c_innerMM) / 2, c_thumbMM.h() / 2);
+	fRect outer = fRect(fSize(GUIApp::style().thumbSize.w(), geometry().h()));
+	fRect inner = outer.inset((GUIApp::style().thumbSize.w() - c_innerMM) / 2, GUIApp::style().thumbSize.h() / 2);
 	{
 		ProgramUser u(m_lightBar);
 		auto top = u.uniform("topColor");
 		auto bottom = u.uniform("bottomColor");
+		RGBA rgba(Color(HSLSpace, m_middle.hue(), 1, 0.5f));
 
 		top = RGBA(1.f, 1.f, 1.f, 1.f);
-		bottom = RGBA(m_middle);
+		bottom = rgba;
 		_c.rect(inner.lerp(0, 0, 1, .5f));
 
-		top = RGBA(m_middle);
+		top = rgba;
 		bottom = RGBA(0.f, 0.f, 0.f, 1.f);
 		_c.rect(inner.lerp(0, 0.5f, 1, 1));
 	}
 
-	fEllipse thumb(inner.lerp(.5f, 1.f - m_light), c_thumbMM / 2);
+	fEllipse thumb(inner.lerp(.5f, 1.f - m_light), GUIApp::style().thumbSize / 2);
 	_c.disc(thumb, White);
 
-	Color c = Color(m_middle.hue(), m_middle.sat() == 0.f ? 0.f : clamp(2.f - m_light * 2.f, 0.f, 1.f), m_middle.sat() == 0.f ? m_light : clamp(m_light * 2.f, 0.f, 1.f));
-	_c.disc(thumb.inset(c_thumbOutlineMM), c);
+	_c.disc(thumb.inset(GUIApp::style().thumbOutline), Color(HSLSpace, m_middle.hue(), 1, m_light));
 }
 
 fSize LightPickerBody::specifyFit(fSize _space) const
 {
-	return fSize(c_thumbMM.width(), _space.height());
+	return fSize(GUIApp::style().thumbSize.width(), _space.height());
 }

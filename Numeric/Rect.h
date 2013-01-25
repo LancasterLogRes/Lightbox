@@ -79,12 +79,19 @@ public:
 	Rect outset(Numeric _l, Numeric _t, Numeric _r, Numeric _b) const { return outset(xMargin(_l, _t, _r, _b)); }
 	Rect outset(xMargin _m) const { return Rect(m_pos.x() - _m.left(), m_pos.y() - _m.top(), m_size.w() + _m.left() + _m.right(), m_size.h() + _m.top() + _m.bottom()); }
 
+	Rect multipliedBy(Numeric _s) const { return Rect(m_pos * _s, m_size * _s); }
+	Rect multipliedBy(xSize _s) const { return Rect(m_pos * _s, m_size * _s); }
+	Rect dividedBy(Numeric _s) const { return Rect(m_pos / _s, m_size / _s); }
 	Rect dividedBy(xSize _s) const { return Rect(m_pos / _s, m_size / _s); }
 
 	Rect operator+(Numeric _f) const { return outset(_f); }
 	Rect operator-(Numeric _f) const { return inset(_f); }
+	Rect operator*(Numeric _s) const { return multipliedBy(_s); }
+	Rect operator*(xSize _s) const { return multipliedBy(_s); }
+	Rect operator/(Numeric _s) const { return dividedBy(_s); }
 	Rect operator/(xSize _s) const { return dividedBy(_s); }
-	bool contains(xCoord const& _p) const { return _p >= m_pos && _p <= bottomRight(); }
+	bool contains(xCoord _p) const { return _p >= m_pos && _p <= bottomRight(); }
+	void include(xCoord _p) { Coord<Numeric> br = bottomRight().max(_p); Coord<Numeric> tl = m_pos.minify(_p); m_size = br - tl; }
 	// TODO
 	bool inside(Rect const&) const { return true; }
 

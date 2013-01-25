@@ -37,7 +37,7 @@ namespace Lightbox
 class Color;
 typedef std::vector<Color> Colors;
 
-enum ColorSpace { RGBASpace, RGBSpace, RGBA8Space, RGB8Space };
+enum ColorSpace { RGBASpace, RGBSpace, RGBA8Space, RGB8Space, HSLSpace };
 
 class Color
 {
@@ -71,7 +71,7 @@ public:
 	Color& attenuate(float _x) { m_value *= _x; return *this; }
 	Color attenuated(float _x) const { return Color(m_hue, m_sat, m_value * _x, m_alpha); }
 
-	void convertFrom(ColorSpace _cc, float _x, float _y, float _z, float _w = 0.f);
+	void convertFrom(ColorSpace _cc, float _x, float _y = 0.f, float _z = 0.f, float _w = 0.f);
 	fVector4 convertTo(ColorSpace _cc) const;
 
 	RGBA toRGBA() const { return (RGBA&&)convertTo(RGBASpace); }

@@ -46,16 +46,20 @@ bool HuePickerBody::event(Event* _e)
 
 void HuePickerBody::draw(Context const& _c, unsigned _l)
 {
-	BasicButtonBody::drawButton(_c, _l, isChecked(), isDown() || isChecked(),
-	[&](iRect inner){
+	BasicButtonBody::drawButton(_c, _l, isChecked(), isDown() || isChecked(), [&](iRect inner)
+	{
+		iSize thumbPx = _c.toPixels(GUIApp::style().thumbSize / 2 + GUIApp::style().thumbOutline);
 		iEllipse e(inner);
 		{
 			ProgramUser u(m_hueWheel);
-			_c.disc(e);
+			_c.disc(e.inset(thumbPx / 2));
 		}
-		_c.disc(e.inset(e.radii() * 6 / 10), Color(0.f));
+		_c.disc(e.inset(thumbPx * 3 / 2), Black);
+
+		iCoord p = e.pos() + iSize(fSize(-sin(m_hue * TwoPi), -cos(m_hue * TwoPi)) * fSize(e.radii() - thumbPx));
+		_c.disc(iEllipse(p, thumbPx), isChecked() ? White : Black);
 		if (isChecked())
-			_c.disc(e.inset(e.radii() * 7 / 10), Color(m_hue, 1.f, 1.f));
+			_c.disc(iEllipse(p, _c.toPixels(GUIApp::style().thumbSize / 2)), m_middle.withHue(m_hue));
 	}, false);
 	return;
 }

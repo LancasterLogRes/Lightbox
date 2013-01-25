@@ -25,7 +25,7 @@ protected:
 	TabsBody();
 	
 	virtual bool event(Event* _e);
-	virtual void draw(Context const& _c);
+	virtual void draw(Context const& _c, unsigned);
 	
 private:
 	using ViewCreator::setLayout;

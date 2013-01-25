@@ -31,13 +31,12 @@ bool PatternPickerBody::event(Event* _e)
 
 void PatternPickerBody::draw(Context const& _c, unsigned _layer)
 {
-	static const fSize c_thumbMM(20, 20);
-
 	drawButton(_c, _layer, isChecked(), isDown() || isChecked(),
 	[&](iRect oinner)
 	{
-		fSize thumbPx = _c.pixelsF(c_thumbMM);
-		fRect inner = fRect(oinner).inset(thumbPx / 2);
+		fSize thumbOutPx = _c.pixelsF(GUIApp::style().thumbSize / 2 + GUIApp::style().thumbOutline);
+		fSize thumbPx = _c.pixelsF(GUIApp::style().thumbSize / 2);
+		fRect inner = fRect(oinner).inset(thumbPx);
 
 		fSize spacing(inner.size() / ((fSize)m_space - fSize(1, 1)));
 		int i = 0;
@@ -47,10 +46,13 @@ void PatternPickerBody::draw(Context const& _c, unsigned _layer)
 				fCoord p = inner.pos() + fSize(x, y) * spacing;
 				if (isChecked() && m_index == i)
 					if (_layer == 1)
-						_c.pxDisc(fEllipse(p, thumbPx / 2), color());
+					{
+						_c.pxDisc(fEllipse(p, thumbOutPx), White);
+						_c.pxDisc(fEllipse(p, thumbPx), color());
+					}
 					else {}
 				else if (_layer == 0)
-					_c.pxRect(fRect::square(p, min(spacing.w(), spacing.h()) / 6.f), Color(0.25f));
+					_c.pxRect(fRect::square(p, min(spacing.w(), spacing.h()) / 6.f), color().attenuated(.25f));
 			}
 	}, false);
 }

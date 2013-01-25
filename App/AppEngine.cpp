@@ -65,6 +65,8 @@ void AppEngine::startActivity(string const& _app, string const& _intent, functio
 	mEnv->CallVoidMethod(appClassObj, mid, mEnv->NewStringUTF(url));
 	appClassObj = m_androidApp->NewGlobalRef(thiz);*/
 #else
+	(void)_app;
+	(void)_intent;
 	_onDone();
 #endif
 

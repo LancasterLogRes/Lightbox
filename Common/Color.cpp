@@ -43,6 +43,7 @@ void Color::convertFrom(ColorSpace _cc, float _x, float _y, float _z, float _w)
 		m_alpha = _w;
 	case RGBSpace:
 	case RGB8Space:
+	{
 		float m = min(_x, min(_y, _z));
 		m_value = max(_x, max(_y, _z));
 		float c = m_value - m;
@@ -63,6 +64,12 @@ void Color::convertFrom(ColorSpace _cc, float _x, float _y, float _z, float _w)
 			if (m_hue > 1.f)
 				m_hue -= 1.f;
 		}
+		break;
+	}
+	case HSLSpace:
+		m_hue = _x;
+		m_sat = _x >= 0 ? _y * clamp(2.f - _z * 2.f, 0.f, 1.f) : 0.f;
+		m_value = _x >= 0 ? lerp(_y, _z, clamp(_z * 2.f, 0.f, 1.f)) : _z;
 		break;
 	}
 }

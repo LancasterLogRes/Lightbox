@@ -34,14 +34,16 @@ public:
 	static This average(This const& p0, This const& p1) { return This((p0.x() + p1.x()) / 2.0, (p0.y() + p1.y()) / 2.0, (p0.z() + p1.z()) / 2.0, (p0.w() + p1.w()) / 2.0); }
 	static This average(This const& p0, This const& p1, This const& p2) { return This((p0.x() + p1.x() + p2.x()) / 3.0, (p0.y() + p1.y() + p2.y()) / 3.0, (p0.z() + p1.z() + p2.z()) / 3.0, (p0.w() + p1.w() + p2.w()) / 3.0); }
 
-	void sum(T _n) { m_x += _n; m_y += _n; m_z += _n; m_w += _n; }
-	void sub(T _n) { m_x -= _n; m_y -= _n; m_z -= _n; m_w -= _n; }
-	void scale(T _n) { m_x *= _n; m_y *= _n; m_z *= _n; m_w *= _n; }
-	void slash(T _n) { m_x /= _n; m_y /= _n; m_z /= _n; m_w /= _n; }
-	void sum(This _n) { m_x += _n.m_x; m_y += _n.m_y; m_z += _n.m_z; m_w += _n.m_w; }
-	void sub(This _n) { m_x -= _n.m_x; m_y -= _n.m_y; m_z -= _n.m_z; m_w -= _n.m_w; }
-	void scale(This _n) { m_x *= _n.m_x; m_y *= _n.m_y; m_z *= _n.m_z; m_w *= _n.m_w; }
-	void slash(This _n) { m_x /= _n.m_x; m_y /= _n.m_y; m_z /= _n.m_z; m_w /= _n.m_w; }
+	This& sum(T _n) { m_x += _n; m_y += _n; m_z += _n; m_w += _n; return *this; }
+	This& sub(T _n) { m_x -= _n; m_y -= _n; m_z -= _n; m_w -= _n; return *this; }
+	This& scale(T _n) { m_x *= _n; m_y *= _n; m_z *= _n; m_w *= _n; return *this; }
+	This& slash(T _n) { m_x /= _n; m_y /= _n; m_z /= _n; m_w /= _n; return *this; }
+	This& sum(This _n) { m_x += _n.m_x; m_y += _n.m_y; m_z += _n.m_z; m_w += _n.m_w; return *this; }
+	This& sub(This _n) { m_x -= _n.m_x; m_y -= _n.m_y; m_z -= _n.m_z; m_w -= _n.m_w; return *this; }
+	This& scale(This _n) { m_x *= _n.m_x; m_y *= _n.m_y; m_z *= _n.m_z; m_w *= _n.m_w; return *this; }
+	This& slash(This _n) { m_x /= _n.m_x; m_y /= _n.m_y; m_z /= _n.m_z; m_w /= _n.m_w; return *this; }
+	This& minify(This _n) { m_x = std::min(m_x, _n.m_x); m_y = std::min(m_y, _n.m_y); m_z = std::min(m_z, _n.m_z); m_w = std::min(m_w, _n.m_w); return *this; }
+	This& maxify(This _n) { m_x = std::max(m_x, _n.m_x); m_y = std::max(m_y, _n.m_y); m_z = std::max(m_z, _n.m_z); m_w = std::max(m_w, _n.m_w); return *this; }
 
 	This summed(T _n) const { return This(m_x + _n, m_y + _n, m_z + _n, m_w + _n); }
 	This subbed(T _n) const { return This(m_x - _n, m_y - _n, m_z - _n, m_w - _n); }
@@ -51,6 +53,8 @@ public:
 	This subbed(This _n) const { return This(m_x - _n.m_x, m_y - _n.m_y, m_z - _n.m_z, m_w - _n.m_w); }
 	This scaled(This _n) const { return This(m_x * _n.m_x, m_y * _n.m_y, m_z * _n.m_z, m_w * _n.m_w); }
 	This slashed(This _n) const { return This(m_x / _n.m_x, m_y / _n.m_y, m_z / _n.m_z, m_w / _n.m_w); }
+	This min(This _n) const { return This(std::min(m_x, _n.m_x), std::min(m_y, _n.m_y), std::min(m_z, _n.m_z), std::min(m_w, _n.m_w)); }
+	This max(This _n) const { return This(std::max(m_x, _n.m_x), std::max(m_y, _n.m_y), std::max(m_z, _n.m_z), std::max(m_w, _n.m_w)); }
 
 	template<typename _T> void setX(_T _x) { m_x = _x; }
 	template<typename _T> void setY(_T _y) { m_y = _y; }

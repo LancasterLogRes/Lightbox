@@ -132,7 +132,7 @@ android {
         }
         isEmpty(ANDROID_JAVA_SOURCES) {
             QMAKE_POST_LINK += mv '"$${OBJECTS_DIR}wrap/AndroidManifest.xml"' '"$${OBJECTS_DIR}wrap/AndroidManifest.xml.tmp"' && \
-                sed '\'s/<application android:label="@string/app_name">/<application android:label="@string/app_name" android:hasCode="false">/\'' '"$${OBJECTS_DIR}wrap/AndroidManifest.xml.tmp"' > '"$${OBJECTS_DIR}wrap/AndroidManifest.xml"' &&
+				sed '\'s|<application android:label="@string/app_name">|<application android:label="@string/app_name" android:hasCode="false">|\'' '"$${OBJECTS_DIR}wrap/AndroidManifest.xml.tmp"' > '"$${OBJECTS_DIR}wrap/AndroidManifest.xml"' &&
         }
         QMAKE_POST_LINK += \
             echo '\'<?xml version="1.0" encoding="utf-8"?><resources><string name="app_name">$${TARGET}</string></resources>\'' > '$${OBJECTS_DIR}wrap/res/values/strings.xml' &&\

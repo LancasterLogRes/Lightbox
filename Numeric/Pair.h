@@ -36,6 +36,9 @@ public:
 	This& scale(This _n) { m_x *= _n.m_x; m_y *= _n.m_y; return *this; }
 	This& slash(This _n) { m_x /= _n.m_x; m_y /= _n.m_y; return *this; }
 
+	This& minify(This _n) { m_x = std::min(m_x, _n.m_x); m_y = std::min(m_y, _n.m_y); return *this; }
+	This& maxify(This _n) { m_x = std::max(m_x, _n.m_x); m_y = std::max(m_y, _n.m_y); return *this; }
+
 	This summed(T _n) const { return This(m_x + _n, m_y + _n); }
 	This subbed(T _n) const { return This(m_x - _n, m_y - _n); }
 	This scaled(T _n) const { return This(m_x * _n, m_y * _n); }
@@ -45,6 +48,9 @@ public:
 	This subbed(This _n) const { return This(m_x - _n.m_x, m_y - _n.m_y); }
 	This scaled(This _n) const { return This(m_x * _n.m_x, m_y * _n.m_y); }
 	This slashed(This _n) const { return This(m_x / _n.m_x, m_y / _n.m_y); }
+
+	This min(This _n) const { return This(std::min(m_x, _n.m_x), std::min(m_y, _n.m_y)); }
+	This max(This _n) const { return This(std::max(m_x, _n.m_x), std::max(m_y, _n.m_y)); }
 
 	void setX(T _x) { m_x = _x; }
 	void setY(T _y) { m_y = _y; }
@@ -93,6 +99,8 @@ public:
 	using Super::slash;
 	using Super::min;
 	using Super::max;
+	using Super::minify;
+	using Super::maxify;
 
 	R& clamp(T _min, T _max) { return Super::clamp(_min, _max); }
 	R clamped(T _min, T _max) const { return Super::clamped(_min, _max); }

@@ -17,11 +17,6 @@ bool FrameBody::event(Event* _e)
 	return Super::event(_e);
 }
 
-void FrameBody::draw(Context const& _c)
-{
-	Super::draw(_c);
-}
-
 View Lightbox::operator|(View const& _a, View const& _b)
 {
 	if (!!_a->children().size() == !!_b->children().size())

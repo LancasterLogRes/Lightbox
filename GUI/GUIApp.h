@@ -16,10 +16,14 @@ struct Style
 	Color back;		// usually similar hue to fore, but dark and desaturated.
 	Color fore;		// usually fairly bright and vibrant.
 	Color high;		// usually complimentary to fore.
+	Font big;
+	Font bigBold;
 	Font regular;
 	Font bold;
 	Font small;
 	Font smallBold;
+	fSize thumbSize;
+	float thumbOutline;
 };
 
 class GUIApp: public App

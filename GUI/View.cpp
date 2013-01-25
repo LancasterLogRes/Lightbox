@@ -9,27 +9,22 @@
 using namespace std;
 using namespace Lightbox;
 
-iRect Context::pixels(ViewBody* _v) const
-{
-	return iRect(iCoord(0, 0), _v->m_globalRect.size());
-}
-
-iSize Context::pixels(fSize _mm) const
+iSize Context::toPixels(fSize _mm) const
 {
 	return GUIApp::joint().display->toPixels(_mm);
 }
 
-iCoord Context::pixels(fCoord _mm) const
+iCoord Context::toPixels(fCoord _mm) const
 {
 	return GUIApp::joint().display->toPixels(_mm);
 }
 
-fSize Context::pixelsF(fSize _mm) const
+fSize Context::toPixelsF(fSize _mm) const
 {
 	return GUIApp::joint().display->toPixelsF(_mm);
 }
 
-fCoord Context::pixelsF(fCoord _mm) const
+fCoord Context::toPixelsF(fCoord _mm) const
 {
 	return GUIApp::joint().display->toPixelsF(_mm);
 }
@@ -348,7 +343,7 @@ bool ViewBody::gatherDrawers(std::vector<pair<ViewBody*, unsigned> >& _l, unsign
 	return ret;
 }
 
-void ViewBody::draw(Context const&)
+void ViewBody::draw(Context const&, unsigned)
 {
 }
 

@@ -16,30 +16,24 @@ BakedFontPtr Font::getBaked() const
 	}
 }
 
-void Font::draw(fCoord _anchor, std::string const& _text, RGBA _c) const
+void Font::draw(fCoord _anchor, std::string const& _text, RGBA _c, AnchorType _t) const
 {
 	if (auto b = getBaked())
-		b->draw(_anchor, _text, _c);
+		b->draw(_anchor, _text, _c, _t);
 }
 
-void Font::draw(iCoord _anchor, std::string const& _text, RGBA _c) const
+void Font::draw(iCoord _anchor, std::string const& _text, RGBA _c, AnchorType _t) const
 {
 	if (auto b = getBaked())
-		b->draw(fCoord(_anchor), _text, _c);
+		b->draw(fCoord(_anchor), _text, _c, _t);
 }
 
-fSize Font::measure(std::string const& _text) const
+fRect Font::measure(std::string const& _text, bool _tight) const
 {
-	if (auto b = getBaked())
-		return b->measure(_text);
-	else
-		return fSize(0, 0);
+	return GUIApp::fontManager().getInfo(m_definition).measure(_text, m_mm, _tight);
 }
 
-iSize Font::measurePx(std::string const& _text) const
+fRect Font::measurePx(std::string const& _text, bool _tight) const
 {
-	if (auto b = getBaked())
-		return (iSize)b->measure(_text);
-	else
-		return iSize(0, 0);
+	return GUIApp::fontManager().getInfo(m_definition).measure(_text, GUIApp::joint().display->toUnalignedPixels(fSize(0, m_mm)).h(), _tight);
 }

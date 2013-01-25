@@ -12,21 +12,41 @@
 #include "Global.h"
 #include "Font.h"
 
+struct stbtt_fontinfo;
+
 namespace Lightbox
 {
+
+class BakedFont;
+
+class FontInfo
+{
+	friend class BakedFont;
+
+public:
+	FontInfo() {}
+	FontInfo(foreign_vector<uint8_t const> const& _ttfData);
+
+	fRect measure(std::string const& _text, float _size, bool _tight = false) const;
+
+private:
+	foreign_vector<uint8_t const> m_data;
+	std::shared_ptr<stbtt_fontinfo> m_info;
+};
 
 class BakedFont
 {
 public:
-	BakedFont(Font const& _f, uint8_t const* _ttfData);
+	BakedFont(Font const& _f, FontInfo const& _info);
 	~BakedFont();
 	
-	fSize measure(std::string const& _text) const;
-	void draw(fCoord _anchor, std::string const& _text, RGBA _c);
+	void draw(fCoord _anchor, std::string const& _text, RGBA _c, AnchorType _anchorType);
+	fRect measurePx(std::string const& _text) const;
+	fRect measureMm(std::string const& _text) const;
 
 private:
 	Font m_f;
-	float m_pxSize;
+	FontInfo m_info;
 
 	Program m_program;
 	Attrib m_index;
@@ -35,6 +55,7 @@ private:
 	Attrib m_size;
 	Uniform m_color;
 	Uniform m_tex;
+	Uniform m_texSize;
 
 	void* m_charData;
 	Texture2D m_texture;

@@ -16,7 +16,7 @@ class Coord: public CalcPair<Numeric, Coord<Numeric> >
 	typedef CalcPair<Numeric, Coord<Numeric> > Super;
 
 public:
-	Coord() {}
+	Coord(): Super(0, 0) {}
 	Coord(Pair<Numeric> _q): Super(_q) {}
 	Coord(Numeric _x, Numeric _y): Super(_x, _y) {}
 
@@ -59,7 +59,7 @@ class Size: public CalcPair<Numeric, Size<Numeric> >
 	typedef CalcPair<Numeric, Size<Numeric> > Super;
 
 public:
-	Size() {}
+	Size(): Super(0, 0) {}
 	Size(Pair<Numeric> _q): Super(_q) {}
 	Size(Numeric _w, Numeric _h): Super(_w, _h) {}
 

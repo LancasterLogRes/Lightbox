@@ -37,11 +37,15 @@ struct Context
 
 	iSize offsetPixels() const { return iSize(canvas.left(), canvas.top()); }
 
-	iRect pixels(ViewBody* _v) const;
-	iSize pixels(fSize _mm) const;
-	iCoord pixels(fCoord _mm) const;
-	fSize pixelsF(fSize _mm) const;
-	fCoord pixelsF(fCoord _mm) const;
+	iSize pixels(fSize _mm) const { return toPixels(_mm); }
+	iCoord pixels(fCoord _mm) const { return toPixels(_mm); }
+	fSize pixelsF(fSize _mm) const { return toPixelsF(_mm); }
+	fCoord pixelsF(fCoord _mm) const { return toPixelsF(_mm); }
+
+	iSize toPixels(fSize _mm) const;
+	iCoord toPixels(fCoord _mm) const;
+	fSize toPixelsF(fSize _mm) const;
+	fCoord toPixelsF(fCoord _mm) const;
 
 	fCoord toDevice(fCoord _mm) const { return pixelsF(_mm) + fCoord(active.pos()); }
 
@@ -259,8 +263,7 @@ protected:
 	bool pointerLocked(int _id);
 
 	virtual std::vector<iMargin> prepareDraw() { return std::vector<iMargin>(1); }
-	virtual void draw(Context const& _c, unsigned _layer) { (void)_layer; draw(_c); }
-	virtual void draw(Context const& _c);
+	virtual void draw(Context const& _c, unsigned _layer);
 	virtual bool event(Event*) { return false; }
 	virtual void resized() { m_visibleLayoutChanged = true; relayout(); update(); }
 	virtual void shownChanged() { m_visibleLayoutChanged = true; update(); }

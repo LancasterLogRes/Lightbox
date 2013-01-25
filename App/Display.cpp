@@ -27,8 +27,8 @@ using namespace Lightbox;
 #elif !defined(LIGHTBOX_CROSS)
 #endif
 
-int c_defaultWidth = 1200;
-int c_defaultHeight = 720;
+int c_defaultWidth = 1440;
+int c_defaultHeight = 800;
 int c_defaultWidthMM = 800;
 int c_defaultHeightMM = 480;
 

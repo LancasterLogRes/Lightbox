@@ -21,4 +21,4 @@ HEADERS += \
 # TODO: make it work for debug/release
 QMAKE_EXTRA_TARGETS += deploy
 deploy.depends = $$RELATIVE_DESTDIR/$(TARGET)
-deploy.commands = $$ANDROID_SDK_PATH/platform-tools/adb install -r $$DESTDIR/TestGUI.apk && $$ANDROID_SDK_PATH/platform-tools/adb shell am start -n com.example.testgui/.TestGUI
+deploy.commands = $$ANDROID_SDK_PATH/platform-tools/adb install -r $$DESTDIR/TestGUI.apk && $$ANDROID_SDK_PATH/platform-tools/adb shell am start -n com.lancasterlogicresponse.wrapper/.NativeActivity
