@@ -63,9 +63,8 @@ void LightPickerBody::draw(Context const& _c, unsigned)
 	}
 
 	fEllipse thumb(inner.lerp(.5f, 1.f - m_light), GUIApp::style().thumbSize / 2);
-	_c.disc(thumb, White);
-
-	_c.disc(thumb.inset(GUIApp::style().thumbOutline), Color(HSLSpace, m_middle.hue(), 1, m_light));
+	_c.disc(thumb.outset(GUIApp::style().thumbOutline), GUIApp::style().outlineColor);
+	_c.disc(thumb, Color(HSLSpace, m_middle.hue(), 1, m_light));
 }
 
 fSize LightPickerBody::specifyFit(fSize _space) const

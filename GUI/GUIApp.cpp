@@ -31,12 +31,13 @@ GUIApp::GUIApp()
 	m_style.high = Color(1.f);
 	m_style.big = Font(20, FontDefinition("Ubuntu", false));
 	m_style.bigBold = Font(20, FontDefinition("Ubuntu", true));
-	m_style.regular = Font(15, FontDefinition("Ubuntu", false));
-	m_style.bold = Font(15, FontDefinition("Ubuntu", true));
-	m_style.small = Font(10, FontDefinition("Ubuntu", false));
-	m_style.smallBold = Font(10, FontDefinition("Ubuntu", true));
+	m_style.regular = Font(17, FontDefinition("Ubuntu", false));
+	m_style.bold = Font(17, FontDefinition("Ubuntu", true));
+	m_style.small = Font(13, FontDefinition("Ubuntu", false));
+	m_style.smallBold = Font(13, FontDefinition("Ubuntu", true));
 	m_style.thumbSize = fSize(40, 40);
 	m_style.thumbOutline = 2;
+	m_style.outlineColor = Black;
 }
 
 GUIApp::~GUIApp()

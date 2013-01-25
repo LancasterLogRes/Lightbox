@@ -24,6 +24,7 @@ struct Style
 	Font smallBold;
 	fSize thumbSize;
 	float thumbOutline;
+	Color outlineColor;
 };
 
 class GUIApp: public App

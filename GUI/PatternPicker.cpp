@@ -47,7 +47,7 @@ void PatternPickerBody::draw(Context const& _c, unsigned _layer)
 				if (isChecked() && m_index == i)
 					if (_layer == 1)
 					{
-						_c.pxDisc(fEllipse(p, thumbOutPx), White);
+						_c.pxDisc(fEllipse(p, thumbOutPx), GUIApp::style().outlineColor);
 						_c.pxDisc(fEllipse(p, thumbPx), color());
 					}
 					else {}
