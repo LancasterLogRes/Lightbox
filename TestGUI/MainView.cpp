@@ -35,6 +35,7 @@ private:
 
 		_c.blit(m_baseTex);
 		_c.blit(m_glowTex, fCoord(0, 256));
+//		_c.blit(m_sglowTex, fCoord(0, 512));
 	}
 
 	virtual void initGraphics()
@@ -62,6 +63,11 @@ private:
 		m_vblur = Program(Shader::vertex(LB_RES(Blur_glsl, vblur.vert)), Shader::fragment(LB_RES(Blur_glsl, blur.frag)));
 		m_vblur.tie(GUIApp::joint().uniforms);
 		m_glowTex = filter(filter(tex, m_hblur), m_vblur);
+/*		m_shblur = Program(Shader::vertex(LB_RES(Blur_glsl, shblur.vert)), Shader::fragment(LB_RES(Blur_glsl, sblur.frag)));
+		m_shblur.tie(GUIApp::joint().uniforms);
+		m_svblur = Program(Shader::vertex(LB_RES(Blur_glsl, svblur.vert)), Shader::fragment(LB_RES(Blur_glsl, sblur.frag)));
+		m_svblur.tie(GUIApp::joint().uniforms);
+		m_sglowTex = filter(filter(tex, m_shblur), m_svblur);*/
 	}
 
 	Texture2D filter(Texture2D const& _in, Program const& _p)
@@ -107,8 +113,11 @@ private:
 
 	Program m_hblur;
 	Program m_vblur;
+	Program m_shblur;
+	Program m_svblur;
 	Texture2D m_baseTex;
 	Texture2D m_glowTex;
+	Texture2D m_sglowTex;
 };
 
 MainView::MainView()

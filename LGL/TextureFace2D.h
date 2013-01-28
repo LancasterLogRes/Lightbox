@@ -12,7 +12,7 @@ namespace Lightbox
 class TextureFace2D: public boost::noncopyable
 {
 public:
-	TextureFace2D() { LB_GL(glGenTextures, 1, &m_id); }
+	TextureFace2D(): m_sampling(GL_LINEAR) { LB_GL(glGenTextures, 1, &m_id); }
 	~TextureFace2D() { LB_GL(glDeleteTextures, 1, &m_id); }
 
 	GLuint id() const { return m_id; }
@@ -25,11 +25,14 @@ public:
 	void activate(unsigned _unit) const;
 	void deactivate(unsigned _unit) const;
 
+	void setSampling(GLenum _s = GL_LINEAR) { m_sampling = _s; }
+
 	void viewport() const { LB_GL(glViewport, 0, 0, m_dims.w(), m_dims.h()); }
 
 private:
 	uSize m_dims;
 	GLuint m_id;
+	GLenum m_sampling;
 };
 
 std::pair<uSize, foreign_vector<uint8_t> > readPng(std::function<void(uint8_t*, size_t)> const& _read);

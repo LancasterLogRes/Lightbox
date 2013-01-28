@@ -20,6 +20,8 @@ public:
 	void activate(uint _unit) const { if (m_p) m_p->activate(_unit); }
 	void deactivate(uint _unit) const { if (m_p) m_p->deactivate(_unit); }
 
+	void setSampling(GLenum _sampling = GL_LINEAR) { if (m_p) m_p->setSampling(_sampling); }
+
 	void framebufferColor(unsigned _index = 0, unsigned _level = 0) { if (m_p) m_p->framebufferColor(_index, _level); }
 	void viewport() { if (m_p) m_p->viewport(); }
 
