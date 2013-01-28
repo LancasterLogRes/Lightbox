@@ -295,7 +295,7 @@ void ViewBody::setParent(View const& _p)
 	}
 }
 
-bool ViewBody::gatherDrawers(std::vector<pair<ViewBody*, unsigned> >& _l, unsigned _layer, fCoord _o, bool _ancestorVisibleLayoutChanged)
+bool ViewBody::gatherDrawers(std::vector<ViewLayer>& _l, unsigned _layer, fCoord _o, bool _ancestorVisibleLayoutChanged)
 {
 	vector<iMargin> overdraw = prepareDraw();
 	if (m_overdraw.size() != overdraw.size())
@@ -329,7 +329,7 @@ bool ViewBody::gatherDrawers(std::vector<pair<ViewBody*, unsigned> >& _l, unsign
 		// If we're going to draw, we need to flag ourselves as visible-layout-changed if us or
 		// any of our ancestors have had their layout visibly changed.
 		m_visibleLayoutChanged = _ancestorVisibleLayoutChanged;
-		_l += make_pair((ViewBody*)this, 0u);
+		_l += ViewLayer((ViewBody*)this, 0u);
 	}
 	else
 		// If it can't be reset by the compositor because it's not in the view tree, then we'll

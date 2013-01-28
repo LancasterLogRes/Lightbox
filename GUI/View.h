@@ -113,6 +113,15 @@ template <class _T> _T& operator<<(_T& _out, View const& _v)
 	return _out;
 }
 
+template <class _T> _T& operator<<(_T& _out, ViewBody* _v)
+{
+	if (_v)
+		_out << toString(View(_v));
+	else
+		_out << "(ViewBody*)0";
+	return _out;
+}
+
 /* Inheriting a new type of View:
  * - Always inherit from ViewCreator<SuperView, ThisView>
  * - No getter method for event handlers.
@@ -132,6 +141,8 @@ template <class _T> _T& operator<<(_T& _out, View const& _v)
  */
 
 static unsigned const c_viewLayerCount = 2;
+
+LIGHTBOX_STRUCT(2, ViewLayer, ViewBody*, view, unsigned, layer);
 
 class ViewBody: public boost::noncopyable
 {
@@ -279,7 +290,7 @@ protected:
 private:
 	void checkCache();
 	void cleanCache();
-	bool gatherDrawers(std::vector<std::pair<ViewBody*, unsigned> >& _l, unsigned _layer, fCoord _o = fCoord(0, 0), bool _ancestorVisibileLayoutChanged = false);
+	bool gatherDrawers(std::vector<ViewLayer>& _l, unsigned _layer, fCoord _o = fCoord(0, 0), bool _ancestorVisibileLayoutChanged = false);
 
 	void executeDraw(Context const& _c, unsigned _layer);
 	void initGraphicsRecursive() { if (!m_graphicsInitialized) { initGraphics(); m_graphicsInitialized = true; } for (auto const& c: m_children) c->initGraphicsRecursive(); }

@@ -269,13 +269,14 @@ int32_t AppEngine::handleInput(AInputEvent* _event)
 			}
 			break;
 		case AMOTION_EVENT_ACTION_MOVE:
+
 			for (index = 0; index < 5; ++index)
 			{
 				id = AMotionEvent_getPointerId(_event, index);
 				if (id >= 0 && id < 5)
 				{
 					c = iCoord(AMotionEvent_getX(_event, index), AMotionEvent_getY(_event, index));
-					if (c != m_pointerState[index] && c.x() + c.y() > 4 && c.x() + c.y() < 2000 && (m_pointerState[index] - c).length() < 150)	//arbitrary limits to reduce blips on shitty touchscreens.
+					if (c != m_pointerState[index] && c.x() + c.y() > 4 && m_display && c.x() < (int)m_display->width() && c.y() < (int)m_display->height() && (m_pointerState[index] - c).length() < m_display->sizePixels().length() / 6)	//arbitrary limits to reduce blips on shitty touchscreens.
 					{
 						cnote << "(" << id << "[" << index << "] move" << m_pointerState[id] << "->" << c << ")";
 						break;

@@ -54,13 +54,7 @@ private:
 	Style m_style;
 	FontManager m_fontManager;
 
-	typedef std::pair<ViewBody*, unsigned> ViewLayer;
-
-	struct CachePos
-	{
-		uRect pos;
-		unsigned index;
-	};
+	LIGHTBOX_STRUCT(2, CachePos, uRect, pos, unsigned, index);
 
 	struct ImageCache
 	{
@@ -77,8 +71,16 @@ private:
 	};
 	std::vector<ImageCache> m_cache;
 
+	template <class _S> friend _S& operator<<(_S& _out, ImageCache const& _ic);
+
 	std::array<View, s_maxPointers> m_pointerLock;
 };
+
+template <class _S> _S& operator<<(_S& _out, GUIApp::ImageCache const& _ic)
+{
+	_out << _ic.vs;
+	return _out;
+}
 
 }
 

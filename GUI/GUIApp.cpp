@@ -159,10 +159,10 @@ bool GUIApp::drawGraphics()
 		unsigned vi = 0;
 		for (ViewLayer v: drawers)
 			if (l == 0)
-				activeLayers = max<unsigned>(activeLayers, v.first->m_overdraw.size());
-			else if (l < v.first->m_overdraw.size())
+				activeLayers = max<unsigned>(activeLayers, v.view->m_overdraw.size());
+			else if (l < v.view->m_overdraw.size())
 			{
-				drawers.push_back(make_pair(v.first, l));
+				drawers.push_back(ViewLayer(v.view, l));
 				++vi;
 				if (vi == firstLayerDrawers)
 					break;
@@ -176,72 +176,75 @@ bool GUIApp::drawGraphics()
 
 		for (ViewLayer v: drawers)
 		{
-			v.first->m_layerDirty[v.second] = true;
-			v.first->m_visibleLayoutChanged = false;
+			v.view->m_layerDirty[v.layer] = true;
+			v.view->m_visibleLayoutChanged = false;
 			while (true)
 			{
-				int page = max(0, int(m_cache.size()) - 1);
 				// assuming page is valid, try to find a position in m_cache[page] and put it into pos...
-				if ((int)m_cache.size() > page && m_cache[page].fit(v.first->m_globalLayer[v.second], v))
+				if (m_cache.size() && m_cache.back().fit(v.view->m_globalLayer[v.layer], v))
 					break;
 				// End of cache - add a new page onto m_cache.
-				uSize ps(joint().display->width(), 4096);
+				uSize ps(joint().display->width(), joint().display->height());
 				m_cache.push_back(ImageCache(ps));
 			}
 		}
-		for (auto& c: m_cache)
+		for (auto& cache: m_cache)
 		{
-			c.geom = Buffer<float>(c.collated);
-			c.collated.clear();
+			cache.geom = Buffer<float>(cache.collated);
+			cache.collated.clear();
 		}
 	}
 
 	vector< vector<ViewLayer> > renderToFramebuffer(m_cache.size());
-	if (find_if(drawers.begin(), drawers.end(), [&](ViewLayer v){ return v.first->m_layerDirty[v.second]; }) != drawers.end())
+	if (find_if(drawers.begin(), drawers.end(), [&](ViewLayer v){ return v.view->m_layerDirty[v.layer]; }) != drawers.end())
 	{
 		// At least one dirty drawer - set up for render-to-texture and rerender dirty parts.
 		LB_GL(glBlendFunc, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		LB_GL(glClearColor, 0.f, 0.f, 0.f, 0.f);
 		LB_GL(glEnable, GL_SCISSOR_TEST);
 
-		unsigned ci = 0;
-		for (auto& c: m_cache)
+		unsigned cacheIndex = 0;
+		for (auto& cache: m_cache)
 		{
 			bool willRenderToTexture = false;
-			for (auto const& v: c.vs)
+			for (auto const& i: cache.vs)
 			{
-				if (v.first.first->m_layerDirty[v.first.second] && v.first.first->m_readyForCache[v.first.second])
+				ViewLayer v = i.first;
+				if (v.view->m_layerDirty[v.layer] && v.view->m_readyForCache[v.layer])
 					willRenderToTexture = true;
-				else if (v.first.first->m_layerDirty[v.first.second])
+				else if (v.view->m_layerDirty[v.layer])
 				{
-					renderToFramebuffer[ci] += v.first;
-					v.first.first->m_readyForCache[v.first.second] = stillDirty = true;
+					renderToFramebuffer[cacheIndex] += v;
+					v.view->m_readyForCache[v.layer] = stillDirty = true;
 				}
 			}
 
-			sort(renderToFramebuffer[ci].begin(), renderToFramebuffer[ci].end(), [&](ViewLayer a, ViewLayer b) { return c.vs[a].index < c.vs[b].index; });
+			sort(renderToFramebuffer[cacheIndex].begin(), renderToFramebuffer[cacheIndex].end(), [&](ViewLayer a, ViewLayer b) { return cache.vs[a].index < cache.vs[b].index; });
 
 			if (willRenderToTexture)
 			{
-				FramebufferUser u(c.fb);
-				for (auto const& v: c.vs)
-					if (v.first.first->m_layerDirty[v.first.second])
+				FramebufferUser u(cache.fb);
+				for (auto const& i: cache.vs)
+				{
+					ViewLayer v = i.first;
+					if (v.view->m_layerDirty[v.layer])
 					{
-						uRect texRect = v.second.pos;
+						uRect texRect = i.second.pos;
 						LB_GL(glViewport, texRect.x(), texRect.y(), texRect.w(), texRect.h());
 						LB_GL(glScissor, texRect.x(), texRect.y(), texRect.w(), texRect.h());
 						LB_GL(glClear, GL_COLOR_BUFFER_BIT);
 						GUIApp::joint().u_displaySize = (vec2)(fSize)texRect.size();
-						assert((iSize)texRect.size() == v.first.first->m_globalLayer[v.first.second].size());
+						assert((iSize)texRect.size() == v.view->m_globalLayer[v.layer].size());
 						iRect canvas(iCoord(0, 0), (iSize)texRect.size());
-						Context con(canvas.inset(v.first.first->m_overdraw[v.first.second]), canvas);
-						v.first.first->executeDraw(con, v.first.second);
-						if (!v.first.first->m_isEnabled)
+						Context con(canvas.inset(v.view->m_overdraw[v.layer]), canvas);
+						v.view->executeDraw(con, v.layer);
+						if (!v.view->m_isEnabled)
 							con.rect(canvas, Color(0.f, .5f));
-						v.first.first->m_layerDirty[v.first.second] = false;
+						v.view->m_layerDirty[v.layer] = false;
 					}
+				}
 			}
-			ci++;
+			cacheIndex++;
 		}
 		LB_GL(glDisable, GL_SCISSOR_TEST);
 	}
@@ -255,73 +258,73 @@ bool GUIApp::drawGraphics()
 		if (stillDirty)
 		{
 			// geometry is guaranteed to be in composite-draw-order.
-			unsigned ci = 0;
-			for (auto& c: m_cache)
+			unsigned cacheIndex = 0;
+			for (auto& cache: m_cache)
 			{
 				unsigned next = 0;
-				for (ViewLayer v: renderToFramebuffer[ci])
+				for (ViewLayer v: renderToFramebuffer[cacheIndex])
 				{
-					assert(c.vs.count(v));
-					CachePos const& cp = c.vs[v];
+					assert(cache.vs.count(v));
+					CachePos const& cp = cache.vs[v];
 					// render all before
 					if (next < cp.index)
 					{
 						LB_GL(glBlendFunc, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 						ProgramUser u(m_joint.texture);
-						u.uniform("u_tex") = c.tx;
-						u.attrib("a_texCoordPosition").setData(c.geom, 4, 0, 6 * 4 * next * sizeof(float));
+						u.uniform("u_tex") = cache.tx;
+						u.attrib("a_texCoordPosition").setData(cache.geom, 4, 0, 6 * 4 * next * sizeof(float));
 						u.triangles((cp.index - next) * 6);
 					}
 
 					// draw our view directly to framebuffer.
 					LB_GL(glBlendFunc, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-					auto globalLayer = v.first->m_globalLayer[v.second];
-					Context c(v.first->m_globalRect, globalLayer);
-					c.offset = joint().display->fromPixels(v.first->m_globalRect).topLeft();
+					auto globalLayer = v.view->m_globalLayer[v.layer];
+					Context c(v.view->m_globalRect, globalLayer);
+					c.offset = joint().display->fromPixels(v.view->m_globalRect).topLeft();
 					LB_GL(glEnable, GL_SCISSOR_TEST);
 					LB_GL(glScissor, globalLayer.x(), joint().display->sizePixels().h() - globalLayer.bottom(), globalLayer.w(), globalLayer.h());
-					v.first->executeDraw(c, v.second);
+					v.view->executeDraw(c, v.layer);
 					iRect canvas(iCoord(0, 0), globalLayer.size());
-					if (!v.first->m_isEnabled && v.second == 0)
+					if (!v.view->m_isEnabled && v.layer == 0)
 						c.rect(canvas, Color(0.f, .5f));
 					LB_GL(glDisable, GL_SCISSOR_TEST);
 					next = cp.index + 1;
 				}
 
 				// render from next to end.
-				if (next < c.vs.size())
+				if (next < cache.vs.size())
 				{
 					LB_GL(glBlendFunc, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 					ProgramUser u(m_joint.texture);
-					u.uniform("u_tex") = c.tx;
-					u.attrib("a_texCoordPosition").setData(c.geom, 4, 0, 6 * 4 * next * sizeof(float));
-					u.triangles((c.vs.size() - next) * 6);
+					u.uniform("u_tex") = cache.tx;
+					u.attrib("a_texCoordPosition").setData(cache.geom, 4, 0, 6 * 4 * next * sizeof(float));
+					u.triangles((cache.vs.size() - next) * 6);
 				}
+				cacheIndex++;
 			}
 		}
 		else
 		{
 			LB_GL(glEnable, GL_SCISSOR_TEST);
 			LB_GL(glBlendFunc, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-			for (auto& c: m_cache)
+			for (auto& cache: m_cache)
 			{
 				vector<ViewLayer> views;
-				views.reserve(c.vs.size());
-				for (auto const& vv: c.vs)
-					views.push_back(vv.first);
-				sort(views.begin(), views.end(), [&](ViewLayer a, ViewLayer b) { return c.vs[a].index < c.vs[b].index; });
+				views.reserve(cache.vs.size());
+				for (auto const& vp: cache.vs)
+					views.push_back(vp.first);
+				sort(views.begin(), views.end(), [&](ViewLayer a, ViewLayer b) { return cache.vs[a].index < cache.vs[b].index; });
 				for (auto const& v: views)
 				{
 					// draw our view directly to framebuffer.
-					auto globalLayer = v.first->m_globalLayer[v.second];
-					Context c(v.first->m_globalRect, globalLayer);
-					c.offset = joint().display->fromPixels(v.first->m_globalRect).topLeft();
+					auto globalLayer = v.view->m_globalLayer[v.layer];
+					Context c(v.view->m_globalRect, globalLayer);
+					c.offset = joint().display->fromPixels(v.view->m_globalRect).topLeft();
 					LB_GL(glScissor, globalLayer.x(), joint().display->sizePixels().h() - globalLayer.bottom(), globalLayer.w(), globalLayer.h());
-					v.first->executeDraw(c, v.second);
+					v.view->executeDraw(c, v.layer);
 					iRect canvas(iCoord(0, 0), globalLayer.size());
-					if (!v.first->m_isEnabled && v.second == 0)
+					if (!v.view->m_isEnabled && v.layer == 0)
 						c.rect(canvas, Color(0.f, .5f));
-					cnote << View(v.first) << globalLayer << v.second;
 				}
 			}
 			LB_GL(glDisable, GL_SCISSOR_TEST);

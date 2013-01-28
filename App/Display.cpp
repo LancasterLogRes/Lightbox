@@ -206,8 +206,30 @@ Lightbox::Display::Display()
 #endif
 
 #if LIGHTBOX_ANDROID
-	m_widthMM = m_width;
-	m_heightMM = m_height;
+	if (m_width == 2560)
+	{
+		// Nexus 10
+		m_widthMM = 800;
+		m_heightMM = 480;
+	}
+	else if (m_width == 1024)
+	{
+		// 4:3 Scroll elite
+		m_widthMM = 800;
+		m_heightMM = 600;
+	}
+	else if (m_width == 800)
+	{
+		// Icoo
+		m_widthMM = 800;
+		m_heightMM = 480;
+	}
+	else
+	{
+		m_widthMM = m_width;
+		m_heightMM = m_height;
+	}
+
 #else
 	m_widthMM = c_defaultWidthMM;
 	m_heightMM = c_defaultHeightMM;

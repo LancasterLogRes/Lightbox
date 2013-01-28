@@ -95,6 +95,10 @@ public:
 	// TODO
 	bool inside(Rect const&) const { return true; }
 
+	bool operator==(Rect const& _c) const { return m_pos == _c.m_pos && m_size == _c.m_size; }
+	bool operator!=(Rect const& _c) const { return !operator==(_c); }
+	bool operator<(Rect const& _c) const { return inside(_c); }
+
 private:
 	xCoord m_pos;
 	xSize m_size;
