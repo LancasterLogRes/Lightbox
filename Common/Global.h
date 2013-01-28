@@ -382,6 +382,9 @@ public:
 };
 
 #define LB_R(X) foreign_vector<uint8_t const>(X, X ## _len)
+#define LB_RES(X, N) Lightbox::subresource(foreign_vector<uint8_t const>(X, X ## _len), #N)
+
+foreign_vector<uint8_t const> subresource(foreign_vector<uint8_t const> _data, std::string const& _name);
 
 template <bool _AutoSpacing = true>
 class SysLogOutputStream

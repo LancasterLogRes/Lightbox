@@ -52,7 +52,7 @@ AppEngine::~AppEngine()
 void AppEngine::startActivity(string const& _app, string const& _intent, function<void()> const& _onDone)
 {
 #if LIGHTBOX_ANDROID
-	char const* args[] = { "/system/bin/am", "start", "-a", _intent.c_str(), _app.c_str() };
+	char const* args[] = { "/system/bin/am", "start", "-a", _intent.c_str(), _app.c_str(), nullptr };
 	cnote << "executing " << args[0] << args[1] << args[2] << args[3] << args[4];
 	if (!fork())
 	{
@@ -69,7 +69,18 @@ void AppEngine::startActivity(string const& _app, string const& _intent, functio
 	(void)_intent;
 	_onDone();
 #endif
+}
 
+void AppEngine::killSystemBar()
+{
+#if LIGHTBOX_ANDROID
+	char const* args[] = { "-c", "service call activity 42 s16 com.android.systemui", nullptr };
+	if (!fork())
+	{
+		execvp("su", (char**)args);
+		exit(0);
+	}
+#endif
 }
 
 void AppEngine::setApp(App* _app)
@@ -276,7 +287,7 @@ int32_t AppEngine::handleInput(AInputEvent* _event)
 				if (id >= 0 && id < 5)
 				{
 					c = iCoord(AMotionEvent_getX(_event, index), AMotionEvent_getY(_event, index));
-					if (c != m_pointerState[index] && c.x() + c.y() > 4 && m_display && c.x() < (int)m_display->width() && c.y() < (int)m_display->height() && (m_pointerState[index] - c).length() < m_display->sizePixels().length() / 6)	//arbitrary limits to reduce blips on shitty touchscreens.
+					if (c != m_pointerState[index] && c.x() + c.y() > 4 && m_display && c.x() < (int)m_display->width() && c.y() < (int)m_display->height() && (m_pointerState[index] - c).length() < (int)m_display->sizePixels().length() / 6)	//arbitrary limits to reduce blips on shitty touchscreens.
 					{
 						cnote << "(" << id << "[" << index << "] move" << m_pointerState[id] << "->" << c << ")";
 						break;

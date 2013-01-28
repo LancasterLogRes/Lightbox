@@ -68,7 +68,7 @@ void ProgramFace::use(shared_ptr<ProgramFace> const& _this) const
 	if (s_idInUse != m_id)
 	{
 		LB_GL(glUseProgram, m_id);
-		g_metrics.m_useProgramCount++;
+		g_metrics.incUseProgram();
 		s_idInUse = m_id;
 	}
 

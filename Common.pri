@@ -61,9 +61,19 @@ outputs {
 
 message ( "TEMPLATE:" $$TEMPLATE "TARGET:" $$TARGET "PROJECT: $$PROJECT_NAME/$$SUBPROJECT_NAME" "CONFIG:" $$find(CONFIG, (outputs)|(pi)|(amd)|(android)|(x86)|(native)|(cross)) "PWD:" $$PWD "OUT_PWD:" $$OUT_PWD "IN_PWD:" $$IN_PWD "DESTDIR:" $$DESTDIR)
 
+final {
+	QMAKE_CXXFLAGS += -DFINAL
+	DEFINES += LIGHTBOX_FINAL
+	CONFIG += release
+}
+profile {
+	QMAKE_CXXFLAGS += -g3 -pg -DPROFILE
+	QMAKE_LFLAGS += -pg
+	DEFINES += LIGHTBOX_PROFILE
+	CONFIG += release
+}
 release {
 	CONFIG += ndebug
-	profile: QMAKE_CXXFLAGS += -g3
 	!profile: QMAKE_CXXFLAGS += -g0 -fomit-frame-pointer -Wl,-strip-all
 	QMAKE_CXXFLAGS += -DRELEASE -O2
 }
@@ -71,10 +81,6 @@ debug {
 	CONFIG -= ndebug
 	QMAKE_CXXFLAGS += -DDEBUG -g3 -fno-inline -O0 -Wall
 	!win32: QMAKE_CXXFLAGS += -fPIC
-}
-profile {
-    QMAKE_CXXFLAGS += -pg
-    QMAKE_LFLAGS += -pg
 }
 
 pi {
@@ -96,6 +102,20 @@ resource_compiler.depend_command = cat ${QMAKE_FILE_IN}
 resource_compiler.CONFIG += target_predeps
 resource_compiler.name = RESOURCE_COMPILER
 QMAKE_EXTRA_COMPILERS += resource_compiler
+inline_resource_compiler.output = $${OUT_PWD}/${QMAKE_FILE_IN_BASE}.c $${OUT_PWD}/${QMAKE_FILE_IN_BASE}.h
+inline_resource_compiler.input = LB_RES
+inline_resource_compiler.commands = \
+	echo ${QMAKE_FILE_IN} ${QMAKE_FILE_IN_BASE} && \
+	rm -f $${OUT_PWD}/${QMAKE_FILE_IN_BASE}.c $${OUT_PWD}/${QMAKE_FILE_IN_BASE}.h &&\
+	cd ${QMAKE_FILE_IN_PATH} &&\
+	xxd -i ${QMAKE_FILE_IN_BASE}${QMAKE_FILE_EXT} >> $${OUT_PWD}/${QMAKE_FILE_IN_BASE}.c &&\
+	echo extern unsigned int ${QMAKE_FILE_IN_BASE}${QMAKE_FILE_EXT}_len\\; | sed s/\\\\./_/ >> $${OUT_PWD}/${QMAKE_FILE_IN_BASE}.h &&\
+	echo extern unsigned char ${QMAKE_FILE_IN_BASE}${QMAKE_FILE_EXT}[]\\; | sed s/\\\\./_/ >> $${OUT_PWD}/${QMAKE_FILE_IN_BASE}.h
+inline_resource_compiler.variable_out = SOURCES
+inline_resource_compiler.depend_command = cat ${QMAKE_FILE_IN}
+inline_resource_compiler.CONFIG += target_predeps
+inline_resource_compiler.name = RESOURCE_COMPILER
+QMAKE_EXTRA_COMPILERS += inline_resource_compiler
 
 android {
     TOOLCHAIN_PATH = "$$ANDROID_NDK_PATH/toolchains/arm-linux-androideabi-$$ANDROID_TOOLCHAIN_VERSION/prebuilt/linux-x86/bin/"

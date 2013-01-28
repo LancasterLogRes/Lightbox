@@ -41,6 +41,7 @@ public:
 	Display& display() { return *m_display; }
 
 	void startActivity(std::string const& _application, std::string const& _intent, std::function<void()> const& _onDone);
+	void killSystemBar();
 
 	Time lastDrawTime() const { return m_lastDrawTime; }
 

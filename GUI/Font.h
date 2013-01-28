@@ -29,12 +29,20 @@ LIGHTBOX_FLAGS_TYPE(AnchorFlags, AnchorType);
 class BakedFont;
 typedef std::shared_ptr<BakedFont> BakedFontPtr;
 
+enum Metric
+{
+	ByPixels = 0,
+	ByMillis
+};
+
 class Font
 {
 public:
 	Font(): m_mm(0) {}
 	Font(float _mm, std::string _family, bool _bold = false): Font(_mm, FontDefinition(_family, _bold)) {}
-	Font(float _mm, FontDefinition const& _d): m_definition(_d), m_mm(_mm) {}
+	Font(float _mm, FontDefinition const& _d): Font(ByMillis, _mm, _d) {}
+	Font(Metric _m, float _u, std::string _family, bool _bold = false): Font(_m, _u, FontDefinition(_family, _bold)) {}
+	Font(Metric _m, float _u, FontDefinition const& _d);
 
 	BakedFontPtr getBaked() const;
 	FontDefinition const& definition() const { return m_definition; }

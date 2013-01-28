@@ -16,6 +16,12 @@ BakedFontPtr Font::getBaked() const
 	}
 }
 
+Font::Font(Metric _m, float _u, FontDefinition const& _d):
+	m_definition(_d),
+	m_mm(_m == ByMillis ? _u : GUIApp::joint().display->fromPixels(fSize(0, _u)).h())
+{
+}
+
 void Font::draw(fCoord _anchor, std::string const& _text, RGBA _c, AnchorType _t) const
 {
 	if (auto b = getBaked())

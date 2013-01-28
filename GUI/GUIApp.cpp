@@ -331,17 +331,21 @@ bool GUIApp::drawGraphics()
 		}
 	}
 
+#if !LIGHTBOX_FINAL
 	LB_GL(glBlendFunc, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	string info = textualTime(AppEngine::get()->lastDrawTime());
 	iRect rr = m_root->rect();
 	Context con(rr, rr);
-	con.rect(iRect(rr.bottomRight() - iCoord(200, 54), iSize(190, 44)), Color(1.f, .5f));
-	iSize s = (iSize)GUIApp::style().regular.measurePx(info).size();
-	GUIApp::style().regular.draw(iCoord(rr.size() - s / 2.f - iSize(34, 34)), info, RGBA::Black);
+	iRect infoRect(rr.bottomRight() - iCoord(200, 54), iSize(190, 44));
+	con.rect(infoRect.outset(3), Color(1.f, .5f));
+	Font f(ByPixels, 16, "Ubuntu");
+	iCoord p = infoRect.topLeft();
+	f.draw(p, info, RGBA::Black, AtTop|AtLeft);
 	info = toString(g_metrics.m_useProgramCount) + "/" + toString(g_metrics.m_drawCount);
-	s = (iSize)GUIApp::style().regular.measurePx(info).size();
-	GUIApp::style().regular.draw(iCoord(rr.size() - s / 2.f - iSize(33, 14)), info, RGBA::Black);
+	p += iSize(0, 16);
+	f.draw(p, info, RGBA::Black, AtTop|AtLeft);
 	g_metrics.reset();
+#endif
 
 	return !stillDirty;
 }

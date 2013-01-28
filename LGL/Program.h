@@ -55,13 +55,13 @@ public:
 	Attrib attrib(std::string const& _name) const { return Attrib(m_p, _name); }
 	Uniform uniform(std::string const& _name) const { return Uniform(m_p, _name); }
 
-	void points(GLsizei _count, GLint _first = 0) { LB_GL(glDrawArrays, GL_POINTS, _first, _count); g_metrics.m_drawCount++; }
-	void lines(GLsizei _count, GLint _first = 0) { LB_GL(glDrawArrays, GL_LINES, _first, _count); g_metrics.m_drawCount++; }
-	void lineLoop(GLsizei _count, GLint _first = 0) { LB_GL(glDrawArrays, GL_LINE_LOOP, _first, _count); g_metrics.m_drawCount++; }
-	void lineStrip(GLsizei _count, GLint _first = 0) { LB_GL(glDrawArrays, GL_LINE_STRIP, _first, _count); g_metrics.m_drawCount++; }
-	void triangles(GLsizei _count, GLint _first = 0) { LB_GL(glDrawArrays, GL_TRIANGLES, _first, _count); g_metrics.m_drawCount++; }
-	void triangleStrip(GLsizei _count, GLint _first = 0) { LB_GL(glDrawArrays, GL_TRIANGLE_STRIP, _first, _count); g_metrics.m_drawCount++; }
-	void triangleFan(GLsizei _count, GLint _first = 0) { LB_GL(glDrawArrays, GL_TRIANGLE_FAN, _first, _count); g_metrics.m_drawCount++; }
+	void points(GLsizei _count, GLint _first = 0) { LB_GL(glDrawArrays, GL_POINTS, _first, _count); g_metrics.incDraw(); }
+	void lines(GLsizei _count, GLint _first = 0) { LB_GL(glDrawArrays, GL_LINES, _first, _count); g_metrics.incDraw(); }
+	void lineLoop(GLsizei _count, GLint _first = 0) { LB_GL(glDrawArrays, GL_LINE_LOOP, _first, _count); g_metrics.incDraw(); }
+	void lineStrip(GLsizei _count, GLint _first = 0) { LB_GL(glDrawArrays, GL_LINE_STRIP, _first, _count); g_metrics.incDraw(); }
+	void triangles(GLsizei _count, GLint _first = 0) { LB_GL(glDrawArrays, GL_TRIANGLES, _first, _count); g_metrics.incDraw(); }
+	void triangleStrip(GLsizei _count, GLint _first = 0) { LB_GL(glDrawArrays, GL_TRIANGLE_STRIP, _first, _count); g_metrics.incDraw(); }
+	void triangleFan(GLsizei _count, GLint _first = 0) { LB_GL(glDrawArrays, GL_TRIANGLE_FAN, _first, _count); g_metrics.incDraw(); }
 
 private:
 	Program m_p;

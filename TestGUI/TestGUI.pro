@@ -11,8 +11,11 @@ android: LIBS += $$LIBSTL -llog -landroid
 INCLUDEPATH += $${DESTDIR}
 resource_compiler.CONFIG += target_predeps
 
-RES += #Shaders.resources
-OTHER_FILES += Shaders.resources AndroidManifest.xml
+#RES += Shaders.resources
+LB_RES += Blur.glsl
+
+OTHER_FILES += Shaders.resources AndroidManifest.xml \
+    Blur.glsl
 
 HEADERS += \
     MainView.h \

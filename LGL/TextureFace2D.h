@@ -25,6 +25,8 @@ public:
 	void activate(unsigned _unit) const;
 	void deactivate(unsigned _unit) const;
 
+	void viewport() const { LB_GL(glViewport, 0, 0, m_dims.w(), m_dims.h()); }
+
 private:
 	uSize m_dims;
 	GLuint m_id;
