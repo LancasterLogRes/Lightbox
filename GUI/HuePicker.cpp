@@ -19,11 +19,14 @@ void HuePickerBody::initGraphics()
 {
 	m_hueWheel = LB_PROGRAM(HueWheel_glsl, huewheel);
 	m_hueWheel.tie(GUIApp::joint().uniforms);
+	m_hueWheelDodge = LB_PROGRAM_ASYM(HueWheel_glsl, huewheeldodge, huewheel);
+	m_hueWheelDodge.tie(GUIApp::joint().uniforms);
+	Super::initGraphics();
 }
 
 void HuePickerBody::finiGraphics()
 {
-	m_hueWheel = Program();
+	m_hueWheel = m_hueWheelDodge = Program();
 }
 
 bool HuePickerBody::event(Event* _e)
@@ -46,13 +49,13 @@ bool HuePickerBody::event(Event* _e)
 
 void HuePickerBody::draw(Context const& _c, unsigned _l)
 {
-	BasicButtonBody::drawButton(_c, _l, isChecked(), isDown() || isChecked(), [&](iRect inner)
+	BasicButtonBody::drawButton(_c, _l, isChecked(), [&](iRect inner)
 	{
 		iSize thumbPx = _c.toPixels(GUIApp::style().thumbSize / 2 + GUIApp::style().thumbOutline);
 		inner = inner.inset(thumbPx / 2.f);
 		iEllipse e(inner);
 		{
-			ProgramUser u(m_hueWheel);
+			ProgramUser u(_l ? m_hueWheelDodge : m_hueWheel);
 			_c.disc(e.inset(thumbPx / 2));
 		}
 		_c.disc(e.inset(thumbPx * 3 / 2), Black);

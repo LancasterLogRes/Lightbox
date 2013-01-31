@@ -194,16 +194,13 @@ void Context::blit(Texture2D const& _tex, fCoord _pos) const
 		// bottom right.
 		1, 1, ox + _tex.size().w(), oy + _tex.size().h()
 	}};
-	cnote << quad;
 	u.uniform("u_tex") = _tex;
 	u.attrib("a_texCoordPosition").setStaticData(quad.data(), 4, 0);
 	u.triangleStrip(4);
 }
 
-void Layer::update()
+void Layer::refresh()
 {
-	setDirty();
-	setReadyForCache(false);
 	if (GUIApp::get() && GUIApp::joint().display)
 		GUIApp::joint().display->setOneOffAnimating();
 }
@@ -216,7 +213,8 @@ ViewBody::ViewBody():
 	m_stretch(1.f),
 	m_isShown(true),
 	m_isEnabled(true),
-	m_graphicsInitialized(false)
+	m_graphicsInitialized(false),
+	m_layers(1)
 {
 	// Allows it to always stay alive during the construction process, even if an intrusive_ptr
 	// is destructed within it. This must be explicitly decremented at some point afterwards,
@@ -239,12 +237,8 @@ ViewBody::~ViewBody()
 
 void ViewBody::executeDraw(Context const& _c, unsigned _layer)
 {
-	if (!m_graphicsInitialized)
-	{
-		initGraphics();
-		m_graphicsInitialized = true;
-	}
-	draw(_c, _layer);
+	if (m_graphicsInitialized)
+		draw(_c, _layer);
 }
 
 void ViewBody::clearChildren()
@@ -270,7 +264,6 @@ void ViewBody::update(int _layer)
 
 void ViewBody::setParent(View const& _p)
 {
-//	cnote << "(" << View(this) << ")->setParent(" << _p << ")";
 	if (m_parent != _p)
 	{
 		auto op = m_parent;
@@ -295,24 +288,16 @@ void ViewBody::setParent(View const& _p)
 	}
 }
 
+void ViewBody::setLayers(Layers const& _l)
+{
+	m_layers = _l;
+	m_visibleLayoutChanged = true;
+	update();
+}
+
 bool ViewBody::gatherDrawers(std::vector<ViewLayerPtr>& _l, unsigned _layer, fCoord _o, bool _ancestorVisibleLayoutChanged)
 {
-	Layers layers = prepareDraw();
-	if (m_layers.size() != layers.size())
-	{
-		m_visibleLayoutChanged = true;	// actually just the overdraw that has changed so this overkill, but at least it'll work.
-		m_layers = layers;
-	}
-	else
-		for (unsigned i = 0; i < layers.size(); ++i)
-			if (m_layers[i].overdraw() != layers[i].overdraw())
-			{
-				m_visibleLayoutChanged = true;	// actually just the overdraw that has changed so this overkill, but at least it'll work.
-				m_layers[i] = layers[i];
-			}
-
 	bool ret = m_visibleLayoutChanged;
-
 	m_globalRectMM = m_geometry.translated(_o);
 	m_globalRect = GUIApp::joint().display->toPixels(m_globalRectMM);
 	for (unsigned i = 0; i < m_layers.size(); ++i)
@@ -452,14 +437,15 @@ std::string Lightbox::toString(View const& _v, std::string const& _insert)
 	std::stringstream out;
 	out << (_v->m_isEnabled ? "EN" : "--") << " "
 		<< (_v->m_isShown ? "VIS" : "hid") << " "
+		<< (_v->m_graphicsInitialized ? "GFX " : "___ ")
 		<< "*" << _v->m_layers.size() << " [";
 	for (auto const& i: _v->m_layers)
-		out << (i.isDirty() ? "X " : "/");
+		out << (i.isDirty() ? i.isShown() ? "!" : "-" : i.isShown() ? "+" : "_");
 	out	<< (_v->m_visibleLayoutChanged ? " LAY" : " lay") << "] "
 		<< _insert
 		<< _v->name() << ": "
-		<< _v->minimumSize() << " -> "
-		<< _v->maximumSize() << "  "
+//		<< _v->minimumSize() << " -> "
+//		<< _v->maximumSize() << "  "
 		<< _v->geometry() << " (" << _v->m_children.size() << " children)";
 	return out.str();
 }

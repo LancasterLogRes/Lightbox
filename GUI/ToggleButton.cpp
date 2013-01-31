@@ -9,6 +9,8 @@ ToggleButtonBody::ToggleButtonBody(std::string const& _text, Color _c, Grouping 
 	ViewCreator(_text, _c, _grouping),
 	m_isChecked(true)
 {
+	setDown();
+	setLit();
 }
 
 ToggleButtonBody::~ToggleButtonBody()
@@ -29,6 +31,27 @@ void ToggleButtonBody::setChecked(bool _c, bool _userEvent)
 					b->setChecked(false, _userEvent);
 		toggled(_userEvent);
 	}
+	setDown(m_isChecked);
+	setLit(m_isChecked);
+}
+
+void ToggleButtonBody::toggled(bool _userEvent)
+{
+	if (m_onToggled && _userEvent)
+		m_onToggled(this);
+	if (m_isChecked && m_onChecked && _userEvent)
+		m_onChecked(this);
+}
+
+void ToggleButtonBody::tapped()
+{
+	if (m_members && !m_members->count(nullptr))
+		if (m_complement && m_isChecked)
+			m_complement->setChecked(true, true);
+		else
+			setChecked(true, true);
+	else
+		toggle(true);
 }
 
 void ToggleButtonBody::setExclusiveWith(ToggleButton const& _b)
@@ -88,12 +111,7 @@ ToggleButton ToggleButtonBody::checkedExclusive()
 	return ToggleButton(this);
 }
 
-Layers ToggleButtonBody::prepareDraw()
-{
-	return prepareDrawButton(isChecked());
-}
-
 void ToggleButtonBody::draw(Context const& _c, unsigned _l)
 {
-	drawButton(_c, _l, isChecked(), isDown() || isChecked());
+	drawButton(_c, _l, isChecked());
 }

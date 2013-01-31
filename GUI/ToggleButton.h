@@ -36,9 +36,8 @@ protected:
 	ToggleButtonBody(std::string const& _text = std::string(), Color _c = White, Grouping _grouping = NoGrouping);
 
 	virtual void draw(Context const& _c, unsigned _l);
-	virtual Layers prepareDraw();
-	virtual void toggled(bool _userEvent) { if (m_onToggled && _userEvent) m_onToggled(this); if (m_isChecked && m_onChecked && _userEvent) m_onChecked(this); update(); }
-	virtual void tapped() { if (m_members && !m_members->count(nullptr)) if (m_complement && m_isChecked) m_complement->setChecked(true, true); else setChecked(true, true); else toggle(true); }
+	virtual void toggled(bool _userEvent);
+	virtual void tapped();
 
 private:
 	typedef std::set<ToggleButtonBody*> MemberSet;	/// OK as the ~ToggleButton removes itself from its member set.

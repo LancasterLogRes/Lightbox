@@ -36,8 +36,8 @@ public:
 protected:
 	explicit DirectionPickerBody(Color _c = White, Grouping _grouping = NoGrouping);
 	
+	virtual void initGraphics();
 	virtual bool event(Event* _e);
-	virtual Layers prepareDraw();
 	virtual void draw(Context const& _c, unsigned _l);
 	virtual void directionChanged(bool _userEvent) { if (m_onDirectionChanged && _userEvent) m_onDirectionChanged(this); update(); }
 	virtual fSize specifyFit(fSize _space) const;

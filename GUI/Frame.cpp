@@ -6,6 +6,7 @@ using namespace Lightbox;
 
 FrameBody::FrameBody()
 {
+	setLayers(Layers());
 }
 
 FrameBody::~FrameBody()

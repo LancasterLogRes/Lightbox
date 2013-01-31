@@ -20,7 +20,6 @@ protected:
 	FrameBody();
 	
 	virtual bool event(Event* _e);
-	virtual Layers prepareDraw() { return Layers(); }
 	
 private:
 };

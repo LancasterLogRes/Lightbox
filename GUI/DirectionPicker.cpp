@@ -57,14 +57,9 @@ bool DirectionPickerBody::event(Event* _e)
 //static const float c_surroundWidth = 2;
 //static const float c_lightWidth = 4;
 
-Layers DirectionPickerBody::prepareDraw()
+void DirectionPickerBody::initGraphics()
 {
-	iSize lightWidth = GUIApp::joint().display->toPixels(fSize(c_lightWidth, c_lightWidth));
-	Layers ret;
-	ret += Layer();
-	if (isEnabled())
-		ret += Layer(iMargin(lightWidth / 2, lightWidth - lightWidth / 2), false);
-	return ret;
+	setLayers({{ Layer(), Layer(iMargin(), true)}});
 }
 
 void DirectionPickerBody::draw(Context const& _c, unsigned _l)
@@ -84,6 +79,7 @@ void DirectionPickerBody::draw(Context const& _c, unsigned _l)
 	iRect innerPx = outerPx.inset(lightMargin);
 
 	fRect innerMM(GUIApp::joint().display->fromPixels(innerPx));
+	Color glow = Color(m_color.hue(), m_color.sat() * .95f, m_color.value() * 8.f, lerp(m_color.sat(), .65f, .75f));
 
 	if (_l == 0)
 	{
@@ -100,32 +96,33 @@ void DirectionPickerBody::draw(Context const& _c, unsigned _l)
 		if (m_mode == Fill)
 			_c.disc(m_direction.transformedInto(innerMM), Color(1.f, .5f));
 
-		if (m_mode == Circle || m_mode == Fill)
-			_c.circle(m_direction.transformedInto(innerMM), m_mode == Circle ? 2.f : 1.f, m_color);
-
-		if (m_mode >= Circle)
-		{
-			_c.disc(fEllipse(innerMM.lerp(xC(-1), yC(-1)), GUIApp::style().thumbSize / 8), m_color);
-			_c.disc(fEllipse(innerMM.lerp(xC(-1), yC(1)), GUIApp::style().thumbSize / 8), m_color);
-			_c.disc(fEllipse(innerMM.lerp(xC(1), yC(-1)), GUIApp::style().thumbSize / 8), m_color);
-			_c.disc(fEllipse(innerMM.lerp(xC(1), yC(1)), GUIApp::style().thumbSize / 8), m_color);
-		}
-
-		if (m_mode == Circle || m_mode == Fill)
-		{
-			_c.disc(fEllipse(innerMM.lerp(xC(m_lastSign.w()), yC(m_lastSign.h())), GUIApp::style().thumbSize / 2 + GUIApp::style().thumbOutline), GUIApp::style().outlineColor);
-			_c.disc(fEllipse(innerMM.lerp(xC(m_lastSign.w()), yC(m_lastSign.h())), GUIApp::style().thumbSize / 2), m_color);
-		}
-
-		_c.disc(fEllipse(innerMM.lerp(m_direction.pos()), GUIApp::style().thumbSize / 2 + GUIApp::style().thumbOutline), GUIApp::style().outlineColor);
-		_c.disc(fEllipse(innerMM.lerp(m_direction.pos()), GUIApp::style().thumbSize / 2), m_color);
-
 		_c.rectOutline(outerPx, surroundMargin, Color(0));
 		_c.rectOutline(innerPx, lightMargin, Color(m_color.hue(), m_color.sat(), .125f));
 	}
 	else if (_l == 1)
 	{
-		_c.rectOutline(innerPx.outset(lightWidth / 4), iMargin(lightWidth / 2), m_color);
+
+		if (m_mode == Circle || m_mode == Fill)
+			_c.circle(m_direction.transformedInto(innerMM), m_mode == Circle ? 2.f : 1.f, glow);
+
+		if (m_mode >= Circle)
+		{
+			_c.disc(fEllipse(innerMM.lerp(xC(-1), yC(-1)), GUIApp::style().thumbSize / 8), glow);
+			_c.disc(fEllipse(innerMM.lerp(xC(-1), yC(1)), GUIApp::style().thumbSize / 8), glow);
+			_c.disc(fEllipse(innerMM.lerp(xC(1), yC(-1)), GUIApp::style().thumbSize / 8), glow);
+			_c.disc(fEllipse(innerMM.lerp(xC(1), yC(1)), GUIApp::style().thumbSize / 8), glow);
+		}
+
+		if (m_mode == Circle || m_mode == Fill)
+		{
+			_c.disc(fEllipse(innerMM.lerp(xC(m_lastSign.w()), yC(m_lastSign.h())), GUIApp::style().thumbSize / 2 + GUIApp::style().thumbOutline), GUIApp::style().outlineColor);
+			_c.disc(fEllipse(innerMM.lerp(xC(m_lastSign.w()), yC(m_lastSign.h())), GUIApp::style().thumbSize / 2), glow);
+		}
+
+		_c.disc(fEllipse(innerMM.lerp(m_direction.pos()), GUIApp::style().thumbSize / 2 + GUIApp::style().thumbOutline), GUIApp::style().outlineColor);
+		_c.disc(fEllipse(innerMM.lerp(m_direction.pos()), GUIApp::style().thumbSize / 2), glow);
+
+		_c.rectOutline(innerPx.outset(lightWidth / 4), iMargin(lightWidth / 2), glow);
 	}
 }
 

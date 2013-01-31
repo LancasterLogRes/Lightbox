@@ -148,12 +148,16 @@ class Layer
 	friend class ViewBody;
 
 public:
-	Layer(iMargin _overdraw = iMargin(), bool _glows = false, bool _dirty = true): m_overdraw(_overdraw), m_glows(_glows), m_dirty(_dirty), m_readyForCache(false) {}
+	Layer(iMargin _overdraw = iMargin(), bool _glows = false, bool _dirty = true): m_overdraw(_overdraw), m_glows(_glows), m_isShown(true), m_dirty(_dirty), m_readyForCache(false) {}
 
 	bool glows() const { return m_glows; }
 	iMargin overdraw() const { return m_overdraw; }
+	bool isShown() const { return m_isShown; }
+	void show(bool _isShown = true) { m_isShown = _isShown; refresh(); }
+	void hide() { m_isShown = false; refresh(); }
 
-	void update();
+	static void refresh();
+	void update() { m_dirty = true; m_readyForCache = false; refresh(); }
 
 	// Private-ish stuff - less useful to classes outside GUIApp & View.
 	iRect globalLayer() const { return m_globalLayer; }
@@ -164,8 +168,9 @@ public:
 	void setReadyForCache(bool _ready = true) { m_readyForCache = _ready; }
 
 private:
-	iMargin m_overdraw;		///< The margin of overdraw that we wanted as of the last call to prepareDraw(), stored in pixels, for each active layer.
+	iMargin m_overdraw;		///< The margin of overdraw that we wanted for this layer when we called ViewBody::setLayers(), stored in pixels, for each active layer.
 	bool m_glows;			///< True if we glow.
+	bool m_isShown;			///< Is this layer shown?
 	mutable bool m_dirty;	///< True if a redraw would result in a different canvas to the last.
 	bool m_readyForCache;	///< True if we had a direct redraw but the cache is still invalid.
 	iRect m_globalLayer;	///< Our full footprint in device coordinates; includes overdraw. Up to date at time of last call to gatherDrawers().
@@ -317,7 +322,9 @@ protected:
 	void releasePointer(int _id);
 	bool pointerLocked(int _id);
 
-	virtual Layers prepareDraw() { return Layers(1); }
+	void setLayers(Layers const& _l);
+	Layer& layer(unsigned _i) { return m_layers[std::min<unsigned>(_i, m_layers.size() - 1)]; }
+
 	virtual void preDraw(unsigned) {}
 	virtual void draw(Context const& _c, unsigned _layer);
 	virtual bool event(Event*) { return false; }

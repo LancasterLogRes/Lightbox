@@ -20,7 +20,7 @@ public:
 
 	void setHue(float _h, bool _userEvent = false) { if (m_hue != _h) { m_hue = _h; hueChanged(_userEvent); } }
 	void setMiddle(Color _c) { if (m_middle != _c) { m_middle = _c; update(); } }
-	void setOnHueChanged(EventHandler const& _t) { m_onHueChanged = _t; }
+	void setOnHueChanged(EventHandler const& _t) { m_onHueChanged = _t; assert(!!m_onHueChanged); }
 
 	HuePicker withOnHueChanged(EventHandler const& _t) { setOnHueChanged(_t); return this; }
 
@@ -42,6 +42,7 @@ private:
 	float m_hue;
 	Color m_middle;
 	Program m_hueWheel;
+	Program m_hueWheelDodge;
 	EventHandler m_onHueChanged;
 };
 

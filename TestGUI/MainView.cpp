@@ -25,12 +25,6 @@ public:
 	}
 
 private:
-	virtual Layers prepareDraw()
-	{
-		update();
-		return Layers(1, Layer(iMargin(), true));
-	}
-
 	virtual void preDraw(unsigned)
 	{
 		return;
@@ -79,6 +73,8 @@ private:
 
 	virtual void initGraphics()
 	{
+		setLayers(Layers(1, Layer(iMargin(), true)));
+
 		uSize s(256, 256);
 		Texture2D tex(s);
 

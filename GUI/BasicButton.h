@@ -22,7 +22,10 @@ class BasicButtonBody: public ViewCreator<ViewBody, BasicButtonBody>
 public:
 	virtual ~BasicButtonBody() {}
 
+	static Layers layers();
+
 	bool isDown() const { return m_isDown; }
+	bool isLit() const { return m_isLit; }
 	std::string const& text() const { return m_text; }
 	Color color() const { return m_color; }
 	Grouping grouping() const { return m_grouping; }
@@ -32,6 +35,9 @@ public:
 	void setColor(Color _c) { m_color = _c; update(); }
 	void setGrouping(Grouping _g) { m_grouping = _g; update(); }
 
+	void setDown(bool _down = true);
+	void setLit(bool _lit = true);
+
 	BasicButton withOnTapped(EventHandler const& _t) { setOnTapped(_t); return this; }
 	BasicButton withText(std::string const& _s) { setText(_s); return this; }
 	BasicButton withColor(Color _c) { setColor(_c); return this; }
@@ -40,14 +46,13 @@ public:
 protected:
 	BasicButtonBody(std::string const& _text = std::string(), Color _c = White, Grouping _grouping = NoGrouping);
 
-	Layers prepareDrawButton(bool _lit);
-	void drawButton(Context const& _c, unsigned _l, bool _lit, bool _down, std::function<void(iRect)> const& _inner = std::function<void(iRect)>(), bool _polish = true);
+	void drawButton(Context const& _c, unsigned _l, bool _down, std::function<void(iRect)> const& _inner = std::function<void(iRect)>(), bool _polish = true);
 
-	virtual Layers prepareDraw();
 	virtual void draw(Context const& _c, unsigned _layer);
 	virtual bool event(Event* _e);
 	virtual void tapped();
 	virtual fSize specifyMinimumSize(fSize) const;
+	virtual void initGraphics();
 
 private:
 	std::string m_text;
@@ -55,6 +60,7 @@ private:
 	Color m_color;
 	Grouping m_grouping;
 
+	bool m_isLit;
 	bool m_isDown;
 	int m_downPointer;
 };

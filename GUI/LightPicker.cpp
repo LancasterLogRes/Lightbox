@@ -20,6 +20,7 @@ void LightPickerBody::initGraphics()
 {
 	m_lightBar = LB_PROGRAM(LightBar_glsl, lightbar);
 	m_lightBar.tie(GUIApp::joint().uniforms);
+	setLayers({{Layer(), Layer(iMargin(), true)}});
 }
 
 void LightPickerBody::finiGraphics()
@@ -41,12 +42,15 @@ bool LightPickerBody::event(Event* _e)
 	return Super::event(_e);
 }
 
+static const float c_outerMargin = 5;
 static const float c_innerMM = 10;
 
-void LightPickerBody::draw(Context const& _c, unsigned)
+void LightPickerBody::draw(Context const& _c, unsigned _l)
 {
-	fRect outer = fRect(fSize(GUIApp::style().thumbSize.w(), geometry().h()));
+	fRect fullOuter = fRect(fSize(GUIApp::style().thumbSize.w() + c_outerMargin * 2, geometry().h()));
+	fRect outer = fullOuter.inset(fSize(c_outerMargin));
 	fRect inner = outer.inset((GUIApp::style().thumbSize.w() - c_innerMM) / 2, GUIApp::style().thumbSize.h() / 2);
+	if (_l == 0)
 	{
 		ProgramUser u(m_lightBar);
 		auto top = u.uniform("topColor");
@@ -61,13 +65,16 @@ void LightPickerBody::draw(Context const& _c, unsigned)
 		bottom = RGBA(0.f, 0.f, 0.f, 1.f);
 		_c.rect(inner.lerp(0, 0.5f, 1, 1));
 	}
-
-	fEllipse thumb(inner.lerp(.5f, 1.f - m_light), GUIApp::style().thumbSize / 2);
-	_c.disc(thumb.outset(GUIApp::style().thumbOutline), GUIApp::style().outlineColor);
-	_c.disc(thumb, Color(HSLSpace, m_middle.hue(), 1, m_light));
+	else
+	{
+		fEllipse thumb(inner.lerp(.5f, 1.f - m_light), GUIApp::style().thumbSize / 2);
+		_c.disc(thumb.outset(GUIApp::style().thumbOutline), GUIApp::style().outlineColor);
+		Color c(HSLSpace, m_middle.hue(), 1, m_light);
+		_c.disc(thumb, Color::withConstantLight(c.hue(), c.sat(), c.value(), 0.5));
+	}
 }
 
 fSize LightPickerBody::specifyFit(fSize _space) const
 {
-	return fSize(GUIApp::style().thumbSize.width(), _space.height());
+	return fSize(GUIApp::style().thumbSize.width() + c_outerMargin * 2, _space.height() + c_outerMargin * 2);
 }
