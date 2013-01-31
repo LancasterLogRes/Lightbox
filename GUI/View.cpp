@@ -297,26 +297,26 @@ void ViewBody::setParent(View const& _p)
 
 bool ViewBody::gatherDrawers(std::vector<ViewLayer>& _l, unsigned _layer, fCoord _o, bool _ancestorVisibleLayoutChanged)
 {
-	vector<iMargin> overdraw = prepareDraw();
-	if (m_overdraw.size() != overdraw.size())
+	Layers layers = prepareDraw();
+	if (m_layers.size() != layers.size())
 	{
 		m_visibleLayoutChanged = true;	// actually just the overdraw that has changed so this overkill, but at least it'll work.
-		m_layerDirty = vector<bool>(overdraw.size(), true);
-		m_readyForCache = vector<bool>(overdraw.size(), false);
-		m_globalLayer = vector<iRect>(overdraw.size());
+		m_layerDirty = vector<bool>(layers.size(), true);
+		m_readyForCache = vector<bool>(layers.size(), false);
+		m_globalLayer = vector<iRect>(layers.size());
 	}
 	else
-		for (unsigned i = 0; i < overdraw.size(); ++i)
-			if (m_overdraw[i] != overdraw[i])
+		for (unsigned i = 0; i < layers.size(); ++i)
+			if (m_layers[i].overdraw() != layers[i].overdraw())
 				m_visibleLayoutChanged = true;	// actually just the overdraw that has changed so this overkill, but at least it'll work.
-	m_overdraw = overdraw;
+	m_layers = layers;
 
 	bool ret = m_visibleLayoutChanged;
 
 	m_globalRectMM = m_geometry.translated(_o);
 	m_globalRect = GUIApp::joint().display->toPixels(m_globalRectMM);
-	for (unsigned i = 0; i < m_overdraw.size(); ++i)
-		m_globalLayer[i] = m_globalRect.outset(m_overdraw[i]);
+	for (unsigned i = 0; i < m_layers.size(); ++i)
+		m_globalLayer[i] = m_globalRect.outset(m_layers[i].overdraw());
 
 	// Visibility is inherited, so if we draw and have not had our visibility changed directly
 	// but an ancestor has, we must inherit that invalidity.
@@ -452,7 +452,7 @@ std::string Lightbox::toString(View const& _v, std::string const& _insert)
 	std::stringstream out;
 	out << (_v->m_isEnabled ? "EN" : "--") << " "
 		<< (_v->m_isShown ? "VIS" : "hid") << " "
-		<< "*" << _v->m_overdraw.size() << " [";
+		<< "*" << _v->m_layers.size() << " [";
 	for (auto i: _v->m_layerDirty)
 		out << (i ? "X " : "/");
 	out	<< (_v->m_visibleLayoutChanged ? " LAY" : " lay") << "] "

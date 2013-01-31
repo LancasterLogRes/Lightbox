@@ -20,7 +20,7 @@ protected:
 	FrameBody();
 	
 	virtual bool event(Event* _e);
-	virtual std::vector<iMargin> prepareDraw() { return std::vector<iMargin>(); }
+	virtual Layers prepareDraw() { return Layers(); }
 	
 private:
 };

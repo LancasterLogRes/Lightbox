@@ -31,6 +31,7 @@ public:
 	virtual void setState(foreign_vector<uint8_t> const&) {}
 
 	virtual bool motionEvent(int, iCoord, int) { return false; }
+	virtual bool keyEvent(int, int) { return false; }
 };
 
 }

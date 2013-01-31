@@ -74,7 +74,8 @@ private:
 	JNIEnv* m_jni;
 
 	std::function<void()> m_onDoneLastActivity;
-#elif !defined(LIGHTBOX_CROSS)
+#elif LIGHTBOX_USE_XLIB
+	int m_lastCode;
 #endif
 
 	static AppEngine* s_this;

@@ -43,6 +43,7 @@ public:
 	virtual bool drawGraphics();
 	virtual void finiGraphics(Display& _d);
 	virtual bool motionEvent(int _id, iCoord _pos, int _direction);
+	virtual bool keyEvent(int _code, int _direction);
 
 	bool lockPointer(int _id, View const& _v);
 	bool releasePointer(int _id, View const& _v);
@@ -70,6 +71,7 @@ private:
 		std::map<ViewLayer, CachePos> vs;
 	};
 	std::vector<ImageCache> m_cache;
+	int m_showCachePage;
 
 	template <class _S> friend _S& operator<<(_S& _out, ImageCache const& _ic);
 

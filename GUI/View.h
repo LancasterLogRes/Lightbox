@@ -144,6 +144,26 @@ static unsigned const c_viewLayerCount = 2;
 
 LIGHTBOX_STRUCT(2, ViewLayer, ViewBody*, view, unsigned, layer);
 
+class Layer
+{
+	friend class GUIApp;
+
+public:
+	Layer(iMargin _overdraw = iMargin(), bool _glows = false, bool _dirty = true): m_overdraw(_overdraw), m_glows(_glows), m_dirty(_dirty), m_readyForCache(false) {}
+
+	bool glows() const { return m_glows; }
+	iMargin overdraw() const { return m_overdraw; }
+
+private:
+	iMargin m_overdraw;		///< The margin of overdraw that we wanted as of the last call to prepareDraw(), stored in pixels, for each active layer.
+	bool m_glows;			///< True if we glow.
+	mutable bool m_dirty;	///< True if a redraw would result in a different canvas to the last.
+	bool m_readyForCache;	///< True if we had a direct redraw but the cache is still invalid.
+	iRect m_globalLayer;	///< Our full footprint in device coordinates; includes overdraw. Up to date at time of last call to gatherDrawers().
+};
+
+typedef std::vector<Layer> Layers;
+
 class ViewBody: public boost::noncopyable
 {
 	template <class _T, class _I> friend class ViewCreator;
@@ -221,7 +241,7 @@ public:
 
 	void clearChildren();
 
-	bool draws(unsigned _layer = 0) const { return m_overdraw.size() > _layer; }
+	bool draws(unsigned _layer = 0) const { return m_layers.size() > _layer; }
 	bool isEnabled() const { return m_isEnabled; }
 	bool isShown() const { return m_isShown; }
 	bool isHidden() const { return !m_isShown; }
@@ -234,7 +254,7 @@ public:
 
 	fRect rectMM() const { return fRect(fCoord(0, 0), m_geometry.size()); }
 	iRect rect() const { return iRect(iCoord(0, 0), m_globalRect.size()); }
-	iRect canvas(unsigned _layer = 0) const { if (_layer < m_overdraw.size()) return rect().outset(m_overdraw[_layer]); else return iRect(); }
+	iRect canvas(unsigned _layer = 0) const { if (_layer < m_layers.size()) return rect().outset(m_layers[_layer].overdraw()); else return iRect(); }
 
 	template <class _T> _T property(std::string const& _name, _T const& _default = _T()) { try { return boost::any_cast<_T>(m_misc[_name]); } catch (...) { return _default; } }
 	template <class _T> bool hasProperty(std::string const& _name) { if (m_misc.count(_name)) try { boost::any_cast<_T>(m_misc[_name]); return true; } catch (...) {} return false; }
@@ -273,7 +293,8 @@ protected:
 	void releasePointer(int _id);
 	bool pointerLocked(int _id);
 
-	virtual std::vector<iMargin> prepareDraw() { return std::vector<iMargin>(1); }
+	virtual Layers prepareDraw() { return Layers(1); }
+	virtual void preDraw(unsigned) {}
 	virtual void draw(Context const& _c, unsigned _layer);
 	virtual bool event(Event*) { return false; }
 	virtual void resized() { m_visibleLayoutChanged = true; relayout(); update(); }
@@ -312,10 +333,10 @@ private:
 
 	bool m_graphicsInitialized;			///< True if we have initialized graphics (with initGraphics()) and not subsequently finalized (with finiGraphics()).
 
-	mutable std::vector<bool> m_layerDirty;	///< True if a redraw would result in a different canvas to the last.
-	std::vector<bool> m_readyForCache;	///< True if we had a direct redraw but the cache is still invalid.
-	std::vector<iMargin> m_overdraw;	///< The margin of overdraw that we wanted as of the last call to prepareDraw(), stored in pixels, for each active layer.
-	std::vector<iRect> m_globalLayer;	///< Our full footprint in device coordinates; includes overdraw. Up to date at time of last call to gatherDrawers().
+	Layers m_layers;					///< The definitions of each layer.
+	mutable std::vector<bool> m_layerDirty;	///< True if a redraw would result in a different canvas to the last. DEPRECATE
+	std::vector<bool> m_readyForCache;	///< True if we had a direct redraw but the cache is still invalid. DEPRECATE
+	std::vector<iRect> m_globalLayer;	///< Our full footprint in device coordinates; includes overdraw. Up to date at time of last call to gatherDrawers(). DEPRECATE
 
 	fRect m_globalRectMM;				///< Our basic footprint in device coordinates in mm; this doesn't include overdraw. Up to date at time of last call to gatherDrawers().
 	iRect m_globalRect;					///< Our basic footprint in device coordinates; this doesn't include overdraw. Up to date at time of last call to gatherDrawers().

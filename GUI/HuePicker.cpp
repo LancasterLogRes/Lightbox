@@ -2,7 +2,7 @@
 #include <LGL.h>
 #include "Global.h"
 #include "GUIApp.h"
-#include "Shaders.h"
+#include "HueWheel.h"
 #include "HuePicker.h"
 using namespace std;
 using namespace Lightbox;
@@ -17,7 +17,7 @@ HuePickerBody::~HuePickerBody()
 
 void HuePickerBody::initGraphics()
 {
-	m_hueWheel = Program(Shader::vertex(LB_R(HueWheel_vert)), Shader::fragment(LB_R(HueWheel_frag)));
+	m_hueWheel = LB_PROGRAM(HueWheel_glsl, huewheel);
 	m_hueWheel.tie(GUIApp::joint().uniforms);
 }
 
@@ -60,7 +60,7 @@ void HuePickerBody::draw(Context const& _c, unsigned _l)
 		if (isChecked())
 		{
 			_c.disc(iEllipse(p, thumbPx), GUIApp::style().outlineColor);
-			_c.disc(iEllipse(p, _c.toPixels(GUIApp::style().thumbSize / 2)), m_middle.withHue(m_hue));
+			_c.disc(iEllipse(p, _c.toPixels(GUIApp::style().thumbSize / 2)), Color::withConstantLight(m_hue, m_middle.sat(), m_middle.value() / 3.f));
 		}
 	}, false);
 	return;

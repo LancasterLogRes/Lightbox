@@ -6,6 +6,12 @@
 using namespace std;
 using namespace Lightbox;
 
+Joint::Joint(): display(nullptr)
+{
+	displaySizePixels = uSize(1, 1);
+	displaySizeMM = fSize(1, 1);
+}
+
 void Joint::init(Display& _d)
 {
 	display = &_d;
@@ -20,13 +26,18 @@ void Joint::init(Display& _d)
 		uc[2 * i + 1] = cos(i / 72.f * TwoPi);
 	unitCircle72 = Buffer<float>(uc);
 
-	shaded = Program(Shader::vertex(LB_R(View_vert)), Shader::fragment(LB_R(View_frag)));
-	flat = Program(Shader::vertex(LB_R(Flat_vert)), Shader::fragment(LB_R(Flat_frag)));
-	texture = Program(Shader::vertex(LB_R(Texture_vert)), Shader::fragment(LB_R(Texture_frag)));
+	shaded = LB_PROGRAM(Shaders_glsl, view);
+	flat = LB_PROGRAM(Shaders_glsl, flat);
+	texture = LB_PROGRAM(Shaders_glsl, texture);
+	general = LB_PROGRAM(Shaders_glsl, general);
+	hblur6 = LB_PROGRAM_ASYM(Shaders_glsl, hblur6, hblur6);
+	vblur6 = LB_PROGRAM_ASYM(Shaders_glsl, vblur6, vblur6);
+	pass = LB_PROGRAM(Shaders_glsl, pass);
 
 	shaded.tie(uniforms);
 	flat.tie(uniforms);
 	texture.tie(uniforms);
+	general.tie(uniforms);
 
 	u_displaySize = uniforms["displaySize"];
 	u_minusY = uniforms["minusY"];
@@ -41,3 +52,7 @@ void Joint::init(Display& _d)
 	shadedGeometry = shaded.attrib("geometry");
 }
 
+void Joint::fini()
+{
+	*this = Joint();
+}

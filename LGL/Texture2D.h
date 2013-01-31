@@ -8,6 +8,7 @@ namespace Lightbox
 {
 
 class TextureActivator;
+class Program;
 
 class Texture2D: public Pimpl<TextureFace2D>
 {
@@ -24,6 +25,8 @@ public:
 
 	void framebufferColor(unsigned _index = 0, unsigned _level = 0) { if (m_p) m_p->framebufferColor(_index, _level); }
 	void viewport() { if (m_p) m_p->viewport(); }
+
+	Texture2D filter(Program const& _p, Texture2D _out = Texture2D()) const;
 
 	typedef TextureActivator Activator;
 };

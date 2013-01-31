@@ -1,5 +1,6 @@
 #include <Common/Global.h>
 #include <GUI/TextLabel.h>
+#include <GUI/ToggleButton.h>
 #include <GUI/GUIApp.h>
 #include "Blur.h"
 #include "Global.h"
@@ -18,11 +19,49 @@ public:
 	TestViewBody()
 	{
 		m_f = Font(100, "Ubuntu");
+
+		ToggleButtonBody::spawn(this, "Hello", Red)->setGeometry(fRect(400, 20, 150, 50));
+
 	}
 
 private:
+	virtual Layers prepareDraw()
+	{
+		update();
+		return Layers(1, Layer(iMargin(), true));
+	}
+
+	virtual void preDraw(unsigned)
+	{
+		return;
+		LB_GL(glBlendFunc, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+		m_glowTex = m_baseTex.filter(m_vblur).filter(m_hblur);
+		vector<Texture2D> levels(3);
+		for (unsigned i = 0; i < levels.size(); ++i)
+			levels[i] = (i ? levels[i - 1] : m_baseTex).filter(m_pass, Texture2D(m_baseTex.size() / (1 << i)));
+		for (unsigned i = 0; i < levels.size(); ++i)
+			levels[i] = levels[i].filter(m_vblur).filter(m_hblur).filter(m_hblur);
+		LB_GL(glBlendFunc, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+		Framebuffer fb(Framebuffer::Create);
+		FramebufferUser fbu(fb);
+		m_sglowTex = Texture2D(m_baseTex.size());
+		m_sglowTex.viewport();
+		fbu.attachColor(m_sglowTex);
+		LB_GL(glClear, GL_COLOR_BUFFER_BIT);
+		LB_GL(glBlendFunc, GL_SRC_ALPHA, GL_ONE);
+		ProgramUser u(m_pass);
+		for (auto const& l: levels)
+			u.filterMerge(l);
+		u.filterMerge(m_baseTex);
+		LB_GL(glBlendFunc, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	}
+
 	virtual void draw(Context const& _c, unsigned)
 	{
+		_c.disc(iEllipse(128, 58, 15, 15), Color(0, .95, 2, .35f));
+		_c.rectOutline(iRect(50, 50, 150, 175), iMargin(iSize(8, 8)), Color(0, .95f, 2.f, .35f));
+/*
 		fRect r = m_f.measure("Hello world", true).translated(fSize(100, 150));
 		fRect r2 = m_f.measure("Hello world", false).translated(fSize(100, 250));
 		fRect r3 = m_f.getBaked()->measureMm("Hello world").translated(fSize(100, 350));
@@ -35,7 +74,7 @@ private:
 
 		_c.blit(m_baseTex);
 		_c.blit(m_glowTex, fCoord(0, 256));
-//		_c.blit(m_sglowTex, fCoord(0, 512));
+		_c.blit(m_sglowTex, fCoord(560, 0));*/
 	}
 
 	virtual void initGraphics()
@@ -52,69 +91,38 @@ private:
 			LB_GL(glClear, GL_COLOR_BUFFER_BIT);
 			GUIApp::joint().u_displaySize = (fVector2)(fSize)s;
 			glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-			m_f.draw((iCoord)(uCoord)(tex.size() / 2), "u", RGBA::White);
+//			m_f.draw((iCoord)(uCoord)(tex.size() / 2), "x", RGBA::Blue);
+			Context c;
+			c.disc(iEllipse(128, 58, 15, 15), Color(0, .95, 2, .4f));
+			c.rectOutline(iRect(50, 50, 150, 175), iMargin(iSize(8, 8)), Color(0, .95, 2, .4f));
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+			GUIApp::joint().u_displaySize = (fVector2)(fSize)GUIApp::joint().displaySizePixels;
 		}
 
 		// Filter it.
 		m_baseTex = tex;
-		m_hblur = Program(Shader::vertex(LB_RES(Blur_glsl, hblur.vert)), Shader::fragment(LB_RES(Blur_glsl, blur.frag)));
-		m_hblur.tie(GUIApp::joint().uniforms);
-		m_vblur = Program(Shader::vertex(LB_RES(Blur_glsl, vblur.vert)), Shader::fragment(LB_RES(Blur_glsl, blur.frag)));
-		m_vblur.tie(GUIApp::joint().uniforms);
-		m_glowTex = filter(filter(tex, m_hblur), m_vblur);
-/*		m_shblur = Program(Shader::vertex(LB_RES(Blur_glsl, shblur.vert)), Shader::fragment(LB_RES(Blur_glsl, sblur.frag)));
-		m_shblur.tie(GUIApp::joint().uniforms);
-		m_svblur = Program(Shader::vertex(LB_RES(Blur_glsl, svblur.vert)), Shader::fragment(LB_RES(Blur_glsl, sblur.frag)));
-		m_svblur.tie(GUIApp::joint().uniforms);
-		m_sglowTex = filter(filter(tex, m_shblur), m_svblur);*/
-	}
+		m_hblur = LB_PROGRAM_ASYM(Blur_glsl, hblur6, blur6);
+		m_vblur = LB_PROGRAM_ASYM(Blur_glsl, vblur6, blur6);
+		m_pass = LB_PROGRAM(Blur_glsl, pass);
 
-	Texture2D filter(Texture2D const& _in, Program const& _p)
-	{
-		GUIApp::joint().u_displaySize = (fVector2)(fSize)_in.size();
-
-		Framebuffer fb(Framebuffer::Create);
-		FramebufferUser fbu(fb);
-
-		Texture2D ret(_in.size());
-		ret.viewport();
-		fbu.attachColor(ret);
-		LB_GL(glClear, GL_COLOR_BUFFER_BIT);
-
-		ProgramUser u(_p);
-		float ox = 0;
-		float oy = 0;
-		std::array<float, 4 * 4> quad =
-		{{
-			// top left.
-			0, 0, ox, oy,
-			// top right.
-			1, 0, ox + _in.size().w(), oy,
-			// bottom left.
-			0, 1, ox, oy + _in.size().h(),
-			// bottom right.
-			1, 1, ox + _in.size().w(), oy + _in.size().h()
-		}};
-		u.uniform("u_tex") = _in;
-		u.attrib("a_texCoordPosition").setStaticData(quad.data(), 4, 0);
-		glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-		u.triangleStrip(4);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		return ret;
+		GUIApp::joint().display->setAnimating();
 	}
 
 	virtual void finiGraphics()
 	{
+		GUIApp::joint().display->releaseAnimating();
+		m_hblur = Program();
+		m_vblur = Program();
+		m_baseTex = Texture2D();
 		m_glowTex = Texture2D();
+		m_sglowTex = Texture2D();
 	}
 
 	Font m_f;
 
 	Program m_hblur;
 	Program m_vblur;
-	Program m_shblur;
-	Program m_svblur;
+	Program m_pass;
 	Texture2D m_baseTex;
 	Texture2D m_glowTex;
 	Texture2D m_sglowTex;

@@ -11,11 +11,9 @@ android: LIBS += $$LIBSTL -llog -landroid
 INCLUDEPATH += $${DESTDIR}
 resource_compiler.CONFIG += target_predeps
 
-#RES += Shaders.resources
 LB_RES += Blur.glsl
 
-OTHER_FILES += Shaders.resources AndroidManifest.xml \
-    Blur.glsl
+OTHER_FILES += AndroidManifest.xml Blur.glsl
 
 HEADERS += \
     MainView.h \
@@ -24,4 +22,4 @@ HEADERS += \
 # TODO: make it work for debug/release
 QMAKE_EXTRA_TARGETS += deploy
 deploy.depends = $$RELATIVE_DESTDIR/$(TARGET)
-deploy.commands = $$ANDROID_SDK_PATH/platform-tools/adb install -r $$DESTDIR/TestGUI.apk && $$ANDROID_SDK_PATH/platform-tools/adb shell am start -n com.lancasterlogicresponse.wrapper/.NativeActivity
+deploy.commands = $$ANDROID_SDK_PATH/platform-tools/adb install -r $$DESTDIR/TestGUI.apk && $$ANDROID_SDK_PATH/platform-tools/adb shell am start -n com.lancasterlogicresponse.testgui/android.app.NativeActivity

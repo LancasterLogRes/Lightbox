@@ -2,7 +2,8 @@ TEMPLATE = lib
 include ( ../Common.pri )
 
 LIBS += $$GFX_LIBS -lpng -lz
-RES += Shaders.resources Fonts.resources
+LB_RES += Shaders.glsl HueWheel.glsl LightBar.glsl ubuntu_r.ttf ubuntu_b.ttf
+
 SOURCES += \
     View.cpp \
     BasicButton.cpp \
@@ -45,14 +46,7 @@ HEADERS += \
     ProgressBar.h \
     FontManager.h \
     BakedFont.h
-OTHER_FILES += Shaders.resources View.frag View.vert \
-    Fonts.resources \
-    Flat.frag \
-    Flat.vert \
-    Font.frag \
-    Font.vert \
-    Texture.frag \
-    Texture.vert \
-    HueWheel.frag \
-    HueWheel.vert \
-    LightBar.vert
+OTHER_FILES += \
+    Shaders.glsl \
+    HueWheel.glsl \
+    LightBar.glsl

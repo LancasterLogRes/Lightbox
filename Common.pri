@@ -161,9 +161,10 @@ android {
 			$${ANDROID_SDK_PATH}/tools/android update project -p '$${OBJECTS_DIR}wrap' -t 1 -n $$TARGET &&\
 			JAVA_HOME="$$ANDROID_JDK_PATH" ant debug -buildfile '$${OBJECTS_DIR}wrap/build.xml' &&\
             mv '$${OBJECTS_DIR}wrap/bin/$${TARGET}-debug.apk' '$${DESTDIR}/$${TARGET}.apk' &&\
-            rm -rf '$${OBJECTS_DIR}wrap' &&\
-            echo DONE.
-        QMAKE_CLEAN = '$${DESTDIR}$${TARGET}.apk'
+			rm -rf '$${OBJECTS_DIR}wrap' &&\
+			echo DONE.
+
+		QMAKE_CLEAN = '$${DESTDIR}$${TARGET}.apk'
     }
 
     DEFINES += LIGHTBOX_ANDROID

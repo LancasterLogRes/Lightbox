@@ -5,6 +5,7 @@
 #elif LIGHTBOX_USE_XLIB
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
+#include <X11/XKBlib.h>
 #elif LIGHTBOX_USE_SDL
 #include <SDL/SDL.h>
 #endif
@@ -100,7 +101,10 @@ void AppEngine::exec()
 	gfxDraw();
 	::Display* xDisplay = (::Display*)m_display->xDisplay();
 	::Window xWindow = m_display->xWindow();
-	XSelectInput(xDisplay, xWindow, ExposureMask | KeyPressMask | KeyReleaseMask | ButtonPressMask | ButtonReleaseMask | PointerMotionMask);
+	XSelectInput(xDisplay, xWindow, ExposureMask | KeyPressMask | KeyReleaseMask | ButtonPressMask | ButtonReleaseMask | PointerMotionMask | FocusChangeMask);
+	int detectable_autorepeat_supported;
+	XkbSetDetectableAutoRepeat(xDisplay, true, &detectable_autorepeat_supported);
+	m_lastCode = -1;
 #elif LIGHTBOX_USE_SDL
 	gfxInit();
 	gfxDraw();
@@ -169,6 +173,19 @@ void AppEngine::exec()
 					break;
 				case DestroyNotify:
 					carryOn = false;
+					break;
+				case KeyPress:
+					if (m_lastCode == -1)
+					{
+						m_lastCode = event.xkey.keycode;
+						m_app->keyEvent(m_lastCode, 1);
+					}
+					break;
+				case FocusOut:
+				case KeyRelease:
+					if (m_lastCode > -1)
+						m_app->keyEvent(m_lastCode, -1);
+					m_lastCode = -1;
 					break;
 				case Expose:
 					m_display->repaint();

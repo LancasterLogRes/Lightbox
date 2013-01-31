@@ -40,9 +40,10 @@ public:
 protected:
 	BasicButtonBody(std::string const& _text = std::string(), Color _c = White, Grouping _grouping = NoGrouping);
 
+	Layers prepareDrawButton(bool _lit);
 	void drawButton(Context const& _c, unsigned _l, bool _lit, bool _down, std::function<void(iRect)> const& _inner = std::function<void(iRect)>(), bool _polish = true);
 
-	virtual std::vector<iMargin> prepareDraw();
+	virtual Layers prepareDraw();
 	virtual void draw(Context const& _c, unsigned _layer);
 	virtual bool event(Event* _e);
 	virtual void tapped();

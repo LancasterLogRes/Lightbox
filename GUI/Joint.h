@@ -9,7 +9,10 @@ class Display;
 
 struct Joint
 {
+	Joint();
+
 	void init(Display& _d);
+	void fini();
 
 	Display* display;
 	uSize displaySizePixels;
@@ -23,6 +26,10 @@ struct Joint
 	Program flat;
 	Program shaded;
 	Program texture;
+	Program general;
+	Program hblur6;
+	Program vblur6;
+	Program pass;
 	Attrib flatGeometry;
 	Attrib shadedGeometry;
 	PagedUniform u_displaySize;

@@ -14,6 +14,9 @@
 namespace Lightbox
 {
 
+#define LB_PROGRAM(_FILE, _NAME) Program(Shader::vertex(LB_RES(_FILE, _NAME.vert)), Shader::fragment(LB_RES(_FILE, _NAME.frag)))
+#define LB_PROGRAM_ASYM(_FILE, _VERTNAME, _FRAGNAME) Program(Shader::vertex(LB_RES(_FILE, _VERTNAME.vert)), Shader::fragment(LB_RES(_FILE, _FRAGNAME.frag)))
+
 class Program: public Pimpl<ProgramFace>
 {
 	friend class ProgramFace;
@@ -62,6 +65,8 @@ public:
 	void triangles(GLsizei _count, GLint _first = 0) { LB_GL(glDrawArrays, GL_TRIANGLES, _first, _count); g_metrics.incDraw(); }
 	void triangleStrip(GLsizei _count, GLint _first = 0) { LB_GL(glDrawArrays, GL_TRIANGLE_STRIP, _first, _count); g_metrics.incDraw(); }
 	void triangleFan(GLsizei _count, GLint _first = 0) { LB_GL(glDrawArrays, GL_TRIANGLE_FAN, _first, _count); g_metrics.incDraw(); }
+
+	void filterMerge(Texture2D const& _in);
 
 private:
 	Program m_p;

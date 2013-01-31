@@ -25,13 +25,18 @@ bool isNeighbour(View const& _v)
 static const float c_surroundWidth = 2;
 static const float c_lightWidth = 4;
 
-vector<iMargin> BasicButtonBody::prepareDraw()
+Layers BasicButtonBody::prepareDraw()
+{
+	return prepareDrawButton(isEnabled() && m_isDown);
+}
+
+Layers BasicButtonBody::prepareDrawButton(bool _lit)
 {
 	iSize lightWidth = GUIApp::joint().display->toPixels(fSize(c_lightWidth, c_lightWidth));
-	vector<iMargin> ret;
-	ret += iMargin();
-	if (isEnabled())
-		ret += iMargin(lightWidth / 2, lightWidth - lightWidth / 2);
+	Layers ret;
+	ret += Layer();
+	if (_lit)
+		ret += Layer(iMargin(lightWidth * 2, lightWidth * 2), true);
 	return ret;
 }
 
@@ -58,7 +63,7 @@ void BasicButtonBody::drawButton(Context const& _c, unsigned _l, bool _lit, bool
 		if (_inner)
 			_inner(inner);
 		else
-			_c.text(GUIApp::style().bold, inner.lerp(.5f, .5f), boost::algorithm::to_upper_copy(m_text), Color(m_color.hue(), m_color.sat() * .75f, 1.f).toRGBA());
+			_c.text(GUIApp::style().regular, inner.lerp(.5f, .5f), boost::algorithm::to_upper_copy(m_text), Color(m_color.hue(), m_color.sat() * .75f, m_color.value() * .75f).toRGBA());
 		if (!_down && _polish)
 		{
 			_c.rect(inner.lerp(0, 0, 1, .35f), Color(1.f, .05f));
@@ -66,9 +71,12 @@ void BasicButtonBody::drawButton(Context const& _c, unsigned _l, bool _lit, bool
 	}
 	else if (_l == 1 && _lit)
 	{
+		Color glow = Color(m_color.hue(), m_color.sat() * .95f, m_color.value() * 8.f, .75f);
 		if (_inner)
 			_inner(inner);
-		_c.rectOutline(inner.outset(lightWidth / 4), iMargin(lightWidth / 2), m_color);
+		else
+			_c.text(GUIApp::style().bold, inner.lerp(.5f, .5f), boost::algorithm::to_upper_copy(m_text), glow.toRGBA());
+		_c.rectOutline(inner.outset(lightWidth / 4), iMargin(lightWidth / 2), glow);
 	}
 }
 

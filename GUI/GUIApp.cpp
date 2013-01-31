@@ -19,7 +19,8 @@ void Style::generateColors(Color _fore)
 	high = Color(_fore.h() + .5f, _fore.sat(), _fore.value());
 }
 
-GUIApp::GUIApp()
+GUIApp::GUIApp():
+	m_showCachePage(-1)
 {
 	m_fontManager.registerData(FontDefinition("Ubuntu", false), LB_R(ubuntu_r_ttf));
 	m_fontManager.registerData(FontDefinition("Ubuntu", true), LB_R(ubuntu_b_ttf));
@@ -75,7 +76,7 @@ void GUIApp::finiGraphics(Display&)
 	cnote << "Finalizing GUI graphics";
 	m_root->finiGraphicsRecursive();
 	m_fontManager.finiGraphics();
-	m_joint = Joint();
+	m_joint.fini();
 	m_cache.clear();
 	m_root->show(false);
 }
@@ -159,8 +160,8 @@ bool GUIApp::drawGraphics()
 		unsigned vi = 0;
 		for (ViewLayer v: drawers)
 			if (l == 0)
-				activeLayers = max<unsigned>(activeLayers, v.view->m_overdraw.size());
-			else if (l < v.view->m_overdraw.size())
+				activeLayers = max<unsigned>(activeLayers, v.view->m_layers.size());
+			else if (l < v.view->m_layers.size())
 			{
 				drawers.push_back(ViewLayer(v.view, l));
 				++vi;
@@ -210,10 +211,15 @@ bool GUIApp::drawGraphics()
 			for (auto const& i: cache.vs)
 			{
 				ViewLayer v = i.first;
-				if (v.view->m_layerDirty[v.layer] && v.view->m_readyForCache[v.layer])
+				if (v.view->m_layerDirty[v.layer] && (v.view->m_readyForCache[v.layer] || v.view->m_layers[v.layer].glows()))
+				{
+					v.view->preDraw(v.layer);
+					v.view->m_readyForCache[v.layer] = true;
 					willRenderToTexture = true;
+				}
 				else if (v.view->m_layerDirty[v.layer])
 				{
+					v.view->preDraw(v.layer);
 					renderToFramebuffer[cacheIndex] += v;
 					v.view->m_readyForCache[v.layer] = stillDirty = true;
 				}
@@ -223,23 +229,73 @@ bool GUIApp::drawGraphics()
 
 			if (willRenderToTexture)
 			{
-				FramebufferUser u(cache.fb);
 				for (auto const& i: cache.vs)
 				{
 					ViewLayer v = i.first;
-					if (v.view->m_layerDirty[v.layer])
+					if (v.view->m_layerDirty[v.layer] && v.view->m_readyForCache[v.layer])
 					{
-						uRect texRect = i.second.pos;
-						LB_GL(glViewport, texRect.x(), texRect.y(), texRect.w(), texRect.h());
-						LB_GL(glScissor, texRect.x(), texRect.y(), texRect.w(), texRect.h());
-						LB_GL(glClear, GL_COLOR_BUFFER_BIT);
-						GUIApp::joint().u_displaySize = (vec2)(fSize)texRect.size();
-						assert((iSize)texRect.size() == v.view->m_globalLayer[v.layer].size());
-						iRect canvas(iCoord(0, 0), (iSize)texRect.size());
-						Context con(canvas.inset(v.view->m_overdraw[v.layer]), canvas);
-						v.view->executeDraw(con, v.layer);
-						if (!v.view->m_isEnabled)
-							con.rect(canvas, Color(0.f, .5f));
+						if (v.view->m_layers[v.layer].glows())
+						{
+							uRect texRect = i.second.pos;
+							Texture2D baseTex(texRect.size());
+
+							// Generate base texture.
+							glDisable(GL_SCISSOR_TEST);
+							{
+								Framebuffer fb(Framebuffer::Create);
+								FramebufferUser fbu(fb);
+								baseTex.viewport();
+								fbu.attachColor(baseTex);
+								LB_GL(glClear, GL_COLOR_BUFFER_BIT);
+								GUIApp::joint().u_displaySize = (vec2)(fSize)texRect.size();
+								assert((iSize)texRect.size() == v.view->m_globalLayer[v.layer].size());
+								iRect canvas(iCoord(0, 0), (iSize)texRect.size());
+								Context con(canvas.inset(v.view->m_layers[v.layer].overdraw()), canvas);
+								v.view->executeDraw(con, v.layer);
+								if (!v.view->m_isEnabled)
+									con.rect(canvas, Color(0.f, .5f));
+							}
+
+							// Filter base texture.
+							LB_GL(glBlendFunc, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+							int glowAmount = ceil(m_joint.display->toPixelsF(fSize(0, 2)).h());
+							vector<Texture2D> levels(glowAmount);
+							for (unsigned i = 0; i < levels.size(); ++i)
+								levels[i] = (i ? levels[i - 1] : baseTex).filter(m_joint.pass, Texture2D(baseTex.size() / (1 << i)));
+							for (unsigned i = 0; i < levels.size(); ++i)
+								levels[i] = levels[i].filter(m_joint.vblur6).filter(m_joint.hblur6);//.filter(m_joint.hblur6);
+
+							glEnable(GL_SCISSOR_TEST);
+							// Composite final texture.
+							FramebufferUser fbu(cache.fb);
+							LB_GL(glViewport, texRect.x(), texRect.y(), texRect.w(), texRect.h());
+							LB_GL(glScissor, texRect.x(), texRect.y(), texRect.w(), texRect.h());
+							LB_GL(glClear, GL_COLOR_BUFFER_BIT);
+							ProgramUser u(m_joint.pass);
+//							LB_GL(glBlendFunc, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+							LB_GL(glBlendFunc, GL_SRC_ALPHA, GL_ONE);
+//							LB_GL(glBlendFunc, GL_SRC_ALPHA, GL_DST_ALPHA);
+//							LB_GL(glBlendFunc, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+							for (auto const& l: levels)
+								u.filterMerge(l);
+							u.filterMerge(baseTex);
+							LB_GL(glBlendFunc, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+						}
+						else
+						{
+							FramebufferUser u(cache.fb);
+							uRect texRect = i.second.pos;
+							LB_GL(glViewport, texRect.x(), texRect.y(), texRect.w(), texRect.h());
+							LB_GL(glScissor, texRect.x(), texRect.y(), texRect.w(), texRect.h());
+							LB_GL(glClear, GL_COLOR_BUFFER_BIT);
+							GUIApp::joint().u_displaySize = (vec2)(fSize)texRect.size();
+							assert((iSize)texRect.size() == v.view->m_globalLayer[v.layer].size());
+							iRect canvas(iCoord(0, 0), (iSize)texRect.size());
+							Context con(canvas.inset(v.view->m_layers[v.layer].overdraw()), canvas);
+							v.view->executeDraw(con, v.layer);
+							if (!v.view->m_isEnabled)
+								con.rect(canvas, Color(0.f, .5f));
+						}
 						v.view->m_layerDirty[v.layer] = false;
 					}
 				}
@@ -254,8 +310,14 @@ bool GUIApp::drawGraphics()
 	LB_GL(glClear, GL_COLOR_BUFFER_BIT);
 	LB_GL(glViewport, 0, 0, GUIApp::joint().display->sizePixels().w(), GUIApp::joint().display->sizePixels().h());
 	joint().u_displaySize = (fVector2)(fSize)GUIApp::joint().display->sizePixels() * vec2(1, -1);
+	if (m_showCachePage > -1)
 	{
-		if (stillDirty)
+		if (m_showCachePage < (int)m_cache.size())
+			Context().blit(m_cache[m_showCachePage].tx);
+	}
+	else
+	{
+		if (true || stillDirty)
 		{
 			// geometry is guaranteed to be in composite-draw-order.
 			unsigned cacheIndex = 0;
@@ -348,6 +410,19 @@ bool GUIApp::drawGraphics()
 #endif
 
 	return !stillDirty;
+}
+
+bool GUIApp::keyEvent(int _code, int _direction)
+{
+	if (_code >= 10 && _code <= 20)
+		if (_direction == 1)
+			m_showCachePage = _code - 10;
+		else
+			m_showCachePage = -1;
+	else
+		return false;
+	m_joint.display->repaint();
+	return true;
 }
 
 bool GUIApp::motionEvent(int _id, iCoord _pos, int _direction)

@@ -57,13 +57,13 @@ bool DirectionPickerBody::event(Event* _e)
 //static const float c_surroundWidth = 2;
 //static const float c_lightWidth = 4;
 
-vector<iMargin> DirectionPickerBody::prepareDraw()
+Layers DirectionPickerBody::prepareDraw()
 {
 	iSize lightWidth = GUIApp::joint().display->toPixels(fSize(c_lightWidth, c_lightWidth));
-	vector<iMargin> ret;
-	ret += iMargin();
+	Layers ret;
+	ret += Layer();
 	if (isEnabled())
-		ret += iMargin(lightWidth / 2, lightWidth - lightWidth / 2);
+		ret += Layer(iMargin(lightWidth / 2, lightWidth - lightWidth / 2), false);
 	return ret;
 }
 

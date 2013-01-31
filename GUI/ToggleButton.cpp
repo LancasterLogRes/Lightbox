@@ -88,6 +88,11 @@ ToggleButton ToggleButtonBody::checkedExclusive()
 	return ToggleButton(this);
 }
 
+Layers ToggleButtonBody::prepareDraw()
+{
+	return prepareDrawButton(isChecked());
+}
+
 void ToggleButtonBody::draw(Context const& _c, unsigned _l)
 {
 	drawButton(_c, _l, isChecked(), isDown() || isChecked());
