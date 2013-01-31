@@ -63,7 +63,7 @@ void BasicButtonBody::drawButton(Context const& _c, unsigned _l, bool _lit, bool
 		if (_inner)
 			_inner(inner);
 		else
-			_c.text(GUIApp::style().regular, inner.lerp(.5f, .5f), boost::algorithm::to_upper_copy(m_text), Color(m_color.hue(), m_color.sat() * .75f, m_color.value() * .75f).toRGBA());
+			_c.text(_lit ? GUIApp::style().bold : GUIApp::style().regular, inner.lerp(.5f, .5f), boost::algorithm::to_upper_copy(m_text), Color(m_color.hue(), m_color.sat() * .75f, m_color.value() * .75f).toRGBA());
 		if (!_down && _polish)
 		{
 			_c.rect(inner.lerp(0, 0, 1, .35f), Color(1.f, .05f));
@@ -71,7 +71,7 @@ void BasicButtonBody::drawButton(Context const& _c, unsigned _l, bool _lit, bool
 	}
 	else if (_l == 1 && _lit)
 	{
-		Color glow = Color(m_color.hue(), m_color.sat() * .95f, m_color.value() * 8.f, .75f);
+		Color glow = Color(m_color.hue(), m_color.sat() * .95f, m_color.value() * 8.f, lerp(m_color.sat(), .65f, .75f));
 		if (_inner)
 			_inner(inner);
 		else

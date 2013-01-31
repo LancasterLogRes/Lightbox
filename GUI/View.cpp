@@ -200,6 +200,14 @@ void Context::blit(Texture2D const& _tex, fCoord _pos) const
 	u.triangleStrip(4);
 }
 
+void Layer::update()
+{
+	setDirty();
+	setReadyForCache(false);
+	if (GUIApp::get() && GUIApp::joint().display)
+		GUIApp::joint().display->setOneOffAnimating();
+}
+
 ViewBody::ViewBody():
 	m_parent(nullptr),
 	m_references(0),
@@ -254,18 +262,10 @@ void ViewBody::clearChildren()
 void ViewBody::update(int _layer)
 {
 	if (_layer >= 0)
-	{
-		m_layerDirty[_layer] = true;
-		m_readyForCache[_layer] = false;
-	}
+		m_layers[_layer].update();
 	else
-		for (unsigned i = 0; i < m_layerDirty.size(); ++i)
-		{
-			m_layerDirty[i] = true;
-			m_readyForCache[i] = false;
-		}
-	if (GUIApp::get() && GUIApp::joint().display)
-		GUIApp::joint().display->setOneOffAnimating();
+		for (auto& l: m_layers)
+			l.update();
 }
 
 void ViewBody::setParent(View const& _p)
@@ -295,28 +295,28 @@ void ViewBody::setParent(View const& _p)
 	}
 }
 
-bool ViewBody::gatherDrawers(std::vector<ViewLayer>& _l, unsigned _layer, fCoord _o, bool _ancestorVisibleLayoutChanged)
+bool ViewBody::gatherDrawers(std::vector<ViewLayerPtr>& _l, unsigned _layer, fCoord _o, bool _ancestorVisibleLayoutChanged)
 {
 	Layers layers = prepareDraw();
 	if (m_layers.size() != layers.size())
 	{
 		m_visibleLayoutChanged = true;	// actually just the overdraw that has changed so this overkill, but at least it'll work.
-		m_layerDirty = vector<bool>(layers.size(), true);
-		m_readyForCache = vector<bool>(layers.size(), false);
-		m_globalLayer = vector<iRect>(layers.size());
+		m_layers = layers;
 	}
 	else
 		for (unsigned i = 0; i < layers.size(); ++i)
 			if (m_layers[i].overdraw() != layers[i].overdraw())
+			{
 				m_visibleLayoutChanged = true;	// actually just the overdraw that has changed so this overkill, but at least it'll work.
-	m_layers = layers;
+				m_layers[i] = layers[i];
+			}
 
 	bool ret = m_visibleLayoutChanged;
 
 	m_globalRectMM = m_geometry.translated(_o);
 	m_globalRect = GUIApp::joint().display->toPixels(m_globalRectMM);
 	for (unsigned i = 0; i < m_layers.size(); ++i)
-		m_globalLayer[i] = m_globalRect.outset(m_layers[i].overdraw());
+		m_layers[i].m_globalLayer = m_globalRect.outset(m_layers[i].overdraw());
 
 	// Visibility is inherited, so if we draw and have not had our visibility changed directly
 	// but an ancestor has, we must inherit that invalidity.
@@ -329,7 +329,7 @@ bool ViewBody::gatherDrawers(std::vector<ViewLayer>& _l, unsigned _layer, fCoord
 		// If we're going to draw, we need to flag ourselves as visible-layout-changed if us or
 		// any of our ancestors have had their layout visibly changed.
 		m_visibleLayoutChanged = _ancestorVisibleLayoutChanged;
-		_l += ViewLayer((ViewBody*)this, 0u);
+		_l += ViewLayerPtr((ViewBody*)this, 0u);
 	}
 	else
 		// If it can't be reset by the compositor because it's not in the view tree, then we'll
@@ -453,8 +453,8 @@ std::string Lightbox::toString(View const& _v, std::string const& _insert)
 	out << (_v->m_isEnabled ? "EN" : "--") << " "
 		<< (_v->m_isShown ? "VIS" : "hid") << " "
 		<< "*" << _v->m_layers.size() << " [";
-	for (auto i: _v->m_layerDirty)
-		out << (i ? "X " : "/");
+	for (auto const& i: _v->m_layers)
+		out << (i.isDirty() ? "X " : "/");
 	out	<< (_v->m_visibleLayoutChanged ? " LAY" : " lay") << "] "
 		<< _insert
 		<< _v->name() << ": "

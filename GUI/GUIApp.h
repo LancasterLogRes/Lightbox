@@ -60,7 +60,7 @@ private:
 	struct ImageCache
 	{
 		explicit ImageCache(uSize _ps);
-		bool fit(iRect _g, ViewLayer _v);
+		bool fit(iRect _g, ViewLayerPtr _v);
 
 		Framebuffer fb;
 		Texture2D tx;
@@ -68,7 +68,7 @@ private:
 		std::vector<float> collated;
 		unsigned nextfree;
 		std::multimap<unsigned, std::pair<unsigned, unsigned> > rows; // rowheight -> (ypos, width)
-		std::map<ViewLayer, CachePos> vs;
+		std::map<ViewLayerPtr, CachePos> vs;
 	};
 	std::vector<ImageCache> m_cache;
 	int m_showCachePage;

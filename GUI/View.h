@@ -142,17 +142,26 @@ template <class _T> _T& operator<<(_T& _out, ViewBody* _v)
 
 static unsigned const c_viewLayerCount = 2;
 
-LIGHTBOX_STRUCT(2, ViewLayer, ViewBody*, view, unsigned, layer);
-
 class Layer
 {
 	friend class GUIApp;
+	friend class ViewBody;
 
 public:
 	Layer(iMargin _overdraw = iMargin(), bool _glows = false, bool _dirty = true): m_overdraw(_overdraw), m_glows(_glows), m_dirty(_dirty), m_readyForCache(false) {}
 
 	bool glows() const { return m_glows; }
 	iMargin overdraw() const { return m_overdraw; }
+
+	void update();
+
+	// Private-ish stuff - less useful to classes outside GUIApp & View.
+	iRect globalLayer() const { return m_globalLayer; }
+	bool isDirty() const { return m_dirty; }
+	bool isReadyForCache() const { return m_readyForCache; }
+
+	void setDirty(bool _dirty = true) const { m_dirty = _dirty; }
+	void setReadyForCache(bool _ready = true) { m_readyForCache = _ready; }
 
 private:
 	iMargin m_overdraw;		///< The margin of overdraw that we wanted as of the last call to prepareDraw(), stored in pixels, for each active layer.
@@ -162,11 +171,26 @@ private:
 	iRect m_globalLayer;	///< Our full footprint in device coordinates; includes overdraw. Up to date at time of last call to gatherDrawers().
 };
 
+class ViewLayerPtr
+{
+public:
+	LIGHTBOX_STRUCT_BASE_2(ViewLayerPtr, ViewBody*, view, unsigned, layer)
+	LIGHTBOX_STRUCT_INTERNALS_2(ViewLayerPtr, ViewBody*, view, unsigned, layer)
+
+	inline Layer* get() const;
+	Layer& operator*() const { return *get(); }
+	Layer* operator->() const { return get(); }
+
+	inline void preDraw() const;
+	inline void draw(Context const& _c) const;
+};
+
 typedef std::vector<Layer> Layers;
 
 class ViewBody: public boost::noncopyable
 {
 	template <class _T, class _I> friend class ViewCreator;
+	friend class ViewLayerPtr;
 	friend class GUIApp;
 	friend class Context;
 	inline friend void intrusive_ptr_add_ref(ViewBody* _v);
@@ -311,7 +335,7 @@ protected:
 private:
 	void checkCache();
 	void cleanCache();
-	bool gatherDrawers(std::vector<ViewLayer>& _l, unsigned _layer, fCoord _o = fCoord(0, 0), bool _ancestorVisibileLayoutChanged = false);
+	bool gatherDrawers(std::vector<ViewLayerPtr>& _l, unsigned _layer, fCoord _o = fCoord(0, 0), bool _ancestorVisibileLayoutChanged = false);
 
 	void executeDraw(Context const& _c, unsigned _layer);
 	void initGraphicsRecursive() { if (!m_graphicsInitialized) { initGraphics(); m_graphicsInitialized = true; } for (auto const& c: m_children) c->initGraphicsRecursive(); }
@@ -334,9 +358,6 @@ private:
 	bool m_graphicsInitialized;			///< True if we have initialized graphics (with initGraphics()) and not subsequently finalized (with finiGraphics()).
 
 	Layers m_layers;					///< The definitions of each layer.
-	mutable std::vector<bool> m_layerDirty;	///< True if a redraw would result in a different canvas to the last. DEPRECATE
-	std::vector<bool> m_readyForCache;	///< True if we had a direct redraw but the cache is still invalid. DEPRECATE
-	std::vector<iRect> m_globalLayer;	///< Our full footprint in device coordinates; includes overdraw. Up to date at time of last call to gatherDrawers(). DEPRECATE
 
 	fRect m_globalRectMM;				///< Our basic footprint in device coordinates in mm; this doesn't include overdraw. Up to date at time of last call to gatherDrawers().
 	iRect m_globalRect;					///< Our basic footprint in device coordinates; this doesn't include overdraw. Up to date at time of last call to gatherDrawers().
@@ -351,6 +372,21 @@ inline void intrusive_ptr_release(ViewBody* _v)
 {
 	if (!--_v->m_references)
 		delete _v;
+}
+
+inline void ViewLayerPtr::preDraw() const
+{
+	view->preDraw(layer);
+}
+
+inline void ViewLayerPtr::draw(Context const& _c) const
+{
+	view->executeDraw(_c, layer);
+}
+
+inline Layer* ViewLayerPtr::get() const
+{
+	return &(view->m_layers[layer]);
 }
 
 template <class _Inherits, class _ViewBody>

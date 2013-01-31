@@ -9,6 +9,7 @@ varying vec4 v_color;
 
 vec4 hueToRgba(float hue)
 {
+	float l = 0.2;
 	float h = hue * 6.0;
 	if (h == 6.0)
 		h = 0.0;
@@ -20,6 +21,10 @@ vec4 hueToRgba(float hue)
 	float tone = 1.0 - t;	// or 1
 	q *= 0.3;				// or not
 	float qone = 1.0 - t;	// or 1
+	q *= l;
+	t *= l;
+	qone *= l;
+	tone *= l;
 	if (i == 0.0)
 		return vec4(tone, t, 0.0, 1.0);
 	if (i == 1.0)
@@ -32,7 +37,7 @@ vec4 hueToRgba(float hue)
 		return vec4(t, 0.0, tone, 1.0);
 	if (i == 5.0)
 		return vec4(qone, 0.0, q, 1.0);
-	return vec4(1.0, 0.0, 0.0, 1.0);
+	return vec4(tone, 0.0, 0.0, 1.0);
 }
 
 void main()

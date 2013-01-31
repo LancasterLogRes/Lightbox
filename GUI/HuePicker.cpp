@@ -49,6 +49,7 @@ void HuePickerBody::draw(Context const& _c, unsigned _l)
 	BasicButtonBody::drawButton(_c, _l, isChecked(), isDown() || isChecked(), [&](iRect inner)
 	{
 		iSize thumbPx = _c.toPixels(GUIApp::style().thumbSize / 2 + GUIApp::style().thumbOutline);
+		inner = inner.inset(thumbPx / 2.f);
 		iEllipse e(inner);
 		{
 			ProgramUser u(m_hueWheel);
