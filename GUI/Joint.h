@@ -15,7 +15,8 @@ struct Joint
 	void init(Display& _d);
 	void fini();
 
-	Color glow(Color _c) { return Color(_c.hue(), _c.sat() * .95f, _c.value() * 8.f, lerp(_c.sat(), .65f, glowAlpha)); }
+	Color glow(Color _c) const { return Color(_c.hue(), _c.sat() * .95f, _c.value() * 8.f, lerp(_c.sat(), .65f, glowAlpha)); }
+	Color mildGlow(Color _c) const { return _c.attenuated(1.f / (1 << glowLevels)).withConstantLight(); }
 
 	Display* display;
 	uSize displaySizePixels;

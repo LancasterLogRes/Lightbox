@@ -63,7 +63,7 @@ void HuePickerBody::draw(Context const& _c, unsigned _l)
 		{
 			iCoord p = e.pos() + iSize(fSize(-sin(m_hue * TwoPi), -cos(m_hue * TwoPi)) * fSize(e.radii() - thumbPx));
 			_c.disc(iEllipse(p, thumbPx), GUIApp::style().outlineColor);
-			_c.disc(iEllipse(p, _c.toPixels(GUIApp::style().thumbSize / 2)), Color::withConstantLight(m_hue, m_middle.sat(), m_middle.value() / GUIApp::joint().glowLevels));
+			_c.disc(iEllipse(p, _c.toPixels(GUIApp::style().thumbSize / 2)), GUIApp::joint().mildGlow(Color(m_hue, m_middle.sat(), m_middle.value())));
 		}
 	}, false);
 	return;

@@ -34,7 +34,7 @@ Color Color::withConstantLight(float _hue, float _sat, float _value, float _alph
 {
 	float ipart;
 	float fpart = modff(_hue / .16666f, &ipart);
-	float maxTotal = lerp(_sat, 3.f, (int)ipart % 2 ? 2 - fpart : (1 + fpart));
+	float maxTotal = lerp(_sat, 2.f, (int)ipart % 2 ? 2 - fpart : (1 + fpart));
 	return Color(_hue, _sat, _value / maxTotal, _alpha);
 }
 

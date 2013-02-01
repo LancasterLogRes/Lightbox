@@ -70,6 +70,7 @@ public:
 
 	static Color withConstantLight(float _hue, float _sat, float _value, float _alpha = 1.f);
 	Color withConstantLight(float _hue) const { return withConstantLight(_hue, m_sat, m_value, m_alpha); }
+	Color withConstantLight() const { return withConstantLight(m_hue, m_sat, m_value, m_alpha); }
 
 	Color& attenuate(float _x) { m_value *= _x; return *this; }
 	Color attenuated(float _x) const { return Color(m_hue, m_sat, m_value * _x, m_alpha); }

@@ -51,6 +51,8 @@ protected:
 	virtual void draw(Context const& _c, unsigned _layer);
 	virtual bool event(Event* _e);
 	virtual void tapped();
+	virtual void pushed() { setDown(); setLit(); }
+	virtual void released() { setDown(false); setLit(false); }
 	virtual fSize specifyMinimumSize(fSize) const;
 	virtual void initGraphics();
 

@@ -7,5 +7,7 @@ void ProgramUser::filterMerge(Texture2D const& _in)
 	uniform("u_tex") = _in;
 	attrib("a_position").setStaticData(quad.data(), 2, 0);
 	uniform("u_texturePitch") = vec2(1.f / _in.size().w(), 1.f / _in.size().h());
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	triangleStrip(4);
 }
