@@ -37,7 +37,8 @@ AppEngine::AppEngine(struct android_app* _app):
 		m_app->setState(foreign_vector<uint8_t>((unsigned char*)m_androidApp->savedState, m_androidApp->savedStateSize));
 }
 #elif LIGHTBOX_USE_XLIB | LIGHTBOX_USE_SDL
-AppEngine::AppEngine()
+AppEngine::AppEngine():
+	m_lastDrawTime(wallTime())
 {
 	s_this = this;
 }

@@ -24,6 +24,7 @@
 #include <vector>
 #include <list>
 #include <map>
+#include <unordered_map>
 #include <set>
 #include <string>
 #include <tuple>
@@ -152,6 +153,18 @@ S& streamout(S& _out, std::map<T, U> const& _v)
 	return _out << " }";
 }
 template <class T, class U> inline std::ostream& operator<<(std::ostream& _out, std::map<T, U> const& _e) { streamout(_out, _e); return _out; }
+
+template <class S, class T, class U>
+S& streamout(S& _out, std::unordered_map<T, U> const& _v)
+{
+	if (_v.empty())
+		return _out << "{}";
+	int i = 0;
+	foreach (auto p, _v)
+		_out << (!(i++) ? "{ " : "; ") << p.first << " => " << p.second;
+	return _out << " }";
+}
+template <class T, class U> inline std::ostream& operator<<(std::ostream& _out, std::unordered_map<T, U> const& _e) { streamout(_out, _e); return _out; }
 
 template <class S, class T>
 S& streamout(S& _out, std::set<T> const& _v)

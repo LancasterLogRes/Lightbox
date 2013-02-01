@@ -50,6 +50,9 @@ void Joint::init(Display& _d)
 
 	flatGeometry = flat.attrib("geometry");
 	shadedGeometry = shaded.attrib("geometry");
+
+	glowLevels = Lightbox::log2(ceil(_d.toPixelsF(fSize(0, 2)).h()));
+	glowAlpha = 1.f - (glowLevels - 1) * .125f;
 }
 
 void Joint::fini()

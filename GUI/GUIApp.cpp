@@ -151,28 +151,20 @@ bool GUIApp::drawGraphics()
 
 	bool stillDirty = false;
 
-	vector<ViewLayerPtr> drawers;
-	bool visibleLayoutChanged = m_root->gatherDrawers(drawers, 0);
+	vector<ViewLayerPtr> drawingViews;
+	bool visibleLayoutChanged = m_root->gatherDrawers(drawingViews, 0);
 
-	// Add in extra layers
-	unsigned firstLayerDrawers = drawers.size();
+	// Add in layers
+	vector<ViewLayerPtr> drawingLayers;
 	unsigned activeLayers = 1;
 	for (unsigned l = 0; l < activeLayers; ++l)
-	{
-		unsigned vi = 0;
-		for (ViewLayerPtr v: drawers)
+		for (ViewLayerPtr v: drawingViews)
+		{
 			if (l == 0)
 				activeLayers = max<unsigned>(activeLayers, v.view->m_layers.size());
-			else if (l < v.view->m_layers.size())
-			{
-				ViewLayerPtr vp(v.view, l);
-				drawers.push_back(vp);
-
-				++vi;
-				if (vi == firstLayerDrawers)
-					break;
-			}
-	}
+			if (l < v.view->m_layers.size())
+				drawingLayers.push_back(ViewLayerPtr(v.view, l));
+		}
 
 	bool fraggedRender = false;
 	if (visibleLayoutChanged)
@@ -180,7 +172,7 @@ bool GUIApp::drawGraphics()
 		// At least one resized drawer - reset and redraw everything (in the future we might attempt a more evolutionary cache design).
 		m_cache.clear();
 
-		for (ViewLayerPtr v: drawers)
+		for (ViewLayerPtr v: drawingLayers)
 		{
 			v->setDirty();
 			v.view->m_visibleLayoutChanged = false;
@@ -201,7 +193,7 @@ bool GUIApp::drawGraphics()
 		}
 	}
 
-	for (ViewLayerPtr const& vl: drawers)
+	for (ViewLayerPtr const& vl: drawingLayers)
 		if (vl->isDirty() || !vl->isShown())
 			fraggedRender = true;
 
@@ -222,26 +214,26 @@ bool GUIApp::drawGraphics()
 				ViewLayerPtr v = i.first;
 				if (!v->isShown())
 				{
-					cnote << "SKIP:" << v;
+//					cnote << "SKIP:" << v;
 					renderDirect[cacheIndex] += v;
 				}
 				else if (v->isDirty() && (v->isReadyForCache() || v->glows()))
 				{
-					cnote << "RENDER:" << v;
+//					cnote << "RENDER:" << v;
 					v.preDraw();
 					v->setReadyForCache();
 					willRenderToTexture = true;
 				}
 				else if (v->isDirty())
 				{
-					cnote << "DIRECT:" << v;
+//					cnote << "DIRECT:" << v;
 					v.preDraw();
 					renderDirect[cacheIndex] += v;
 					v->setReadyForCache();
 					stillDirty = true;
 				}
-				else
-					cnote << "CACHED:" << v;
+//				else
+//					cnote << "CACHED:" << v;
 			}
 
 			sort(renderDirect[cacheIndex].begin(), renderDirect[cacheIndex].end(), [&](ViewLayerPtr a, ViewLayerPtr b) { return cache.vs[a].index < cache.vs[b].index; });
@@ -277,7 +269,7 @@ bool GUIApp::drawGraphics()
 
 							// Filter base texture.
 							LB_GL(glBlendFunc, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-							int glowAmount = Lightbox::log2(ceil(m_joint.display->toPixelsF(fSize(0, 2)).h()));
+							int glowAmount = m_joint.glowLevels;
 							vector<Texture2D> levels(glowAmount);
 							for (unsigned i = 0; i < levels.size(); ++i)
 								levels[i] = (i ? levels[i - 1] : baseTex).filter(m_joint.pass, Texture2D(baseTex.size() / (1 << i)));

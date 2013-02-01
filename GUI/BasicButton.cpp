@@ -87,7 +87,7 @@ void BasicButtonBody::drawButton(Context const& _c, unsigned _l, bool _down, fun
 	}
 	else if (_l == 1)
 	{
-		Color glow = Color(m_color.hue(), m_color.sat() * .95f, m_color.value() * 8.f, lerp(m_color.sat(), .65f, .75f));
+		Color glow = GUIApp::joint().glow(m_color);
 		if (_inner)
 			_inner(inner);
 		else

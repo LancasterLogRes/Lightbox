@@ -208,11 +208,13 @@ void Layer::refresh()
 ViewBody::ViewBody():
 	m_parent(nullptr),
 	m_references(0),
+	m_constructionReference(false),
 	m_layout(nullptr),
 	m_childIndex(0),
 	m_stretch(1.f),
 	m_isShown(true),
 	m_isEnabled(true),
+	m_visibleLayoutChanged(true),
 	m_graphicsInitialized(false),
 	m_layers(1)
 {
@@ -256,7 +258,11 @@ void ViewBody::clearChildren()
 void ViewBody::update(int _layer)
 {
 	if (_layer >= 0)
-		m_layers[_layer].update();
+	{
+		if (_layer < (int)m_layers.size())
+			m_layers[_layer].update();
+			// else graphics might not yet be initialized.
+	}
 	else
 		for (auto& l: m_layers)
 			l.update();
@@ -432,6 +438,19 @@ string ViewBody::name() const
 	return ret;
 }
 
+/*namespace Lightbox
+{
+template <class _S> _S& operator<<(_S& _out, boost::any const& _a)
+{
+	try	{ _out << boost::any_cast<int>(_a); return _out; } catch (...) {}
+	try	{ _out << boost::any_cast<unsigned>(_a); return _out; } catch (...) {}
+	try	{ _out << boost::any_cast<char>(_a); return _out; } catch (...) {}
+	try	{ _out << boost::any_cast<string>(_a); return _out; } catch (...) {}
+	_out << "#Unknown";
+	return _out;
+}
+}*/
+
 std::string Lightbox::toString(View const& _v, std::string const& _insert)
 {
 	std::stringstream out;
@@ -440,13 +459,19 @@ std::string Lightbox::toString(View const& _v, std::string const& _insert)
 		<< (_v->m_graphicsInitialized ? "GFX " : "___ ")
 		<< "*" << _v->m_layers.size() << " [";
 	for (auto const& i: _v->m_layers)
-		out << (i.isDirty() ? i.isShown() ? "!" : "-" : i.isShown() ? "+" : "_");
+		out << (i.isDirty() ? i.isShown() ? "!" : "_" : i.isShown() ? "*" : "+");
 	out	<< (_v->m_visibleLayoutChanged ? " LAY" : " lay") << "] "
 		<< _insert
 		<< _v->name() << ": "
 //		<< _v->minimumSize() << " -> "
 //		<< _v->maximumSize() << "  "
 		<< _v->geometry() << " (" << _v->m_children.size() << " children)";
+	out << (void*)_v.get();
+	for (auto const& i: _v->m_misc)
+	{
+		try	{ int x = boost::any_cast<int>(i.second); out << " " << i.first << "=" << x; } catch (...) {}	// i.first (string) BAD!!!
+		try	{ string x = boost::any_cast<string>(i.second); out << " " << i.first << "=" << x; } catch (...) {}
+	}
 	return out.str();
 }
 

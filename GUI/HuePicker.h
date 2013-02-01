@@ -19,7 +19,7 @@ public:
 	float hue() const { return m_hue; }
 
 	void setHue(float _h, bool _userEvent = false) { if (m_hue != _h) { m_hue = _h; hueChanged(_userEvent); } }
-	void setMiddle(Color _c) { if (m_middle != _c) { m_middle = _c; update(); } }
+	void setMiddle(Color _c) { if (m_middle != _c) { m_middle = _c; update(1); } }
 	void setOnHueChanged(EventHandler const& _t) { m_onHueChanged = _t; assert(!!m_onHueChanged); }
 
 	HuePicker withOnHueChanged(EventHandler const& _t) { setOnHueChanged(_t); return this; }
@@ -36,7 +36,7 @@ protected:
 	virtual fSize specifyMaximumSize(fSize) const;
 	virtual fSize specifyFit(fSize _space) const;
 
-	virtual void hueChanged(bool _userEvent) { if (m_onHueChanged && _userEvent) m_onHueChanged(this); update(); }
+	virtual void hueChanged(bool _userEvent) { if (m_onHueChanged && _userEvent) m_onHueChanged(this); update(1); }
 
 private:
 	float m_hue;

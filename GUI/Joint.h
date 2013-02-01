@@ -1,5 +1,6 @@
 #pragma once
 #include <LGL.h>
+#include <Common/Color.h>
 #include "Font.h"
 
 namespace Lightbox
@@ -13,6 +14,8 @@ struct Joint
 
 	void init(Display& _d);
 	void fini();
+
+	Color glow(Color _c) { return Color(_c.hue(), _c.sat() * .95f, _c.value() * 8.f, lerp(_c.sat(), .65f, glowAlpha)); }
 
 	Display* display;
 	uSize displaySizePixels;
@@ -34,6 +37,8 @@ struct Joint
 	Attrib shadedGeometry;
 	PagedUniform u_displaySize;
 	PagedUniform u_minusY;
+	unsigned glowLevels;
+	float glowAlpha;
 };
 
 }

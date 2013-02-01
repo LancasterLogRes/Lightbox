@@ -10,6 +10,7 @@ template <class Numeric>
 class Margin: public CalcQuad<Numeric, Margin<Numeric> >
 {
 	typedef CalcQuad<Numeric, Margin<Numeric> > Super;
+	friend class CalcQuad<Numeric, Margin<Numeric> >;
 
 public:
 	typedef Size<Numeric> xSize;
@@ -41,7 +42,11 @@ public:
 	Numeric extraWidth() const { return m_x + m_z; }
 	Numeric extraHeight() const { return m_y + m_w; }
 
+	using Super::operator-;
+
 private:
+	Margin(Super const& _s): Super(_s) {}
+	Margin(typename Super::Super const& _s): Super(_s) {}
 	using Super::compare;
 	using Super::m_x;
 	using Super::m_y;

@@ -59,12 +59,11 @@ void HuePickerBody::draw(Context const& _c, unsigned _l)
 			_c.disc(e.inset(thumbPx / 2));
 		}
 		_c.disc(e.inset(thumbPx * 3 / 2), Black);
-
-		iCoord p = e.pos() + iSize(fSize(-sin(m_hue * TwoPi), -cos(m_hue * TwoPi)) * fSize(e.radii() - thumbPx));
-		if (isChecked())
+		if (_l)
 		{
+			iCoord p = e.pos() + iSize(fSize(-sin(m_hue * TwoPi), -cos(m_hue * TwoPi)) * fSize(e.radii() - thumbPx));
 			_c.disc(iEllipse(p, thumbPx), GUIApp::style().outlineColor);
-			_c.disc(iEllipse(p, _c.toPixels(GUIApp::style().thumbSize / 2)), Color::withConstantLight(m_hue, m_middle.sat(), m_middle.value() / 3.f));
+			_c.disc(iEllipse(p, _c.toPixels(GUIApp::style().thumbSize / 2)), Color::withConstantLight(m_hue, m_middle.sat(), m_middle.value() / GUIApp::joint().glowLevels));
 		}
 	}, false);
 	return;

@@ -59,7 +59,17 @@ bool DirectionPickerBody::event(Event* _e)
 
 void DirectionPickerBody::initGraphics()
 {
-	setLayers({{ Layer(), Layer(iMargin(), true)}});
+	Layers l = BasicButtonBody::layers();
+	iSize surroundWidth = GUIApp::joint().display->toPixels(fSize(c_surroundWidth, c_surroundWidth));
+	iSize lightWidth = GUIApp::joint().display->toPixels(fSize(c_lightWidth, c_lightWidth));
+	bool haveLeft = m_grouping & ForceLeft;
+	bool haveRight = m_grouping & ForceRight;
+	bool haveTop = m_grouping & ForceAbove;
+	bool haveBottom = m_grouping & ForceBelow;
+	iMargin surroundMargin(haveLeft ? 0 : surroundWidth.w(), haveTop ? 0 : surroundWidth.h(), haveRight ? 0 : surroundWidth.w(), haveBottom ? 0 : surroundWidth.h());
+	iMargin lightMargin(lightWidth.w() / (haveLeft ? 2 : 1), lightWidth.h() / (haveTop ? 2 : 1), lightWidth.w() - (haveRight ? lightWidth.w() / 2 : 0), lightWidth.h() - (haveBottom ? lightWidth.h() / 2 : 0));
+	l.push_back(Layer(-surroundMargin - lightMargin, true));
+	setLayers(l);
 }
 
 void DirectionPickerBody::draw(Context const& _c, unsigned _l)
@@ -79,7 +89,7 @@ void DirectionPickerBody::draw(Context const& _c, unsigned _l)
 	iRect innerPx = outerPx.inset(lightMargin);
 
 	fRect innerMM(GUIApp::joint().display->fromPixels(innerPx));
-	Color glow = Color(m_color.hue(), m_color.sat() * .95f, m_color.value() * 8.f, lerp(m_color.sat(), .65f, .75f));
+	Color glow = GUIApp::joint().glow(m_color);
 
 	if (_l == 0)
 	{
@@ -101,7 +111,10 @@ void DirectionPickerBody::draw(Context const& _c, unsigned _l)
 	}
 	else if (_l == 1)
 	{
-
+		_c.rectOutline(innerPx.outset(lightWidth / 4), iMargin(lightWidth / 2), glow);
+	}
+	else if (_l == 2 || _l == 3)
+	{
 		if (m_mode == Circle || m_mode == Fill)
 			_c.circle(m_direction.transformedInto(innerMM), m_mode == Circle ? 2.f : 1.f, glow);
 
@@ -121,8 +134,6 @@ void DirectionPickerBody::draw(Context const& _c, unsigned _l)
 
 		_c.disc(fEllipse(innerMM.lerp(m_direction.pos()), GUIApp::style().thumbSize / 2 + GUIApp::style().thumbOutline), GUIApp::style().outlineColor);
 		_c.disc(fEllipse(innerMM.lerp(m_direction.pos()), GUIApp::style().thumbSize / 2), glow);
-
-		_c.rectOutline(innerPx.outset(lightWidth / 4), iMargin(lightWidth / 2), glow);
 	}
 }
 

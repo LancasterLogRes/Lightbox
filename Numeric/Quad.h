@@ -117,7 +117,7 @@ public:
 	R operator*(T _x) const { return R(scaled(_x)); }
 	R operator/(T _x) const { return R(slashed(_x)); }
 
-	R operator-() const { return R(scaled(T(-1))); }
+	R operator-() const { auto r = scaled(T(-1)); return (R&)r; }
 
 	inline friend R operator*(T _a, R _b) { return R(_b.scaled(_a)); }
 	inline friend R operator/(T _a, R _b) { return R(_b.slashed(_a)); }
