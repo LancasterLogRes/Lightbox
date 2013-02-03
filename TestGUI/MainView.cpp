@@ -2,7 +2,6 @@
 #include <GUI/TextLabel.h>
 #include <GUI/ToggleButton.h>
 #include <GUI/GUIApp.h>
-#include "Blur.h"
 #include "Global.h"
 #include "MainView.h"
 using namespace std;
@@ -97,9 +96,9 @@ private:
 
 		// Filter it.
 		m_baseTex = tex;
-		m_hblur = LB_PROGRAM_ASYM(Blur_glsl, hblur6, blur6);
-		m_vblur = LB_PROGRAM_ASYM(Blur_glsl, vblur6, blur6);
-		m_pass = LB_PROGRAM(Blur_glsl, pass);
+		m_hblur = Program("Blur.glsl", "hblur6.vert", "blur6.frag");
+		m_vblur = Program("Blur.glsl", "vblur6.vert", "blur6.frag");
+		m_pass = Program("Blur.glsl", "pass");
 
 		GUIApp::joint().display->setAnimating();
 	}

@@ -2,7 +2,6 @@
 #include <LGL.h>
 #include "Global.h"
 #include "GUIApp.h"
-#include "HueWheel.h"
 #include "HuePicker.h"
 using namespace std;
 using namespace Lightbox;
@@ -17,9 +16,9 @@ HuePickerBody::~HuePickerBody()
 
 void HuePickerBody::initGraphics()
 {
-	m_hueWheel = LB_PROGRAM(HueWheel_glsl, huewheel);
+	m_hueWheel = Program("HueWheel.glsl");
 	m_hueWheel.tie(GUIApp::joint().uniforms);
-	m_hueWheelDodge = LB_PROGRAM_ASYM(HueWheel_glsl, huewheeldodge, huewheel);
+	m_hueWheelDodge = Program("HueWheel.glsl", "dodge", "vert");
 	m_hueWheelDodge.tie(GUIApp::joint().uniforms);
 	Super::initGraphics();
 }

@@ -1,7 +1,6 @@
 #include <Common/Global.h>
 #include "Global.h"
 #include "GUIApp.h"
-#include "LightBar.h"
 #include "LightPicker.h"
 using namespace std;
 using namespace Lightbox;
@@ -18,7 +17,7 @@ LightPickerBody::~LightPickerBody()
 
 void LightPickerBody::initGraphics()
 {
-	m_lightBar = LB_PROGRAM(LightBar_glsl, lightbar);
+	m_lightBar = Program("LightBar.glsl");
 	m_lightBar.tie(GUIApp::joint().uniforms);
 	setLayers({{Layer(), Layer(iMargin(), true)}});
 }

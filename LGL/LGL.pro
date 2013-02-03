@@ -23,10 +23,3 @@ HEADERS += ProgramFace.h ShaderFace.h Program.h \
     GLMap.h \
     Metrics.h \
     Framebuffer.h
-
-RES += Shaders.resources
-
-OTHER_FILES += \
-    Shaders.resources \
-    Font.frag \
-    Font.vert

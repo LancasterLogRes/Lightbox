@@ -1,5 +1,18 @@
 #include "Program.h"
+#include "Shader.h"
 using namespace Lightbox;
+
+Program::Program(std::string const& _file):
+	Program(Shader::vertex(Resources::find(_file, "vert")), Shader::fragment(Resources::find(_file, "frag")))
+{}
+
+Program::Program(std::string const& _file, std::string const& _base):
+	Program(Shader::vertex(Resources::find(_file, _base + ".vert")), Shader::fragment(Resources::find(_file, _base + ".frag")))
+{}
+
+Program::Program(std::string const& _file, std::string const& _vert, std::string const& _frag):
+	Program(Shader::vertex(Resources::find(_file, _vert)), Shader::fragment(Resources::find(_file, _frag)))
+{}
 
 void ProgramUser::filterMerge(Texture2D const& _in)
 {
@@ -11,3 +24,4 @@ void ProgramUser::filterMerge(Texture2D const& _in)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	triangleStrip(4);
 }
+

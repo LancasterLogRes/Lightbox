@@ -2,7 +2,7 @@ TEMPLATE = lib
 include ( ../Common.pri )
 
 LIBS += $$GFX_LIBS -lpng -lz
-LB_RES += Shaders.glsl HueWheel.glsl LightBar.glsl ubuntu_r.ttf ubuntu_b.ttf
+RES += Shaders.glsl HueWheel.glsl LightBar.glsl ubuntu_r.ttf ubuntu_b.ttf
 
 SOURCES += \
     View.cpp \

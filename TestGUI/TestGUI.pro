@@ -11,7 +11,7 @@ android: LIBS += $$LIBSTL -llog -landroid
 INCLUDEPATH += $${DESTDIR}
 resource_compiler.CONFIG += target_predeps
 
-LB_RES2 += Blur.glsl
+RES += Blur.glsl
 
 OTHER_FILES += AndroidManifest.xml \
     Blur.glsl

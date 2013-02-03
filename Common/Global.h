@@ -21,6 +21,7 @@
 #pragma once
 
 #include <vector>
+#include <unordered_map>
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -381,10 +382,23 @@ public:
 	std::stringstream sstr;
 };
 
-#define LB_R(X) foreign_vector<uint8_t const>(X, X ## _len)
-#define LB_RES(X, N) Lightbox::subresource(foreign_vector<uint8_t const>(X, X ## _len), #N)
-
 foreign_vector<uint8_t const> subresource(foreign_vector<uint8_t const> _data, std::string const& _name);
+
+class Resources
+{
+public:
+	static Resources* get() { if (!s_this) s_this = new Resources; return s_this; }
+
+	static bool add(std::string const& _s, foreign_vector<uint8_t const> const& _r) { get()->m_resources[_s] = _r; return true; }
+	static std::unordered_map<std::string, foreign_vector<uint8_t const> > const& map() { return get()->m_resources; }
+	static bool contains(std::string const& _name) { return get()->m_resources.count(_name); }
+	static foreign_vector<uint8_t const> find(std::string const& _name) { try { return get()->m_resources.at(_name); } catch(...) { return foreign_vector<uint8_t const>(); } }
+	static foreign_vector<uint8_t const> find(std::string const& _name, std::string const& _section) { try { return subresource(get()->m_resources.at(_name), _section); } catch(...) { return foreign_vector<uint8_t const>(); } }
+
+private:
+	static Resources* s_this;
+	std::unordered_map<std::string, foreign_vector<uint8_t const> > m_resources;
+};
 
 template <bool _AutoSpacing = true>
 class SysLogOutputStream

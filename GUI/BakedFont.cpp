@@ -1,7 +1,6 @@
 #define STB_TRUETYPE_IMPLEMENTATION
 #include "stb_truetype.h"
 #include "BakedFont.h"
-#include "Shaders.h"
 #include "GUIApp.h"
 using namespace std;
 using namespace Lightbox;
@@ -65,7 +64,7 @@ BakedFont::BakedFont(Font const& _f, FontInfo const& _info): m_f(_f), m_info(_in
 {
 	float pxSize(GUIApp::joint().display->toUnalignedPixels(fSize(0, _f.mmSize())).height());
 
-	m_program = LB_PROGRAM(Shaders_glsl, font);
+	m_program = Program("Shaders.glsl", "font");
 	m_program.tie(GUIApp::joint().uniforms);
 
 	m_index = m_program.attrib("a_index");

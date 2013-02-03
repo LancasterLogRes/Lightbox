@@ -3,10 +3,8 @@
 #include <Common/Global.h>
 #include <LGL.h>
 #include <App.h>
-#include "Fonts.h"
 #include "Global.h"
 #include "View.h"
-#include "Shaders.h"
 #include "Frame.h"
 #include "GUIApp.h"
 using namespace std;
@@ -22,8 +20,8 @@ void Style::generateColors(Color _fore)
 GUIApp::GUIApp():
 	m_showCachePage(-1)
 {
-	m_fontManager.registerData(FontDefinition("Ubuntu", false), LB_R(ubuntu_r_ttf));
-	m_fontManager.registerData(FontDefinition("Ubuntu", true), LB_R(ubuntu_b_ttf));
+	m_fontManager.registerData(FontDefinition("Ubuntu", false), Resources::find("ubuntu_r.ttf"));
+	m_fontManager.registerData(FontDefinition("Ubuntu", true), Resources::find("ubuntu_b.ttf"));
 
 	m_root = FrameBody::create();
 

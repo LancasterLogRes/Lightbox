@@ -14,9 +14,6 @@
 namespace Lightbox
 {
 
-#define LB_PROGRAM(_FILE, _NAME) Program(Shader::vertex(LB_RES(_FILE, _NAME.vert)), Shader::fragment(LB_RES(_FILE, _NAME.frag)))
-#define LB_PROGRAM_ASYM(_FILE, _VERTNAME, _FRAGNAME) Program(Shader::vertex(LB_RES(_FILE, _VERTNAME.vert)), Shader::fragment(LB_RES(_FILE, _FRAGNAME.frag)))
-
 class Program: public Pimpl<ProgramFace>
 {
 	friend class ProgramFace;
@@ -24,6 +21,9 @@ class Program: public Pimpl<ProgramFace>
 
 public:
 	Program() {}
+	explicit Program(std::string const& _file);						///< Sections "vert" & "frag" in file @p _file
+	Program(std::string const& _file, std::string const& _base);	///< Sections "@p _base .vert" & "@p _base .frag" in file @p _file
+	Program(std::string const& _file, std::string const& _vert, std::string const& _frag);	///< Sections @p _vert & @p _frag in file @p _file
 	Program(Shader const& _vs, Shader const& _fs):
 		Pimpl<ProgramFace>(new ProgramFace)
 	{

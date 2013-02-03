@@ -1,7 +1,6 @@
 #include <Common/Global.h>
 #include <App/Display.h>
 #include "Global.h"
-#include "Shaders.h"
 #include "Joint.h"
 using namespace std;
 using namespace Lightbox;
@@ -26,13 +25,13 @@ void Joint::init(Display& _d)
 		uc[2 * i + 1] = cos(i / 72.f * TwoPi);
 	unitCircle72 = Buffer<float>(uc);
 
-	shaded = LB_PROGRAM(Shaders_glsl, view);
-	flat = LB_PROGRAM(Shaders_glsl, flat);
-	texture = LB_PROGRAM(Shaders_glsl, texture);
-	general = LB_PROGRAM(Shaders_glsl, general);
-	hblur6 = LB_PROGRAM_ASYM(Shaders_glsl, hblur6, hblur6);
-	vblur6 = LB_PROGRAM_ASYM(Shaders_glsl, vblur6, vblur6);
-	pass = LB_PROGRAM(Shaders_glsl, pass);
+	shaded = Program("Shaders.glsl", "view");
+	flat = Program("Shaders.glsl", "flat");
+	texture = Program("Shaders.glsl", "texture");
+	general = Program("Shaders.glsl", "general");
+	hblur6 = Program("Shaders.glsl", "hblur6.vert", "hblur6.frag");
+	vblur6 = Program("Shaders.glsl", "vblur6.vert", "vblur6.frag");
+	pass = Program("Shaders.glsl", "pass");
 
 	shaded.tie(uniforms);
 	flat.tie(uniforms);

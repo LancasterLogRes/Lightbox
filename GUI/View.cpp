@@ -5,7 +5,6 @@
 #include <Common/StreamIO.h>
 #include "GUIApp.h"
 #include "View.h"
-#include "Shaders.h"
 using namespace std;
 using namespace Lightbox;
 

@@ -1,4 +1,4 @@
-//@huewheel.vert
+//@vert
 uniform vec2 displaySize;
 vec2 halfDisplaySize = displaySize / vec2(2.0);
 
@@ -40,7 +40,7 @@ void main()
 	gl_Position.xy = (offsetScale.xy + geometry * offsetScale.zw) / halfDisplaySize - sign(displaySize);
 }
 
-//@huewheeldodge.vert
+//@dodge.vert
 uniform vec2 displaySize;
 vec2 halfDisplaySize = displaySize / vec2(2.0);
 
@@ -89,7 +89,7 @@ void main()
 	gl_Position.xy = (offsetScale.xy + geometry * offsetScale.zw) / halfDisplaySize - sign(displaySize);
 }
 
-//@huewheel.frag
+//@frag
 precision mediump float;
 varying vec4 v_color;
 
