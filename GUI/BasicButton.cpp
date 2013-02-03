@@ -7,9 +7,10 @@
 using namespace std;
 using namespace Lightbox;
 
-BasicButtonBody::BasicButtonBody(std::string const& _text, Color _c, Grouping _grouping):
+BasicButtonBody::BasicButtonBody(std::string const& _text, Color _c, Font _f, Grouping _grouping):
 	m_text(_text),
 	m_color(_c),
+	m_font(_f),
 	m_grouping(_grouping),
 	m_isLit(false),
 	m_isDown(false)
@@ -79,7 +80,7 @@ void BasicButtonBody::drawButton(Context const& _c, unsigned _l, bool _down, fun
 		if (_inner)
 			_inner(inner);
 		else
-			_c.text(_down ? GUIApp::style().bold : GUIApp::style().regular, inner.lerp(.5f, .5f), boost::algorithm::to_upper_copy(m_text), Color(m_color.hue(), m_color.sat() * .75f, m_color.value() * .75f).toRGBA());
+			_c.text(m_font.isValid() ? m_font : _down ? GUIApp::style().bold : GUIApp::style().regular, inner.lerp(.5f, .5f), boost::algorithm::to_upper_copy(m_text), Color(m_color.hue(), m_color.sat() * .75f, m_color.value() * .75f).toRGBA());
 		if (!_down && _polish)
 		{
 			_c.rect(inner.lerp(0, 0, 1, .35f), Color(1.f, .05f));
@@ -91,7 +92,7 @@ void BasicButtonBody::drawButton(Context const& _c, unsigned _l, bool _down, fun
 		if (_inner)
 			_inner(inner);
 		else
-			_c.text(GUIApp::style().bold, inner.lerp(.5f, .5f), boost::algorithm::to_upper_copy(m_text), glow.toRGBA());
+			_c.text(m_font.isValid() ? m_font : GUIApp::style().bold, inner.lerp(.5f, .5f), boost::algorithm::to_upper_copy(m_text), glow.toRGBA());
 		_c.rectOutline(inner.outset(lightWidth / 4), iMargin(lightWidth / 2), glow);
 	}
 }

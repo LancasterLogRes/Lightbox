@@ -44,7 +44,7 @@ public:
 	BasicButton withGrouping(Grouping _g) { setGrouping(_g); return this; }
 
 protected:
-	BasicButtonBody(std::string const& _text = std::string(), Color _c = White, Grouping _grouping = NoGrouping);
+	BasicButtonBody(std::string const& _text = std::string(), Color _c = White, Font _f = Font(), Grouping _grouping = NoGrouping);
 
 	void drawButton(Context const& _c, unsigned _l, bool _down, std::function<void(iRect)> const& _inner = std::function<void(iRect)>(), bool _polish = true);
 
@@ -60,6 +60,7 @@ private:
 	std::string m_text;
 	EventHandler m_onTapped;
 	Color m_color;
+	Font m_font;
 	Grouping m_grouping;
 
 	bool m_isLit;

@@ -20,20 +20,17 @@ void Style::generateColors(Color _fore)
 GUIApp::GUIApp():
 	m_showCachePage(-1)
 {
-	m_fontManager.registerData(FontDefinition("Ubuntu", false), Resources::find("ubuntu_r.ttf"));
-	m_fontManager.registerData(FontDefinition("Ubuntu", true), Resources::find("ubuntu_b.ttf"));
-
 	m_root = FrameBody::create();
 
 	m_style.fore = Color(.5f);
 	m_style.back = Color(0.f);
 	m_style.high = Color(1.f);
-	m_style.big = Font(20, FontDefinition("Ubuntu", false));
-	m_style.bigBold = Font(20, FontDefinition("Ubuntu", true));
-	m_style.regular = Font(17, FontDefinition("Ubuntu", false));
-	m_style.bold = Font(17, FontDefinition("Ubuntu", true));
-	m_style.small = Font(13, FontDefinition("Ubuntu", false));
-	m_style.smallBold = Font(13, FontDefinition("Ubuntu", true));
+	m_style.big = Font(20, FontDefinition("ubuntu", false));
+	m_style.bigBold = Font(20, FontDefinition("ubuntu", true));
+	m_style.regular = Font(17, FontDefinition("ubuntu", false));
+	m_style.bold = Font(17, FontDefinition("ubuntu", true));
+	m_style.small = Font(13, FontDefinition("ubuntu", false));
+	m_style.smallBold = Font(13, FontDefinition("ubuntu", true));
 	m_style.thumbSize = fSize(40, 40);
 	m_style.thumbOutline = 2;
 	m_style.outlineColor = Black;
@@ -412,7 +409,7 @@ bool GUIApp::drawGraphics()
 	Context con(rr, rr);
 	iRect infoRect(rr.bottomRight() - iCoord(200, 54), iSize(190, 44));
 	con.rect(infoRect.outset(3), Color(1.f, .5f));
-	Font f(ByPixels, 16, "Ubuntu");
+	Font f(ByPixels, 16, "ubuntu");
 	iCoord p = infoRect.topLeft();
 	f.draw(p, info, RGBA::Black, AtTop|AtLeft);
 	info = toString(g_metrics.m_useProgramCount) + "/" + toString(g_metrics.m_drawCount);

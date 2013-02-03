@@ -33,7 +33,7 @@ public:
 	void toggle(bool _userEvent = false) { setChecked(!isChecked(), _userEvent); }
 
 protected:
-	ToggleButtonBody(std::string const& _text = std::string(), Color _c = White, Grouping _grouping = NoGrouping);
+	ToggleButtonBody(std::string const& _text = std::string(), Color _c = White, Font _f = Font(), Grouping _grouping = NoGrouping);
 
 	virtual void pushed() { setDown(true); }
 	virtual void released() {}

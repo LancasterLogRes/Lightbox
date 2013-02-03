@@ -209,7 +209,7 @@ inline_resource_compiler2.input = RES
 inline_resource_compiler2.commands = \
 	echo '\'$${LITERAL_HASH}include <Common/Global.h>\'' > ${QMAKE_FILE_OUT} &&\
 	for i in ${QMAKE_FILE_IN}; do \
-		f=`echo "\$\$i" | sed 's:.*/::g' | sed s/\\\\\\\\./_/g'` &&\
+		f=`echo "\$\$i" | sed 's:.*/::g' | sed s/[\\\\\\\\.-]/_/g'` &&\
 		echo '\"extern uint8_t const _binary_\$\${f}_start;'\" | sed s/\\\\./_/ >> ${QMAKE_FILE_OUT} &&\
 		echo '\"extern uint8_t const _binary_\$\${f}_end;'\" | sed s/\\\\./_/ >> ${QMAKE_FILE_OUT} ;\
 	done ;\
@@ -217,7 +217,9 @@ inline_resource_compiler2.commands = \
 	for i in ${QMAKE_FILE_IN}; do \
 		f=`echo "\$\$i" | sed 's:.*/::g'`&&\
 		echo -n '\" && Lightbox::Resources::add(\\\"\$\$f\\\", \"' >> ${QMAKE_FILE_OUT} &&\
-		echo '\"Lightbox::foreign(&_binary_\$\${f}_start, &_binary_\$\${f}_end - &_binary_\$\${f}_start))\"' | sed s/\\\\./_/g' >> ${QMAKE_FILE_OUT} ;\
+		echo -n '\"Lightbox::foreign(&_binary_\$\${f}_start, &_binary_\$\${f}_end\"' | sed s/[\\\\.-]/_/g' >> ${QMAKE_FILE_OUT} &&\
+		echo -n ' - ' >> ${QMAKE_FILE_OUT} &&\
+		echo '\"&_binary_\$\${f}_start))\"' | sed s/[\\\\.-]/_/g' >> ${QMAKE_FILE_OUT} ;\
 	done ;\
 	echo '\';\'' >> ${QMAKE_FILE_OUT}
 inline_resource_compiler2.variable_out = SOURCES
