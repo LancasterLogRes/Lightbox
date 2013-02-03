@@ -19,7 +19,7 @@ public:
 	{
 		m_f = Font(100, "ubuntu");
 
-		ToggleButtonBody::spawn(this, "Hello", Red, Font(16, "AbyssinicaSIL"))->setGeometry(fRect(400, 20, 150, 50));
+		ToggleButtonBody::spawn(this, "Hello", Red)->setGeometry(fRect(400, 20, 150, 50));
 
 	}
 
