@@ -119,7 +119,7 @@ android {
     contains(TEMPLATE, app) {
         SOURCES += "$$ANDROID_NDK_PATH/sources/android/native_app_glue/android_native_app_glue.c"
         TEMPLATE = lib
-        CONFIG += force_shared
+		CONFIG += force_shared shared_from_static
         QMAKE_POST_LINK = mkdir -p '"$${OBJECTS_DIR}wrap/libs/armeabi"' &&\
             cp '"$${DESTDIR}/lib$${TARGET}.so"' '"$${OBJECTS_DIR}wrap/libs/armeabi"' &&\
             sed '\'s/"android.app.lib_name" android:value=""/"android.app.lib_name" android:value="$$TARGET"/\'' '$${ANDROID_MANIFEST}' > '"$${OBJECTS_DIR}wrap/AndroidManifest.xml"' &&\
@@ -209,17 +209,17 @@ inline_resource_compiler2.input = RES
 inline_resource_compiler2.commands = \
 	echo '\'$${LITERAL_HASH}include <Common/Global.h>\'' > ${QMAKE_FILE_OUT} &&\
 	for i in ${QMAKE_FILE_IN}; do \
-		f=`echo "\$\$i" | sed 's:.*/::g' | sed s/[\\\\\\\\.-]/_/g'` &&\
-		echo '\"extern uint8_t const _binary_\$\${f}_start;'\" | sed s/\\\\./_/ >> ${QMAKE_FILE_OUT} &&\
-		echo '\"extern uint8_t const _binary_\$\${f}_end;'\" | sed s/\\\\./_/ >> ${QMAKE_FILE_OUT} ;\
+		f=`echo "\$\$i" | sed 's:.*/::g' | sed 's/[\\\\\\\\.-]/_/g'` &&\
+		echo '\"extern uint8_t const _binary_\$\${f}_start;'\" | sed 's/\\\\./_/' >> ${QMAKE_FILE_OUT} &&\
+		echo '\"extern uint8_t const _binary_\$\${f}_end;'\" | sed 's/\\\\./_/' >> ${QMAKE_FILE_OUT} ;\
 	done ;\
 	echo 'static bool s_registerResources = true' >> ${QMAKE_FILE_OUT} &&\
 	for i in ${QMAKE_FILE_IN}; do \
-		f=`echo "\$\$i" | sed 's:.*/::g'`&&\
+		f=`echo "\$\$i" | sed 's:.*/::g'` &&\
 		echo -n '\" && Lightbox::Resources::add(\\\"\$\$f\\\", \"' >> ${QMAKE_FILE_OUT} &&\
-		echo -n '\"Lightbox::foreign(&_binary_\$\${f}_start, &_binary_\$\${f}_end\"' | sed s/[\\\\.-]/_/g' >> ${QMAKE_FILE_OUT} &&\
+		echo -n '\"Lightbox::foreign(&_binary_\$\${f}_start, &_binary_\$\${f}_end\"' | sed 's/[\\\\.-]/_/g' >> ${QMAKE_FILE_OUT} &&\
 		echo -n ' - ' >> ${QMAKE_FILE_OUT} &&\
-		echo '\"&_binary_\$\${f}_start))\"' | sed s/[\\\\.-]/_/g' >> ${QMAKE_FILE_OUT} ;\
+		echo '\"&_binary_\$\${f}_start))\"' | sed 's/[\\\\.-]/_/g' >> ${QMAKE_FILE_OUT} ;\
 	done ;\
 	echo '\';\'' >> ${QMAKE_FILE_OUT}
 inline_resource_compiler2.variable_out = SOURCES
@@ -227,8 +227,6 @@ inline_resource_compiler2.depend_command =
 inline_resource_compiler2.CONFIG += combine
 inline_resource_compiler2.name = RESOURCE_COMPILER
 QMAKE_EXTRA_COMPILERS += inline_resource_compiler2
-
-#QMAKE_LFLAGS += -Wl,--whole-archive
 
 QMAKE_CXXFLAGS += -pipe -fexceptions -std=gnu++11 -frtti -ffast-math
 QMAKE_CXXFLAGS_WARN_ON += -Wno-parentheses
@@ -374,6 +372,11 @@ defineTest(tidy) {
 		export($${sd}.depends)
 		message ("Tidyied $$sd (depends: " $$eval($${sd}.depends) ")" )
 	}
+}
+
+shared_from_static {
+	QMAKE_LFLAGS += -Wl,--whole-archive -Wl,-zmuldefs
+	LIBS += -Wl,--no-whole-archive
 }
 
 win32: DESTDIR = $$ProjectPath(Lightbox)

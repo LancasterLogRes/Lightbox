@@ -34,6 +34,7 @@ public:
 
 protected:
 	ToggleButtonBody(std::string const& _text = std::string(), Color _c = White, Font _f = Font(), Grouping _grouping = NoGrouping);
+	ToggleButtonBody(std::string const& _text, Color _c, Grouping _grouping): ToggleButtonBody(_text, _c, Font(), _grouping) {}
 
 	virtual void pushed() { setDown(true); }
 	virtual void released() {}

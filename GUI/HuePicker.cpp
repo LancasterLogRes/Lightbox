@@ -18,7 +18,7 @@ void HuePickerBody::initGraphics()
 {
 	m_hueWheel = Program("HueWheel.glsl");
 	m_hueWheel.tie(GUIApp::joint().uniforms);
-	m_hueWheelDodge = Program("HueWheel.glsl", "dodge", "vert");
+	m_hueWheelDodge = Program("HueWheel.glsl", "dodge.vert", "frag");
 	m_hueWheelDodge.tie(GUIApp::joint().uniforms);
 	Super::initGraphics();
 }

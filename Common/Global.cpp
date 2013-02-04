@@ -25,6 +25,7 @@
 #if LIGHTBOX_ANDROID
 #include <android/log.h>
 #endif
+#include "StreamIO.h"
 #include "Global.h"
 using namespace std;
 using namespace Lightbox;
@@ -71,22 +72,6 @@ string Lightbox::afterComma(char const* _s, unsigned _i)
 	return string(_s, l);
 }
 
-foreign_vector<uint8_t const> Lightbox::subresource(foreign_vector<uint8_t const> _data, std::string const& _name)
-{
-	string token = "//@" + _name + "\n";
-	for (unsigned i = 0; i < _data.size() - token.size() - 1; ++i)
-		if ((!i || _data[i - 1] == '\n') && !memcmp(token.data(), _data.data() + i, token.size()))
-		{
-			i += token.size();
-			unsigned off = i;
-			for (; i < _data.size() - 4; ++i)
-				if (!memcmp(_data.data() + i, "\n//@", 4))
-					return _data.cropped(off, i - off);
-			return _data.cropped(off, _data.size() - off);
-		}
-	return foreign_vector<uint8_t const>();
-}
-
 string Lightbox::demangled(char const* _name)
 {
 	int status;
@@ -104,4 +89,40 @@ string Lightbox::shortened(string const& _s)
 		if (isupper(_s[i]) || (i && isupper(_s[i - 1])))
 			ret += _s[i];
 	return ret;
+}
+
+foreign_vector<uint8_t const> Resources::subresource(foreign_vector<uint8_t const> _data, std::string const& _name)
+{
+	string token = "//@" + _name + "\n";
+	for (unsigned i = 0; i < _data.size() - token.size() - 1; ++i)
+		if ((!i || _data[i - 1] == '\n') && !memcmp(token.data(), _data.data() + i, token.size()))
+		{
+			i += token.size();
+			unsigned off = i;
+			for (; i < _data.size() - 4; ++i)
+				if (!memcmp(_data.data() + i, "\n//@", 4))
+					return _data.cropped(off, i - off);
+			return _data.cropped(off, _data.size() - off);
+		}
+	return foreign_vector<uint8_t const>();
+}
+
+foreign_vector<uint8_t const> Resources::find(std::string const& _name)
+{
+	try
+	{
+		return get()->m_resources.at(_name);
+	}
+	catch (...)
+	{
+		cwarn << "Resource not found!" << _name;
+		cwarn << "Have:" << get()->m_resources;
+		return foreign_vector<uint8_t const>();
+	}
+}
+
+foreign_vector<uint8_t const> Resources::find(std::string const& _name, std::string const& _section)
+{
+	foreign_vector<uint8_t const> r = find(_name);
+	return subresource(r, _section);
 }

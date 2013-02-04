@@ -32,6 +32,8 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/foreach.hpp>
 
+#undef _S
+
 #undef foreach
 #define foreach BOOST_FOREACH
 
@@ -346,6 +348,12 @@ private:
 	std::shared_ptr<void> m_lock;
 };
 
+template <class _S, class _T> inline _S& operator<<(_S& _out, foreign_vector<_T> const& _v)
+{
+	_out << _v.size() << "@" << (void*)_v.data();
+	return _out;
+}
+
 template <class _T> inline foreign_vector<_T> foreign(_T* _d, size_t _s) { return foreign_vector<_T>(_d, _s); }
 
 class NullOutputStream
@@ -382,24 +390,6 @@ public:
 	std::stringstream sstr;
 };
 
-foreign_vector<uint8_t const> subresource(foreign_vector<uint8_t const> _data, std::string const& _name);
-
-class Resources
-{
-public:
-	static Resources* get() { if (!s_this) s_this = new Resources; return s_this; }
-
-	static bool add(std::string const& _s, foreign_vector<uint8_t const> const& _r) { get()->m_resources[_s] = _r; return true; }
-	static std::unordered_map<std::string, foreign_vector<uint8_t const> > const& map() { return get()->m_resources; }
-	static bool contains(std::string const& _name) { return get()->m_resources.count(_name); }
-	static foreign_vector<uint8_t const> find(std::string const& _name) { try { return get()->m_resources.at(_name); } catch(...) { return foreign_vector<uint8_t const>(); } }
-	static foreign_vector<uint8_t const> find(std::string const& _name, std::string const& _section) { try { return subresource(get()->m_resources.at(_name), _section); } catch(...) { return foreign_vector<uint8_t const>(); } }
-
-private:
-	static Resources* s_this;
-	std::unordered_map<std::string, foreign_vector<uint8_t const> > m_resources;
-};
-
 template <bool _AutoSpacing = true>
 class SysLogOutputStream
 {
@@ -411,8 +401,6 @@ public:
 	template <class _T> static void writePod(char _type, _T const& _s) { char const* begin = (char const*)&_s; char const* end = (char const*)&_s + sizeof(_T); g_syslogPost(_type, std::string(begin, end)); }
 	std::stringstream sstr;
 };
-
-}
 
 // Dirties the global namespace, but oh so convenient...
 #define cnote Lightbox::DebugOutputStream<Lightbox::NoteChannel, true>()
@@ -433,3 +421,23 @@ public:
 #endif
 
 #define clog Lightbox::SysLogOutputStream<true>()
+
+class Resources
+{
+public:
+	static Resources* get() { if (!s_this) s_this = new Resources; return s_this; }
+
+	static bool add(std::string const& _s, foreign_vector<uint8_t const> const& _r) { get()->m_resources[_s] = _r; return true; }
+	static std::unordered_map<std::string, foreign_vector<uint8_t const> > const& map() { return get()->m_resources; }
+	static bool contains(std::string const& _name) { return get()->m_resources.count(_name); }
+	static foreign_vector<uint8_t const> find(std::string const& _name);
+	static foreign_vector<uint8_t const> find(std::string const& _name, std::string const& _section);
+
+	static foreign_vector<uint8_t const> subresource(foreign_vector<uint8_t const> _data, std::string const& _name);
+
+private:
+	static Resources* s_this;
+	std::unordered_map<std::string, foreign_vector<uint8_t const> > m_resources;
+};
+
+}

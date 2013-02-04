@@ -36,7 +36,7 @@ Layers BasicButtonBody::layers()
 void BasicButtonBody::initGraphics()
 {
 	setLayers(layers());
-	layer(1).show(m_isLit);
+	updateLayers();
 }
 
 void BasicButtonBody::setLit(bool _lit)
@@ -44,7 +44,7 @@ void BasicButtonBody::setLit(bool _lit)
 	if (m_isLit != _lit)
 	{
 		m_isLit = _lit;
-		layer(1).show(m_isLit);
+		updateLayers();
 	}
 }
 
@@ -131,6 +131,12 @@ void BasicButtonBody::tapped()
 {
 	if (m_onTapped)
 		m_onTapped(this);
+}
+
+void BasicButtonBody::enabledChanged()
+{
+	Super::enabledChanged();
+	updateLayers();
 }
 
 fSize BasicButtonBody::specifyMinimumSize(fSize) const

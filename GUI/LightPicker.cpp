@@ -69,7 +69,7 @@ void LightPickerBody::draw(Context const& _c, unsigned _l)
 		fEllipse thumb(inner.lerp(.5f, 1.f - m_light), GUIApp::style().thumbSize / 2);
 		_c.disc(thumb.outset(GUIApp::style().thumbOutline), GUIApp::style().outlineColor);
 		Color c(HSLSpace, m_middle.hue(), 1, m_light);
-		_c.disc(thumb, Color::withConstantLight(m_middle.hue(), c.sat(), c.value() / GUIApp::joint().glowLevels));
+		_c.disc(thumb, GUIApp::joint().mildGlow(Color(c.hue(), c.sat(), c.value())));
 	}
 }
 

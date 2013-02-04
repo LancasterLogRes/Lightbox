@@ -218,7 +218,7 @@ public:
 	void setParent(View const& _p);
 	void setGeometry(fRect _geometry) { m_geometry = _geometry; resized(); }
 	void resize(fSize _size) { auto g = m_geometry; g.resize(_size); setGeometry(g); }
-	void setEnabled(bool _en) { m_isEnabled = _en; update(); }
+	void setEnabled(bool _en) { m_isEnabled = _en; enabledChanged(); }
 	void show(bool _vi) { if (m_isShown != _vi) { m_isShown = _vi; shownChanged(); if (!m_parent || m_parent->isVisible()) visibilityChangedRecursive(m_isShown); } }
 	void hide() { show(false); }
 
@@ -331,6 +331,7 @@ protected:
 	virtual void resized() { m_visibleLayoutChanged = true; relayout(); update(); }
 	virtual void shownChanged() { m_visibleLayoutChanged = true; update(); }
 	virtual void visibilityChanged() {}
+	virtual void enabledChanged() { update(); }
 
 	virtual fSize specifyMinimumSize(fSize) const;	// default is determined by layout.
 	virtual fSize specifyMaximumSize(fSize) const;	// default is determined by layout.

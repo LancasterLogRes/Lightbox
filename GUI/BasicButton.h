@@ -2,6 +2,7 @@
 
 #include <functional>
 #include <Common/Flags.h>
+#include "Font.h"
 #include "View.h"
 
 namespace Lightbox
@@ -45,6 +46,7 @@ public:
 
 protected:
 	BasicButtonBody(std::string const& _text = std::string(), Color _c = White, Font _f = Font(), Grouping _grouping = NoGrouping);
+	BasicButtonBody(std::string const& _text, Color _c, Grouping _grouping): BasicButtonBody(_text, _c, Font(), _grouping) {}
 
 	void drawButton(Context const& _c, unsigned _l, bool _down, std::function<void(iRect)> const& _inner = std::function<void(iRect)>(), bool _polish = true);
 
@@ -55,6 +57,8 @@ protected:
 	virtual void released() { setDown(false); setLit(false); }
 	virtual fSize specifyMinimumSize(fSize) const;
 	virtual void initGraphics();
+	virtual void enabledChanged();
+	virtual void updateLayers() { layer(1).show(isEnabled() && isLit()); }
 
 private:
 	std::string m_text;

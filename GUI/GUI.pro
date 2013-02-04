@@ -23,7 +23,7 @@ SOURCES += \
     Collated.cpp \
     ProgressBar.cpp \
     FontManager.cpp \
-    BakedFont.cpp
+	BakedFont.cpp
 
 HEADERS += \
     View.h \
