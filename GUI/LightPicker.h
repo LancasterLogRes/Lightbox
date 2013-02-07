@@ -21,7 +21,7 @@ public:
 	Color middle() const { return m_middle; }
 
 	void setLight(float _l, bool _userEvent = false) { m_light = _l; lightChanged(_userEvent); }
-	void setMiddle(Color _c) { m_middle = _c; update(); }
+	void setMiddle(Color _c) { if (_c.hue() != m_middle.hue()) { m_middle = _c; update(); } }
 	void setOnLightChanged(EventHandler const& _t) { m_onLightChanged = _t; }
 
 	LightPicker withOnLightChanged(EventHandler const& _t) { setOnLightChanged(_t); return this; }
@@ -33,7 +33,7 @@ protected:
 	virtual void draw(Context const& _c, unsigned);
 	virtual fSize specifyFit(fSize _space) const;
 
-	virtual void lightChanged(bool _userEvent) { if (m_onLightChanged && _userEvent) m_onLightChanged(this); update(); }
+	virtual void lightChanged(bool _userEvent) { if (m_onLightChanged && _userEvent) m_onLightChanged(this); update(1); }
 
 	virtual void initGraphics();
 	virtual void finiGraphics();

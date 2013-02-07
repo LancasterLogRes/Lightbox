@@ -214,14 +214,14 @@ bool GUIApp::drawGraphics()
 				}
 				else if (v->isDirty() && (v->isReadyForCache() || v->glows()))
 				{
-//					cnote << "RENDER:" << v;
+					cnote << "RENDER:" << v;
 					v.preDraw();
 					v->setReadyForCache();
 					willRenderToTexture = true;
 				}
 				else if (v->isDirty())
 				{
-//					cnote << "DIRECT:" << v;
+					cnote << "DIRECT:" << v;
 					v.preDraw();
 					renderDirect[cacheIndex] += v;
 					v->setReadyForCache();

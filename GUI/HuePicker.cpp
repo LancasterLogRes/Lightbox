@@ -43,7 +43,6 @@ bool HuePickerBody::event(Event* _e)
 		{
 			setChecked(true, true);
 			setHue(atan2(off.x(), off.y()) / TwoPi + 0.5f, true);
-			update(1);
 			return true;
 		}
 	}

@@ -29,7 +29,7 @@ public:
 	void setMode(Mode _m, bool _userEvent = false) { if (m_mode != _m) { m_mode = _m; directionChanged(_userEvent); } }
 	void setOnDirectionChanged(EventHandler const& _t) { m_onDirectionChanged = _t; }
 	void setColor(Color _c) { m_color = _c; update(); }
-	void setMiddle(Color _c) { if (m_middle != _c) { m_middle = _c; update(); } }
+	void setMiddle(Color _c) { if (m_middle != _c) { m_middle = _c; /*update();*/ } }	// Not required for now.
 
 	DirectionPicker withOnDirectionChanged(EventHandler const& _t) { setOnDirectionChanged(_t); return this; }
 
