@@ -267,7 +267,7 @@ bool GUIApp::drawGraphics()
 							int glowAmount = m_joint.glowLevels;
 							vector<Texture2D> levels(glowAmount);
 							for (unsigned i = 0; i < levels.size(); ++i)
-								levels[i] = (i ? levels[i - 1] : baseTex).filter(m_joint.pass, Texture2D(baseTex.size() / (1 << i)));
+								levels[i] = (i ? levels[i - 1] : baseTex).filter(m_joint.pass, Texture2D(baseTex.size() / (glowAmount << i)));
 							for (unsigned i = 0; i < levels.size(); ++i)
 								levels[i] = levels[i].filter(m_joint.vblur6).filter(m_joint.hblur6);//.filter(m_joint.hblur6);
 
