@@ -17,9 +17,9 @@ class TestViewBody: public ViewCreator<ViewBody, TestViewBody>
 public:
 	TestViewBody()
 	{
-		m_f = Font(100, "ubuntu");
+//		m_f = Font(100, "ubuntu");
 
-		ToggleButtonBody::spawn(this, "Hello", Red)->setGeometry(fRect(400, 20, 150, 50));
+//		ToggleButtonBody::spawn(this, "Hello", Red)->setGeometry(fRect(400, 20, 150, 50));
 	}
 
 private:
@@ -51,8 +51,11 @@ private:
 
 	virtual void draw(Context const& _c, unsigned)
 	{
-		_c.disc(iEllipse(128, 58, 15, 15), Color(0, .95, 2, .35f));
-		_c.rectOutline(iRect(50, 50, 150, 175), iMargin(iSize(8, 8)), Color(0, .95f, 2.f, .35f));
+//		_c.disc(iEllipse(128, 58, 15, 15), Color(0, .95, 2, .35f));
+//		_c.rectOutline(iRect(50, 50, 150, 175), iMargin(iSize(8, 8)), Color(0, .95f, 2.f, .35f));
+
+//		_c.disc(iEllipse(128, 58, 15, 15), Color(0, .95, 2, .35f));
+//		_c.rectOutline(iRect(50, 50, 150, 175), iMargin(iSize(8, 8)), Color(0, .95f, 2.f, .35f));
 /*
 		fRect r = m_f.measure("Hello world", true).translated(fSize(100, 150));
 		fRect r2 = m_f.measure("Hello world", false).translated(fSize(100, 250));
@@ -71,7 +74,10 @@ private:
 
 	virtual void initGraphics()
 	{
-		setLayers(Layers(1, Layer(iMargin(), true)));
+		GUIApp::joint().display->setAnimating();
+
+		return;
+		setLayers(Layers(1, Layer(iMargin(), false)));
 
 		uSize s(256, 256);
 		Texture2D tex(s);
@@ -83,6 +89,7 @@ private:
 			u.attachColor(tex);
 			tex.viewport();
 			LB_GL(glClear, GL_COLOR_BUFFER_BIT);
+
 			GUIApp::joint().u_displaySize = (fVector2)(fSize)s;
 			glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 //			m_f.draw((iCoord)(uCoord)(tex.size() / 2), "x", RGBA::Blue);
@@ -90,6 +97,7 @@ private:
 			c.disc(iEllipse(128, 58, 15, 15), Color(0, .95, 2, .4f));
 			c.rectOutline(iRect(50, 50, 150, 175), iMargin(iSize(8, 8)), Color(0, .95, 2, .4f));
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
 			GUIApp::joint().u_displaySize = (fVector2)(fSize)GUIApp::joint().displaySizePixels;
 		}
 
@@ -98,8 +106,6 @@ private:
 		m_hblur = Program("Blur.glsl", "hblur6.vert", "blur6.frag");
 		m_vblur = Program("Blur.glsl", "vblur6.vert", "blur6.frag");
 		m_pass = Program("Blur.glsl", "pass");
-
-		GUIApp::joint().display->setAnimating();
 	}
 
 	virtual void finiGraphics()

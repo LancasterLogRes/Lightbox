@@ -34,7 +34,7 @@ bool LightPickerBody::event(Event* _e)
 		lockPointer(e->id);
 	if (e && pointerLocked(e->id))
 	{
-		fRect geo = geometry().inset(0.f, geometry().w() / 2 + 2);
+		fRect geo = geometry().inset(0.f, GUIApp::style().thumbSize.h() / 2 + 2);
 		setLight(clamp(lext(e->local.y(), geo.bottom(), geo.top()), 0.f, 1.f), true);
 		return true;
 	}
@@ -75,5 +75,5 @@ void LightPickerBody::draw(Context const& _c, unsigned _l)
 
 fSize LightPickerBody::specifyFit(fSize _space) const
 {
-	return fSize(GUIApp::style().thumbSize.width() + c_outerMargin * 2, _space.height() + c_outerMargin * 2);
+	return fSize(max(_space.width(), GUIApp::style().thumbSize.width() + c_outerMargin * 2), max(_space.height(), GUIApp::style().thumbSize.height() + c_outerMargin * 2));
 }

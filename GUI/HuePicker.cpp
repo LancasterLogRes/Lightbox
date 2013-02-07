@@ -6,7 +6,10 @@
 using namespace std;
 using namespace Lightbox;
 
-HuePickerBody::HuePickerBody(Color _c, Grouping _grouping): ViewCreator(string(), _c, Font(), _grouping)
+HuePickerBody::HuePickerBody(Color _c, Grouping _grouping):
+	ViewCreator(string(), _c, Font(), _grouping),
+	m_hue(-1.f),
+	m_middle(White)
 {
 }
 
@@ -40,6 +43,7 @@ bool HuePickerBody::event(Event* _e)
 		{
 			setChecked(true, true);
 			setHue(atan2(off.x(), off.y()) / TwoPi + 0.5f, true);
+			update(1);
 			return true;
 		}
 	}

@@ -96,6 +96,8 @@ typedef std::set<View, ViewSiblingsComparator> ViewSet;
 class Views: public std::vector<View>
 {
 public:
+	Views() = default;
+	template <class _T> Views(std::vector<_T> const& _vs) { for (auto i: _vs) push_back(i); }
 	Views& operator,(View const& _b) { push_back(_b); return *this; }
 };
 

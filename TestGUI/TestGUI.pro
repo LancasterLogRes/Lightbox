@@ -5,16 +5,19 @@ SOURCES += main.cpp \
 	MainView.cpp \
 	TestGUIApp.cpp
 
+#android: LIBS += -L$${TP}/MonkVG/projects/MonkVG-Android/obj/local/armeabi -L$${TP}/MonkSVG/projects/MonkSVG-Android/obj/local/armeabi
+android: LIBS += $${STP}/MonkSVG/projects/MonkSVG-Android/obj/local/armeabi/libMonkSVG.a $${STP}/MonkVG/projects/MonkVG-Android/obj/local/armeabi/libOpenVGU.a $${STP}/MonkVG/projects/MonkVG-Android/obj/local/armeabi/libOpenVG.a -lGLESv1_CM
+!android: LIBS += -L$${STP}/MonkSVG/projects/MonkSVG-qmake -L$${STP}/MonkVG/projects/MonkVG-autotools/.libs -lMonkSVG -lOpenVGU -lOpenVG -lGLESv1_CM
+
 LIBS += $$GFX_LIBS -lpng -lz
 android: LIBS += $$LIBSTL -llog -landroid
 
-INCLUDEPATH += $${DESTDIR}
-resource_compiler.CONFIG += target_predeps
+INCLUDEPATH += $${DESTDIR} $${STP}/MonkVG/include $${STP}/MonkSVG/src
 
-RES += Blur.glsl
+RES += Blur.glsl speed0.svg speed1.svg speed2.svg circle.svg
 
 OTHER_FILES += AndroidManifest.xml \
-    Blur.glsl
+	Blur.glsl speed0.svg speed1.svg speed2.svg circle.svg
 
 HEADERS += \
     MainView.h \

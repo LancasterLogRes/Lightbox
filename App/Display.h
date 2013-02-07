@@ -20,6 +20,8 @@ public:
 
 	void update();
 
+	float aspect() const { return m_widthMM / m_heightMM; }
+
 	unsigned width() const { return m_width; }
 	unsigned height() const { return m_height; }
 	float widthMM() const { return m_widthMM; }

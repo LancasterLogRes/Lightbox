@@ -18,6 +18,8 @@ public:
 	static Shader vertex(foreign_vector<uint8_t const> const& _code) { return Shader(new ShaderFace(_code, false)); }
 	static Shader fragment(foreign_vector<uint8_t const> const& _code) { return Shader(new ShaderFace(_code, true)); }
 
+	bool compile() const { return m_p->compile(); }
+
 private:
 	Shader(ShaderFace* _p): Pimpl<ShaderFace>(std::shared_ptr<ShaderFace>(_p)) {}
 };

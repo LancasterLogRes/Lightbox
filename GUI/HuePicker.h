@@ -18,7 +18,7 @@ public:
 
 	float hue() const { return m_hue; }
 
-	void setHue(float _h, bool _userEvent = false) { if (m_hue != _h) { m_hue = _h; hueChanged(_userEvent); } }
+	void setHue(float _h, bool _userEvent = false) { if (!isFinite(m_hue) || m_hue != _h) { m_hue = _h; hueChanged(_userEvent); } }
 	void setMiddle(Color _c) { if (m_middle != _c) { m_middle = _c; update(1); } }
 	void setOnHueChanged(EventHandler const& _t) { m_onHueChanged = _t; assert(!!m_onHueChanged); }
 

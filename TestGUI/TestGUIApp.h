@@ -17,8 +17,10 @@ public:
 	TestGUIApp();
 
 	virtual void initGraphics(Display& _d);
-	virtual void go();
+	virtual bool drawGraphics();
+	virtual void finiGraphics(Display& _d);
 	virtual void sendInitialEvents();
+	virtual void go();
 
 	static TestGUIApp* get() { return dynamic_cast<TestGUIApp*>(GUIApp::get()); }
 

@@ -9,8 +9,9 @@ SOURCES += ProgramFace.cpp Program.cpp ShaderFace.cpp Uniform.cpp \
     TextureFace2D.cpp \
     BufferFace.cpp Buffer.cpp \
     Metrics.cpp \
-	Framebuffer.cpp \
-	Collated.cpp
+	Framebuffer.cpp
+!android: SOURCES += Collated.cpp
+
 HEADERS += ProgramFace.h ShaderFace.h Program.h \
     Shader.h Uniform.h \
     Global.h \

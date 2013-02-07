@@ -83,6 +83,7 @@ debug {
 	!win32: QMAKE_CXXFLAGS += -fPIC
 }
 
+STP = $$IN_PWD/../Thirdparty
 pi {
         TP = $$IN_PWD/../Pi/Thirdparty
 }

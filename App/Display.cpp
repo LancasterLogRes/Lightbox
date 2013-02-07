@@ -27,10 +27,17 @@ using namespace Lightbox;
 #elif !defined(LIGHTBOX_CROSS)
 #endif
 
-int c_defaultWidth = 1440;
-int c_defaultHeight = 800;
-int c_defaultWidthMM = 800;
-int c_defaultHeightMM = 480;
+#if 0
+static const int c_defaultWidth = 1440;
+static const int c_defaultHeight = 800;
+static const int c_defaultWidthMM = 800;
+static const int c_defaultHeightMM = 480;
+#else
+static const int c_defaultWidth = 1600;
+static const int c_defaultHeight = 1200;
+static const int c_defaultWidthMM = 800;
+static const int c_defaultHeightMM = 600;
+#endif
 
 #define Assert(X) Lightbox::doAssert(X, #X, __FILE__, __LINE__, false);
 #undef assert

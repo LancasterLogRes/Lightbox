@@ -33,6 +33,8 @@ protected:
 	
 	virtual bool event(Event* _e);
 	virtual void draw(Context const& _c, unsigned _layer);
+
+	virtual void resized();
 	
 private:
 	int m_index;

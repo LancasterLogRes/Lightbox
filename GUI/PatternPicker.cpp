@@ -1,4 +1,5 @@
 #include <Common/Global.h>
+#include <GUI/GUIApp.h>
 #include "Global.h"
 #include "PatternPicker.h"
 using namespace std;
@@ -13,6 +14,15 @@ PatternPickerBody::PatternPickerBody(Color _c, Grouping _grouping):
 
 PatternPickerBody::~PatternPickerBody()
 {
+}
+
+void PatternPickerBody::resized()
+{
+	Super::resized();
+	// want ~ 128 points from exposed geometry.
+	float f = sqrt((geometry().w() - GUIApp::style().thumbSize.w()) * (geometry().h() - GUIApp::style().thumbSize.h()) / 128.f);
+	m_space = uSize(ceil(geometry().w() / f), ceil(geometry().h() / f));
+	m_index = min<unsigned>(m_index, m_space.w() * m_space.h() - 1);
 }
 
 bool PatternPickerBody::event(Event* _e)

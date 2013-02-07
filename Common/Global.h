@@ -322,6 +322,7 @@ public:
 	explicit operator bool() const { return m_data && m_count; }
 
 	std::vector<_T> toVector() const { return std::vector<_T>(m_data, m_data + m_count); }
+	std::string toString() const { return std::string((char const*)m_data, ((char const*)m_data) + m_count); }
 
 	_T* data() const { return m_data; }
 //	_T const* data() const { return m_data; }
@@ -435,9 +436,14 @@ public:
 
 	static foreign_vector<uint8_t const> subresource(foreign_vector<uint8_t const> _data, std::string const& _name);
 
+	foreign_vector<uint8_t const> operator[](std::string const& _name) const { return find(_name); }
+	foreign_vector<uint8_t const> operator()(std::string const& _name, std::string const& _section) const { return find(_name, _section); }
+
 private:
 	static Resources* s_this;
 	std::unordered_map<std::string, foreign_vector<uint8_t const> > m_resources;
 };
+
+//static Resources const& Res = *Resources::get();
 
 }
