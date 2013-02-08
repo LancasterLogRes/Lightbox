@@ -29,7 +29,7 @@ public:
 protected:
 	PatternPickerBody(Color _c = White, Grouping _grouping = NoGrouping);
 
-	virtual void indexChanged(bool _userEvent) { if (m_onIndexChanged && _userEvent) m_onIndexChanged(this); update(); }
+	virtual void indexChanged(bool _userEvent) { if (m_onIndexChanged && _userEvent) m_onIndexChanged(this); update(1); }
 	
 	virtual bool event(Event* _e);
 	virtual void draw(Context const& _c, unsigned _layer);
