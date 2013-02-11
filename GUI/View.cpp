@@ -88,8 +88,8 @@ void Context::pxDisc(fEllipse _e) const
 	fCoord c = _e.middle() + fCoord(active.pos());
 	vm.offsetScale = fVector4(c.x(), c.y(), _e.rx(), _e.ry());
 	ProgramUser u;
-	u.attrib("geometry").setData(vm.unitCircle144, 2);
-	u.triangleFan(146);
+	u.attrib("geometry").setData(vm.unitCircle72, 2);
+	u.triangleFan(74);
 }
 
 void Context::pxDisc(fEllipse _e, Color _c) const
@@ -177,21 +177,56 @@ void Context::text(Font const& _f, fCoord _anchor, std::string const& _text, RGB
 	_f.draw(_anchor + offset, _text, _c);
 }
 
-void Context::blit(Texture2D const& _tex, fCoord _pos) const
+void Context::blitThumb(fCoord _pos, Color _c, float _overglow) const
+{
+	ProgramUser u(GUIApp::joint().colorize);
+	u.uniform("u_overglow") = _overglow;
+	u.uniform("u_color") = (fVector4)_c.toRGBA();
+	blit(GUIApp::joint().glowThumbTex, _pos - GUIApp::style().thumbDiameter);
+}
+
+void Context::blitThumb(iCoord _pos, Color _c, float _overglow) const
+{
+	ProgramUser u(GUIApp::joint().colorize);
+	u.uniform("u_overglow") = _overglow;
+	u.uniform("u_color") = (fVector4)_c.toRGBA();
+	blit(GUIApp::joint().glowThumbTex, _pos - toPixels(GUIApp::style().thumbDiameter));
+}
+
+void Context::blit(Texture2D const& _tex, iCoord _pos) const
 {
 	ProgramUser u(GUIApp::joint().texture, ProgramUser::AsDefault);
-	float ox = round(_pos.x() + offset.w());
-	float oy = round(_pos.y() + offset.h());
+	fCoord o = fCoord(_pos + active.pos());
 	std::array<float, 4 * 4> quad =
 	{{
 		// top left.
-		0, 0, ox, oy,
+		0, 0, o.x(), o.y(),
 		// top right.
-		1, 0, ox + _tex.size().w(), oy,
+		1, 0, o.x() + _tex.size().w(), o.y(),
 		// bottom left.
-		0, 1, ox, oy + _tex.size().h(),
+		0, 1, o.x(), o.y() + _tex.size().h(),
 		// bottom right.
-		1, 1, ox + _tex.size().w(), oy + _tex.size().h()
+		1, 1, o.x() + _tex.size().w(), o.y() + _tex.size().h()
+	}};
+	u.uniform("u_tex") = _tex;
+	u.attrib("a_texCoordPosition").setStaticData(quad.data(), 4, 0);
+	u.triangleStrip(4);
+}
+
+void Context::blit(Texture2D const& _tex, fCoord _pos) const
+{
+	ProgramUser u(GUIApp::joint().texture, ProgramUser::AsDefault);
+	fCoord o = toDevice(_pos);
+	std::array<float, 4 * 4> quad =
+	{{
+		// top left.
+		0, 0, o.x(), o.y(),
+		// top right.
+		1, 0, o.x() + _tex.size().w(), o.y(),
+		// bottom left.
+		0, 1, o.x(), o.y() + _tex.size().h(),
+		// bottom right.
+		1, 1, o.x() + _tex.size().w(), o.y() + _tex.size().h()
 	}};
 	u.uniform("u_tex") = _tex;
 	u.attrib("a_texCoordPosition").setStaticData(quad.data(), 4, 0);

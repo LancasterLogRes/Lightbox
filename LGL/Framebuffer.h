@@ -41,6 +41,8 @@ public:
 
 	void attachColor(Texture2D const& _t, unsigned _index = 0, unsigned _level = 0) { _t.sharedPtr()->framebufferColor(_index, _level); }
 
+	bool checkComplete() const;
+
 private:
 	Framebuffer m_p;
 };

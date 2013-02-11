@@ -42,6 +42,11 @@ template <class T> inline T lerp(double _x, T _a, T _b) { return _a + (_b - _a) 
 
 template <class _T> double lext(_T _v, _T _a, _T _b) { return double(_v - _a) / (_b - _a); }
 
+inline float mod1(float _f)
+{
+	float d;
+	return modff(_f, &d);
+}
 
 template <class _T>
 typename std::remove_reference<decltype(_T()[0])>::type sumOf(_T const& _r)

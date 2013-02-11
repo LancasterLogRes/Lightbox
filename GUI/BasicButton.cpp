@@ -95,6 +95,8 @@ void BasicButtonBody::drawButton(Context const& _c, unsigned _l, bool _down, fun
 			_c.text(m_font.isValid() ? m_font : GUIApp::style().bold, inner.lerp(.5f, .5f), boost::algorithm::to_upper_copy(m_text), glow.toRGBA());
 		_c.rectOutline(inner.outset(lightWidth / 4), iMargin(lightWidth / 2), glow);
 	}
+	else if (_inner)
+		_inner(inner);
 }
 
 void BasicButtonBody::draw(Context const& _c, unsigned _l)

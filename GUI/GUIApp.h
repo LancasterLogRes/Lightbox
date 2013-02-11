@@ -2,6 +2,7 @@
 
 #include <tuple>
 #include <App/App.h>
+#include <Common/Time.h>
 #include <Common/Color.h>
 #include "FontManager.h"
 #include "Joint.h"
@@ -22,7 +23,7 @@ struct Style
 	Font bold;
 	Font small;
 	Font smallBold;
-	fSize thumbSize;
+	fSize thumbDiameter;
 	float thumbOutline;
 	Color outlineColor;
 };
@@ -30,6 +31,7 @@ struct Style
 class GUIApp: public App
 {
 public:
+	typedef App Super;
 	GUIApp();
 	virtual ~GUIApp();
 
@@ -38,12 +40,14 @@ public:
 	static Frame const& root() { return get()->m_root; }
 	static Style const& style() { return get()->m_style; }
 	static FontManager& fontManager() { return get()->m_fontManager; }
+	static Time runningTime() { return wallTime() - get()->m_startTime; }
 
 	virtual void initGraphics(Display& _d);
 	virtual bool drawGraphics();
 	virtual void finiGraphics(Display& _d);
 	virtual bool motionEvent(int _id, iCoord _pos, int _direction);
 	virtual bool keyEvent(int _code, int _direction);
+	virtual void go() { Super::go(); m_startTime = wallTime(); }
 
 	bool lockPointer(int _id, View const& _v);
 	bool releasePointer(int _id, View const& _v);
@@ -54,6 +58,7 @@ private:
 	Joint m_joint;
 	Style m_style;
 	FontManager m_fontManager;
+	Time m_startTime;
 
 	LIGHTBOX_STRUCT(2, CachePos, uRect, pos, unsigned, index);
 

@@ -1,3 +1,4 @@
+#pragma once
 #include <map>
 static const std::map<unsigned, char const*> g_symbolStrings =
 {

@@ -31,6 +31,7 @@ protected:
 	virtual void draw(Context const& _c, unsigned _l);
 	virtual void initGraphics();
 	virtual void finiGraphics();
+	virtual void updateLayers();
 
 	virtual fSize specifyMinimumSize(fSize) const;
 	virtual fSize specifyMaximumSize(fSize) const;

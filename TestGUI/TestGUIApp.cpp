@@ -41,6 +41,8 @@ void TestGUIApp::initGraphics(Display& _d)
 		s.initialize(s_handler);
 		s.read(Resources::find("broken.svg").toString());
 	}
+
+//	_d.setAnimating();
 }
 
 bool TestGUIApp::drawGraphics()
@@ -64,6 +66,8 @@ bool TestGUIApp::drawGraphics()
 //	vgSetPaint( _paint, VG_FILL_PATH );
 //	vgDrawPath( _path, VG_FILL_PATH );
 
+//	return true;
+	m_mainView->child(0)->update();
 	return false;
 }
 

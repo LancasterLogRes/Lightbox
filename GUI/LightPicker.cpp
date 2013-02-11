@@ -19,7 +19,7 @@ void LightPickerBody::initGraphics()
 {
 	m_lightBar = Program("LightBar.glsl");
 	m_lightBar.tie(GUIApp::joint().uniforms);
-	setLayers({{Layer(), Layer(iMargin(), false)}});
+	setLayers({{Layer(), Layer(iMargin(), false, true)}});
 }
 
 void LightPickerBody::finiGraphics()
@@ -34,7 +34,7 @@ bool LightPickerBody::event(Event* _e)
 		lockPointer(e->id);
 	if (e && pointerLocked(e->id))
 	{
-		fRect geo = geometry().inset(0.f, GUIApp::style().thumbSize.h() / 2 + 2);
+		fRect geo = geometry().inset(0.f, GUIApp::style().thumbDiameter.h() / 2 + 2);
 		setLight(clamp(lext(e->local.y(), geo.bottom(), geo.top()), 0.f, 1.f), true);
 		return true;
 	}
@@ -46,9 +46,9 @@ static const float c_innerMM = 10;
 
 void LightPickerBody::draw(Context const& _c, unsigned _l)
 {
-	fRect fullOuter = fRect(fSize(GUIApp::style().thumbSize.w() + c_outerMargin * 2, geometry().h()));
+	fRect fullOuter = fRect(fSize(GUIApp::style().thumbDiameter.w() + c_outerMargin * 2, geometry().h()));
 	fRect outer = fullOuter.inset(fSize(c_outerMargin));
-	fRect inner = outer.inset((GUIApp::style().thumbSize.w() - c_innerMM) / 2, GUIApp::style().thumbSize.h() / 2);
+	fRect inner = outer.inset((GUIApp::style().thumbDiameter.w() - c_innerMM) / 2, GUIApp::style().thumbDiameter.h() / 2);
 	if (_l == 0)
 	{
 		ProgramUser u(m_lightBar);
@@ -65,15 +65,10 @@ void LightPickerBody::draw(Context const& _c, unsigned _l)
 		_c.rect(inner.lerp(0, 0.5f, 1, 1));
 	}
 	else
-	{
-		fEllipse thumb(inner.lerp(.5f, 1.f - m_light), GUIApp::style().thumbSize / 2);
-		_c.disc(thumb.outset(GUIApp::style().thumbOutline), GUIApp::style().outlineColor);
-		Color c(HSLSpace, m_middle.hue(), 1, m_light);
-		_c.disc(thumb, GUIApp::joint().mildGlow(Color(c.hue(), c.sat(), c.value())));
-	}
+		_c.blitThumb(inner.lerp(.5f, 1.f - m_light), Color(HSLSpace, m_middle.hue(), 1, m_light));
 }
 
 fSize LightPickerBody::specifyFit(fSize _space) const
 {
-	return fSize(max(_space.width(), GUIApp::style().thumbSize.width() + c_outerMargin * 2), max(_space.height(), GUIApp::style().thumbSize.height() + c_outerMargin * 2));
+	return fSize(max(_space.width(), GUIApp::style().thumbDiameter.width() + c_outerMargin * 2), max(_space.height(), GUIApp::style().thumbDiameter.height() + c_outerMargin * 2));
 }

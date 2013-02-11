@@ -177,15 +177,3 @@ void main(void)
 }
 
 
-
-//@colorize
-precision mediump float;
-uniform sampler2D u_tex;
-uniform vec4 u_color;
-varying vec2 v_texCoord;
-void main()
-{
-	gl_FragColor.rgb = texture2D(u_tex, v_texCoord).rgb * u_color.rgb;
-	gl_FragColor.a = u_color.a;
-}
-

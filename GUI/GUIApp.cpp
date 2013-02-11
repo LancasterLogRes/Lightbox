@@ -18,6 +18,7 @@ void Style::generateColors(Color _fore)
 }
 
 GUIApp::GUIApp():
+	m_startTime(wallTime()),
 	m_showCachePage(-1)
 {
 	m_root = FrameBody::create();
@@ -31,7 +32,7 @@ GUIApp::GUIApp():
 	m_style.bold = Font(17, FontDefinition("ubuntu", true));
 	m_style.small = Font(13, FontDefinition("ubuntu", false));
 	m_style.smallBold = Font(13, FontDefinition("ubuntu", true));
-	m_style.thumbSize = fSize(40, 40);
+	m_style.thumbDiameter = fSize(40, 40);
 	m_style.thumbOutline = 2;
 	m_style.outlineColor = Black;
 }
@@ -212,7 +213,7 @@ bool GUIApp::drawGraphics()
 //					cnote << "SKIP:" << v;
 					renderDirect[cacheIndex] += v;
 				}
-				else if (v->isDirty() && (v->isReadyForCache() || v->glows()))
+				else if (v->isDirty() && (v->isReadyForCache() || v->glows() || v->isPremultiplied()))
 				{
 					cnote << "RENDER:" << v;
 					v.preDraw();
@@ -412,6 +413,7 @@ bool GUIApp::drawGraphics()
 	Font f(ByPixels, 16, "ubuntu");
 	iCoord p = infoRect.topLeft();
 	f.draw(p, info, RGBA::Black, AtTop|AtLeft);
+	cdebug << info;
 #if LIGHTBOX_PROFILE
 	info = toString(g_metrics.m_useProgramCount) + "/" + toString(g_metrics.m_drawCount);
 	p += iSize(0, 16);

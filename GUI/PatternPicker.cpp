@@ -20,7 +20,7 @@ void PatternPickerBody::resized()
 {
 	Super::resized();
 	// want ~ 128 points from exposed geometry.
-	float f = sqrt((geometry().w() - GUIApp::style().thumbSize.w()) * (geometry().h() - GUIApp::style().thumbSize.h()) / 128.f);
+	float f = sqrt((geometry().w() - GUIApp::style().thumbDiameter.w()) * (geometry().h() - GUIApp::style().thumbDiameter.h()) / 128.f);
 	m_space = uSize(ceil(geometry().w() / f), ceil(geometry().h() / f));
 	m_index = min<unsigned>(m_index, m_space.w() * m_space.h() - 1);
 }
@@ -46,8 +46,8 @@ void PatternPickerBody::draw(Context const& _c, unsigned _layer)
 	drawButton(_c, _layer, isChecked(),
 	[&](iRect oinner)
 	{
-		fSize thumbOutPx = _c.pixelsF(GUIApp::style().thumbSize / 2 + GUIApp::style().thumbOutline);
-		fSize thumbPx = _c.pixelsF(GUIApp::style().thumbSize / 2);
+		fSize thumbOutPx = _c.pixelsF(GUIApp::style().thumbDiameter / 2 + GUIApp::style().thumbOutline);
+		fSize thumbPx = _c.pixelsF(GUIApp::style().thumbDiameter / 2);
 		fRect inner = fRect(oinner).inset(thumbPx);
 
 		fSize spacing(inner.size() / ((fSize)m_space - fSize(1, 1)));
