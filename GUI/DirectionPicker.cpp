@@ -68,7 +68,7 @@ void DirectionPickerBody::initGraphics()
 	bool haveBottom = m_grouping & ForceBelow;
 	iMargin surroundMargin(haveLeft ? 0 : surroundWidth.w(), haveTop ? 0 : surroundWidth.h(), haveRight ? 0 : surroundWidth.w(), haveBottom ? 0 : surroundWidth.h());
 	iMargin lightMargin(lightWidth.w() / (haveLeft ? 2 : 1), lightWidth.h() / (haveTop ? 2 : 1), lightWidth.w() - (haveRight ? lightWidth.w() / 2 : 0), lightWidth.h() - (haveBottom ? lightWidth.h() / 2 : 0));
-	l.push_back(Layer(-surroundMargin - lightMargin, true));
+	l.push_back(Layer(/*-surroundMargin*/ - lightMargin, false, true));
 	setLayers(l);
 }
 
@@ -128,13 +128,8 @@ void DirectionPickerBody::draw(Context const& _c, unsigned _l)
 		}
 
 		if (m_mode == Circle || m_mode == Fill)
-		{
-			_c.disc(fEllipse(activeMM.lerp(xC(m_lastSign.w()), yC(m_lastSign.h())), GUIApp::style().thumbDiameter / 2 + GUIApp::style().thumbOutline), GUIApp::style().outlineColor);
-			_c.disc(fEllipse(activeMM.lerp(xC(m_lastSign.w()), yC(m_lastSign.h())), GUIApp::style().thumbDiameter / 2), glow);
-		}
-
-		_c.disc(fEllipse(activeMM.lerp(m_direction.pos()), GUIApp::style().thumbDiameter / 2 + GUIApp::style().thumbOutline), GUIApp::style().outlineColor);
-		_c.disc(fEllipse(activeMM.lerp(m_direction.pos()), GUIApp::style().thumbDiameter / 2), glow);
+			_c.blitThumb(activeMM.lerp(xC(m_lastSign.w()), yC(m_lastSign.h())), m_color, 1.f);
+		_c.blitThumb(activeMM.lerp(m_direction.pos()), m_color, 1.f);
 	}
 }
 

@@ -39,6 +39,20 @@ bool PatternPickerBody::event(Event* _e)
 	return ret;
 }
 
+void PatternPickerBody::initGraphics()
+{
+	Super::initGraphics();
+	Layers l = layers();
+	l.push_back(Layer(iMargin(), false, true));
+	setLayers(l);
+}
+
+void PatternPickerBody::updateLayers()
+{
+	Super::updateLayers();
+	layer(2).show(isEnabled() && isLit());
+}
+
 void PatternPickerBody::draw(Context const& _c, unsigned _layer)
 {
 	unsigned xBig[] = { m_space.w() / 4, m_space.w() * 3 / 4 };
@@ -59,11 +73,8 @@ void PatternPickerBody::draw(Context const& _c, unsigned _layer)
 				fCoord p = inner.pos() + fSize(x, y) * spacing;
 				if (_layer == 0)
 					_c.pxRect(fRect::square(p, min(spacing.w(), spacing.h()) / ((x == xBig[0] || x == xBig[1]) && (y == yBig[0] || y == yBig[1]) ? 3.f : 6.f)), glow.attenuated(.25f));
-				else if (isChecked() && m_index == i && _layer == 1)
-				{
-					_c.pxDisc(fEllipse(p, thumbOutPx), GUIApp::style().outlineColor);
-					_c.pxDisc(fEllipse(p, thumbPx), glow);
-				}
+				else if (isChecked() && m_index == i && _layer == 2)
+					_c.blitThumb(iCoord(p), color(), 1.f);
 			}
 	}, false);
 }
