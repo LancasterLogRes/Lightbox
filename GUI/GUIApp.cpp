@@ -215,14 +215,14 @@ bool GUIApp::drawGraphics()
 				}
 				else if (v->isDirty() && (v->isReadyForCache() || v->glows() || v->isPremultiplied()))
 				{
-					cnote << "RENDER:" << v;
+//					cnote << "RENDER:" << v;
 					v.preDraw();
 					v->setReadyForCache();
 					willRenderToTexture = true;
 				}
 				else if (v->isDirty())
 				{
-					cnote << "DIRECT:" << v;
+//					cnote << "DIRECT:" << v;
 					v.preDraw();
 					renderDirect[cacheIndex] += v;
 					v->setReadyForCache();
@@ -403,7 +403,7 @@ bool GUIApp::drawGraphics()
 		}
 	}
 
-#if 1||LIGHTBOX_PROFILE
+#if LIGHTBOX_PROFILE
 	LB_GL(glBlendFunc, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	string info = textualTime(AppEngine::get()->lastDrawTime());
 	iRect rr = m_root->rect();

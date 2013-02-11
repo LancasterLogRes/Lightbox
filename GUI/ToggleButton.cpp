@@ -43,6 +43,14 @@ void ToggleButtonBody::toggled(bool _userEvent)
 		m_onChecked(this);
 }
 
+void ToggleButtonBody::released(bool _withFinger)
+{
+	if (_withFinger)
+		tapped();
+	else
+		setDown(isLit());
+}
+
 void ToggleButtonBody::tapped()
 {
 	if (m_members && !m_members->count(nullptr))

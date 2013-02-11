@@ -76,12 +76,21 @@ void AppEngine::startActivity(string const& _app, string const& _intent, functio
 void AppEngine::killSystemBar()
 {
 #if LIGHTBOX_ANDROID
+#if 0
 	char const* args[] = { "call", "activity", "42", "s16", "com.android.systemui", nullptr };
 	if (!fork())
 	{
 		execvp("service", (char**)args);
 		exit(0);
 	}
+#else
+	char const* args[] = { "-c", "service call activity 42 s16 com.android.systemui", nullptr };
+	if (!fork())
+	{
+		execvp("su", (char**)args);
+		exit(0);
+	}
+#endif
 #endif
 }
 

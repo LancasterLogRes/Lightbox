@@ -120,9 +120,7 @@ bool BasicButtonBody::event(Event* _e)
 		if (m_isDown && e->id == m_downPointer)
 		{
 			m_downPointer = -1;
-			released();
-			if (geometry().contains(e->local))
-				tapped();
+			released(geometry().contains(e->local));
 		}
 		return true;
 	}

@@ -60,7 +60,7 @@ void PatternPickerBody::draw(Context const& _c, unsigned _layer)
 	drawButton(_c, _layer, isChecked(),
 	[&](iRect oinner)
 	{
-		fSize thumbOutPx = _c.pixelsF(GUIApp::style().thumbDiameter / 2 + GUIApp::style().thumbOutline);
+//		fSize thumbOutPx = _c.pixelsF(GUIApp::style().thumbDiameter / 2 + GUIApp::style().thumbOutline);
 		fSize thumbPx = _c.pixelsF(GUIApp::style().thumbDiameter / 2);
 		fRect inner = fRect(oinner).inset(thumbPx);
 

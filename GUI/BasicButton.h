@@ -54,7 +54,7 @@ protected:
 	virtual bool event(Event* _e);
 	virtual void tapped();
 	virtual void pushed() { setDown(); setLit(); }
-	virtual void released() { setDown(false); setLit(false); }
+	virtual void released(bool _withFinger) { setDown(false); setLit(false); if (_withFinger) tapped(); }
 	virtual fSize specifyMinimumSize(fSize) const;
 	virtual void initGraphics();
 	virtual void enabledChanged();

@@ -37,7 +37,7 @@ protected:
 	ToggleButtonBody(std::string const& _text, Color _c, Grouping _grouping): ToggleButtonBody(_text, _c, Font(), _grouping) {}
 
 	virtual void pushed() { setDown(true); }
-	virtual void released() {}
+	virtual void released(bool _withFinger);
 	virtual void toggled(bool _userEvent);
 	virtual void tapped();
 

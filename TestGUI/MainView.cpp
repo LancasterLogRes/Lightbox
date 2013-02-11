@@ -18,7 +18,7 @@ public:
 	TestViewBody()
 	{
 //		m_f = Font(100, "ubuntu");
-//		ToggleButtonBody::spawn(this, "Hello", Red)->setGeometry(fRect(400, 20, 150, 50));
+		ToggleButtonBody::spawn(this, "Hello", Red)->setGeometry(fRect(400, 20, 150, 50));
 	}
 
 private:
