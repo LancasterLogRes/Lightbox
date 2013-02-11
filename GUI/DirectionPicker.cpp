@@ -47,7 +47,6 @@ bool DirectionPickerBody::event(Event* _e)
 					r.setW(.05f);
 				setRadii(r, true);
 			}
-			update();
 			return true;
 		}
 	}

@@ -2,6 +2,7 @@
 #include <map>
 static const std::map<unsigned, char const*> g_symbolStrings =
 {
+#ifdef DEBUG
 	{0x1400, "GL_BYTE"},
     {0x1401, "GL_UNSIGNED_BYTE"},
     {0x1402, "GL_SHORT"},
@@ -4080,5 +4081,6 @@ static const std::map<unsigned, char const*> g_symbolStrings =
     {0x90E1, "GL_SYNC_X11_FENCE_EXT"},
     {0x90BA, "GL_SCALED_RESOLVE_FASTEST_EXT"},
     {0x90BB, "GL_SCALED_RESOLVE_NICEST_EXT"}
+#endif
 };
 
