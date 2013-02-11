@@ -24,6 +24,11 @@ public:
 	explicit Program(std::string const& _file);						///< Sections "vert" & "frag" in file @p _file
 	Program(std::string const& _file, std::string const& _base);	///< Sections "@p _base .vert" & "@p _base .frag" in file @p _file
 	Program(std::string const& _file, std::string const& _vert, std::string const& _frag);	///< Sections @p _vert & @p _frag in file @p _file
+	Program(std::string const& _vfile, std::string const& _vert, std::string const& _ffile, std::string const& _frag);	///< Sections @p _vert & @p _frag in files @p _vfile and @p ffile respectively.
+	Program(Shader const& _vs, std::string const& _file, std::string const& _frag):
+		Program(_vs, Shader::fragment(Resources::find(_file, _frag))) {}
+	Program(std::string const& _file, std::string const& _vert, Shader const& _fs):
+		Program(Shader::fragment(Resources::find(_file, _vert)), _fs) {}
 	Program(Shader const& _vs, Shader const& _fs):
 		Pimpl<ProgramFace>(new ProgramFace)
 	{
@@ -31,6 +36,9 @@ public:
 		m_p->setFragment(_fs);
 		m_p->link();
 	}
+
+	Shader const& vertexShader() const { return m_p->vertexShader(); }
+	Shader const& fragmentShader() const { return m_p->fragmentShader(); }
 
 	NonVolatile operator[](std::string const& _name) const { return uniform(_name).keep(); }
 	Attrib attrib(std::string const& _name) const { return Attrib(*this, _name); }
@@ -51,8 +59,11 @@ private:
 class ProgramUser: public boost::noncopyable
 {
 public:
+	enum DefaultType { AsDefault };
+
 	ProgramUser(): m_p(ProgramFace::inUse()), m_owns(false) { assert(m_p); }
 	ProgramUser(Program const& _p): m_p(_p ? _p : ProgramFace::inUse()), m_owns(!!_p) { if (m_owns) { assert(!ProgramFace::inUse()); m_p.use(); } else assert(m_p); }
+	ProgramUser(Program const& _p, DefaultType): m_p(ProgramFace::inUse() ? ProgramFace::inUse() : _p), m_owns(!ProgramFace::inUse()) { if (m_owns) m_p.use(); }
 	~ProgramUser() { if (m_owns) m_p.drop(); }
 
 	Attrib attrib(std::string const& _name) const { return Attrib(m_p, _name); }

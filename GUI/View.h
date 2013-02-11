@@ -82,8 +82,8 @@ struct Context
 	void disc(fEllipse _r, Program const& _p) const;
 	void circle(fEllipse _r, float _size, Color _c) const;
 	void circle(fEllipse _r, float _size, Program const& _p) const;
-	void blit(Texture2D const& _tex, fCoord _pos = fCoord(0, 0)) const;
 	void text(Font const& _f, fCoord _anchor, std::string const& _text, RGBA _c = RGBA::Black) const;
+	void blit(Texture2D const& _tex, fCoord _pos = fCoord(0, 0)) const;
 };
 
 struct ViewSiblingsComparator

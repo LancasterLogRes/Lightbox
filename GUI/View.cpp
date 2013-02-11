@@ -88,8 +88,8 @@ void Context::pxDisc(fEllipse _e) const
 	fCoord c = _e.middle() + fCoord(active.pos());
 	vm.offsetScale = fVector4(c.x(), c.y(), _e.rx(), _e.ry());
 	ProgramUser u;
-	u.attrib("geometry").setData(vm.unitCircle72, 2);
-	u.triangleFan(74);
+	u.attrib("geometry").setData(vm.unitCircle144, 2);
+	u.triangleFan(146);
 }
 
 void Context::pxDisc(fEllipse _e, Color _c) const
@@ -179,7 +179,7 @@ void Context::text(Font const& _f, fCoord _anchor, std::string const& _text, RGB
 
 void Context::blit(Texture2D const& _tex, fCoord _pos) const
 {
-	ProgramUser u(GUIApp::joint().texture);
+	ProgramUser u(GUIApp::joint().texture, ProgramUser::AsDefault);
 	float ox = round(_pos.x() + offset.w());
 	float oy = round(_pos.y() + offset.h());
 	std::array<float, 4 * 4> quad =

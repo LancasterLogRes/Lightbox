@@ -21,7 +21,8 @@ public:
 	Coord(Numeric _x, Numeric _y): Super(_x, _y) {}
 
 	explicit Coord(Super _q): Super(_q) {}
-	template <class _N> explicit Coord(Coord<_N> _s): CalcPair<Numeric, Coord<Numeric>>(_s) {}
+	template <class _N> explicit Coord(Size<_N> _c);
+	template <class _N> explicit Coord(Coord<_N> _s): Super(_s) {}
 
 	using Super::x;
 	using Super::y;
@@ -66,7 +67,8 @@ public:
 	explicit Size(Super _q): Super(_q) {}
 	explicit Size(Numeric _s): Super(_s, _s) {}
 	explicit Size(Coord<Numeric> _c): Super((Super)_c) {}
-	template<class _N> explicit Size(Size<_N> _s): CalcPair<Numeric, Size<Numeric>>(_s) {}
+	template <class _N> explicit Size(Coord<_N> _c): Super(_c.x, _c.y) {}
+	template <class _N> explicit Size(Size<_N> _s): Super(_s) {}
 
 	Numeric w() const { return x(); }
 	Numeric h() const { return y(); }
@@ -100,6 +102,7 @@ typedef Size<double> dSize;
 typedef Size<int> iSize;
 typedef Size<unsigned> uSize;
 
+template <class Numeric> template <class _N> Coord<Numeric>::Coord(Size<_N> _c): Super(_c.w(), _c.h()) {}
 template <class Numeric> Coord<Numeric> Coord<Numeric>::operator+(Size<Numeric> const& _c) const { return Coord(x() + _c.w(), y() + _c.h()); }
 template <class Numeric> Coord<Numeric> Coord<Numeric>::operator-(Size<Numeric> const& _c) const { return Coord(x() - _c.w(), y() - _c.h()); }
 template <class Numeric> Size<Numeric> Coord<Numeric>::operator-(Coord const& _c) const { return Size<Numeric>(x() - _c.x(), y() - _c.y()); }

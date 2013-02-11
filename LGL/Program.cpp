@@ -14,6 +14,10 @@ Program::Program(std::string const& _file, std::string const& _vert, std::string
 	Program(Shader::vertex(Resources::find(_file, _vert)), Shader::fragment(Resources::find(_file, _frag)))
 {}
 
+Program::Program(std::string const& _vfile, std::string const& _vert, std::string const& _ffile, std::string const& _frag):
+	Program(Shader::vertex(Resources::find(_vfile, _vert)), Shader::fragment(Resources::find(_ffile, _frag)))
+{}
+
 void ProgramUser::filterMerge(Texture2D const& _in)
 {
 	std::array<float, 4 * 2> quad = {{ 0, 0, 1, 0, 0, 1, 1, 1 }};

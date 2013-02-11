@@ -18,12 +18,22 @@ void Joint::init(Display& _d)
 	displaySizeMM = _d.sizeMM();
 
 	unitQuad = Buffer<float>({ 0.f, 1.f, 1.f, 1.f, 0.f, 0.f, 1.f, 0.f });
-	vector<float> uc(74 * 2);
-	uc[0] = uc[1] = 0.f;
-	for (unsigned i = 1; i < 74; ++i)
-		uc[2 * i] = sin(i / 72.f * TwoPi),
-		uc[2 * i + 1] = cos(i / 72.f * TwoPi);
-	unitCircle72 = Buffer<float>(uc);
+	{
+		vector<float> uc(74 * 2);
+		uc[0] = uc[1] = 0.f;
+		for (unsigned i = 1; i < 74; ++i)
+			uc[2 * i] = sin(i / 72.f * TwoPi),
+			uc[2 * i + 1] = cos(i / 72.f * TwoPi);
+		unitCircle72 = Buffer<float>(uc);
+	}
+	{
+		vector<float> uc(146 * 2);
+		uc[0] = uc[1] = 0.f;
+		for (unsigned i = 1; i < 146; ++i)
+			uc[2 * i] = sin(i / 144.f * TwoPi),
+			uc[2 * i + 1] = cos(i / 144.f * TwoPi);
+		unitCircle144 = Buffer<float>(uc);
+	}
 
 	shaded = Program("Shaders.glsl", "view");
 	flat = Program("Shaders.glsl", "flat");

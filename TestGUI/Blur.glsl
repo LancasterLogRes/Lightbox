@@ -178,25 +178,14 @@ void main(void)
 
 
 
-//@pass.vert
-uniform vec2 u_texturePitch;
-uniform vec2 u_offset;
-attribute vec2 a_position;
-varying vec2 v_texCoord;
-void main()
-{
-	gl_Position.zw = vec2(1.0);
-	gl_Position.xy = a_position.xy * 2.0 - vec2(1.0);
-	v_texCoord = a_position.xy + u_texturePitch * u_offset;
-}
-
-//@pass.frag
+//@colorize
 precision mediump float;
 uniform sampler2D u_tex;
-uniform float u_amplitude;
+uniform vec4 u_color;
 varying vec2 v_texCoord;
 void main()
 {
-	gl_FragColor = texture2D(u_tex, v_texCoord) * (1.0 + u_amplitude);
+	gl_FragColor.rgb = texture2D(u_tex, v_texCoord).rgb * u_color.rgb;
+	gl_FragColor.a = u_color.a;
 }
 

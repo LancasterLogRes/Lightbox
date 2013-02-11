@@ -27,6 +27,7 @@ struct Joint
 	PagedUniform color;
 	Buffer<float> unitQuad;
 	Buffer<float> unitCircle72;
+	Buffer<float> unitCircle144;
 	Program flat;
 	Program shaded;
 	Program texture;

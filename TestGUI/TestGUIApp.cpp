@@ -46,8 +46,9 @@ void TestGUIApp::initGraphics(Display& _d)
 bool TestGUIApp::drawGraphics()
 {
 	Super::drawGraphics();
-	glClearColor(0.f, 0.f, .25f, .25f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+//	glClearColor(0.f, 0.f, .25f, .25f);
+//	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	// Draw SVG
 	vgSeti(VG_MATRIX_MODE, VG_MATRIX_PATH_USER_TO_SURFACE);
@@ -57,11 +58,11 @@ bool TestGUIApp::drawGraphics()
 	s_handler->draw();
 
 	// Draw box
-	Context().rect(fRect(50, 50, 50, 50), Color(1.f, .25f));
+//	Context().rect(fRect(50, 50, 50, 50), Color(1.f, .25f));
 
 	// Draw VG
-	vgSetPaint( _paint, VG_FILL_PATH );
-	vgDrawPath( _path, VG_FILL_PATH );
+//	vgSetPaint( _paint, VG_FILL_PATH );
+//	vgDrawPath( _path, VG_FILL_PATH );
 
 	return false;
 }
