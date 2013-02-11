@@ -31,8 +31,8 @@ struct Joint
 	Program shaded;
 	Program texture;
 	Program general;
-	Program hblur6;
-	Program vblur6;
+	Program hblur;
+	Program vblur;
 	Program pass;
 	Attrib flatGeometry;
 	Attrib shadedGeometry;

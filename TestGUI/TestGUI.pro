@@ -14,10 +14,10 @@ android: LIBS += $$LIBSTL -llog -landroid
 
 INCLUDEPATH += $${DESTDIR} $${STP}/MonkVG/include $${STP}/MonkSVG/src
 
-RES += Blur.glsl speed0.svg speed1.svg speed2.svg circle.svg
+RES += Blur.glsl speed0.svg speed1.svg speed2.svg circle.svg broken.svg
 
 OTHER_FILES += AndroidManifest.xml \
-	Blur.glsl speed0.svg speed1.svg speed2.svg circle.svg
+	Blur.glsl speed0.svg speed1.svg speed2.svg circle.svg broken.svg
 
 HEADERS += \
     MainView.h \

@@ -19,7 +19,7 @@ void LightPickerBody::initGraphics()
 {
 	m_lightBar = Program("LightBar.glsl");
 	m_lightBar.tie(GUIApp::joint().uniforms);
-	setLayers({{Layer(), Layer(iMargin(), true)}});
+	setLayers({{Layer(), Layer(iMargin(), false)}});
 }
 
 void LightPickerBody::finiGraphics()

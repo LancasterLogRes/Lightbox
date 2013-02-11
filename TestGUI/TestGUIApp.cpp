@@ -39,7 +39,7 @@ void TestGUIApp::initGraphics(Display& _d)
 	{
 		MonkSVG::SVG s;
 		s.initialize(s_handler);
-		s.read(Resources::find("speed2.svg").toString());
+		s.read(Resources::find("broken.svg").toString());
 	}
 }
 

@@ -29,8 +29,8 @@ void Joint::init(Display& _d)
 	flat = Program("Shaders.glsl", "flat");
 	texture = Program("Shaders.glsl", "texture");
 	general = Program("Shaders.glsl", "general");
-	hblur6 = Program("Shaders.glsl", "hblur6.vert", "hblur6.frag");
-	vblur6 = Program("Shaders.glsl", "vblur6.vert", "vblur6.frag");
+	hblur = Program("Shaders.glsl", "hblur4.vert", "hblur4.frag");
+	vblur = Program("Shaders.glsl", "vblur4.vert", "vblur4.frag");
 	pass = Program("Shaders.glsl", "pass");
 
 	shaded.tie(uniforms);

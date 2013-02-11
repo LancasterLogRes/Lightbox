@@ -41,6 +41,8 @@ bool PatternPickerBody::event(Event* _e)
 
 void PatternPickerBody::draw(Context const& _c, unsigned _layer)
 {
+	unsigned xBig[] = { m_space.w() / 4, m_space.w() * 3 / 4 };
+	unsigned yBig[] = { m_space.h() / 4, m_space.h() * 3 / 4 };
 	drawButton(_c, _layer, isChecked(),
 	[&](iRect oinner)
 	{
@@ -55,15 +57,13 @@ void PatternPickerBody::draw(Context const& _c, unsigned _layer)
 			for (unsigned x = 0; x < m_space.w(); ++x, ++i)
 			{
 				fCoord p = inner.pos() + fSize(x, y) * spacing;
-				if (isChecked() && m_index == i)
-					if (_layer == 1)
-					{
-						_c.pxDisc(fEllipse(p, thumbOutPx), GUIApp::style().outlineColor);
-						_c.pxDisc(fEllipse(p, thumbPx), glow);
-					}
-					else {}
-				else if (_layer == 0)
-					_c.pxRect(fRect::square(p, min(spacing.w(), spacing.h()) / 6.f), glow.attenuated(.25f));
+				if (_layer == 0)
+					_c.pxRect(fRect::square(p, min(spacing.w(), spacing.h()) / ((x == xBig[0] || x == xBig[1]) && (y == yBig[0] || y == yBig[1]) ? 3.f : 6.f)), glow.attenuated(.25f));
+				else if (isChecked() && m_index == i && _layer == 1)
+				{
+					_c.pxDisc(fEllipse(p, thumbOutPx), GUIApp::style().outlineColor);
+					_c.pxDisc(fEllipse(p, thumbPx), glow);
+				}
 			}
 	}, false);
 }

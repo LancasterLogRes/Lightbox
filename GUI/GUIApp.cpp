@@ -269,7 +269,7 @@ bool GUIApp::drawGraphics()
 							for (unsigned i = 0; i < levels.size(); ++i)
 								levels[i] = (i ? levels[i - 1] : baseTex).filter(m_joint.pass, Texture2D(baseTex.size() / (glowAmount << i)));
 							for (unsigned i = 0; i < levels.size(); ++i)
-								levels[i] = levels[i].filter(m_joint.vblur6).filter(m_joint.hblur6);//.filter(m_joint.hblur6);
+								levels[i] = levels[i].filter(m_joint.vblur).filter(m_joint.hblur);//.filter(m_joint.hblur6);
 
 							// Composite final texture.
 							glEnable(GL_SCISSOR_TEST);
@@ -402,7 +402,7 @@ bool GUIApp::drawGraphics()
 		}
 	}
 
-#if !LIGHTBOX_FINAL
+#if 1||LIGHTBOX_PROFILE
 	LB_GL(glBlendFunc, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	string info = textualTime(AppEngine::get()->lastDrawTime());
 	iRect rr = m_root->rect();
@@ -412,10 +412,12 @@ bool GUIApp::drawGraphics()
 	Font f(ByPixels, 16, "ubuntu");
 	iCoord p = infoRect.topLeft();
 	f.draw(p, info, RGBA::Black, AtTop|AtLeft);
+#if LIGHTBOX_PROFILE
 	info = toString(g_metrics.m_useProgramCount) + "/" + toString(g_metrics.m_drawCount);
 	p += iSize(0, 16);
 	f.draw(p, info, RGBA::Black, AtTop|AtLeft);
 	g_metrics.reset();
+#endif
 #endif
 
 	return !stillDirty;

@@ -24,6 +24,9 @@ void HuePickerBody::initGraphics()
 	m_hueWheelDodge = Program("HueWheel.glsl", "dodge.vert", "frag");
 	m_hueWheelDodge.tie(GUIApp::joint().uniforms);
 	Super::initGraphics();
+	Layers l = layers();
+	l.push_back(Layer(iMargin(), false));
+	setLayers(l);
 }
 
 void HuePickerBody::finiGraphics()
@@ -51,23 +54,26 @@ bool HuePickerBody::event(Event* _e)
 
 void HuePickerBody::draw(Context const& _c, unsigned _l)
 {
+	iSize thumbPx = _c.toPixels(GUIApp::style().thumbSize / 2 + GUIApp::style().thumbOutline);
 	BasicButtonBody::drawButton(_c, _l, isChecked(), [&](iRect inner)
 	{
-		iSize thumbPx = _c.toPixels(GUIApp::style().thumbSize / 2 + GUIApp::style().thumbOutline);
 		inner = inner.inset(thumbPx / 2.f);
 		iEllipse e(inner);
+		if (_l < 2)
 		{
 			ProgramUser u(_l ? m_hueWheelDodge : m_hueWheel);
 			_c.disc(e.inset(thumbPx / 2));
 		}
 		_c.disc(e.inset(thumbPx * 3 / 2), Black);
-		if (_l)
-		{
-			iCoord p = e.pos() + iSize(fSize(-sin(m_hue * TwoPi), -cos(m_hue * TwoPi)) * fSize(e.radii() - thumbPx));
-			_c.disc(iEllipse(p, thumbPx), GUIApp::style().outlineColor);
-			_c.disc(iEllipse(p, _c.toPixels(GUIApp::style().thumbSize / 2)), GUIApp::joint().mildGlow(Color(m_hue, m_middle.sat(), m_middle.value())));
-		}
 	}, false);
+
+	if (_l == 2)
+	{
+		iEllipse e(rect().inset(thumbPx / 2.f));
+		iCoord p = e.pos() + iSize(fSize(-sin(m_hue * TwoPi), -cos(m_hue * TwoPi)) * fSize(e.radii() - thumbPx));
+		_c.disc(iEllipse(p, thumbPx), GUIApp::style().outlineColor);
+		_c.disc(iEllipse(p, _c.toPixels(GUIApp::style().thumbSize / 2)), GUIApp::joint().mildGlow(Color(m_hue, m_middle.sat(), m_middle.value())));
+	}
 	return;
 }
 

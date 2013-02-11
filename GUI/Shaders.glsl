@@ -206,6 +206,69 @@ void main()
 }
 
 
+
+//-----------------------------------------------------------------------------
+//@hblur4.vert
+uniform vec2 u_texturePitch;
+attribute vec2 a_position;
+varying vec2 v_blurTexCoords[6];
+void main()
+{
+	gl_Position.zw = vec2(1.0);
+	gl_Position.xy = a_position.xy * 2.0 - vec2(1.0);
+	vec2 texCoord = a_position.xy;
+	v_blurTexCoords[ 0 ] = texCoord + vec2( -2.2884087325 * u_texturePitch.x, 0.0);
+	v_blurTexCoords[ 1 ] = texCoord + vec2( -0.454966120801 * u_texturePitch.x, 0.0);
+	v_blurTexCoords[ 2 ] = texCoord + vec2( 0.454966120801 * u_texturePitch.x, 0.0);
+	v_blurTexCoords[ 3 ] = texCoord + vec2( 2.2884087325 * u_texturePitch.x, 0.0);
+}
+
+//@vblur4.vert
+uniform vec2 u_texturePitch;
+attribute vec2 a_position;
+varying vec2 v_blurTexCoords[6];
+void main()
+{
+	gl_Position.zw = vec2(1.0);
+	gl_Position.xy = a_position.xy * 2.0 - vec2(1.0);
+	vec2 texCoord = a_position.xy;
+	v_blurTexCoords[ 0 ] = texCoord + vec2(0.0, -2.2884087325 * u_texturePitch.y);
+	v_blurTexCoords[ 1 ] = texCoord + vec2(0.0, -0.454966120801 * u_texturePitch.y);
+	v_blurTexCoords[ 2 ] = texCoord + vec2(0.0, 0.454966120801 * u_texturePitch.y);
+	v_blurTexCoords[ 3 ] = texCoord + vec2(0.0, 2.2884087325 * u_texturePitch.y);
+}
+
+//@hblur4.frag
+precision mediump float;
+uniform sampler2D u_tex;
+varying vec2 v_blurTexCoords[6];
+const float c = 0.0;
+const float m = 1.4;
+void main()
+{
+	gl_FragColor = vec4(0.0);
+	gl_FragColor += texture2D(u_tex, v_blurTexCoords[ 0 ]) * (0.164602202961 * m + c);
+	gl_FragColor += texture2D(u_tex, v_blurTexCoords[ 1 ]) * (0.442609282276 * m + c);
+	gl_FragColor += texture2D(u_tex, v_blurTexCoords[ 2 ]) * (0.442609282276 * m + c);
+	gl_FragColor += texture2D(u_tex, v_blurTexCoords[ 3 ]) * (0.164602202961 * m + c);
+}
+
+//@vblur4.frag
+precision mediump float;
+uniform sampler2D u_tex;
+varying vec2 v_blurTexCoords[6];
+const float c = 0.2;
+const float m = 1.0;
+void main()
+{
+	gl_FragColor = vec4(0.0);
+	gl_FragColor += texture2D(u_tex, v_blurTexCoords[ 0 ]) * (0.164602202961 * m + c);
+	gl_FragColor += texture2D(u_tex, v_blurTexCoords[ 1 ]) * (0.442609282276 * m + c);
+	gl_FragColor += texture2D(u_tex, v_blurTexCoords[ 2 ]) * (0.442609282276 * m + c);
+	gl_FragColor += texture2D(u_tex, v_blurTexCoords[ 3 ]) * (0.164602202961 * m + c);
+}
+
+
 //-----------------------------------------------------------------------------
 //@pass.vert
 uniform vec2 u_texturePitch;
