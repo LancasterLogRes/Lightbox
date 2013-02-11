@@ -67,7 +67,7 @@ void DirectionPickerBody::initGraphics()
 	bool haveBottom = m_grouping & ForceBelow;
 	iMargin surroundMargin(haveLeft ? 0 : surroundWidth.w(), haveTop ? 0 : surroundWidth.h(), haveRight ? 0 : surroundWidth.w(), haveBottom ? 0 : surroundWidth.h());
 	iMargin lightMargin(lightWidth.w() / (haveLeft ? 2 : 1), lightWidth.h() / (haveTop ? 2 : 1), lightWidth.w() - (haveRight ? lightWidth.w() / 2 : 0), lightWidth.h() - (haveBottom ? lightWidth.h() / 2 : 0));
-	l.push_back(Layer(/*-surroundMargin*/ - lightMargin, false, true));
+	l.push_back(Layer(-surroundMargin - lightMargin / 2, false, true));
 	setLayers(l);
 }
 
