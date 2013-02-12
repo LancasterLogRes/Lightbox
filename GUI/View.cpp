@@ -180,6 +180,7 @@ void Context::text(Font const& _f, fCoord _anchor, std::string const& _text, RGB
 void Context::blitThumb(fCoord _pos, Color _c, float _overglow) const
 {
 	ProgramUser u(GUIApp::joint().colorize);
+	u.uniform("u_amplitude") = 1.f;
 	u.uniform("u_overglow") = _overglow;
 	u.uniform("u_color") = (fVector4)_c.toRGBA();
 	blit(GUIApp::joint().glowThumbTex, _pos - GUIApp::style().thumbDiameter);
@@ -188,25 +189,37 @@ void Context::blitThumb(fCoord _pos, Color _c, float _overglow) const
 void Context::blitThumb(iCoord _pos, Color _c, float _overglow) const
 {
 	ProgramUser u(GUIApp::joint().colorize);
+	u.uniform("u_amplitude") = 1.f;
 	u.uniform("u_overglow") = _overglow;
 	u.uniform("u_color") = (fVector4)_c.toRGBA();
 	blit(GUIApp::joint().glowThumbTex, _pos - toPixels(GUIApp::style().thumbDiameter));
 }
 
-void Context::blit(Texture2D const& _tex, iCoord _pos) const
+void Context::blit(iRect _src, Texture2D const& _tex, iRect _dest) const
 {
 	ProgramUser u(GUIApp::joint().texture, ProgramUser::AsDefault);
-	fCoord o = fCoord(_pos + active.pos());
+	if (_src.w() == 0)
+		_src.setW(_tex.size().w());
+	if (_src.h() == 0)
+		_src.setH(_tex.size().h());
+	if (_dest.w() == 0)
+		_dest.setW(abs(_src.w()));
+	if (_dest.h() == 0)
+		_dest.setH(abs(_src.h()));
+
+	float tw = _tex.size().w();
+	float th = _tex.size().h();
+	fRect o = fRect(fCoord(_dest.pos() + active.pos()), (fSize)_dest.size());
 	std::array<float, 4 * 4> quad =
 	{{
 		// top left.
-		0, 0, o.x(), o.y(),
+		_src.left() / tw, _src.top() / th, o.left(), o.top(),
 		// top right.
-		1, 0, o.x() + _tex.size().w(), o.y(),
+		_src.right() / tw, _src.top() / th, o.right(), o.top(),
 		// bottom left.
-		0, 1, o.x(), o.y() + _tex.size().h(),
+		_src.left() / tw, _src.bottom() / th, o.left(), o.bottom(),
 		// bottom right.
-		1, 1, o.x() + _tex.size().w(), o.y() + _tex.size().h()
+		_src.right() / tw, _src.bottom() / th, o.right(), o.bottom()
 	}};
 	u.uniform("u_tex") = _tex;
 	u.attrib("a_texCoordPosition").setStaticData(quad.data(), 4, 0);

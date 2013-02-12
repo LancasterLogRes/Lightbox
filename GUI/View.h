@@ -60,7 +60,10 @@ struct Context
 	void rect(iRect _r, Color _c, float _gradient) const { pxRect(fRect(_r), _c, _gradient); }
 	void disc(iEllipse _r) const { pxDisc(fEllipse(_r)); }
 	void disc(iEllipse _r, Color _c) const { pxDisc(fEllipse(_r), _c); }
-	void blit(Texture2D const& _tex, iCoord _pos = iCoord(0, 0)) const;
+	void blit(Texture2D const& _tex, iCoord _dest = iCoord(0, 0)) const { blit(_tex, iRect(_dest, iSize(0, 0))); }
+	void blit(Texture2D const& _tex, iRect _dest) const { blit(iRect(0, 0, 0, 0), _tex, _dest); }
+	void blit(iRect _src, Texture2D const& _tex, iCoord _dest) const { blit(_src, _tex, iRect(_dest, iSize(0, 0))); }
+	void blit(iRect _src, Texture2D const& _tex, iRect _dest = iRect(0, 0, 0, 0)) const;
 	void blitThumb(iCoord _pos, Color _c, float _overglow = 0) const;
 
 	// Pixel functions that take float params.

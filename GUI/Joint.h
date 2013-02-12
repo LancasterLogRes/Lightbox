@@ -17,6 +17,7 @@ struct Joint
 
 	Texture2D thumbTex() const;
 	Texture2D makeGlower(Texture2D _baseTex) const;
+	Texture2D makeGlower4(Texture2D _baseTex) const;
 
 	Color glow(Color _c) const { return Color(_c.hue(), _c.sat() * .95f, _c.value() * 8.f, lerp(_c.sat(), .65f, glowAlpha)); }
 	Color mildGlow(Color _c) const { return _c.attenuated(1.f / (1 << glowLevels)).withConstantLight(); }

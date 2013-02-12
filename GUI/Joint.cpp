@@ -84,7 +84,7 @@ Texture2D Joint::thumbTex() const
 
 	u_displaySize = (fVector2)(fSize)totalSize;
 	LB_GL(glBlendFunc, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-	Context().disc(iEllipse(iCoord(totalSize / 2), thumbRadiusPx), Color(1.f / (glowLevels * 2 + 1)));	// illogical. TEST!
+	Context().disc(iEllipse(iCoord(totalSize / 2), thumbRadiusPx), Color(1.f / (glowLevels * 2 + 1)));
 
 	u_displaySize = (fVector2)(fSize)displaySizePixels;
 	LB_GL(glBlendFunc, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -100,6 +100,32 @@ Texture2D Joint::makeGlower(Texture2D _baseTex) const
 		levels[i] = (i ? levels[i - 1] : _baseTex).filter(pass, Texture2D(_baseTex.size() / (1 << i)));
 	for (unsigned i = 0; i < levels.size(); ++i)
 		levels[i] = levels[i].filter(vblur8).filter(hblur8);
+
+	Framebuffer fb(Framebuffer::Create);
+	FramebufferUser fbu(fb);
+	Texture2D ret(_baseTex.size());
+	ret.viewport();
+	fbu.attachColor(ret);
+	LB_GL(glClear, GL_COLOR_BUFFER_BIT);
+	LB_GL(glBlendFunc, GL_SRC_ALPHA, GL_ONE);
+	ProgramUser u(pass);
+	for (auto const& l: levels)
+		u.filterMerge(l);
+	u.filterMerge(_baseTex);
+
+	LB_GL(glBlendFunc, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	return ret;
+}
+
+Texture2D Joint::makeGlower4(Texture2D _baseTex) const
+{
+	// Filter it.
+	LB_GL(glBlendFunc, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+	vector<Texture2D> levels(glowLevels);
+	for (unsigned i = 0; i < levels.size(); ++i)
+		levels[i] = (i ? levels[i - 1] : _baseTex).filter(pass, Texture2D(_baseTex.size() / (glowLevels << i)));
+	for (unsigned i = 0; i < levels.size(); ++i)
+		levels[i] = levels[i].filter(vblur).filter(hblur);
 
 	Framebuffer fb(Framebuffer::Create);
 	FramebufferUser fbu(fb);

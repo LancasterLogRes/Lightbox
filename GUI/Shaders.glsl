@@ -114,11 +114,12 @@ precision mediump float;
 uniform sampler2D u_tex;
 uniform vec4 u_color;
 uniform float u_overglow;
+uniform float u_amplitude;
 varying vec2 v_texCoord;
 void main()
 {
 	float t = texture2D(u_tex, v_texCoord).r;
-	gl_FragColor.a = u_color.a * t;
+	gl_FragColor.a = u_color.a * t * u_amplitude;
 	gl_FragColor.rgb = mix(u_color.rgb, min(vec3(1), u_color.rgb + vec3(u_overglow)), t);
 //	gl_FragColor.rgb = u_color.rgb + vec3(u_overglow * t);
 //	gl_FragColor.rgb = texture2D(u_tex, v_texCoord).rgb * (vec3(u_overglow) + u_color.rgb);

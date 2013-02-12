@@ -172,6 +172,7 @@ bool GUIApp::drawGraphics()
 		{
 			v->setDirty();
 			v.view->m_visibleLayoutChanged = false;
+			assert(v->globalLayer().width() <= (int)joint().display->width() && v->globalLayer().height() <= (int)joint().display->height());
 			while (true)
 			{
 				// assuming page is valid, try to find a position in m_cache[page] and put it into pos...
@@ -403,7 +404,7 @@ bool GUIApp::drawGraphics()
 		}
 	}
 
-#if LIGHTBOX_PROFILE
+#if LIGHTBOX_PROFILE || DEBUG
 	LB_GL(glBlendFunc, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	string info = textualTime(AppEngine::get()->lastDrawTime());
 	iRect rr = m_root->rect();
@@ -414,7 +415,7 @@ bool GUIApp::drawGraphics()
 	iCoord p = infoRect.topLeft();
 	f.draw(p, info, RGBA::Black, AtTop|AtLeft);
 	cdebug << info;
-#if LIGHTBOX_PROFILE
+#if LIGHTBOX_PROFILE || DEBUG
 	info = toString(g_metrics.m_useProgramCount) + "/" + toString(g_metrics.m_drawCount);
 	p += iSize(0, 16);
 	f.draw(p, info, RGBA::Black, AtTop|AtLeft);

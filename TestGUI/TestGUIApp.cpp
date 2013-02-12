@@ -22,11 +22,12 @@ bool TestGUIApp::drawGraphics()
 {
 	Super::drawGraphics();
 
+//	return true;
 	m_mainView->child(0)->update();
 	return false;
 }
 
-void TestGUIApp::finiGraphics(Display &_d)
+void TestGUIApp::finiGraphics(Display&)
 {
 }
 

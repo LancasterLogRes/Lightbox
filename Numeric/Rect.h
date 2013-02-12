@@ -15,9 +15,9 @@ public:
 	typedef Margin<Numeric> xMargin;
 
 	Rect() {}
+	explicit Rect(xSize _size): m_pos(0, 0), m_size(_size) {}
 	Rect(xCoord _min, xSize _size): m_pos(_min), m_size(_size) {}
 	Rect(xCoord _min, xCoord _max): m_pos(_min), m_size(_max - _min) {}
-	explicit Rect(xSize _size): m_pos(0, 0), m_size(_size) {}
 	Rect(Numeric _x, Numeric _y, Numeric _w, Numeric _h): m_pos(_x, _y), m_size(_w, _h) {}
 	template<class _N> explicit Rect(Rect<_N> _s): m_pos(_s.pos()), m_size(_s.size()) {}
 
@@ -64,6 +64,10 @@ public:
 	xCoord lerp(float _x, float _y) const { return m_pos + xSize(m_size.w() * _x, m_size.h() * _y); }
 	Rect lerp(float _xf, float _yf, float _xt, float _yt) const { xCoord o = lerp(_xf, _yf); return Rect(o, lerp(_xt, _yt) - o); }
 	xCoord lerp(fSize _xy) const { return m_pos + xSize(m_size.w() * _xy.w(), m_size.h() * _xy.h()); }
+
+	Rect flippedHorizontal() const { return Rect(x() + w(), y(), -w(), h()); }
+	Rect flippedVertical() const { return Rect(x(), y() + h(), w(), -h()); }
+	Rect flipped() const { return Rect(pos() + size(), -size()); }
 
 	Rect inset(Numeric _s) const { return inset(xMargin(_s, _s, _s, _s)); }
 	Rect inset(Numeric _x, Numeric _y) const { return inset(xSize(_x, _y)); }
