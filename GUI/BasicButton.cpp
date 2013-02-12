@@ -26,7 +26,7 @@ bool isNeighbour(View const& _v)
 
 Layers BasicButtonBody::layers()
 {
-	return {{ Layer(), Layer(borderMargin()) }};
+	return {{ Layer(), Layer(borderMargin(), false, true) }};
 }
 
 void BasicButtonBody::initGraphics()

@@ -217,7 +217,7 @@ bool GUIApp::drawGraphics()
 //					cnote << "SKIP:" << v;
 					renderDirect[cacheIndex] += v;
 				}
-				else if (v->isDirty() && (v->isReadyForCache() || v->glows() /*|| v->isPremultiplied()*/))
+				else if (v->isDirty() && (v->isReadyForCache() || v->glows() || v->isPremultiplied()))
 				{
 					cnote << "RENDER:" << v;
 					v.preDraw();
