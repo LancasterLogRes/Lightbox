@@ -215,15 +215,15 @@ void Context::glowRect(iRect _upperLeftEdgeOfLight, Color _col, float _overglow)
 	auto lightEdgePixels = GUIApp::joint().lightEdgePixels;
 	auto glowCornerTex = GUIApp::joint().glowCornerTex;
 	iSize cornerSize = glowPixels * 2 + lightEdgePixels;
-	blit(iRect(cornerSize), glowCornerTex, iRect(_upperLeftEdgeOfLight.topLeft() - glowPixels, iSize(0, 0)));
-	blit(iRect(cornerSize).flippedHorizontal(), glowCornerTex, iRect(_upperLeftEdgeOfLight.topRight() - glowPixels, iSize(0, 0)));
-	blit(iRect(cornerSize).flippedVertical(), glowCornerTex, iRect(_upperLeftEdgeOfLight.bottomLeft() - glowPixels, iSize(0, 0)));
-	blit(iRect(cornerSize).flippedHorizontal().flippedVertical(), glowCornerTex, iRect(_upperLeftEdgeOfLight.bottomRight() - glowPixels, iSize(0, 0)));
+	blit(iRect(iCoord(1, 1), cornerSize), glowCornerTex, iRect(_upperLeftEdgeOfLight.topLeft() - glowPixels, iSize(0, 0)));
+	blit(iRect(iCoord(1, 1), cornerSize).flippedHorizontal(), glowCornerTex, iRect(_upperLeftEdgeOfLight.topRight() - glowPixels, iSize(0, 0)));
+	blit(iRect(iCoord(1, 1), cornerSize).flippedVertical(), glowCornerTex, iRect(_upperLeftEdgeOfLight.bottomLeft() - glowPixels, iSize(0, 0)));
+	blit(iRect(iCoord(1, 1), cornerSize).flippedHorizontal().flippedVertical(), glowCornerTex, iRect(_upperLeftEdgeOfLight.bottomRight() - glowPixels, iSize(0, 0)));
 	iSize extra = _upperLeftEdgeOfLight.size() - lightEdgePixels - glowPixels * 2;
-	blit(iRect(glowPixels.w() * 2 + lightEdgePixels.w(), 0, 1, glowPixels.h() * 2 + lightEdgePixels.h()), glowCornerTex, iRect(_upperLeftEdgeOfLight.x() + glowPixels.w() + lightEdgePixels.w(), _upperLeftEdgeOfLight.y() - glowPixels.w(), extra.w(), 0));
-	blit(iRect(glowPixels.w() * 2 + lightEdgePixels.w(), 0, 1, glowPixels.h() * 2 + lightEdgePixels.h()).flippedVertical(), glowCornerTex, iRect(_upperLeftEdgeOfLight.x() + glowPixels.w() + lightEdgePixels.w(), _upperLeftEdgeOfLight.bottom() - glowPixels.h(), extra.w(), 0));
-	blit(iRect(0, glowPixels.h() * 2 + lightEdgePixels.h(), glowPixels.w() * 2 + lightEdgePixels.w(), 1), glowCornerTex, iRect(_upperLeftEdgeOfLight.x() - glowPixels.h(), _upperLeftEdgeOfLight.y() + glowPixels.h() + lightEdgePixels.h(), 0, extra.h()));
-	blit(iRect(0, glowPixels.h() * 2 + lightEdgePixels.h(), glowPixels.w() * 2 + lightEdgePixels.w(), 1).flippedHorizontal(), glowCornerTex, iRect(_upperLeftEdgeOfLight.right() - glowPixels.h(), _upperLeftEdgeOfLight.y() + glowPixels.h() + lightEdgePixels.h(), 0, extra.h()));
+	blit(iRect(glowPixels.w() * 2 + lightEdgePixels.w() + 1, 1, 1, glowPixels.h() * 2 + lightEdgePixels.h()), glowCornerTex, iRect(_upperLeftEdgeOfLight.x() + glowPixels.w() + lightEdgePixels.w(), _upperLeftEdgeOfLight.y() - glowPixels.w(), extra.w(), 0));
+	blit(iRect(glowPixels.w() * 2 + lightEdgePixels.w() + 1, 1, 1, glowPixels.h() * 2 + lightEdgePixels.h()).flippedVertical(), glowCornerTex, iRect(_upperLeftEdgeOfLight.x() + glowPixels.w() + lightEdgePixels.w(), _upperLeftEdgeOfLight.bottom() - glowPixels.h(), extra.w(), 0));
+	blit(iRect(1, glowPixels.h() * 2 + lightEdgePixels.h() + 1, glowPixels.w() * 2 + lightEdgePixels.w(), 1), glowCornerTex, iRect(_upperLeftEdgeOfLight.x() - glowPixels.h(), _upperLeftEdgeOfLight.y() + glowPixels.h() + lightEdgePixels.h(), 0, extra.h()));
+	blit(iRect(1, glowPixels.h() * 2 + lightEdgePixels.h() + 1, glowPixels.w() * 2 + lightEdgePixels.w(), 1).flippedHorizontal(), glowCornerTex, iRect(_upperLeftEdgeOfLight.right() - glowPixels.h(), _upperLeftEdgeOfLight.y() + glowPixels.h() + lightEdgePixels.h(), 0, extra.h()));
 }
 
 void Context::blit(iRect _src, Texture2D const& _tex, iRect _dest) const

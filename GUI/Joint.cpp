@@ -152,9 +152,9 @@ Texture2D Joint::makeGlowerNear(Texture2D _baseTex) const
 
 Texture2D Joint::cornerTex() const
 {
-	uSize totalSizePx = uSize(lightEdgePixels + glowPixels * 3);
+	uSize totalSizePx = uSize(lightEdgePixels + glowPixels * 3 + iSize(1, 1));
 	Texture2D ret(totalSizePx);
 	RenderToTextureContext c(ret);
-	c.rectInline(iRect((iCoord)glowPixels, (iSize)totalSizePx * 2), iMargin(lightEdgePixels), Color(1.f / (glowLevels * 2 + 1)));
+	c.rectInline(iRect((iCoord)glowPixels + iSize(1, 1), (iSize)totalSizePx * 2), iMargin(lightEdgePixels), Color(1.f / (glowLevels * 2 + 1)));
 	return ret;
 }
