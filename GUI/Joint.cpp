@@ -62,6 +62,7 @@ void Joint::init(Display& _d)
 
 	glowLevels = Lightbox::log2(ceil(_d.toPixelsF(fSize(0, 2)).h()));
 	lightEdgePixels = display->toUnalignedPixels(GUIApp::style().lightEdgeSize);
+	lightBedPixels = display->toUnalignedPixels(GUIApp::style().lightBedSize);
 	glowPixels = iSize(1 << (glowLevels * 2 + 1));
 	cnote << "glowLevels:" << glowLevels << "glowPixels:" << glowPixels << "lightEdgePixels:" << lightEdgePixels;
 	glowAlpha = 1.f - (glowLevels - 1) * .125f;

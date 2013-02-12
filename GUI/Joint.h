@@ -52,8 +52,10 @@ struct Joint
 	Texture2D glowThumbTex;
 	Texture2D glowCornerTex;
 
-	iSize lightEdgePixels;
 	iSize glowPixels;
+
+	iSize lightEdgePixels;
+	iSize lightBedPixels;
 
 private:
 	Texture2D cornerTex() const;

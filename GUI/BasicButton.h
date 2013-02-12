@@ -11,10 +11,10 @@ namespace Lightbox
 class BasicButtonBody;
 typedef boost::intrusive_ptr<BasicButtonBody> BasicButton;
 
-enum GroupingFlags { NoGrouping = 0, HorizontalGrouping = 1, VerticalGrouping = 2, ForceAbove = 4, ForceBelow = 8, ForceLeft = 16, ForceRight= 32 };
-typedef Flags<GroupingFlags> Grouping;
-
-LIGHTBOX_FLAGS_TYPE(GroupingFlags, Grouping);
+void drawButton(Context const& _c, iRect _inner, Color _color, bool _down, bool _base, bool _lit, bool _polish);
+void drawBorder(Context const& _con, iRect _inner, bool _base, bool _lit, Color _col);
+iMargin borderMargin();
+iMargin innerMargin(Grouping _grouping);
 
 class BasicButtonBody: public ViewCreator<ViewBody, BasicButtonBody>
 {
@@ -30,6 +30,7 @@ public:
 	std::string const& text() const { return m_text; }
 	Color color() const { return m_color; }
 	Grouping grouping() const { return m_grouping; }
+	Grouping effectiveGrouping() const;
 
 	void setOnTapped(EventHandler const& _t) { m_onTapped = _t; }
 	void setText(std::string const& _s) { m_text = _s; update(); }
@@ -47,8 +48,6 @@ public:
 protected:
 	BasicButtonBody(std::string const& _text = std::string(), Color _c = White, Font _f = Font(), Grouping _grouping = NoGrouping);
 	BasicButtonBody(std::string const& _text, Color _c, Grouping _grouping): BasicButtonBody(_text, _c, Font(), _grouping) {}
-
-	void drawButton(Context const& _c, unsigned _l, bool _down, std::function<void(iRect)> const& _inner = std::function<void(iRect)>(), bool _polish = true);
 
 	virtual void draw(Context const& _c, unsigned _layer);
 	virtual bool event(Event* _e);

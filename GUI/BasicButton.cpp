@@ -24,13 +24,9 @@ bool isNeighbour(View const& _v)
 	return false;
 }
 
-static const float c_surroundWidth = 2;
-static const float c_lightWidth = 4;
-
 Layers BasicButtonBody::layers()
 {
-	iSize lightWidth = GUIApp::joint().display->toPixels(fSize(c_lightWidth, c_lightWidth));
-	return {{ Layer(), Layer(iMargin(lightWidth * 2, lightWidth * 2), false) }};
+	return {{ Layer(), Layer(borderMargin()) }};
 }
 
 void BasicButtonBody::initGraphics()
@@ -44,7 +40,7 @@ void BasicButtonBody::setLit(bool _lit)
 	if (m_isLit != _lit)
 	{
 		m_isLit = _lit;
-		updateLayers();
+		layer(2).show(m_isLit);
 	}
 }
 
@@ -57,50 +53,67 @@ void BasicButtonBody::setDown(bool _down)
 	}
 }
 
-void BasicButtonBody::drawButton(Context const& _c, unsigned _l, bool _down, function<void(iRect)> const& _inner, bool _polish)
+iMargin Lightbox::innerMargin(Grouping _grouping)
 {
-	iSize surroundWidth = GUIApp::joint().display->toPixels(fSize(c_surroundWidth, c_surroundWidth));
-	iSize lightWidth = GUIApp::joint().display->toPixels(fSize(c_lightWidth, c_lightWidth));
+	auto lightBedPixels = GUIApp::joint().lightBedPixels;
+	return iMargin(lightBedPixels.w() / ((_grouping & ForceLeft) ? 2 : 1), lightBedPixels.h() / ((_grouping & ForceAbove) ? 2 : 1), lightBedPixels.w() - ((_grouping & ForceRight) ? lightBedPixels.w() / 2 : 0), lightBedPixels.h() - ((_grouping & ForceBelow) ? lightBedPixels.h() / 2 : 0));
+}
 
-	bool haveLeft = m_grouping & ForceLeft || (m_grouping & HorizontalGrouping && childIndex() > 0 && isNeighbour(parent()->child(childIndex() - 1)));
-	bool haveRight = m_grouping & ForceRight || (m_grouping & HorizontalGrouping && isNeighbour(parent()->child(childIndex() + 1)));
-	bool haveTop = m_grouping & ForceAbove || (m_grouping & VerticalGrouping && childIndex() > 0 && isNeighbour(parent()->child(childIndex() - 1)));
-	bool haveBottom = m_grouping & ForceBelow || (m_grouping & VerticalGrouping && isNeighbour(parent()->child(childIndex() + 1)));
+iMargin Lightbox::borderMargin()
+{
+	return iMargin(GUIApp::joint().glowPixels + GUIApp::joint().lightBedPixels / 2 + GUIApp::joint().lightEdgePixels);
+}
 
-	iRect surround = rect();
-	iMargin surroundMargin(haveLeft ? 0 : surroundWidth.w(), haveTop ? 0 : surroundWidth.h(), haveRight ? 0 : surroundWidth.w(), haveBottom ? 0 : surroundWidth.h());
-	iMargin lightMargin(lightWidth.w() / (haveLeft ? 2 : 1), lightWidth.h() / (haveTop ? 2 : 1), lightWidth.w() - (haveRight ? lightWidth.w() / 2 : 0), lightWidth.h() - (haveBottom ? lightWidth.h() / 2 : 0));
-	iRect outer = surround.inset(surroundMargin);
-	iRect inner = outer.inset(lightMargin);
-	if (_l == 0)
+void Lightbox::drawBorder(Context const& _con, iRect _inner, bool _base, bool _lit, Color _col)
+{
+	auto lightBedPixels = GUIApp::joint().lightBedPixels;
+	auto lightEdgePixels = GUIApp::joint().lightEdgePixels;
+	if (_base)
+		_con.rectOutline(_inner, iMargin(lightBedPixels), _col.attenuated(.125f));
+	if (_lit)
+		_con.glowRectOutline(_inner.outset(iMargin((lightBedPixels - lightEdgePixels + iSize(1, 1)) / 2, (lightBedPixels - lightEdgePixels) / 2)), _col);
+}
+
+void Lightbox::drawButton(Context const& _c, iRect _inner, Color _color, bool _down, bool _base, bool _lit, bool _polish)
+{
+	if (_base)
 	{
-		_c.rectOutline(outer, surroundMargin, Color(0));
-		_c.rectOutline(inner, lightMargin, Color(m_color.hue(), m_color.sat(), .125f));
-		_c.rect(inner, Color(_down ? .05f : .1f), _down ? .05f : -.1f);
-		if (_inner)
-			_inner(inner);
-		else
-			_c.text(m_font.isValid() ? m_font : _down ? GUIApp::style().bold : GUIApp::style().regular, inner.lerp(.5f, .5f), boost::algorithm::to_upper_copy(m_text), Color(m_color.hue(), m_color.sat() * .75f, m_color.value() * .75f).toRGBA());
+		// Border fill
+		drawBorder(_c, _inner, true, false, _color);
+
+		// Button texture
+		_c.rect(_inner, Color(_down ? .05f : .1f), _down ? .05f : -.1f);
 		if (!_down && _polish)
-		{
-			_c.rect(inner.lerp(0, 0, 1, .35f), Color(1.f, .05f));
-		}
+			_c.rect(_inner.lerp(0, 0, 1, .35f), Color(1.f, .05f));
 	}
-	else if (_l == 1)
-	{
-		if (_inner)
-			_inner(inner);
-		else
-			_c.text(m_font.isValid() ? m_font : GUIApp::style().bold, inner.lerp(.5f, .5f), boost::algorithm::to_upper_copy(m_text), color().toRGBA());
-		_c.glowRectOutline(inner, color());
-	}
-	else if (_inner)
-		_inner(inner);
+
+	if (_lit)
+		// Border light
+		drawBorder(_c, _inner, false, true, _color);
+}
+
+Grouping BasicButtonBody::effectiveGrouping() const
+{
+	Grouping ret = grouping();
+	if (ret & HorizontalGrouping && childIndex() > 0 && isNeighbour(parent()->child(childIndex() - 1)))
+		ret |= ForceLeft;
+	if (ret & HorizontalGrouping && isNeighbour(parent()->child(childIndex() + 1)))
+		ret |= ForceRight;
+	if (ret & VerticalGrouping && childIndex() > 0 && isNeighbour(parent()->child(childIndex() - 1)))
+		ret |= ForceAbove;
+	if (ret & VerticalGrouping && isNeighbour(parent()->child(childIndex() + 1)))
+		ret |= ForceBelow;
+	return ret;
 }
 
 void BasicButtonBody::draw(Context const& _c, unsigned _l)
 {
-	drawButton(_c, _l, m_isDown);
+	auto inner = rect().inset(innerMargin(effectiveGrouping()));
+	drawButton(_c, inner, m_color, m_isDown, _l == 0, _l == 1, true);
+	if (_l == 0)
+		_c.text(m_font.isValid() ? m_font : m_isDown ? GUIApp::style().bold : GUIApp::style().regular, inner.lerp(.5f, .5f), boost::algorithm::to_upper_copy(m_text), Color(m_color.hue(), m_color.sat() * .75f, m_color.value() * .75f));
+	if (_l == 1)
+		_c.text(m_font.isValid() ? m_font : GUIApp::style().bold, inner.lerp(.5f, .5f), boost::algorithm::to_upper_copy(m_text), color());
 }
 
 bool BasicButtonBody::event(Event* _e)

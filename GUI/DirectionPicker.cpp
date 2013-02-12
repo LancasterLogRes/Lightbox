@@ -53,82 +53,49 @@ bool DirectionPickerBody::event(Event* _e)
 	return Super::event(_e);
 }
 
-//static const float c_surroundWidth = 2;
-//static const float c_lightWidth = 4;
-
 void DirectionPickerBody::initGraphics()
 {
-	Layers l = BasicButtonBody::layers();
-	iSize surroundWidth = GUIApp::joint().display->toPixels(fSize(c_surroundWidth, c_surroundWidth));
-	iSize lightWidth = GUIApp::joint().display->toPixels(fSize(c_lightWidth, c_lightWidth));
-	bool haveLeft = m_grouping & ForceLeft;
-	bool haveRight = m_grouping & ForceRight;
-	bool haveTop = m_grouping & ForceAbove;
-	bool haveBottom = m_grouping & ForceBelow;
-	iMargin surroundMargin(haveLeft ? 0 : surroundWidth.w(), haveTop ? 0 : surroundWidth.h(), haveRight ? 0 : surroundWidth.w(), haveBottom ? 0 : surroundWidth.h());
-	iMargin lightMargin(lightWidth.w() / (haveLeft ? 2 : 1), lightWidth.h() / (haveTop ? 2 : 1), lightWidth.w() - (haveRight ? lightWidth.w() / 2 : 0), lightWidth.h() - (haveBottom ? lightWidth.h() / 2 : 0));
-	l.push_back(Layer(-surroundMargin - lightMargin / 2, false, true));
-	setLayers(l);
+	setLayers({{ Layer(), Layer(borderMargin()), Layer(-innerMargin(m_grouping) / 2) }});
 }
 
 void DirectionPickerBody::draw(Context const& _c, unsigned _l)
 {
-	iSize surroundWidth = GUIApp::joint().display->toPixels(fSize(c_surroundWidth, c_surroundWidth));
-	iSize lightWidth = GUIApp::joint().display->toPixels(fSize(c_lightWidth, c_lightWidth));
+	iRect inner = rect().inset(innerMargin(m_grouping));
+	drawButton(_c, inner, m_color, true, _l == 0, _l == 1, false);
 
-	bool haveLeft = m_grouping & ForceLeft;
-	bool haveRight = m_grouping & ForceRight;
-	bool haveTop = m_grouping & ForceAbove;
-	bool haveBottom = m_grouping & ForceBelow;
-
-	iRect surroundPx = rect();
-	iMargin surroundMargin(haveLeft ? 0 : surroundWidth.w(), haveTop ? 0 : surroundWidth.h(), haveRight ? 0 : surroundWidth.w(), haveBottom ? 0 : surroundWidth.h());
-	iMargin lightMargin(lightWidth.w() / (haveLeft ? 2 : 1), lightWidth.h() / (haveTop ? 2 : 1), lightWidth.w() - (haveRight ? lightWidth.w() / 2 : 0), lightWidth.h() - (haveBottom ? lightWidth.h() / 2 : 0));
-	iRect outerPx = surroundPx.inset(surroundMargin);
-	iRect innerPx = outerPx.inset(lightMargin);
-	iRect activePx = innerPx.inset(lightMargin);
-
-	fRect activeMM(GUIApp::joint().display->fromPixels(activePx));
-	Color glow = GUIApp::joint().glow(m_color);
+	iRect activePx = inner.inset(GUIApp::joint().lightEdgePixels);
+	fRect activeMm(GUIApp::joint().display->fromPixels(activePx));
 
 	if (_l == 0)
 	{
 		for (int i = 0; i < 9; ++i)
 			if (i % 4)
 			{
-				_c.xRule(activeMM, i / 8.f, 2, m_color.attenuated(.25f));
-				_c.yRule(activeMM, i / 8.f, 2, m_color.attenuated(.25f));
+				_c.xRule(activeMm, i / 8.f, 2, m_color.attenuated(.25f));
+				_c.yRule(activeMm, i / 8.f, 2, m_color.attenuated(.25f));
 			}
-
-		_c.xRule(activeMM, .5f, 2, m_color.attenuated(.5f));
-		_c.yRule(activeMM, .5f, 2, m_color.attenuated(.5f));
-
-		if (m_mode == Fill)
-			_c.disc(m_direction.transformedInto(activeMM), Color(1.f, .5f));
-
-		_c.rectOutline(outerPx, surroundMargin, Color(0));
-		_c.rectOutline(innerPx, lightMargin, Color(m_color.hue(), m_color.sat(), .125f));
+		_c.xRule(activeMm, .5f, 2, m_color.attenuated(.5f));
+		_c.yRule(activeMm, .5f, 2, m_color.attenuated(.5f));
 	}
-	else if (_l == 1)
-	{
-		_c.rectOutline(innerPx.outset(lightWidth / 4), iMargin(lightWidth / 2), glow);
-	}
-	else if (_l == 2 || _l == 3)
+	else if (_l == 2)
 	{
 		if (m_mode == Circle || m_mode == Fill)
-			_c.circle(m_direction.transformedInto(activeMM), m_mode == Circle ? 2.f : 1.f, glow);
+			_c.circle(m_direction.transformedInto(activeMm), m_mode == Circle ? 2.f : 1.f, m_color);
 
 		if (m_mode >= Circle)
 		{
-			_c.disc(fEllipse(activeMM.lerp(xC(-1), yC(-1)), GUIApp::style().thumbDiameter / 8), glow);
-			_c.disc(fEllipse(activeMM.lerp(xC(-1), yC(1)), GUIApp::style().thumbDiameter / 8), glow);
-			_c.disc(fEllipse(activeMM.lerp(xC(1), yC(-1)), GUIApp::style().thumbDiameter / 8), glow);
-			_c.disc(fEllipse(activeMM.lerp(xC(1), yC(1)), GUIApp::style().thumbDiameter / 8), glow);
+			_c.disc(fEllipse(activeMm.lerp(xC(-1), yC(-1)), GUIApp::style().thumbDiameter / 8), m_color);
+			_c.disc(fEllipse(activeMm.lerp(xC(-1), yC(1)), GUIApp::style().thumbDiameter / 8), m_color);
+			_c.disc(fEllipse(activeMm.lerp(xC(1), yC(-1)), GUIApp::style().thumbDiameter / 8), m_color);
+			_c.disc(fEllipse(activeMm.lerp(xC(1), yC(1)), GUIApp::style().thumbDiameter / 8), m_color);
 		}
 
+		if (m_mode == Fill)
+			_c.disc(m_direction.transformedInto(activeMm), Color(1.f, .5f));
+
 		if (m_mode == Circle || m_mode == Fill)
-			_c.glowThumb(activeMM.lerp(xC(m_lastSign.w()), yC(m_lastSign.h())), m_color, 1.f);
-		_c.glowThumb(activeMM.lerp(m_direction.pos()), m_color, 1.f);
+			_c.glowThumb(activeMm.lerp(xC(m_lastSign.w()), yC(m_lastSign.h())), m_color, 1.f);
+		_c.glowThumb(activeMm.lerp(m_direction.pos()), m_color, 1.f);
 	}
 }
 

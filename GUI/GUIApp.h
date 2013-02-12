@@ -25,6 +25,7 @@ struct Style
 	Font smallBold;
 	fSize thumbDiameter;
 	fSize lightEdgeSize;
+	fSize lightBedSize;
 	Color outlineColor;
 };
 

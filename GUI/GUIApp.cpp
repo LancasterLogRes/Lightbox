@@ -34,6 +34,7 @@ GUIApp::GUIApp():
 	m_style.smallBold = Font(13, FontDefinition("ubuntu", true));
 	m_style.thumbDiameter = fSize(40, 40);
 	m_style.lightEdgeSize = fSize(2, 2);
+	m_style.lightBedSize = fSize(4, 4);
 	m_style.outlineColor = Black;
 }
 
@@ -194,7 +195,7 @@ bool GUIApp::drawGraphics()
 		if (vl->isDirty() || !vl->isShown())
 			fraggedRender = true;
 
-	int nextRendersLeft = 1;
+	int nextRendersLeft = 3;
 
 	vector< vector<ViewLayerPtr> > renderDirect(m_cache.size());
 	if (fraggedRender)
@@ -216,7 +217,7 @@ bool GUIApp::drawGraphics()
 //					cnote << "SKIP:" << v;
 					renderDirect[cacheIndex] += v;
 				}
-				else if (v->isDirty() && (v->isReadyForCache()/* || v->glows() || v->isPremultiplied()*/))
+				else if (v->isDirty() && (v->isReadyForCache() || v->glows() /*|| v->isPremultiplied()*/))
 				{
 					cnote << "RENDER:" << v;
 					v.preDraw();

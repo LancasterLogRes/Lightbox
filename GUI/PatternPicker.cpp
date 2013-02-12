@@ -20,8 +20,9 @@ void PatternPickerBody::resized()
 {
 	Super::resized();
 	// want ~ 128 points from exposed geometry.
-	float f = sqrt((geometry().w() - GUIApp::style().thumbDiameter.w()) * (geometry().h() - GUIApp::style().thumbDiameter.h()) / 128.f);
-	m_space = uSize(ceil(geometry().w() / f), ceil(geometry().h() / f));
+	fSize available = geometry().size() - GUIApp::style().thumbDiameter;
+	float f = sqrt(available.area() / 128.f);
+	m_space = uSize(ceil(available.w() / f), ceil(available.h() / f));
 	m_index = min<unsigned>(m_index, m_space.w() * m_space.h() - 1);
 }
 
@@ -42,41 +43,38 @@ bool PatternPickerBody::event(Event* _e)
 void PatternPickerBody::initGraphics()
 {
 	Super::initGraphics();
-	Layers l = layers();
-	l.push_back(Layer(iMargin(), false, true));
-	setLayers(l);
 }
 
 void PatternPickerBody::updateLayers()
 {
 	Super::updateLayers();
-	layer(2).show(isEnabled() && isLit());
 }
 
 void PatternPickerBody::draw(Context const& _c, unsigned _layer)
 {
 	unsigned xBig[] = { m_space.w() / 4, m_space.w() * 3 / 4 };
 	unsigned yBig[] = { m_space.h() / 4, m_space.h() * 3 / 4 };
-	drawButton(_c, _layer, isChecked(),
-	[&](iRect oinner)
-	{
-//		fSize thumbOutPx = _c.pixelsF(GUIApp::style().thumbDiameter / 2 + GUIApp::style().thumbOutline);
-		fSize thumbPx = _c.pixelsF(GUIApp::style().thumbDiameter / 2);
-		fRect inner = fRect(oinner).inset(thumbPx);
+	iRect oinner = rect().inset(innerMargin(effectiveGrouping()));
+	Lightbox::drawButton(_c, oinner, color(), isChecked(), _layer == 0, _layer == 1, false);
+//	fSize thumbOutPx = _c.pixelsF(GUIApp::style().thumbDiameter / 2 + GUIApp::style().thumbOutline);
+	fSize thumbPx = _c.pixelsF(GUIApp::style().thumbDiameter / 2);
+	fRect inner = fRect(oinner).inset(thumbPx);
 
-		fSize spacing(inner.size() / ((fSize)m_space - fSize(1, 1)));
-		Color glow = Color(color().hue(), color().sat() * .95f, color().value() * 8.f, lerp(color().sat(), .65f, .75f));
-		int i = 0;
-		for (unsigned y = 0; y < m_space.h(); ++y)
-			for (unsigned x = 0; x < m_space.w(); ++x, ++i)
+	fSize spacing(inner.size() / ((fSize)m_space - fSize(1, 1)));
+	Color glow = Color(color().hue(), color().sat() * .95f, color().value() * 8.f, lerp(color().sat(), .65f, .75f));
+	int i = 0;
+	for (unsigned y = 0; y < m_space.h(); ++y)
+		for (unsigned x = 0; x < m_space.w(); ++x, ++i)
+		{
+			fCoord p = inner.pos() + fSize(x, y) * spacing;
+			if (_layer == 0)
+				_c.pxRect(fRect::square(p, min(spacing.w(), spacing.h()) / ((x == xBig[0] || x == xBig[1]) && (y == yBig[0] || y == yBig[1]) ? 3.f : 6.f)), glow.attenuated(.25f));
+			else if (_layer == 1 && m_index == i)
 			{
-				fCoord p = inner.pos() + fSize(x, y) * spacing;
-				if (_layer == 0)
-					_c.pxRect(fRect::square(p, min(spacing.w(), spacing.h()) / ((x == xBig[0] || x == xBig[1]) && (y == yBig[0] || y == yBig[1]) ? 3.f : 6.f)), glow.attenuated(.25f));
-				else if (isChecked() && m_index == i && _layer == 2)
-					_c.glowThumb(iCoord(p), color(), 1.f);
+				_c.glowThumb(iCoord(p), color(), 1.f);
+				_c.text(GUIApp::style().bold, iCoord(p), toString(i), Color(0, 0.5));
 			}
-	}, false);
+		}
 }
 
 

@@ -10,6 +10,7 @@
 #include <Numeric/Ellipse.h>
 #include <Common/Pimpl.h>
 #include <Common/Color.h>
+#include <Common/Flags.h>
 #include <LGL/Global.h>
 #include <LGL/Program.h>
 #include <LGL/Texture2D.h>
@@ -22,6 +23,10 @@
 
 namespace Lightbox
 {
+
+enum GroupingFlags { NoGrouping = 0, HorizontalGrouping = 1, VerticalGrouping = 2, ForceAbove = 4, ForceBelow = 8, ForceLeft = 16, ForceRight= 32 };
+typedef Flags<GroupingFlags> Grouping;
+LIGHTBOX_FLAGS_TYPE(GroupingFlags, Grouping);
 
 class ViewBody;
 typedef boost::intrusive_ptr<ViewBody> View;
@@ -53,7 +58,7 @@ struct Context
 	// Pixel functions - TODO split into proxy and px float param.
 	void rectInline(iRect _outer, iMargin _inset, Color _c) const { rectOutline(_outer.inset(_inset), _inset, _c); }
 	void rectOutline(iRect _inner, iMargin _outset, Color _c) const;
-	void text(Font const& _f, iCoord _anchor, std::string const& _text, RGBA _c = RGBA::Black) const;
+	void text(Font const& _f, iCoord _anchor, std::string const& _text, Color _c = Black) const;
 
 	// Pixel proxy functions.
 	void rect(iRect _r) const { pxRect(fRect(_r)); }
@@ -91,7 +96,7 @@ struct Context
 	void disc(fEllipse _r, Program const& _p) const;
 	void circle(fEllipse _r, float _size, Color _c) const;
 	void circle(fEllipse _r, float _size, Program const& _p) const;
-	void text(Font const& _f, fCoord _anchor, std::string const& _text, RGBA _c = RGBA::Black) const;
+	void text(Font const& _f, fCoord _anchor, std::string const& _text, Color _c = Black) const;
 	void blit(Texture2D const& _tex, fCoord _pos) const;
 
 	void glowThumb(fCoord _pos, Color _c, float _overglow = 0) const;

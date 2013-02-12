@@ -99,9 +99,9 @@ void Context::pxDisc(fEllipse _e, Color _c) const
 	pxDisc(_e);
 }
 
-void Context::text(Font const& _f, iCoord _anchor, std::string const& _text, RGBA _c) const
+void Context::text(Font const& _f, iCoord _anchor, std::string const& _text, Color _c) const
 {
-	_f.draw(_anchor + active.pos(), _text, _c);
+	_f.draw(_anchor + active.pos(), _text, _c.toRGBA());
 }
 
 void Context::xRule(fRect _r, float _y, float _h, Color _c) const
@@ -172,9 +172,9 @@ void Context::circle(fEllipse _e, float _size, Program const& _p) const
 	u.lineLoop(72);
 }
 
-void Context::text(Font const& _f, fCoord _anchor, std::string const& _text, RGBA _c) const
+void Context::text(Font const& _f, fCoord _anchor, std::string const& _text, Color _c) const
 {
-	_f.draw(_anchor + offset, _text, _c);
+	_f.draw(_anchor + offset, _text, _c.toRGBA());
 }
 
 void Context::glowThumb(fCoord _pos, Color _c, float _overglow) const
@@ -197,7 +197,7 @@ void Context::glowThumb(iCoord _pos, Color _c, float _overglow) const
 
 void Context::glowRectOutline(iRect _inner, Color _col, float _overglow) const
 {
-	glowRect(_inner.outset(iMargin(-GUIApp::joint().lightEdgePixels.w(), -GUIApp::joint().lightEdgePixels.h(), 0, 0)), _col, _overglow);
+	glowRect(_inner.outset(iMargin(GUIApp::joint().lightEdgePixels.w(), GUIApp::joint().lightEdgePixels.h(), 0, 0)), _col, _overglow);
 }
 
 void Context::glowRectInline(iRect _outer, Color _col, float _overglow) const

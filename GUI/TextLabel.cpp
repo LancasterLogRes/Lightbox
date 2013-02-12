@@ -23,7 +23,7 @@ void TextLabelBody::draw(Context const& _c, unsigned)
 	iRect geo = rect();
 	Font f = m_font.isValid() ? m_font : GUIApp::style().small;
 	Color c = m_color.isValid() ? m_color : GUIApp::style().fore;
-	_c.text(f, geo.lerp(.5f, .5f), m_text, RGBA(c));
+	_c.text(f, geo.lerp(.5f, .5f), m_text, c);
 	int w = fRect(f.measurePx(m_text).size() + fSize(16, 0)).width() / 2;
 	if (m_rule)
 	{
