@@ -7,6 +7,7 @@ namespace Lightbox
 {
 
 class Display;
+struct Context;
 
 struct Joint
 {
@@ -15,9 +16,8 @@ struct Joint
 	void init(Display& _d);
 	void fini();
 
-	Texture2D thumbTex() const;
-	Texture2D makeGlower(Texture2D _baseTex) const;
-	Texture2D makeGlower4(Texture2D _baseTex) const;
+	Texture2D makeGlowerFar(Texture2D _baseTex) const;
+	Texture2D makeGlowerNear(Texture2D _baseTex) const;
 
 	Color glow(Color _c) const { return Color(_c.hue(), _c.sat() * .95f, _c.value() * 8.f, lerp(_c.sat(), .65f, glowAlpha)); }
 	Color mildGlow(Color _c) const { return _c.attenuated(1.f / (1 << glowLevels)).withConstantLight(); }
@@ -50,6 +50,14 @@ struct Joint
 	unsigned glowLevels;
 	float glowAlpha;
 	Texture2D glowThumbTex;
+	Texture2D glowCornerTex;
+
+	iSize lightEdgePixels;
+	iSize glowPixels;
+
+private:
+	Texture2D cornerTex() const;
+	Texture2D thumbTex() const;
 };
 
 }

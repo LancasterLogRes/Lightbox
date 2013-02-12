@@ -33,7 +33,7 @@ GUIApp::GUIApp():
 	m_style.small = Font(13, FontDefinition("ubuntu", false));
 	m_style.smallBold = Font(13, FontDefinition("ubuntu", true));
 	m_style.thumbDiameter = fSize(40, 40);
-	m_style.thumbOutline = 2;
+	m_style.lightEdgeSize = fSize(2, 2);
 	m_style.outlineColor = Black;
 }
 
@@ -170,7 +170,7 @@ bool GUIApp::drawGraphics()
 
 		for (ViewLayerPtr v: drawingLayers)
 		{
-			v->setDirty();
+			v->update();
 			v.view->m_visibleLayoutChanged = false;
 			assert(v->globalLayer().width() <= (int)joint().display->width() && v->globalLayer().height() <= (int)joint().display->height());
 			while (true)
@@ -194,6 +194,8 @@ bool GUIApp::drawGraphics()
 		if (vl->isDirty() || !vl->isShown())
 			fraggedRender = true;
 
+	int nextRendersLeft = 1;
+
 	vector< vector<ViewLayerPtr> > renderDirect(m_cache.size());
 	if (fraggedRender)
 	{
@@ -214,19 +216,23 @@ bool GUIApp::drawGraphics()
 //					cnote << "SKIP:" << v;
 					renderDirect[cacheIndex] += v;
 				}
-				else if (v->isDirty() && (v->isReadyForCache() || v->glows() || v->isPremultiplied()))
+				else if (v->isDirty() && (v->isReadyForCache()/* || v->glows() || v->isPremultiplied()*/))
 				{
-//					cnote << "RENDER:" << v;
+					cnote << "RENDER:" << v;
 					v.preDraw();
 					v->setReadyForCache();
 					willRenderToTexture = true;
 				}
 				else if (v->isDirty())
 				{
-//					cnote << "DIRECT:" << v;
+					cnote << "DIRECT:" << v;
 					v.preDraw();
 					renderDirect[cacheIndex] += v;
-					v->setReadyForCache();
+					if (nextRendersLeft > 0)
+					{
+						v->setReadyForCache();
+						nextRendersLeft--;
+					}
 					stillDirty = true;
 				}
 //				else
@@ -404,7 +410,7 @@ bool GUIApp::drawGraphics()
 		}
 	}
 
-#if LIGHTBOX_PROFILE || DEBUG
+#if LIGHTBOX_PROFILE || DEBUG || 1
 	LB_GL(glBlendFunc, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	string info = textualTime(AppEngine::get()->lastDrawTime());
 	iRect rr = m_root->rect();
@@ -414,7 +420,7 @@ bool GUIApp::drawGraphics()
 	Font f(ByPixels, 16, "ubuntu");
 	iCoord p = infoRect.topLeft();
 	f.draw(p, info, RGBA::Black, AtTop|AtLeft);
-	cdebug << info;
+	cnote << info;
 #if LIGHTBOX_PROFILE || DEBUG
 	info = toString(g_metrics.m_useProgramCount) + "/" + toString(g_metrics.m_drawCount);
 	p += iSize(0, 16);

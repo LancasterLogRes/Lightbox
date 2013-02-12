@@ -30,7 +30,7 @@ static const float c_lightWidth = 4;
 Layers BasicButtonBody::layers()
 {
 	iSize lightWidth = GUIApp::joint().display->toPixels(fSize(c_lightWidth, c_lightWidth));
-	return {{ Layer(), Layer(iMargin(lightWidth * 2, lightWidth * 2), true) }};
+	return {{ Layer(), Layer(iMargin(lightWidth * 2, lightWidth * 2), false) }};
 }
 
 void BasicButtonBody::initGraphics()
@@ -88,12 +88,11 @@ void BasicButtonBody::drawButton(Context const& _c, unsigned _l, bool _down, fun
 	}
 	else if (_l == 1)
 	{
-		Color glow = GUIApp::joint().glow(m_color);
 		if (_inner)
 			_inner(inner);
 		else
-			_c.text(m_font.isValid() ? m_font : GUIApp::style().bold, inner.lerp(.5f, .5f), boost::algorithm::to_upper_copy(m_text), glow.toRGBA());
-		_c.rectOutline(inner.outset(lightWidth / 4), iMargin(lightWidth / 2), glow);
+			_c.text(m_font.isValid() ? m_font : GUIApp::style().bold, inner.lerp(.5f, .5f), boost::algorithm::to_upper_copy(m_text), color().toRGBA());
+		_c.glowRectOutline(inner, color());
 	}
 	else if (_inner)
 		_inner(inner);

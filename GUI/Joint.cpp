@@ -1,7 +1,9 @@
 #include <Common/Global.h>
 #include <App/Display.h>
+#include "GUIApp.h"
 #include "Global.h"
 #include "Joint.h"
+#include "View.h"
 using namespace std;
 using namespace Lightbox;
 
@@ -59,9 +61,13 @@ void Joint::init(Display& _d)
 	shadedGeometry = shaded.attrib("geometry");
 
 	glowLevels = Lightbox::log2(ceil(_d.toPixelsF(fSize(0, 2)).h()));
-	cnote << "glowLevels:" << glowLevels;
+	lightEdgePixels = display->toUnalignedPixels(GUIApp::style().lightEdgeSize);
+	glowPixels = iSize(1 << (glowLevels * 2 + 1));
+	cnote << "glowLevels:" << glowLevels << "glowPixels:" << glowPixels << "lightEdgePixels:" << lightEdgePixels;
 	glowAlpha = 1.f - (glowLevels - 1) * .125f;
-	glowThumbTex = makeGlower(thumbTex());
+
+	glowThumbTex = makeGlowerFar(thumbTex());
+	glowCornerTex = makeGlowerNear(cornerTex());
 }
 
 void Joint::fini()
@@ -92,7 +98,7 @@ Texture2D Joint::thumbTex() const
 	return ret;
 }
 
-Texture2D Joint::makeGlower(Texture2D _baseTex) const
+Texture2D Joint::makeGlowerFar(Texture2D _baseTex) const
 {
 	// Filter it.
 	vector<Texture2D> levels(glowLevels * 2 + 1);
@@ -117,7 +123,7 @@ Texture2D Joint::makeGlower(Texture2D _baseTex) const
 	return ret;
 }
 
-Texture2D Joint::makeGlower4(Texture2D _baseTex) const
+Texture2D Joint::makeGlowerNear(Texture2D _baseTex) const
 {
 	// Filter it.
 	LB_GL(glBlendFunc, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
@@ -140,5 +146,14 @@ Texture2D Joint::makeGlower4(Texture2D _baseTex) const
 	u.filterMerge(_baseTex);
 
 	LB_GL(glBlendFunc, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	return ret;
+}
+
+Texture2D Joint::cornerTex() const
+{
+	uSize totalSizePx = uSize(lightEdgePixels + glowPixels * 3);
+	Texture2D ret(totalSizePx);
+	RenderToTextureContext c(ret);
+	c.rectInline(iRect((iCoord)glowPixels, (iSize)totalSizePx * 2), iMargin(lightEdgePixels), Color(1.f / (glowLevels * 2 + 1)));
 	return ret;
 }

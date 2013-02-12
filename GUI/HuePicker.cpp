@@ -60,7 +60,7 @@ void HuePickerBody::updateLayers()
 
 void HuePickerBody::draw(Context const& _c, unsigned _l)
 {
-	iSize thumbPx = _c.toPixels(GUIApp::style().thumbDiameter / 2 + GUIApp::style().thumbOutline);
+	iSize thumbPx = _c.toPixels(GUIApp::style().thumbDiameter / 2);
 	BasicButtonBody::drawButton(_c, _l, isChecked(), [&](iRect inner)
 	{
 		inner = inner.inset(thumbPx / 2.f);
@@ -76,7 +76,7 @@ void HuePickerBody::draw(Context const& _c, unsigned _l)
 		else
 		{
 			iCoord p = e.pos() + iSize(fSize(-sin(m_hue * TwoPi), -cos(m_hue * TwoPi)) * fSize(e.radii() - thumbPx));
-			_c.blitThumb(p, m_middle.withHue(m_hue));
+			_c.glowThumb(p, m_middle.withHue(m_hue));
 		}
 	}, false);
 	return;

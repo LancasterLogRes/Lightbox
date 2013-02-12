@@ -177,7 +177,7 @@ void Context::text(Font const& _f, fCoord _anchor, std::string const& _text, RGB
 	_f.draw(_anchor + offset, _text, _c);
 }
 
-void Context::blitThumb(fCoord _pos, Color _c, float _overglow) const
+void Context::glowThumb(fCoord _pos, Color _c, float _overglow) const
 {
 	ProgramUser u(GUIApp::joint().colorize);
 	u.uniform("u_amplitude") = 1.f;
@@ -186,13 +186,44 @@ void Context::blitThumb(fCoord _pos, Color _c, float _overglow) const
 	blit(GUIApp::joint().glowThumbTex, _pos - GUIApp::style().thumbDiameter);
 }
 
-void Context::blitThumb(iCoord _pos, Color _c, float _overglow) const
+void Context::glowThumb(iCoord _pos, Color _c, float _overglow) const
 {
 	ProgramUser u(GUIApp::joint().colorize);
 	u.uniform("u_amplitude") = 1.f;
 	u.uniform("u_overglow") = _overglow;
 	u.uniform("u_color") = (fVector4)_c.toRGBA();
 	blit(GUIApp::joint().glowThumbTex, _pos - toPixels(GUIApp::style().thumbDiameter));
+}
+
+void Context::glowRectOutline(iRect _inner, Color _col, float _overglow) const
+{
+	glowRect(_inner.outset(iMargin(-GUIApp::joint().lightEdgePixels.w(), -GUIApp::joint().lightEdgePixels.h(), 0, 0)), _col, _overglow);
+}
+
+void Context::glowRectInline(iRect _outer, Color _col, float _overglow) const
+{
+	glowRect(_outer.inset(iMargin(0, 0, GUIApp::joint().lightEdgePixels.w(), GUIApp::joint().lightEdgePixels.h())), _col, _overglow);
+}
+
+void Context::glowRect(iRect _upperLeftEdgeOfLight, Color _col, float _overglow) const
+{
+	ProgramUser u(GUIApp::joint().colorize);
+	u.uniform("u_color") = (fVector4)_col.toRGBA();
+	u.uniform("u_amplitude") = 5.f;
+	u.uniform("u_overglow") = _overglow;
+	auto glowPixels = GUIApp::joint().glowPixels;
+	auto lightEdgePixels = GUIApp::joint().lightEdgePixels;
+	auto glowCornerTex = GUIApp::joint().glowCornerTex;
+	iSize cornerSize = glowPixels * 2 + lightEdgePixels;
+	blit(iRect(cornerSize), glowCornerTex, iRect(_upperLeftEdgeOfLight.topLeft() - glowPixels, iSize(0, 0)));
+	blit(iRect(cornerSize).flippedHorizontal(), glowCornerTex, iRect(_upperLeftEdgeOfLight.topRight() - glowPixels, iSize(0, 0)));
+	blit(iRect(cornerSize).flippedVertical(), glowCornerTex, iRect(_upperLeftEdgeOfLight.bottomLeft() - glowPixels, iSize(0, 0)));
+	blit(iRect(cornerSize).flippedHorizontal().flippedVertical(), glowCornerTex, iRect(_upperLeftEdgeOfLight.bottomRight() - glowPixels, iSize(0, 0)));
+	iSize extra = _upperLeftEdgeOfLight.size() - lightEdgePixels - glowPixels * 2;
+	blit(iRect(glowPixels.w() * 2 + lightEdgePixels.w(), 0, 1, glowPixels.h() * 2 + lightEdgePixels.h()), glowCornerTex, iRect(_upperLeftEdgeOfLight.x() + glowPixels.w() + lightEdgePixels.w(), _upperLeftEdgeOfLight.y() - glowPixels.w(), extra.w(), 0));
+	blit(iRect(glowPixels.w() * 2 + lightEdgePixels.w(), 0, 1, glowPixels.h() * 2 + lightEdgePixels.h()).flippedVertical(), glowCornerTex, iRect(_upperLeftEdgeOfLight.x() + glowPixels.w() + lightEdgePixels.w(), _upperLeftEdgeOfLight.bottom() - glowPixels.h(), extra.w(), 0));
+	blit(iRect(0, glowPixels.h() * 2 + lightEdgePixels.h(), glowPixels.w() * 2 + lightEdgePixels.w(), 1), glowCornerTex, iRect(_upperLeftEdgeOfLight.x() - glowPixels.h(), _upperLeftEdgeOfLight.y() + glowPixels.h() + lightEdgePixels.h(), 0, extra.h()));
+	blit(iRect(0, glowPixels.h() * 2 + lightEdgePixels.h(), glowPixels.w() * 2 + lightEdgePixels.w(), 1).flippedHorizontal(), glowCornerTex, iRect(_upperLeftEdgeOfLight.right() - glowPixels.h(), _upperLeftEdgeOfLight.y() + glowPixels.h() + lightEdgePixels.h(), 0, extra.h()));
 }
 
 void Context::blit(iRect _src, Texture2D const& _tex, iRect _dest) const
@@ -244,6 +275,27 @@ void Context::blit(Texture2D const& _tex, fCoord _pos) const
 	u.uniform("u_tex") = _tex;
 	u.attrib("a_texCoordPosition").setStaticData(quad.data(), 4, 0);
 	u.triangleStrip(4);
+}
+
+RenderToTextureContext::RenderToTextureContext(Texture2D const& _tex):
+	Context(iRect((iCoord)_tex.size()), iRect((iCoord)_tex.size())),
+	m_tex(_tex),
+	m_fb(Framebuffer::Create),
+	m_fbu(m_fb)
+{
+	m_fbu.attachColor(m_tex);
+	m_fbu.checkComplete();
+	m_tex.viewport();
+	LB_GL(glClear, GL_COLOR_BUFFER_BIT);
+
+	GUIApp::joint().u_displaySize = (fVector2)(fSize)m_tex.size();
+	LB_GL(glBlendFunc, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+}
+
+RenderToTextureContext::~RenderToTextureContext()
+{
+	GUIApp::joint().u_displaySize = (fVector2)(fSize)GUIApp::joint().displaySizePixels;
+	LB_GL(glBlendFunc, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
 void Layer::refresh()

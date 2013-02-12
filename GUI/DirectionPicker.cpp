@@ -127,8 +127,8 @@ void DirectionPickerBody::draw(Context const& _c, unsigned _l)
 		}
 
 		if (m_mode == Circle || m_mode == Fill)
-			_c.blitThumb(activeMM.lerp(xC(m_lastSign.w()), yC(m_lastSign.h())), m_color, 1.f);
-		_c.blitThumb(activeMM.lerp(m_direction.pos()), m_color, 1.f);
+			_c.glowThumb(activeMM.lerp(xC(m_lastSign.w()), yC(m_lastSign.h())), m_color, 1.f);
+		_c.glowThumb(activeMM.lerp(m_direction.pos()), m_color, 1.f);
 	}
 }
 

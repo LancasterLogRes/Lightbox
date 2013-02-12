@@ -24,7 +24,7 @@ struct Style
 	Font small;
 	Font smallBold;
 	fSize thumbDiameter;
-	float thumbOutline;
+	fSize lightEdgeSize;
 	Color outlineColor;
 };
 

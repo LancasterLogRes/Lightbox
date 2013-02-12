@@ -65,7 +65,7 @@ void LightPickerBody::draw(Context const& _c, unsigned _l)
 		_c.rect(inner.lerp(0, 0.5f, 1, 1));
 	}
 	else
-		_c.blitThumb(inner.lerp(.5f, 1.f - m_light), Color(HSLSpace, m_middle.hue(), 1, m_light));
+		_c.glowThumb(inner.lerp(.5f, 1.f - m_light), Color(HSLSpace, m_middle.hue(), 1, m_light));
 }
 
 fSize LightPickerBody::specifyFit(fSize _space) const

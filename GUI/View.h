@@ -13,6 +13,7 @@
 #include <LGL/Global.h>
 #include <LGL/Program.h>
 #include <LGL/Texture2D.h>
+#include <LGL/Framebuffer.h>
 #include <App/Display.h>
 #include <Common/MemberMap.h>
 #include "Global.h"
@@ -64,7 +65,10 @@ struct Context
 	void blit(Texture2D const& _tex, iRect _dest) const { blit(iRect(0, 0, 0, 0), _tex, _dest); }
 	void blit(iRect _src, Texture2D const& _tex, iCoord _dest) const { blit(_src, _tex, iRect(_dest, iSize(0, 0))); }
 	void blit(iRect _src, Texture2D const& _tex, iRect _dest = iRect(0, 0, 0, 0)) const;
-	void blitThumb(iCoord _pos, Color _c, float _overglow = 0) const;
+	void glowThumb(iCoord _pos, Color _c, float _overglow = 0) const;
+	void glowRect(iRect _topLeftOfLightOutline, Color _col, float _overglow) const;
+	void glowRectOutline(iRect _inner, Color _col, float _overglow = 1.f) const;
+	void glowRectInline(iRect _outer, Color _col, float _overglow = 1.f) const;
 
 	// Pixel functions that take float params.
 	void pxRect(fRect _r) const;
@@ -89,7 +93,20 @@ struct Context
 	void circle(fEllipse _r, float _size, Program const& _p) const;
 	void text(Font const& _f, fCoord _anchor, std::string const& _text, RGBA _c = RGBA::Black) const;
 	void blit(Texture2D const& _tex, fCoord _pos) const;
-	void blitThumb(fCoord _pos, Color _c, float _overglow = 0) const;
+
+	void glowThumb(fCoord _pos, Color _c, float _overglow = 0) const;
+};
+
+class RenderToTextureContext: public Context
+{
+public:
+	RenderToTextureContext(Texture2D const& _tex);
+	~RenderToTextureContext();
+
+private:
+	Texture2D m_tex;
+	Framebuffer m_fb;
+	FramebufferUser m_fbu;
 };
 
 struct ViewSiblingsComparator

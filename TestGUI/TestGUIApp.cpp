@@ -22,7 +22,7 @@ bool TestGUIApp::drawGraphics()
 {
 	Super::drawGraphics();
 
-//	return true;
+	return true;
 	m_mainView->child(0)->update();
 	return false;
 }

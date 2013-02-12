@@ -74,7 +74,7 @@ void PatternPickerBody::draw(Context const& _c, unsigned _layer)
 				if (_layer == 0)
 					_c.pxRect(fRect::square(p, min(spacing.w(), spacing.h()) / ((x == xBig[0] || x == xBig[1]) && (y == yBig[0] || y == yBig[1]) ? 3.f : 6.f)), glow.attenuated(.25f));
 				else if (isChecked() && m_index == i && _layer == 2)
-					_c.blitThumb(iCoord(p), color(), 1.f);
+					_c.glowThumb(iCoord(p), color(), 1.f);
 			}
 	}, false);
 }
