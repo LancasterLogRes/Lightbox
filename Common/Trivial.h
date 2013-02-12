@@ -39,6 +39,7 @@ enum ColorSetItem
 	ValueContinuous =		0x00000080,
 	HueSelection =			0x00000200, // Use colorSelection() to determine actual set.
 	HueContinuous =			0x00000800,
+	ColorSelection =		ChromaSelection | HueSelection,	// Use colorSelection() to determine actual set.
 	SingleColor =			0x00001000	// Forces RGB to a value channel-wise <= to single color in selection.
 };
 
