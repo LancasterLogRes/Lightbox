@@ -65,9 +65,9 @@ public:
 	Rect lerp(float _xf, float _yf, float _xt, float _yt) const { xCoord o = lerp(_xf, _yf); return Rect(o, lerp(_xt, _yt) - o); }
 	xCoord lerp(fSize _xy) const { return m_pos + xSize(m_size.w() * _xy.w(), m_size.h() * _xy.h()); }
 
-	Rect flippedHorizontal() const { return Rect(x() + w() - (std::numeric_limits<Numeric>::is_integer() ? 1 : 0), y(), -w(), h()); }
-	Rect flippedVertical() const { return Rect(x(), y() + h() - (std::numeric_limits<Numeric>::is_integer() ? 1 : 0), w(), -h()); }
-	Rect flipped() const { return Rect(pos() + size() - (std::numeric_limits<Numeric>::is_integer() ? xSize(1, 1) : xSize(0, 0)), -size()); }
+	Rect flippedHorizontal() const { return Rect(x() + w(), y(), -w(), h()); }
+	Rect flippedVertical() const { return Rect(x(), y() + h(), w(), -h()); }
+	Rect flipped() const { return Rect(pos() + size(), -size()); }
 
 	Rect inset(Numeric _s) const { return inset(xMargin(_s, _s, _s, _s)); }
 	Rect inset(Numeric _x, Numeric _y) const { return inset(xSize(_x, _y)); }
