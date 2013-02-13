@@ -319,6 +319,8 @@ int32_t AppEngine::handleInput(AInputEvent* _event)
 						cnote << "(" << id << "[" << index << "] move" << m_pointerState[id] << "->" << c << ")";
 						break;
 					}
+					else
+						cnote << "(" << id << "[" << index << "] blip" << m_pointerState[id] << "->" << c << ")";
 				}
 			}
 			if (index < 5 && id >= 0 && id < 5)

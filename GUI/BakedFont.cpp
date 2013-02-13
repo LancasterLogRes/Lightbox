@@ -145,10 +145,13 @@ void BakedFont::draw(fCoord _anchor, string const& _text, RGBA _c, AnchorType _t
 	m_tex = m_texture;
 	m_texSize = fVector2(m_texture.size().w(), m_texture.size().h());
 	m_index.setData(m_buffer, 2);
-	m_layout.setStaticData(layout.data(), 2);
-	m_source.setStaticData(source.data(), 2);
-	m_size.setStaticData(size.data(), 2);
-	u.triangles(_text.size() * 6);
+	for (int off = 0; off < _text.size(); off += s_maxAtOnce)
+	{
+		m_layout.setStaticData(layout.data() + off * 6, 2);
+		m_source.setStaticData(source.data() + off * 6, 2);
+		m_size.setStaticData(size.data() + off * 6, 2);
+		u.triangles(min<int>(_text.size() - off, s_maxAtOnce) * 6);
+	}
 }
 
 fRect BakedFont::measurePx(std::string const& _text) const
