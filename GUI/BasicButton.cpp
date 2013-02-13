@@ -1,4 +1,5 @@
 #include <array>
+#include <unordered_map>
 #include <Common/Global.h>
 #include <Common/Color.h>
 #include "Global.h"
@@ -23,14 +24,41 @@ bool isNeighbour(View const& _v)
 		return b->grouping() & HorizontalGrouping || b->grouping() & VerticalGrouping;
 	return false;
 }
+/*
+class TextureCache
+{
+public:
+	TextureCache() {}
+	~TextureCache() {}
+
+	void initGraphics();
+	void finiGraphics();
+
+	std::unordered_map<std::hash_t, Texture2D> m_cached;
+};
+static TextureCache s_tc;
+*/
 
 Layers BasicButtonBody::layers()
 {
 	return {{ Layer(), Layer(borderMargin(), false, true) }};
 }
 
+void BasicButtonBody::updateTexture()
+{
+	Font f = m_font.isValid() ? m_font : GUIApp::style().bold;
+	string t = boost::algorithm::to_upper_copy(m_text);
+	Texture2D baseText(uSize(f.measurePx(t).size()) + (uSize)GUIApp::joint().glowPixels * 2);
+	{
+		RenderToTextureContext c(baseText);
+		c.text(f, iCoord(baseText.size() / 2), t, Color(1.f / (GUIApp::joint().glowLevels * 2 + 1)));
+	}
+	m_glowText = GUIApp::joint().makeGlowerNear(baseText);
+}
+
 void BasicButtonBody::initGraphics()
 {
+	updateTexture();
 	setLayers(layers());
 	updateLayers();
 }
@@ -40,7 +68,7 @@ void BasicButtonBody::setLit(bool _lit)
 	if (m_isLit != _lit)
 	{
 		m_isLit = _lit;
-		layer(2).show(m_isLit);
+		updateLayers();
 	}
 }
 
@@ -113,7 +141,13 @@ void BasicButtonBody::draw(Context const& _c, unsigned _l)
 	if (_l == 0)
 		_c.text(m_font.isValid() ? m_font : m_isDown ? GUIApp::style().bold : GUIApp::style().regular, inner.lerp(.5f, .5f), boost::algorithm::to_upper_copy(m_text), Color(m_color.hue(), m_color.sat() * .75f, m_color.value() * .75f));
 	if (_l == 1)
-		_c.text(m_font.isValid() ? m_font : GUIApp::style().bold, inner.lerp(.5f, .5f), boost::algorithm::to_upper_copy(m_text), color());
+	{
+		ProgramUser u(GUIApp::joint().colorize);
+		u.uniform("u_amplitude") = 2.f;
+		u.uniform("u_overglow") = 1.f;
+		u.uniform("u_color") = (fVector4)m_color.toRGBA();
+		_c.blit(m_glowText, inner.lerp(.5f, .5f) - (iSize)m_glowText.size() / 2);
+	}
 }
 
 bool BasicButtonBody::event(Event* _e)

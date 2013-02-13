@@ -209,7 +209,7 @@ void Context::glowRect(iRect _upperLeftEdgeOfLight, Color _col, float _overglow)
 {
 	ProgramUser u(GUIApp::joint().colorize);
 	u.uniform("u_color") = (fVector4)_col.toRGBA();
-	u.uniform("u_amplitude") = 5.f;
+	u.uniform("u_amplitude") = 3.f;
 	u.uniform("u_overglow") = _overglow;
 	auto glowPixels = GUIApp::joint().glowPixels;
 	auto lightEdgePixels = GUIApp::joint().lightEdgePixels;
@@ -289,13 +289,13 @@ RenderToTextureContext::RenderToTextureContext(Texture2D const& _tex):
 	LB_GL(glClear, GL_COLOR_BUFFER_BIT);
 
 	GUIApp::joint().u_displaySize = (fVector2)(fSize)m_tex.size();
-	LB_GL(glBlendFunc, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+	LB_GL(glBlendFunc, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+//	LB_GL(glBlendFunc, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 }
 
 RenderToTextureContext::~RenderToTextureContext()
 {
 	GUIApp::joint().u_displaySize = (fVector2)(fSize)GUIApp::joint().displaySizePixels;
-	LB_GL(glBlendFunc, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
 void Layer::refresh()
@@ -578,5 +578,6 @@ void Lightbox::debugOut(View const& _v, std::string const& _indent)
 {
 	cnote << toString(_v, _indent);
 	for (auto const& c: _v->children())
+
 		debugOut(c, _indent + "  ");
 }

@@ -33,7 +33,7 @@ public:
 	Grouping effectiveGrouping() const;
 
 	void setOnTapped(EventHandler const& _t) { m_onTapped = _t; }
-	void setText(std::string const& _s) { m_text = _s; update(); }
+	void setText(std::string const& _s) { m_text = _s; updateTexture(); update(); }
 	void setColor(Color _c) { m_color = _c; update(); }
 	void setGrouping(Grouping _g) { m_grouping = _g; update(); }
 
@@ -59,12 +59,16 @@ protected:
 	virtual void enabledChanged();
 	virtual void updateLayers() { layer(1).show(isEnabled() && isLit()); }
 
+	void updateTexture();
+
 private:
 	std::string m_text;
 	EventHandler m_onTapped;
 	Color m_color;
 	Font m_font;
 	Grouping m_grouping;
+
+	Texture2D m_glowText;
 
 	bool m_isLit;
 	bool m_isDown;

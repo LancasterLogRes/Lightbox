@@ -33,8 +33,8 @@ GUIApp::GUIApp():
 	m_style.small = Font(13, FontDefinition("ubuntu", false));
 	m_style.smallBold = Font(13, FontDefinition("ubuntu", true));
 	m_style.thumbDiameter = fSize(40, 40);
-	m_style.lightEdgeSize = fSize(2, 2);
-	m_style.lightBedSize = fSize(4, 4);
+	m_style.lightEdgeSize = fSize(3, 3);
+	m_style.lightBedSize = fSize(5, 5);
 	m_style.outlineColor = Black;
 }
 
@@ -219,14 +219,14 @@ bool GUIApp::drawGraphics()
 				}
 				else if (v->isDirty() && (v->isReadyForCache() || v->glows() || v->isPremultiplied()))
 				{
-					cnote << "RENDER:" << v;
+//					cnote << "RENDER:" << v;
 					v.preDraw();
 					v->setReadyForCache();
 					willRenderToTexture = true;
 				}
 				else if (v->isDirty())
 				{
-					cnote << "DIRECT:" << v;
+//					cnote << "DIRECT:" << v;
 					v.preDraw();
 					renderDirect[cacheIndex] += v;
 					if (nextRendersLeft > 0)
@@ -411,7 +411,7 @@ bool GUIApp::drawGraphics()
 		}
 	}
 
-#if LIGHTBOX_PROFILE || DEBUG || 1
+#if LIGHTBOX_PROFILE || DEBUG
 	LB_GL(glBlendFunc, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	string info = textualTime(AppEngine::get()->lastDrawTime());
 	iRect rr = m_root->rect();
