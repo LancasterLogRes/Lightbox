@@ -29,7 +29,9 @@ public:
 #if LIGHTBOX_ANDROID
 	AppEngine(struct android_app* _app);
 
-	struct android_app* androidApp() { return m_androidApp; }
+	struct android_app* androidApp() const { return m_androidApp; }
+	JNIEnv* jni() const { return m_jni; }
+
 #elif !defined(LIGHTBOX_CROSS)
 	AppEngine();
 #endif
@@ -40,7 +42,16 @@ public:
 	void setApp(App* _app);
 	Display& display() { return *m_display; }
 
-	void startActivity(std::string const& _application, std::string const& _intent, std::function<void()> const& _onDone);
+	void setOnResumed(std::function<void()> const& _onDone)
+	{
+#if LIGHTBOX_ANDROID
+		m_onDoneLastActivity = _onDone;
+#else
+		_onDone();
+#endif
+	}
+	void callActivityMethod(std::string const& _activityClass, std::string const& _method);
+
 	void killSystemBar();
 
 	Time lastDrawTime() const { return m_lastDrawTime; }

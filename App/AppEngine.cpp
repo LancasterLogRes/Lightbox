@@ -51,25 +51,41 @@ AppEngine::~AppEngine()
 #endif
 }
 
-void AppEngine::startActivity(string const& _app, string const& _intent, function<void()> const& _onDone)
+void AppEngine::callActivityMethod(string const& _activityClass, string const& _method)
 {
 #if LIGHTBOX_ANDROID
-	char const* args[] = { "/system/bin/am", "start", "-a", _intent.c_str(), _app.c_str(), nullptr };
-	cnote << "executing " << args[0] << args[1] << args[2] << args[3] << args[4];
-	if (!fork())
-	{
-		execvp(args[0], (char**)args);
-		exit(0);
-	}
-	m_onDoneLastActivity = _onDone;
-	/*	jclass appClass = mEnv->GetObjectClass();
-	jmethodID mid = mEnv->GetMethodID(appClass, "openURL", "(Ljava/lang/String;)V");
-	mEnv->CallVoidMethod(appClassObj, mid, mEnv->NewStringUTF(url));
-	appClassObj = m_androidApp->NewGlobalRef(thiz);*/
+	jclass activityClass = AppEngine::get()->jni()->FindClass("android/app/NativeActivity");
+	cdebug << "Base Activity:" << activityClass;
+
+	jmethodID getClassLoader = AppEngine::get()->jni()->GetMethodID(activityClass, "getClassLoader", "()Ljava/lang/ClassLoader;");
+	cdebug << "getLoader:" << getClassLoader;
+
+	jobject cls = AppEngine::get()->jni()->CallObjectMethod(AppEngine::get()->androidApp()->activity->clazz, getClassLoader);
+	cdebug << "loader:" << cls;
+
+	jclass classLoader = AppEngine::get()->jni()->FindClass("java/lang/ClassLoader");
+	cdebug << "Loader:" << classLoader;
+
+	jmethodID findClass = AppEngine::get()->jni()->GetMethodID(classLoader, "loadClass", "(Ljava/lang/String;)Ljava/lang/Class;");
+	cdebug << "findClass:" << findClass;
+
+	jstring strClassName = AppEngine::get()->jni()->NewStringUTF(_activityClass.c_str());
+	cdebug << "className:" << strClassName;
+
+	jclass myActivityClass = (jclass)AppEngine::get()->jni()->CallObjectMethod(cls, findClass, strClassName);
+	cdebug << "myActivity:" << myActivityClass;
+
+	AppEngine::get()->jni()->DeleteLocalRef(strClassName);
+
+	jmethodID method = AppEngine::get()->jni()->GetMethodID(myActivityClass, _method.c_str(), "()V");
+	cdebug << "editFixture" << method;
+
+	cdebug << "Calling...";
+	AppEngine::get()->jni()->CallObjectMethod(AppEngine::get()->androidApp()->activity->clazz, method);
+	cdebug << "Done.";
 #else
-	(void)_app;
-	(void)_intent;
-	_onDone();
+	(void)_activityClass;
+	(void)_method;
 #endif
 }
 
