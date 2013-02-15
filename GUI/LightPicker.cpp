@@ -7,7 +7,7 @@ using namespace Lightbox;
 
 LightPickerBody::LightPickerBody():
 	m_light(.5f),
-	m_middle(0.f, 0.f, .5f)
+	m_middle(-1.f, 0.f, .5f)
 {
 }
 
