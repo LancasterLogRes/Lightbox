@@ -48,8 +48,8 @@ public:
 	void rect(iRect _r, Color _c) const { rect(fRect(_r), _c); }
 	void rect(fRect _r, Color _c, float _gradient) const;
 	void rect(iRect _r, Color _c, float _gradient) const { rect(fRect(_r), _c, _gradient); }
-	void xRule(fRect _r, float _y, float _h, Color _c) const { rect(_r.lerp(0, _y, 1, _y).outset(0, _h / 2), _c); }
-	void yRule(fRect _r, float _x, float _w, Color _c) const { rect(_r.lerp(_x, 0, _x, 1).outset(_w / 2, 0), _c); }
+	void xRule(fRect _r, float _yFraction, float _h, Color _c) const { rect(_r.lerp(0, _yFraction, 1, _yFraction).outset(0, _h / 2), _c); }
+	void yRule(fRect _r, float _xFraction, float _w, Color _c) const { rect(_r.lerp(_xFraction, 0, _xFraction, 1).outset(_w / 2, 0), _c); }
 	void rectOutline(fRect _inner, fMargin _outset, Color _c) const;
 	void rectOutline(iRect _inner, iMargin _outset, Color _c) const { rectOutline((fRect)_inner, (fMargin)_outset, _c); }
 	void rectInline(fRect _outer, fMargin _inset, Color _c) const { rectOutline(_outer.inset(_inset), _inset, _c); }
@@ -79,8 +79,8 @@ public:
 	void mmDisc(fEllipse _r, Color _c) const { disc(toPixelsF(_r), _c); }
 	void mmCircle(fEllipse _r, float _size, Color _c) const { circle(toPixelsF(_r), _size, _c); }
 	void mmCircle(fEllipse _r, float _size) const { circle(toPixelsF(_r), _size); }
-	void mmXRule(fRect _r, float _y, float _h, Color _c) const { xRule(_r, _y, _h, _c); }
-	void mmYRule(fRect _r, float _x, float _w, Color _c) const { yRule(_r, _x, _w, _c); }
+	void mmXRule(fRect _r, float _yFraction, float _h, Color _c) const { xRule(toPixelsF(_r), _yFraction, toPixelsF(fSize(0, _h)).h(), _c); }
+	void mmYRule(fRect _r, float _xFraction, float _w, Color _c) const { yRule(toPixelsF(_r), _xFraction, toPixelsF(fSize(_w, 0)).w(), _c); }
 	void mmText(Font const& _f, fCoord _anchor, std::string const& _text, Color _c = Black) const { text(_f, toPixels(_anchor), _text, _c); }
 	void mmBlit(Texture2D const& _tex, fCoord _pos) const { blit(_tex, toPixels(_pos)); }
 	void mmGlowThumb(fCoord _pos, Color _c, float _overglow = 0) const { glowThumb(toPixels(_pos), _c, _overglow); }
