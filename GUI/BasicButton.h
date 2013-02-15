@@ -2,6 +2,7 @@
 
 #include <functional>
 #include <Common/Flags.h>
+#include <LGL/Texture2D.h>
 #include "Font.h"
 #include "View.h"
 
@@ -11,8 +12,8 @@ namespace Lightbox
 class BasicButtonBody;
 typedef boost::intrusive_ptr<BasicButtonBody> BasicButton;
 
-void drawButton(Context const& _c, iRect _inner, Color _color, bool _down, bool _base, bool _lit, bool _polish);
-void drawBorder(Context const& _con, iRect _inner, bool _base, bool _lit, Color _col);
+void drawButton(Slate const& _c, iRect _inner, Color _color, bool _down, bool _base, bool _lit, bool _polish);
+void drawBorder(Slate const& _con, iRect _inner, bool _base, bool _lit, Color _col);
 iMargin borderMargin();
 iMargin innerMargin(Grouping _grouping);
 
@@ -49,7 +50,7 @@ protected:
 	BasicButtonBody(std::string const& _text = std::string(), Color _c = White, Font _f = Font(), Grouping _grouping = NoGrouping);
 	BasicButtonBody(std::string const& _text, Color _c, Grouping _grouping): BasicButtonBody(_text, _c, Font(), _grouping) {}
 
-	virtual void draw(Context const& _c, unsigned _layer);
+	virtual void draw(Slate const& _c, unsigned _layer);
 	virtual bool event(Event* _e);
 	virtual void tapped();
 	virtual void pushed() { setDown(); setLit(); }

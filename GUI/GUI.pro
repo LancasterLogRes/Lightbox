@@ -23,7 +23,9 @@ SOURCES += \
     Collated.cpp \
     ProgressBar.cpp \
     FontManager.cpp \
-	BakedFont.cpp
+	BakedFont.cpp \
+    Slate.cpp \
+    RenderToTextureSlate.cpp
 
 HEADERS += \
     View.h \
@@ -45,7 +47,9 @@ HEADERS += \
     Frame.h \
     ProgressBar.h \
     FontManager.h \
-    BakedFont.h
+    BakedFont.h \
+    Slate.h \
+    RenderToTextureSlate.h
 OTHER_FILES += \
     Shaders.glsl \
     HueWheel.glsl \

@@ -47,7 +47,7 @@ bool TabsBody::event(Event* _e)
 	return Super::event(_e);
 }
 
-void TabsBody::draw(Context const& _c, unsigned)
+void TabsBody::draw(Slate const& _c, unsigned)
 {
 	if (children().size())
 	{

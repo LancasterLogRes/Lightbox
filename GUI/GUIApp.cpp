@@ -265,7 +265,7 @@ bool GUIApp::drawGraphics()
 								GUIApp::joint().u_displaySize = (vec2)(fSize)texRect.size();
 								assert((iSize)texRect.size() == v->globalLayer().size());
 								iRect canvas(iCoord(0, 0), (iSize)texRect.size());
-								Context con(canvas.inset(v->overdraw()), canvas);
+								Slate con(canvas.inset(v->overdraw()), canvas);
 								v.draw(con);
 								if (!v.view->m_isEnabled)
 									con.rect(canvas, Color(0.f, .5f));
@@ -306,7 +306,7 @@ bool GUIApp::drawGraphics()
 							GUIApp::joint().u_displaySize = (vec2)(fSize)texRect.size();
 							assert((iSize)texRect.size() == v->globalLayer().size());
 							iRect canvas(iCoord(0, 0), (iSize)texRect.size());
-							Context con(canvas.inset(v->overdraw()), canvas);
+							Slate con(canvas.inset(v->overdraw()), canvas);
 							v.draw(con);
 							if (!v.view->m_isEnabled)
 								con.rect(canvas, Color(0.f, .5f));
@@ -328,7 +328,7 @@ bool GUIApp::drawGraphics()
 	if (m_showCachePage > -1)
 	{
 		if (m_showCachePage < (int)m_cache.size())
-			Context().blit(m_cache[m_showCachePage].tx);
+			Slate().blit(m_cache[m_showCachePage].tx);
 	}
 	else
 	{
@@ -358,7 +358,7 @@ bool GUIApp::drawGraphics()
 					{
 						LB_GL(glBlendFunc, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 						auto globalLayer = v->globalLayer();
-						Context c(v.view->m_globalRect, globalLayer);
+						Slate c(v.view->m_globalRect, globalLayer);
 						c.offset = joint().display->fromPixels(v.view->m_globalRect).topLeft();
 						LB_GL(glEnable, GL_SCISSOR_TEST);
 						LB_GL(glScissor, globalLayer.x(), joint().display->sizePixels().h() - globalLayer.bottom(), globalLayer.w(), globalLayer.h());
@@ -398,7 +398,7 @@ bool GUIApp::drawGraphics()
 				{
 					// draw our view directly to framebuffer.
 					auto globalLayer = v->globalLayer();
-					Context c(v.view->m_globalRect, globalLayer);
+					Slate c(v.view->m_globalRect, globalLayer);
 					c.offset = joint().display->fromPixels(v.view->m_globalRect).topLeft();
 					LB_GL(glScissor, globalLayer.x(), joint().display->sizePixels().h() - globalLayer.bottom(), globalLayer.w(), globalLayer.h());
 					v.draw(c);
@@ -415,7 +415,7 @@ bool GUIApp::drawGraphics()
 	LB_GL(glBlendFunc, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	string info = textualTime(AppEngine::get()->lastDrawTime());
 	iRect rr = m_root->rect();
-	Context con(rr, rr);
+	Slate con(rr, rr);
 	iRect infoRect(rr.bottomRight() - iCoord(200, 54), iSize(190, 44));
 	con.rect(infoRect.outset(3), Color(1.f, .5f));
 	Font f(ByPixels, 16, "ubuntu");

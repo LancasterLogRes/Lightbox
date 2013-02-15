@@ -38,7 +38,7 @@ protected:
 	
 	virtual void initGraphics();
 	virtual bool event(Event* _e);
-	virtual void draw(Context const& _c, unsigned _l);
+	virtual void draw(Slate const& _c, unsigned _l);
 	virtual void directionChanged(bool _userEvent) { if (m_onDirectionChanged && _userEvent) m_onDirectionChanged(this); update(2); }
 	virtual fSize specifyFit(fSize _space) const;
 

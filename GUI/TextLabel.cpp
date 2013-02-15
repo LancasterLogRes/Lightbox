@@ -18,7 +18,7 @@ bool TextLabelBody::event(Event* _e)
 	return Super::event(_e);
 }
 
-void TextLabelBody::draw(Context const& _c, unsigned)
+void TextLabelBody::draw(Slate const& _c, unsigned)
 {
 	iRect geo = rect();
 	Font f = m_font.isValid() ? m_font : GUIApp::style().small;

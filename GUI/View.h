@@ -6,17 +6,10 @@
 #include <boost/utility.hpp>
 #include <boost/intrusive_ptr.hpp>
 #include <boost/any.hpp>
-#include <Numeric/Rect.h>
-#include <Numeric/Ellipse.h>
 #include <Common/Pimpl.h>
-#include <Common/Color.h>
 #include <Common/Flags.h>
-#include <LGL/Global.h>
-#include <LGL/Program.h>
-#include <LGL/Texture2D.h>
-#include <LGL/Framebuffer.h>
-#include <App/Display.h>
 #include <Common/MemberMap.h>
+#include <App/Display.h>
 #include "Global.h"
 #include "Event.h"
 #include "Layout.h"
@@ -24,95 +17,9 @@
 namespace Lightbox
 {
 
-enum GroupingFlags { NoGrouping = 0, HorizontalGrouping = 1, VerticalGrouping = 2, ForceAbove = 4, ForceBelow = 8, ForceLeft = 16, ForceRight= 32 };
-typedef Flags<GroupingFlags> Grouping;
-LIGHTBOX_FLAGS_TYPE(GroupingFlags, Grouping);
-
+class Slate;
 class ViewBody;
 typedef boost::intrusive_ptr<ViewBody> View;
-
-struct Context
-{
-	fSize offset;	///< from root topLeft. In MM. @deprecated Completely useless!
-
-	iRect active;	///< Basic (non-overdrawn) view rect, in device coordinates. If there's overdraw (or it's not drawing to texture), it'll have a positive topleft.
-	iRect canvas;	///< Full (overdrawn) view rect, in device coordinates. Zero top-left if it's drawing to texture.
-
-	Context() {}
-	Context(iRect _active, iRect _canvas): active(_active), canvas(_canvas) {}
-
-	iSize offsetPixels() const { return iSize(canvas.left(), canvas.top()); }
-
-	iSize pixels(fSize _mm) const { return toPixels(_mm); }
-	iCoord pixels(fCoord _mm) const { return toPixels(_mm); }
-	fSize pixelsF(fSize _mm) const { return toPixelsF(_mm); }
-	fCoord pixelsF(fCoord _mm) const { return toPixelsF(_mm); }
-
-	iSize toPixels(fSize _mm) const;
-	iCoord toPixels(fCoord _mm) const;
-	fSize toPixelsF(fSize _mm) const;
-	fCoord toPixelsF(fCoord _mm) const;
-
-	fCoord toDevice(fCoord _mm) const { return pixelsF(_mm) + fCoord(active.pos()); }
-
-	// Pixel functions - TODO split into proxy and px float param.
-	void rectInline(iRect _outer, iMargin _inset, Color _c) const { rectOutline(_outer.inset(_inset), _inset, _c); }
-	void rectOutline(iRect _inner, iMargin _outset, Color _c) const;
-	void text(Font const& _f, iCoord _anchor, std::string const& _text, Color _c = Black) const;
-
-	// Pixel proxy functions.
-	void rect(iRect _r) const { pxRect(fRect(_r)); }
-	void rect(iRect _r, Color _c) const { pxRect(fRect(_r), _c); }
-	void rect(iRect _r, Color _c, float _gradient) const { pxRect(fRect(_r), _c, _gradient); }
-	void disc(iEllipse _r) const { pxDisc(fEllipse(_r)); }
-	void disc(iEllipse _r, Color _c) const { pxDisc(fEllipse(_r), _c); }
-	void blit(Texture2D const& _tex, iCoord _dest = iCoord(0, 0)) const { blit(_tex, iRect(_dest, iSize(0, 0))); }
-	void blit(Texture2D const& _tex, iRect _dest) const { blit(iRect(0, 0, 0, 0), _tex, _dest); }
-	void blit(iRect _src, Texture2D const& _tex, iCoord _dest) const { blit(_src, _tex, iRect(_dest, iSize(0, 0))); }
-	void blit(iRect _src, Texture2D const& _tex, iRect _dest = iRect(0, 0, 0, 0)) const;
-	void glowThumb(iCoord _pos, Color _c, float _overglow = 0) const;
-	void glowRect(iRect _topLeftOfLightOutline, Color _col, float _overglow) const;
-	void glowRectOutline(iRect _inner, Color _col, float _overglow = 1.f) const;
-	void glowRectInline(iRect _outer, Color _col, float _overglow = 1.f) const;
-
-	// Pixel functions that take float params.
-	void pxRect(fRect _r) const;
-	void pxRect(fRect _r, Color _c) const;
-	void pxRect(fRect _r, Color _c, float _gradient) const;
-	void pxDisc(fEllipse _r) const;
-	void pxDisc(fEllipse _r, Color _c) const;
-
-	void xRule(fRect _r, float _y, float _h, Color _c) const;
-	void yRule(fRect _r, float _x, float _w, Color _c) const;
-
-	// Deprecated - use iRect/iCoord/iEllipse versions instead.
-	// Actually, no... - these are good for AA interiors; however naming convention needs to be
-	// made to separate pixel-level functions (currently iRect/iCoord/iEllipse) from mm-level functions
-	// (currently fRect, fCoord, fEllipse).
-	void rect(fRect _r, Program const& _p = Program()) const;
-	void rect(fRect _r, Color _c) const;
-	void rect(fRect _r, Color _c, float _gradient) const;
-	void disc(fEllipse _r, Color _c) const;
-	void disc(fEllipse _r, Program const& _p) const;
-	void circle(fEllipse _r, float _size, Color _c) const;
-	void circle(fEllipse _r, float _size, Program const& _p) const;
-	void text(Font const& _f, fCoord _anchor, std::string const& _text, Color _c = Black) const;
-	void blit(Texture2D const& _tex, fCoord _pos) const;
-
-	void glowThumb(fCoord _pos, Color _c, float _overglow = 0) const;
-};
-
-class RenderToTextureContext: public Context
-{
-public:
-	RenderToTextureContext(Texture2D const& _tex);
-	~RenderToTextureContext();
-
-private:
-	Texture2D m_tex;
-	Framebuffer m_fb;
-	FramebufferUser m_fbu;
-};
 
 struct ViewSiblingsComparator
 {
@@ -219,7 +126,7 @@ public:
 	Layer* operator->() const { return get(); }
 
 	inline void preDraw() const;
-	inline void draw(Context const& _c) const;
+	inline void draw(Slate const& _c) const;
 };
 
 typedef std::vector<Layer> Layers;
@@ -229,7 +136,7 @@ class ViewBody: public boost::noncopyable
 	template <class _T, class _I> friend class ViewCreator;
 	friend class ViewLayerPtr;
 	friend class GUIApp;
-	friend class Context;
+	friend class Slate;
 	inline friend void intrusive_ptr_add_ref(ViewBody* _v);
 	inline friend void intrusive_ptr_release(ViewBody* _v);
 	friend void debugOut(View const& _v, std::string const& _indent);
@@ -323,7 +230,7 @@ public:
 	template <class _T> View withProperty(std::string const& _name, _T const& _t) { setProperty(_name, _t); return this; }
 
 	virtual bool sensesEvent(Event* _e);
-	void handleDraw(Context const& _c);
+	void handleDraw(Slate const& _c);
 	bool handleEvent(Event* _e);
 
 	void update(int _layer = -1);
@@ -358,7 +265,7 @@ protected:
 	Layer& layer(unsigned _i) { return m_layers[std::min<unsigned>(_i, m_layers.size() - 1)]; }
 
 	virtual void preDraw(unsigned) {}
-	virtual void draw(Context const& _c, unsigned _layer);
+	virtual void draw(Slate const& _c, unsigned _layer);
 	virtual bool event(Event*) { return false; }
 	virtual void resized() { m_visibleLayoutChanged = true; relayout(); update(); }
 	virtual void shownChanged() { m_visibleLayoutChanged = true; update(); }
@@ -377,7 +284,7 @@ private:
 	void cleanCache();
 	bool gatherDrawers(std::vector<ViewLayerPtr>& _l, unsigned _layer, fCoord _o = fCoord(0, 0), bool _ancestorVisibileLayoutChanged = false);
 
-	void executeDraw(Context const& _c, unsigned _layer);
+	void executeDraw(Slate const& _c, unsigned _layer);
 	void initGraphicsRecursive() { if (!m_graphicsInitialized) { initGraphics(); m_graphicsInitialized = true; } for (auto const& c: m_children) c->initGraphicsRecursive(); }
 	void finiGraphicsRecursive() { for (auto const& c: m_children) c->finiGraphicsRecursive(); if (m_graphicsInitialized) { finiGraphics(); m_graphicsInitialized = false; } }
 	void visibilityChangedRecursive(bool _newRootVisibility) { for (auto const& c: m_children) if (c->m_isShown) c->visibilityChangedRecursive(_newRootVisibility); visibilityChanged(); }
@@ -419,7 +326,7 @@ inline void ViewLayerPtr::preDraw() const
 	view->preDraw(layer);
 }
 
-inline void ViewLayerPtr::draw(Context const& _c) const
+inline void ViewLayerPtr::draw(Slate const& _c) const
 {
 	view->executeDraw(_c, layer);
 }

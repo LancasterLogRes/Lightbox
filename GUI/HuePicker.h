@@ -28,7 +28,7 @@ protected:
 	HuePickerBody(Color _c = White, Grouping _grouping = NoGrouping);
 	
 	virtual bool event(Event* _e);
-	virtual void draw(Context const& _c, unsigned _l);
+	virtual void draw(Slate const& _c, unsigned _l);
 	virtual void initGraphics();
 	virtual void finiGraphics();
 	virtual void updateLayers();

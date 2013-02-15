@@ -4,6 +4,7 @@
 #include <Common/Color.h>
 #include "Global.h"
 #include "GUIApp.h"
+#include "RenderToTextureSlate.h"
 #include "BasicButton.h"
 using namespace std;
 using namespace Lightbox;
@@ -50,7 +51,7 @@ void BasicButtonBody::updateTexture()
 	string t = boost::algorithm::to_upper_copy(m_text);
 	Texture2D baseText(uSize(f.measurePx(t).size()) + (uSize)GUIApp::joint().glowPixels * 2);
 	{
-		RenderToTextureContext c(baseText);
+		RenderToTextureSlate c(baseText);
 		c.text(f, iCoord(baseText.size() / 2), t, Color(1.f / (GUIApp::joint().glowLevels * 2 + 1)));
 	}
 	m_glowText = GUIApp::joint().makeGlowerNear(baseText);
@@ -92,7 +93,7 @@ iMargin Lightbox::borderMargin()
 	return iMargin(GUIApp::joint().glowPixels + GUIApp::joint().lightBedPixels / 2 + GUIApp::joint().lightEdgePixels);
 }
 
-void Lightbox::drawBorder(Context const& _con, iRect _inner, bool _base, bool _lit, Color _col)
+void Lightbox::drawBorder(Slate const& _con, iRect _inner, bool _base, bool _lit, Color _col)
 {
 	auto lightBedPixels = GUIApp::joint().lightBedPixels;
 	auto lightEdgePixels = GUIApp::joint().lightEdgePixels;
@@ -102,7 +103,7 @@ void Lightbox::drawBorder(Context const& _con, iRect _inner, bool _base, bool _l
 		_con.glowRectOutline(_inner.outset(iMargin((lightBedPixels - lightEdgePixels + iSize(1, 1)) / 2, (lightBedPixels - lightEdgePixels) / 2)), _col);
 }
 
-void Lightbox::drawButton(Context const& _c, iRect _inner, Color _color, bool _down, bool _base, bool _lit, bool _polish)
+void Lightbox::drawButton(Slate const& _c, iRect _inner, Color _color, bool _down, bool _base, bool _lit, bool _polish)
 {
 	if (_base)
 	{
@@ -134,7 +135,7 @@ Grouping BasicButtonBody::effectiveGrouping() const
 	return ret;
 }
 
-void BasicButtonBody::draw(Context const& _c, unsigned _l)
+void BasicButtonBody::draw(Slate const& _c, unsigned _l)
 {
 	auto inner = rect().inset(innerMargin(effectiveGrouping()));
 	drawButton(_c, inner, m_color, m_isDown, _l == 0, _l == 1, true);

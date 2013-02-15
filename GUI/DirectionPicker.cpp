@@ -58,7 +58,7 @@ void DirectionPickerBody::initGraphics()
 	setLayers({{ Layer(), Layer(borderMargin(), false, true), Layer(-innerMargin(m_grouping) / 2, false, true) }});
 }
 
-void DirectionPickerBody::draw(Context const& _c, unsigned _l)
+void DirectionPickerBody::draw(Slate const& _c, unsigned _l)
 {
 	iRect inner = rect().inset(innerMargin(m_grouping));
 	drawButton(_c, inner, m_color, true, _l == 0, _l == 1, false);

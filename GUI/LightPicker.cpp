@@ -44,7 +44,7 @@ bool LightPickerBody::event(Event* _e)
 static const float c_outerMargin = 5;
 static const float c_innerMM = 10;
 
-void LightPickerBody::draw(Context const& _c, unsigned _l)
+void LightPickerBody::draw(Slate const& _c, unsigned _l)
 {
 	fRect fullOuter = fRect(fSize(GUIApp::style().thumbDiameter.w() + c_outerMargin * 2, geometry().h()));
 	fRect outer = fullOuter.inset(fSize(c_outerMargin));

@@ -1,6 +1,7 @@
 #include <Common/Common.h>
 #include <GUI/TextLabel.h>
 #include <GUI/ToggleButton.h>
+#include <GUI/Slate.h>
 #include <GUI/GUIApp.h>
 #include "Global.h"
 #include "MainView.h"
@@ -29,7 +30,7 @@ private:
 //		setLayers({{ Layer(iMargin(), true) }});
 	}
 
-	virtual void draw(Context const& _c, unsigned)
+	virtual void draw(Slate const& _c, unsigned)
 	{
 		Color c(mod1(toSeconds(GUIApp::runningTime()) / 10), 1.f, 1.f);
 		{

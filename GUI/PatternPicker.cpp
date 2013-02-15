@@ -50,7 +50,7 @@ void PatternPickerBody::updateLayers()
 	Super::updateLayers();
 }
 
-void PatternPickerBody::draw(Context const& _c, unsigned _layer)
+void PatternPickerBody::draw(Slate const& _c, unsigned _layer)
 {
 	unsigned xBig[] = { m_space.w() / 4, m_space.w() * 3 / 4 };
 	unsigned yBig[] = { m_space.h() / 4, m_space.h() * 3 / 4 };

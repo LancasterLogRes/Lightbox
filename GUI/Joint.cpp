@@ -3,6 +3,8 @@
 #include "GUIApp.h"
 #include "Global.h"
 #include "Joint.h"
+#include "Slate.h"
+#include "RenderToTextureSlate.h"
 #include "View.h"
 using namespace std;
 using namespace Lightbox;
@@ -91,7 +93,7 @@ Texture2D Joint::thumbTex() const
 
 	u_displaySize = (fVector2)(fSize)totalSize;
 	LB_GL(glBlendFunc, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-	Context().disc(iEllipse(iCoord(totalSize / 2), thumbRadiusPx), Color(1.f / (glowLevels * 2 + 1)));
+	Slate().disc(iEllipse(iCoord(totalSize / 2), thumbRadiusPx), Color(1.f / (glowLevels * 2 + 1)));
 
 	u_displaySize = (fVector2)(fSize)displaySizePixels;
 	LB_GL(glBlendFunc, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -154,7 +156,7 @@ Texture2D Joint::cornerTex() const
 {
 	uSize totalSizePx = uSize(lightEdgePixels + glowPixels * 3 + iSize(1, 1));
 	Texture2D ret(totalSizePx);
-	RenderToTextureContext c(ret);
+	RenderToTextureSlate c(ret);
 	c.rectInline(iRect((iCoord)glowPixels + iSize(1, 1), (iSize)totalSizePx * 2), iMargin(lightEdgePixels), Color(1.f / (glowLevels * 2 + 1)));
 	return ret;
 }

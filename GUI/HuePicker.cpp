@@ -56,7 +56,7 @@ void HuePickerBody::updateLayers()
 	layer(2).show(layer(1).isShown());
 }
 
-void HuePickerBody::draw(Context const& _c, unsigned _l)
+void HuePickerBody::draw(Slate const& _c, unsigned _l)
 {
 	iSize thumbPx = _c.toPixels(GUIApp::style().thumbDiameter / 2);
 	iRect inner = rect().inset(innerMargin(effectiveGrouping()));

@@ -19,7 +19,7 @@ bool ProgressBarBody::event(Event* _e)
 	return Super::event(_e);
 }
 
-void ProgressBarBody::draw(Context const& _c, unsigned)
+void ProgressBarBody::draw(Slate const& _c, unsigned)
 {
 	_c.rect(rect(), GUIApp::style().back, 0.1);
 	iRect inner = rect().inset(GUIApp::joint().display->toPixels(fSize(5, 5)));

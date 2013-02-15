@@ -1,11 +1,16 @@
 #pragma once
 
+#include <Common/Flags.h>
 
 namespace Lightbox
 {
 
 class ViewBody;
 class Layout;
+
+enum GroupingFlags { NoGrouping = 0, HorizontalGrouping = 1, VerticalGrouping = 2, ForceAbove = 4, ForceBelow = 8, ForceLeft = 16, ForceRight= 32 };
+typedef Flags<GroupingFlags> Grouping;
+LIGHTBOX_FLAGS_TYPE(GroupingFlags, Grouping);
 
 }
 

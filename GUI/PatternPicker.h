@@ -32,7 +32,7 @@ protected:
 	virtual void indexChanged(bool _userEvent) { if (m_onIndexChanged && _userEvent) m_onIndexChanged(this); update(1); }
 	
 	virtual bool event(Event* _e);
-	virtual void draw(Context const& _c, unsigned _layer);
+	virtual void draw(Slate const& _c, unsigned _layer);
 
 	virtual void resized();
 	virtual void initGraphics();
