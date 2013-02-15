@@ -78,7 +78,7 @@ void AppEngine::callActivityMethod(string const& _activityClass, string const& _
 	AppEngine::get()->jni()->DeleteLocalRef(strClassName);
 
 	jmethodID method = AppEngine::get()->jni()->GetMethodID(myActivityClass, _method.c_str(), "()V");
-	cdebug << "editFixture" << method;
+	cdebug << "editScene" << method;
 
 	cdebug << "Calling...";
 	AppEngine::get()->jni()->CallObjectMethod(AppEngine::get()->androidApp()->activity->clazz, method);

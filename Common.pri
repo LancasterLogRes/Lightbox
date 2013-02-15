@@ -377,7 +377,7 @@ defineTest(tidy) {
 	}
 }
 
-shared_from_static {
+shared_from_static | has_static_plugins: {
 	QMAKE_LFLAGS += -Wl,--whole-archive -Wl,-zmuldefs
 	LIBS += -Wl,--no-whole-archive
 }
