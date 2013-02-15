@@ -1,5 +1,6 @@
 #pragma once
 
+#include <Common/Color.h>
 #include <LGL/Program.h>
 #include "View.h"
 
