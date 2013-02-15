@@ -83,21 +83,8 @@ Texture2D Joint::thumbTex() const
 	iSize thumbRadiusPx = display->toUnalignedPixels(GUIApp::style().thumbDiameter / 2);
 	uSize totalSize = (uSize)thumbRadiusPx * 4;	// 2x diameter
 	Texture2D ret(totalSize, foreign_vector<uint8_t>(), GL_RGBA, GL_RGBA);
-
-	Framebuffer fb(Framebuffer::Create);
-	FramebufferUser u(fb);
-	u.attachColor(ret);
-	u.checkComplete();
-	ret.viewport();
-	LB_GL(glClear, GL_COLOR_BUFFER_BIT);
-
-	u_displaySize = (fVector2)(fSize)totalSize;
-	LB_GL(glBlendFunc, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-	Slate().disc(iEllipse(iCoord(totalSize / 2), thumbRadiusPx), Color(1.f / (glowLevels * 2 + 1)));
-
-	u_displaySize = (fVector2)(fSize)displaySizePixels;
-	LB_GL(glBlendFunc, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
+	RenderToTextureSlate c(ret);
+	c.disc(iEllipse(iCoord(totalSize / 2), thumbRadiusPx), Color(1.f / (glowLevels * 2 + 1)));
 	return ret;
 }
 

@@ -19,7 +19,7 @@ public:
 	Rect(xCoord _min, xSize _size): m_pos(_min), m_size(_size) {}
 	Rect(xCoord _min, xCoord _max): m_pos(_min), m_size(_max - _min) {}
 	Rect(Numeric _x, Numeric _y, Numeric _w, Numeric _h): m_pos(_x, _y), m_size(_w, _h) {}
-	template<class _N> explicit Rect(Rect<_N> _s): m_pos(_s.pos()), m_size(_s.size()) {}
+	template <class _N> explicit Rect(Rect<_N> _s): m_pos(_s.pos()), m_size(xCoord(_s.bottomRight()) - m_pos) {}
 
 	static Rect square(xCoord _mid, Numeric _halfWidth) { return Rect(_mid - fCoord(_halfWidth, _halfWidth), fSize(_halfWidth, _halfWidth) * 2); }
 	

@@ -58,14 +58,14 @@ void LightPickerBody::draw(Slate const& _c, unsigned _l)
 
 		top = RGBA(1.f, 1.f, 1.f, 1.f);
 		bottom = rgba;
-		_c.rect(inner.lerp(0, 0, 1, .5f));
+		_c.mmRect(inner.lerp(0, 0, 1, .5f));
 
 		top = rgba;
 		bottom = RGBA(0.f, 0.f, 0.f, 1.f);
-		_c.rect(inner.lerp(0, 0.5f, 1, 1));
+		_c.mmRect(inner.lerp(0, 0.5f, 1, 1));
 	}
 	else
-		_c.glowThumb(inner.lerp(.5f, 1.f - m_light), Color(HSLSpace, m_middle.hue(), 1, m_light));
+		_c.mmGlowThumb(inner.lerp(.5f, 1.f - m_light), Color(HSLSpace, m_middle.hue(), 1, m_light));
 }
 
 fSize LightPickerBody::specifyFit(fSize _space) const

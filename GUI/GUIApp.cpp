@@ -359,7 +359,7 @@ bool GUIApp::drawGraphics()
 						LB_GL(glBlendFunc, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 						auto globalLayer = v->globalLayer();
 						Slate c(v.view->m_globalRect, globalLayer);
-						c.offset = joint().display->fromPixels(v.view->m_globalRect).topLeft();
+///						c.offset = joint().display->fromPixels(v.view->m_globalRect).topLeft();
 						LB_GL(glEnable, GL_SCISSOR_TEST);
 						LB_GL(glScissor, globalLayer.x(), joint().display->sizePixels().h() - globalLayer.bottom(), globalLayer.w(), globalLayer.h());
 						v.draw(c);
@@ -399,7 +399,7 @@ bool GUIApp::drawGraphics()
 					// draw our view directly to framebuffer.
 					auto globalLayer = v->globalLayer();
 					Slate c(v.view->m_globalRect, globalLayer);
-					c.offset = joint().display->fromPixels(v.view->m_globalRect).topLeft();
+//					c.offset = joint().display->fromPixels(v.view->m_globalRect).topLeft();
 					LB_GL(glScissor, globalLayer.x(), joint().display->sizePixels().h() - globalLayer.bottom(), globalLayer.w(), globalLayer.h());
 					v.draw(c);
 					iRect canvas(iCoord(0, 0), globalLayer.size());

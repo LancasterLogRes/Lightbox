@@ -56,8 +56,7 @@ void PatternPickerBody::draw(Slate const& _c, unsigned _layer)
 	unsigned yBig[] = { m_space.h() / 4, m_space.h() * 3 / 4 };
 	iRect oinner = rect().inset(innerMargin(effectiveGrouping()));
 	Lightbox::drawButton(_c, oinner, color(), isChecked(), _layer == 0, _layer == 1, false);
-//	fSize thumbOutPx = _c.pixelsF(GUIApp::style().thumbDiameter / 2 + GUIApp::style().thumbOutline);
-	fSize thumbPx = _c.pixelsF(GUIApp::style().thumbDiameter / 2);
+	fSize thumbPx = _c.toPixelsF(GUIApp::style().thumbDiameter / 2);
 	fRect inner = fRect(oinner).inset(thumbPx);
 
 	fSize spacing(inner.size() / ((fSize)m_space - fSize(1, 1)));
@@ -68,7 +67,7 @@ void PatternPickerBody::draw(Slate const& _c, unsigned _layer)
 		{
 			fCoord p = inner.pos() + fSize(x, y) * spacing;
 			if (_layer == 0)
-				_c.pxRect(fRect::square(p, min(spacing.w(), spacing.h()) / ((x == xBig[0] || x == xBig[1]) && (y == yBig[0] || y == yBig[1]) ? 3.f : 6.f)), glow.attenuated(.25f));
+				_c.rect(fRect::square(p, min(spacing.w(), spacing.h()) / ((x == xBig[0] || x == xBig[1]) && (y == yBig[0] || y == yBig[1]) ? 3.f : 6.f)), glow.attenuated(.25f));
 			else if (_layer == 1 && m_index == i)
 			{
 				_c.glowThumb(iCoord(p), color(), 1.f);

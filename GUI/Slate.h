@@ -9,41 +9,59 @@
 namespace Lightbox
 {
 
-struct Slate
+class RenderToTextureSlate;
+class ViewBody;
+class GUIApp;
+
+
+/** Drawing class.
+ * Operates on a integer rect that's pixel-aligned.
+ * Primary functions are defined in terms of pixels, though mm functions also exist.
+ * For pixel functions, all exist as integer, though most are overloaded with float
+ * variants, too.
+ */
+class Slate
 {
-	fSize offset;	///< from root topLeft. In MM. @deprecated Completely useless!
+	friend class RenderToTextureSlate;
+	friend class ViewBody;
+	friend class GUIApp;
 
-	iRect active;	///< Basic (non-overdrawn) view rect, in device coordinates. If there's overdraw (or it's not drawing to texture), it'll have a positive topleft.
-	iRect canvas;	///< Full (overdrawn) view rect, in device coordinates. Zero top-left if it's drawing to texture.
-
-	Slate() {}
-	Slate(iRect _active, iRect _canvas): active(_active), canvas(_canvas) {}
-
-	iSize offsetPixels() const { return iSize(canvas.left(), canvas.top()); }
-
-	iSize pixels(fSize _mm) const { return toPixels(_mm); }
-	iCoord pixels(fCoord _mm) const { return toPixels(_mm); }
-	fSize pixelsF(fSize _mm) const { return toPixelsF(_mm); }
-	fCoord pixelsF(fCoord _mm) const { return toPixelsF(_mm); }
+public:
+	// Shouldn't need to use these, but in case you're interested...
+	iRect main() const { return iRect(m_active.size()); }
+	iRect limits() const { return iRect(m_canvas.pos() - (iSize)m_active.pos(), m_canvas.size()); }
 
 	iSize toPixels(fSize _mm) const;
 	iCoord toPixels(fCoord _mm) const;
+	iEllipse toPixels(fEllipse _mm) const { return (iEllipse)toPixelsF(_mm); }
+	iRect toPixels(fRect _mm) const { return (iRect)toPixelsF(_mm); }
+
 	fSize toPixelsF(fSize _mm) const;
 	fCoord toPixelsF(fCoord _mm) const;
+	fEllipse toPixelsF(fEllipse _mm) const { return fEllipse(toPixelsF(_mm.center()), toPixelsF(_mm.radii())); }
+	fRect toPixelsF(fRect _mm) const { return fRect(toPixelsF(_mm.pos()), toPixelsF(_mm.size())); }
 
-	fCoord toDevice(fCoord _mm) const { return pixelsF(_mm) + fCoord(active.pos()); }
-
-	// Pixel functions - TODO split into proxy and px float param.
-	void rectInline(iRect _outer, iMargin _inset, Color _c) const { rectOutline(_outer.inset(_inset), _inset, _c); }
-	void rectOutline(iRect _inner, iMargin _outset, Color _c) const;
+	// Pixel drawing functions.
+	void rect(fRect _r) const;
+	void rect(iRect _r) const { rect(fRect(_r)); }
+	void rect(fRect _r, Color _c) const;
+	void rect(iRect _r, Color _c) const { rect(fRect(_r), _c); }
+	void rect(fRect _r, Color _c, float _gradient) const;
+	void rect(iRect _r, Color _c, float _gradient) const { rect(fRect(_r), _c, _gradient); }
+	void xRule(fRect _r, float _y, float _h, Color _c) const { rect(_r.lerp(0, _y, 1, _y).outset(0, _h / 2), _c); }
+	void yRule(fRect _r, float _x, float _w, Color _c) const { rect(_r.lerp(_x, 0, _x, 1).outset(_w / 2, 0), _c); }
+	void rectOutline(fRect _inner, fMargin _outset, Color _c) const;
+	void rectOutline(iRect _inner, iMargin _outset, Color _c) const { rectOutline((fRect)_inner, (fMargin)_outset, _c); }
+	void rectInline(fRect _outer, fMargin _inset, Color _c) const { rectOutline(_outer.inset(_inset), _inset, _c); }
+	void rectInline(iRect _outer, iMargin _inset, Color _c) const { rectInline((fRect)_outer, (fMargin)_inset, _c); }
+	void disc(fEllipse _r) const;
+	void disc(iEllipse _r) const { disc(fEllipse(_r)); }
+	void disc(fEllipse _r, Color _c) const;
+	void disc(iEllipse _r, Color _c) const { disc(fEllipse(_r), _c); }
+	void circle(fEllipse _r, float _size, Color _c) const;
+	void circle(fEllipse _r, float _size) const;
+	// Note: Below here it doesn't make sense to use float coordinates as the operation must be pixel aligned.
 	void text(Font const& _f, iCoord _anchor, std::string const& _text, Color _c = Black) const;
-
-	// Pixel proxy functions.
-	void rect(iRect _r) const { pxRect(fRect(_r)); }
-	void rect(iRect _r, Color _c) const { pxRect(fRect(_r), _c); }
-	void rect(iRect _r, Color _c, float _gradient) const { pxRect(fRect(_r), _c, _gradient); }
-	void disc(iEllipse _r) const { pxDisc(fEllipse(_r)); }
-	void disc(iEllipse _r, Color _c) const { pxDisc(fEllipse(_r), _c); }
 	void blit(Texture2D const& _tex, iCoord _dest = iCoord(0, 0)) const { blit(_tex, iRect(_dest, iSize(0, 0))); }
 	void blit(Texture2D const& _tex, iRect _dest) const { blit(iRect(0, 0, 0, 0), _tex, _dest); }
 	void blit(iRect _src, Texture2D const& _tex, iCoord _dest) const { blit(_src, _tex, iRect(_dest, iSize(0, 0))); }
@@ -53,31 +71,28 @@ struct Slate
 	void glowRectOutline(iRect _inner, Color _col, float _overglow = 1.f) const;
 	void glowRectInline(iRect _outer, Color _col, float _overglow = 1.f) const;
 
-	// Pixel functions that take float params.
-	void pxRect(fRect _r) const;
-	void pxRect(fRect _r, Color _c) const;
-	void pxRect(fRect _r, Color _c, float _gradient) const;
-	void pxDisc(fEllipse _r) const;
-	void pxDisc(fEllipse _r, Color _c) const;
+	// MM drawing functions.
+	void mmRect(fRect _r) const { rect(toPixelsF(_r)); }
+	void mmRect(fRect _r, Color _c) const { rect(toPixelsF(_r), _c); }
+	void mmRect(fRect _r, Color _c, float _gradient) const { rect(toPixelsF(_r), _c, _gradient); }
+	void mmDisc(fEllipse _r) const { disc(toPixelsF(_r)); }
+	void mmDisc(fEllipse _r, Color _c) const { disc(toPixelsF(_r), _c); }
+	void mmCircle(fEllipse _r, float _size, Color _c) const { circle(toPixelsF(_r), _size, _c); }
+	void mmCircle(fEllipse _r, float _size) const { circle(toPixelsF(_r), _size); }
+	void mmXRule(fRect _r, float _y, float _h, Color _c) const { xRule(_r, _y, _h, _c); }
+	void mmYRule(fRect _r, float _x, float _w, Color _c) const { yRule(_r, _x, _w, _c); }
+	void mmText(Font const& _f, fCoord _anchor, std::string const& _text, Color _c = Black) const { text(_f, toPixels(_anchor), _text, _c); }
+	void mmBlit(Texture2D const& _tex, fCoord _pos) const { blit(_tex, toPixels(_pos)); }
+	void mmGlowThumb(fCoord _pos, Color _c, float _overglow = 0) const { glowThumb(toPixels(_pos), _c, _overglow); }
 
-	void xRule(fRect _r, float _y, float _h, Color _c) const;
-	void yRule(fRect _r, float _x, float _w, Color _c) const;
+private:
+	Slate() {}
+	Slate(iRect _active, iRect _canvas): m_active(_active), m_canvas(_canvas) {}
 
-	// Deprecated - use iRect/iCoord/iEllipse versions instead.
-	// Actually, no... - these are good for AA interiors; however naming convention needs to be
-	// made to separate pixel-level functions (currently iRect/iCoord/iEllipse) from mm-level functions
-	// (currently fRect, fCoord, fEllipse).
-	void rect(fRect _r, Program const& _p = Program()) const;
-	void rect(fRect _r, Color _c) const;
-	void rect(fRect _r, Color _c, float _gradient) const;
-	void disc(fEllipse _r, Color _c) const;
-	void disc(fEllipse _r, Program const& _p) const;
-	void circle(fEllipse _r, float _size, Color _c) const;
-	void circle(fEllipse _r, float _size, Program const& _p) const;
-	void text(Font const& _f, fCoord _anchor, std::string const& _text, Color _c = Black) const;
-	void blit(Texture2D const& _tex, fCoord _pos) const;
+	fCoord mmToDevice(fCoord _mm) const { return toPixelsF(_mm) + fCoord(m_active.pos()); }
 
-	void glowThumb(fCoord _pos, Color _c, float _overglow = 0) const;
+	iRect m_active;	///< Basic (non-overdrawn) view rect, in device coordinates. If there's overdraw (or it's not drawing to texture), it'll have a positive topleft.
+	iRect m_canvas;	///< Full (overdrawn) view rect, in device coordinates. Zero top-left if it's drawing to texture.
 };
 
 }

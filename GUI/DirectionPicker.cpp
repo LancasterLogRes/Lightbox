@@ -71,31 +71,31 @@ void DirectionPickerBody::draw(Slate const& _c, unsigned _l)
 		for (int i = 0; i < 9; ++i)
 			if (i % 4)
 			{
-				_c.xRule(activeMm, i / 8.f, 2, m_color.attenuated(.25f));
-				_c.yRule(activeMm, i / 8.f, 2, m_color.attenuated(.25f));
+				_c.mmXRule(activeMm, i / 8.f, 2, m_color.attenuated(.25f));
+				_c.mmYRule(activeMm, i / 8.f, 2, m_color.attenuated(.25f));
 			}
-		_c.xRule(activeMm, .5f, 2, m_color.attenuated(.5f));
-		_c.yRule(activeMm, .5f, 2, m_color.attenuated(.5f));
+		_c.mmXRule(activeMm, .5f, 2, m_color.attenuated(.5f));
+		_c.mmYRule(activeMm, .5f, 2, m_color.attenuated(.5f));
 	}
 	else if (_l == 2)
 	{
 		if (m_mode == Circle || m_mode == Fill)
-			_c.circle(m_direction.transformedInto(activeMm), m_mode == Circle ? 2.f : 1.f, m_color);
+			_c.mmCircle(m_direction.transformedInto(activeMm), m_mode == Circle ? 2.f : 1.f, m_color);
 
 		if (m_mode >= Circle)
 		{
-			_c.disc(fEllipse(activeMm.lerp(xC(-1), yC(-1)), GUIApp::style().thumbDiameter / 8), m_color);
-			_c.disc(fEllipse(activeMm.lerp(xC(-1), yC(1)), GUIApp::style().thumbDiameter / 8), m_color);
-			_c.disc(fEllipse(activeMm.lerp(xC(1), yC(-1)), GUIApp::style().thumbDiameter / 8), m_color);
-			_c.disc(fEllipse(activeMm.lerp(xC(1), yC(1)), GUIApp::style().thumbDiameter / 8), m_color);
+			_c.mmDisc(fEllipse(activeMm.lerp(xC(-1), yC(-1)), GUIApp::style().thumbDiameter / 8), m_color);
+			_c.mmDisc(fEllipse(activeMm.lerp(xC(-1), yC(1)), GUIApp::style().thumbDiameter / 8), m_color);
+			_c.mmDisc(fEllipse(activeMm.lerp(xC(1), yC(-1)), GUIApp::style().thumbDiameter / 8), m_color);
+			_c.mmDisc(fEllipse(activeMm.lerp(xC(1), yC(1)), GUIApp::style().thumbDiameter / 8), m_color);
 		}
 
 		if (m_mode == Fill)
-			_c.disc(m_direction.transformedInto(activeMm), Color(1.f, .5f));
+			_c.mmDisc(m_direction.transformedInto(activeMm), Color(1.f, .5f));
 
 		if (m_mode == Circle || m_mode == Fill)
-			_c.glowThumb(activeMm.lerp(xC(m_lastSign.w()), yC(m_lastSign.h())), m_color, 1.f);
-		_c.glowThumb(activeMm.lerp(m_direction.pos()), m_color, 1.f);
+			_c.mmGlowThumb(activeMm.lerp(xC(m_lastSign.w()), yC(m_lastSign.h())), m_color, 1.f);
+		_c.mmGlowThumb(activeMm.lerp(m_direction.pos()), m_color, 1.f);
 	}
 }
 

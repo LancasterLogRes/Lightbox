@@ -25,162 +25,98 @@ fCoord Slate::toPixelsF(fCoord _mm) const
 	return GUIApp::joint().display->toPixelsF(_mm);
 }
 
-void Slate::rectOutline(iRect _inner, iMargin _outset, Color _c) const
+void Slate::circle(fEllipse _e, float _size, Color _c) const
 {
-	auto vm = GUIApp::joint();
-
-	// Left bar
-	iRect lb(_inner.left() - _outset.left(), _inner.top() - _outset.top(), _outset.left(), _inner.height() + _outset.extraHeight());
-	iRect rb(_inner.right(), _inner.top() - _outset.top(), _outset.right(), _inner.height() + _outset.extraHeight());
-	iRect tb(_inner.left(), _inner.top() - _outset.top(), _inner.width(), _outset.top());
-	iRect bb(_inner.left(), _inner.bottom(), _inner.width(), _outset.bottom());
-
-	// TODO: do it properly!
-	ProgramUser u(vm.flat);
-	vm.offsetScale = fRect(lb.translated(active.pos())).asVector4();
-	vm.color = RGBA(_c);
-	vm.flatGeometry.setData(vm.unitQuad, 2);
-	u.triangleStrip(4);
-	vm.offsetScale = fRect(rb.translated(active.pos())).asVector4();
-	vm.color = RGBA(_c);
-	vm.flatGeometry.setData(vm.unitQuad, 2);
-	u.triangleStrip(4);
-	vm.offsetScale = fRect(tb.translated(active.pos())).asVector4();
-	vm.color = RGBA(_c);
-	vm.flatGeometry.setData(vm.unitQuad, 2);
-	u.triangleStrip(4);
-	vm.offsetScale = fRect(bb.translated(active.pos())).asVector4();
-	vm.color = RGBA(_c);
-	vm.flatGeometry.setData(vm.unitQuad, 2);
-	u.triangleStrip(4);
+	GUIApp::joint().color = RGBA(_c);
+	ProgramUser u(GUIApp::joint().flat);
+	circle(_e, _size);
 }
 
-void Slate::pxRect(fRect _r) const
+void Slate::circle(fEllipse _e, float _size) const
 {
 	auto vm = GUIApp::joint();
-	vm.offsetScale = _r.translated(fCoord(active.pos())).asVector4();
+	fCoord c = _e.middle() + fCoord(m_active.pos());
+	vm.offsetScale = fVector4(c.x(), c.y(), _e.rx(), _e.ry());
+	LB_GL(glLineWidth, _size);
+	ProgramUser u;
+	u.attrib("geometry").setData(vm.unitCircle72, 2, 0, 8);
+	u.lineLoop(72);
+}
+
+void Slate::rect(fRect _r) const
+{
+	auto vm = GUIApp::joint();
+	vm.offsetScale = _r.translated(fCoord(m_active.pos())).asVector4();
 	ProgramUser u;
 	u.attrib("geometry").setData(vm.unitQuad, 2);
-	u.triangleStrip(4);
-}
-
-void Slate::pxRect(fRect _r, Color _c) const
-{
-	GUIApp::joint().color = RGBA(_c);
-	ProgramUser u(GUIApp::joint().flat);
-	pxRect(_r);
-}
-
-void Slate::pxRect(fRect _r, Color _c, float _gradient) const
-{
-	GUIApp::joint().color = RGBA(_c);
-	GUIApp::joint().gradient = _gradient;
-	ProgramUser u(GUIApp::joint().shaded);
-	pxRect(_r);
-}
-
-void Slate::pxDisc(fEllipse _e) const
-{
-	auto vm = GUIApp::joint();
-	fCoord c = _e.middle() + fCoord(active.pos());
-	vm.offsetScale = fVector4(c.x(), c.y(), _e.rx(), _e.ry());
-	ProgramUser u;
-	u.attrib("geometry").setData(vm.unitCircle72, 2);
-	u.triangleFan(74);
-}
-
-void Slate::pxDisc(fEllipse _e, Color _c) const
-{
-	GUIApp::joint().color = RGBA(_c);
-	ProgramUser u(GUIApp::joint().flat);
-	pxDisc(_e);
-}
-
-void Slate::text(Font const& _f, iCoord _anchor, std::string const& _text, Color _c) const
-{
-	_f.draw(_anchor + active.pos(), _text, _c.toRGBA());
-}
-
-void Slate::xRule(fRect _r, float _y, float _h, Color _c) const
-{
-	rect(_r.lerp(0, _y, 1, _y).outset(0, _h / 2), _c);
-}
-
-void Slate::yRule(fRect _r, float _x, float _w, Color _c) const
-{
-	rect(_r.lerp(_x, 0, _x, 1).outset(_w / 2, 0), _c);
-}
-
-void Slate::rect(fRect _r, Program const& _p) const
-{
-	fCoord c = toDevice(_r.pos());
-	fSize s = pixelsF(_r.size());
-	GUIApp::joint().offsetScale = fVector4(c.x(), c.y(), s.w(), s.h());
-	ProgramUser u(_p);
-	u.attrib("geometry").setData(GUIApp::joint().unitQuad, 2);
 	u.triangleStrip(4);
 }
 
 void Slate::rect(fRect _r, Color _c) const
 {
 	GUIApp::joint().color = RGBA(_c);
-	rect(_r, GUIApp::joint().flat);
+	ProgramUser u(GUIApp::joint().flat);
+	rect(_r);
 }
 
 void Slate::rect(fRect _r, Color _c, float _gradient) const
 {
 	GUIApp::joint().color = RGBA(_c);
 	GUIApp::joint().gradient = _gradient;
-	rect(_r, GUIApp::joint().shaded);
+	ProgramUser u(GUIApp::joint().shaded);
+	rect(_r);
+}
+
+void Slate::disc(fEllipse _e) const
+{
+	auto vm = GUIApp::joint();
+	fCoord c = _e.middle() + fCoord(m_active.pos());
+	vm.offsetScale = fVector4(c.x(), c.y(), _e.rx(), _e.ry());
+	ProgramUser u;
+	u.attrib("geometry").setData(vm.unitCircle72, 2);
+	u.triangleFan(74);
 }
 
 void Slate::disc(fEllipse _e, Color _c) const
 {
 	GUIApp::joint().color = RGBA(_c);
-	disc(_e, GUIApp::joint().flat);
+	ProgramUser u(GUIApp::joint().flat);
+	disc(_e);
 }
 
-void Slate::disc(fEllipse _e, Program const& _p) const
+void Slate::rectOutline(fRect _inner, fMargin _outset, Color _c) const
 {
 	auto vm = GUIApp::joint();
-	fCoord c = toDevice(_e.center());
-	fSize s = pixelsF(_e.radii());
-	vm.offsetScale = fVector4(c.x(), c.y(), s.w(), s.h());
-	ProgramUser u(_p);
-	_p.attrib("geometry").setData(vm.unitCircle72, 2);
-	u.triangleFan(74);
+
+	// Left bar
+	fRect lb(_inner.left() - _outset.left(), _inner.top() - _outset.top(), _outset.left(), _inner.height() + _outset.extraHeight());
+	fRect rb(_inner.right(), _inner.top() - _outset.top(), _outset.right(), _inner.height() + _outset.extraHeight());
+	fRect tb(_inner.left(), _inner.top() - _outset.top(), _inner.width(), _outset.top());
+	fRect bb(_inner.left(), _inner.bottom(), _inner.width(), _outset.bottom());
+
+	// TODO: do it properly!
+	ProgramUser u(vm.flat);
+	vm.offsetScale = lb.translated((fCoord)m_active.pos()).asVector4();
+	vm.color = RGBA(_c);
+	vm.flatGeometry.setData(vm.unitQuad, 2);
+	u.triangleStrip(4);
+	vm.offsetScale = rb.translated((fCoord)m_active.pos()).asVector4();
+	vm.color = RGBA(_c);
+	vm.flatGeometry.setData(vm.unitQuad, 2);
+	u.triangleStrip(4);
+	vm.offsetScale = tb.translated((fCoord)m_active.pos()).asVector4();
+	vm.color = RGBA(_c);
+	vm.flatGeometry.setData(vm.unitQuad, 2);
+	u.triangleStrip(4);
+	vm.offsetScale = bb.translated((fCoord)m_active.pos()).asVector4();
+	vm.color = RGBA(_c);
+	vm.flatGeometry.setData(vm.unitQuad, 2);
+	u.triangleStrip(4);
 }
 
-void Slate::circle(fEllipse _e, float _size, Color _c) const
+void Slate::text(Font const& _f, iCoord _anchor, std::string const& _text, Color _c) const
 {
-	GUIApp::joint().color = RGBA(_c);
-	circle(_e, _size, GUIApp::joint().flat);
-}
-
-void Slate::circle(fEllipse _e, float _size, Program const& _p) const
-{
-	auto vm = GUIApp::joint();
-	fCoord c = toDevice(_e.center());
-	fSize s = pixelsF(_e.radii());
-	vm.offsetScale = fVector4(c.x(), c.y(), s.w(), s.h());
-	glLineWidth(_size);
-	ProgramUser u(_p);
-	_p.attrib("geometry").setData(vm.unitCircle72, 2, 0, 8);
-	u.lineLoop(72);
-}
-
-void Slate::text(Font const& _f, fCoord _anchor, std::string const& _text, Color _c) const
-{
-	_f.draw(_anchor + offset, _text, _c.toRGBA());
-}
-
-void Slate::glowThumb(fCoord _pos, Color _c, float _overglow) const
-{
-	ProgramUser u(GUIApp::joint().colorize);
-	u.uniform("u_amplitude") = 1.f;
-	u.uniform("u_overglow") = _overglow;
-	u.uniform("u_color") = (fVector4)_c.toRGBA();
-	blit(GUIApp::joint().glowThumbTex, _pos - GUIApp::style().thumbDiameter);
+	_f.draw(_anchor + m_active.pos(), _text, _c.toRGBA());
 }
 
 void Slate::glowThumb(iCoord _pos, Color _c, float _overglow) const
@@ -237,7 +173,7 @@ void Slate::blit(iRect _src, Texture2D const& _tex, iRect _dest) const
 
 	float tw = _tex.size().w();
 	float th = _tex.size().h();
-	fRect o = fRect(fCoord(_dest.pos() + active.pos()), (fSize)_dest.size());
+	fRect o = fRect(fCoord(_dest.pos() + m_active.pos()), (fSize)_dest.size());
 	std::array<float, 4 * 4> quad =
 	{{
 		// top left.
@@ -248,26 +184,6 @@ void Slate::blit(iRect _src, Texture2D const& _tex, iRect _dest) const
 		_src.left() / tw, _src.bottom() / th, o.left(), o.bottom(),
 		// bottom right.
 		_src.right() / tw, _src.bottom() / th, o.right(), o.bottom()
-	}};
-	u.uniform("u_tex") = _tex;
-	u.attrib("a_texCoordPosition").setStaticData(quad.data(), 4, 0);
-	u.triangleStrip(4);
-}
-
-void Slate::blit(Texture2D const& _tex, fCoord _pos) const
-{
-	ProgramUser u(GUIApp::joint().texture, ProgramUser::AsDefault);
-	fCoord o = toDevice(_pos);
-	std::array<float, 4 * 4> quad =
-	{{
-		// top left.
-		0, 0, o.x(), o.y(),
-		// top right.
-		1, 0, o.x() + _tex.size().w(), o.y(),
-		// bottom left.
-		0, 1, o.x(), o.y() + _tex.size().h(),
-		// bottom right.
-		1, 1, o.x() + _tex.size().w(), o.y() + _tex.size().h()
 	}};
 	u.uniform("u_tex") = _tex;
 	u.attrib("a_texCoordPosition").setStaticData(quad.data(), 4, 0);

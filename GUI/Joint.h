@@ -7,7 +7,7 @@ namespace Lightbox
 {
 
 class Display;
-struct Slate;
+class Slate;
 
 struct Joint
 {

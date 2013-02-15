@@ -19,6 +19,7 @@ public:
 	explicit Margin(xSize _xy): Super(_xy.w(), _xy.h(), _xy.w(), _xy.h()) {}
 	Margin(xSize _tl, xSize _br): Super(_tl.w(), _tl.h(), _br.w(), _br.h()) {}
 	Margin(Numeric _left, Numeric _top, Numeric _right, Numeric _bottom): Super(_left, _top, _right, _bottom) {}
+	template <class _N> Margin(Margin<_N> const& _m): Super(_m.left(), _m.top(), _m.right(), _m.bottom()) {}
 
 	bool operator==(Margin _c) const { return compare(_c); }
 	bool operator!=(Margin _c) const { return !compare(_c); }
