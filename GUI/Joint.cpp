@@ -11,7 +11,7 @@ using namespace Lightbox;
 
 Joint::Joint(): display(nullptr)
 {
-	displaySizePixels = uSize(1, 1);
+	displaySizePixels = iSize(1, 1);
 	displaySizeMM = fSize(1, 1);
 }
 
@@ -81,7 +81,7 @@ void Joint::fini()
 Texture2D Joint::thumbTex() const
 {
 	iSize thumbRadiusPx = display->toUnalignedPixels(GUIApp::style().thumbDiameter / 2);
-	uSize totalSize = (uSize)thumbRadiusPx * 4;	// 2x diameter
+	iSize totalSize = (iSize)thumbRadiusPx * 4;	// 2x diameter
 	Texture2D ret(totalSize, foreign_vector<uint8_t>(), GL_RGBA, GL_RGBA);
 	RenderToTextureSlate c(ret);
 	c.disc(iEllipse(iCoord(totalSize / 2), thumbRadiusPx), Color(1.f / (glowLevels * 2 + 1)));
@@ -141,7 +141,7 @@ Texture2D Joint::makeGlowerNear(Texture2D _baseTex) const
 
 Texture2D Joint::cornerTex() const
 {
-	uSize totalSizePx = uSize(lightEdgePixels + glowPixels * 3 + iSize(1, 1));
+	iSize totalSizePx = iSize(lightEdgePixels + glowPixels * 3 + iSize(1, 1));
 	Texture2D ret(totalSizePx);
 	RenderToTextureSlate c(ret);
 	c.rectInline(iRect((iCoord)glowPixels + iSize(1, 1), (iSize)totalSizePx * 2), iMargin(lightEdgePixels), Color(1.f / (glowLevels * 2 + 1)));

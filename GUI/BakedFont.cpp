@@ -76,7 +76,7 @@ BakedFont::BakedFont(Font const& _f, FontInfo const& _info): m_f(_f), m_info(_in
 	m_texSize = m_program.uniform("u_texSize");
 
 	m_charData = new stbtt_bakedchar[s_charDataCount];
-	uSize bitmap(max<int>(32, pxSize * 4), max<int>(512, pxSize * 4));
+	iSize bitmap(max<int>(32, pxSize * 4), max<int>(512, pxSize * 4));
 	unsigned char* tempBitmap;
 	while (true)
 	{

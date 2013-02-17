@@ -22,7 +22,7 @@ void PatternPickerBody::resized()
 	// want ~ 128 points from exposed geometry.
 	fSize available = geometry().size() - GUIApp::style().thumbDiameter;
 	float f = sqrt(available.area() / 128.f);
-	m_space = uSize(ceil(available.w() / f), ceil(available.h() / f));
+	m_space = iSize(ceil(available.w() / f), ceil(available.h() / f));
 	m_index = min<unsigned>(m_index, m_space.w() * m_space.h() - 1);
 }
 
@@ -34,7 +34,7 @@ bool PatternPickerBody::event(Event* _e)
 	{
 		iCoord place = (iCoord)fCoord(fSize(e->local - geometry().pos()) / fSize(geometry().size()) * fSize(m_space));
 		setChecked(true, true);
-		setIndex(clamp<int>(place.x(), 0u, m_space.w() - 1) + clamp<int>(place.y(), 0u, m_space.h() - 1) * m_space.w(), true);
+		setIndex(clamp<int>(place.x(), 0, m_space.w() - 1) + clamp<int>(place.y(), 0, m_space.h() - 1) * m_space.w(), true);
 		return true;
 	}
 	return ret;
@@ -52,8 +52,8 @@ void PatternPickerBody::updateLayers()
 
 void PatternPickerBody::draw(Slate const& _c, unsigned _layer)
 {
-	unsigned xBig[] = { m_space.w() / 4, m_space.w() * 3 / 4 };
-	unsigned yBig[] = { m_space.h() / 4, m_space.h() * 3 / 4 };
+	int xBig[] = { m_space.w() / 4, m_space.w() * 3 / 4 };
+	int yBig[] = { m_space.h() / 4, m_space.h() * 3 / 4 };
 	iRect oinner = rect().inset(innerMargin(effectiveGrouping()));
 	Lightbox::drawButton(_c, oinner, color(), isChecked(), _layer == 0, _layer == 1, false);
 	fSize thumbPx = _c.toPixelsF(GUIApp::style().thumbDiameter / 2);
@@ -62,8 +62,8 @@ void PatternPickerBody::draw(Slate const& _c, unsigned _layer)
 	fSize spacing(inner.size() / ((fSize)m_space - fSize(1, 1)));
 	Color glow = Color(color().hue(), color().sat() * .95f, color().value() * 8.f, lerp(color().sat(), .65f, .75f));
 	int i = 0;
-	for (unsigned y = 0; y < m_space.h(); ++y)
-		for (unsigned x = 0; x < m_space.w(); ++x, ++i)
+	for (int y = 0; y < m_space.h(); ++y)
+		for (int x = 0; x < m_space.w(); ++x, ++i)
 		{
 			fCoord p = inner.pos() + fSize(x, y) * spacing;
 			if (_layer == 0)

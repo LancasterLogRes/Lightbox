@@ -23,7 +23,7 @@ struct Joint
 	Color mildGlow(Color _c) const { return _c.attenuated(1.f / (1 << glowLevels)).withConstantLight(); }
 
 	Display* display;
-	uSize displaySizePixels;
+	iSize displaySizePixels;
 	fSize displaySizeMM;
 	UniformPage uniforms;
 	PagedUniform offsetScale;

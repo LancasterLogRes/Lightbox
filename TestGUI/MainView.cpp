@@ -36,8 +36,8 @@ private:
 		{
 			fCoord p(GUIApp::style().thumbDiameter / 2.f);
 			p += fSize(200, 0);
-			_c.glowThumb(p, Color(mod1(toSeconds(GUIApp::runningTime()) / 10), 1.f, 1.f));
-			_c.glowThumb(p + GUIApp::style().thumbDiameter * fSize(3, 0), c, 1.f);
+			_c.mmGlowThumb(p, Color(mod1(toSeconds(GUIApp::runningTime()) / 10), 1.f, 1.f));
+			_c.mmGlowThumb(p + GUIApp::style().thumbDiameter * fSize(3, 0), c, 1.f);
 		}
 		_c.glowRectOutline(iRect(0, 100, 100, 100), c, 1.f);
 	}

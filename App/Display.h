@@ -27,7 +27,7 @@ public:
 	float widthMM() const { return m_widthMM; }
 	float heightMM() const { return m_heightMM; }
 
-	uSize sizePixels() const { return uSize(m_width, m_height); }
+	iSize sizePixels() const { return iSize(m_width, m_height); }
 	fSize sizeMM() const { return fSize(m_widthMM, m_heightMM); }
 
 	iCoord toPixels(fCoord _mm) const { return iCoord(round(_mm.x() / m_widthMM * m_width), round(_mm.y() / m_heightMM * m_height)); }

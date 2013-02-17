@@ -6,7 +6,7 @@
 using namespace std;
 using namespace Lightbox;
 
-void TextureFace2D::bindData(uSize const& _dims, foreign_vector<uint8_t> const& _data, GLenum _format, int _internalFormat, int _level)
+void TextureFace2D::bindData(iSize const& _dims, foreign_vector<uint8_t> const& _data, GLenum _format, int _internalFormat, int _level)
 {
 	bind();
 	LB_GL(glTexParameterf, GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, m_sampling);
@@ -33,9 +33,9 @@ static void readPngAux(png_structp png, png_bytep data, png_size_t size)
 	(*(std::function<void(uint8_t*, size_t)> const*)png_get_io_ptr(png))(data, size);
 }
 
-pair<uSize, foreign_vector<uint8_t> > Lightbox::readPng(std::function<void(uint8_t*, size_t)> const& _read)
+pair<iSize, foreign_vector<uint8_t> > Lightbox::readPng(std::function<void(uint8_t*, size_t)> const& _read)
 {
-	pair<uSize, foreign_vector<uint8_t> > ret;
+	pair<iSize, foreign_vector<uint8_t> > ret;
 
 	const unsigned c_headerSize = 8;
 	png_byte* buffer = new png_byte[c_headerSize];

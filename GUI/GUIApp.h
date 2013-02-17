@@ -61,11 +61,11 @@ private:
 	FontManager m_fontManager;
 	Time m_startTime;
 
-	LIGHTBOX_STRUCT(2, CachePos, uRect, pos, unsigned, index);
+	LIGHTBOX_STRUCT(2, CachePos, iRect, pos, unsigned, index);
 
 	struct ImageCache
 	{
-		explicit ImageCache(uSize _ps);
+		explicit ImageCache(iSize _ps);
 		bool fit(iRect _g, ViewLayerPtr _v);
 
 		Framebuffer fb;

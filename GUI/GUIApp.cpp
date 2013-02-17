@@ -6,6 +6,7 @@
 #include "Global.h"
 #include "View.h"
 #include "Frame.h"
+#include "RenderToTextureSlate.h"
 #include "GUIApp.h"
 using namespace std;
 using namespace Lightbox;
@@ -78,7 +79,7 @@ void GUIApp::finiGraphics(Display&)
 	m_root->show(false);
 }
 
-GUIApp::ImageCache::ImageCache(uSize _ps):
+GUIApp::ImageCache::ImageCache(iSize _ps):
 	fb(Framebuffer::Create),
 	tx(_ps),
 	nextfree(0)
@@ -119,7 +120,7 @@ bool GUIApp::ImageCache::fit(iRect _g, ViewLayerPtr _v)
 		if (int(tx.size().width() - it->second.second) >= _g.width())
 		{
 			// yey - enough space on the row.
-			uRect tr = uRect(it->second.second, it->second.first, _g.width(), _g.height());
+			iRect tr = iRect(it->second.second, it->second.first, _g.width(), _g.height());
 			vs[_v].pos = tr;
 			vs[_v].index = collated.size() / (6 * 4);
 			fRect ftr = fRect(tr) / fSize(tx.size());
@@ -180,7 +181,7 @@ bool GUIApp::drawGraphics()
 				if (m_cache.size() && m_cache.back().fit(v->globalLayer(), v))
 					break;
 				// End of cache - add a new page onto m_cache.
-				uSize ps(joint().display->width(), joint().display->height());
+				iSize ps(joint().display->width(), joint().display->height());
 				m_cache.push_back(ImageCache(ps));
 			}
 		}
@@ -249,9 +250,10 @@ bool GUIApp::drawGraphics()
 					ViewLayerPtr v = i.first;
 					if (v->isDirty() && v->isReadyForCache())
 					{
+						// TODO: Remove.
 						if (v->glows())
 						{
-							uRect texRect = i.second.pos;
+							iRect texRect = i.second.pos;
 							Texture2D baseTex(texRect.size());
 
 							// Generate base texture.
@@ -298,18 +300,19 @@ bool GUIApp::drawGraphics()
 						}
 						else
 						{
-							FramebufferUser u(cache.fb);
-							uRect texRect = i.second.pos;
+/*							FramebufferUser u(cache.fb);
+							iRect texRect = i.second.pos;
 							LB_GL(glViewport, texRect.x(), texRect.y(), texRect.w(), texRect.h());
 							LB_GL(glScissor, texRect.x(), texRect.y(), texRect.w(), texRect.h());
 							LB_GL(glClear, GL_COLOR_BUFFER_BIT);
 							GUIApp::joint().u_displaySize = (vec2)(fSize)texRect.size();
 							assert((iSize)texRect.size() == v->globalLayer().size());
 							iRect canvas(iCoord(0, 0), (iSize)texRect.size());
-							Slate con(canvas.inset(v->overdraw()), canvas);
+							Slate con(canvas.inset(v->overdraw()), canvas);*/
+							RenderToTextureSlate con(cache.fb, i.second.pos, v->overdraw());
 							v.draw(con);
 							if (!v.view->m_isEnabled)
-								con.rect(canvas, Color(0.f, .5f));
+								con.rect(con.limits(), Color(0.f, .5f));
 						}
 						v->setDirty(false);
 					}

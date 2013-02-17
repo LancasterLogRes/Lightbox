@@ -17,9 +17,9 @@ public:
 	~PatternPickerBody();
 
 	int index() const { return m_index; }
-	uSize space() const { return m_space; }
+	iSize space() const { return m_space; }
 
-	void setSpace(uSize _s) { m_space = _s; update(); }
+	void setSpace(iSize _s) { m_space = _s; update(); }
 	void setIndex(int _i, bool _userEvent = false) { if (m_index != _i) { m_index = _i; indexChanged(_userEvent); } }
 	void setOnIndexChanged(EventHandler const& _t) { m_onIndexChanged = _t; }
 	void setMiddle(Color _c) { if (m_middle != _c) { m_middle = _c; /*update();*/ } } // Not required for now.
@@ -40,7 +40,7 @@ protected:
 
 private:
 	int m_index;
-	uSize m_space;
+	iSize m_space;
 	Color m_middle;
 	EventHandler m_onIndexChanged;
 };
