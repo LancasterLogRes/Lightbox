@@ -35,9 +35,9 @@ void Joint::init(Display& _d)
 	flat = Program("Shaders.glsl", "flat");
 	texture = Program("Shaders.glsl", "texture");
 	general = Program("Shaders.glsl", "general");
-	hblur = Program("Shaders.glsl", "hblur4");
-	vblur = Program("Shaders.glsl", "vblur4");
 	pass = Program("Shaders.glsl", "pass");
+	hblur4 = Program("Shaders.glsl", "hblur4");
+	vblur4 = Program("Shaders.glsl", "vblur4");
 	hblur6 = Program("Shaders.glsl", "hblur6");
 	vblur6 = Program("Shaders.glsl", "vblur6");
 	hblur8 = Program("Shaders.glsl", "hblur8");
@@ -97,19 +97,13 @@ Texture2D Joint::makeGlowerFar(Texture2D _baseTex) const
 	for (unsigned i = 0; i < levels.size(); ++i)
 		levels[i] = levels[i].filter(vblur8).filter(hblur8);
 
-	Framebuffer fb(Framebuffer::Create);
-	FramebufferUser fbu(fb);
 	Texture2D ret(_baseTex.size());
-	ret.viewport();
-	fbu.attachColor(ret);
-	LB_GL(glClear, GL_COLOR_BUFFER_BIT);
+	RenderToTextureSlate s(ret);
 	LB_GL(glBlendFunc, GL_SRC_ALPHA, GL_ONE);
 	ProgramUser u(pass);
 	for (auto const& l: levels)
 		u.filterMerge(l);
 	u.filterMerge(_baseTex);
-
-	LB_GL(glBlendFunc, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	return ret;
 }
 
@@ -121,21 +115,15 @@ Texture2D Joint::makeGlowerNear(Texture2D _baseTex) const
 	for (unsigned i = 0; i < levels.size(); ++i)
 		levels[i] = (i ? levels[i - 1] : _baseTex).filter(pass, Texture2D(_baseTex.size() / (glowLevels << i)));
 	for (unsigned i = 0; i < levels.size(); ++i)
-		levels[i] = levels[i].filter(vblur).filter(hblur);
+		levels[i] = levels[i].filter(vblur4).filter(hblur4);
 
-	Framebuffer fb(Framebuffer::Create);
-	FramebufferUser fbu(fb);
 	Texture2D ret(_baseTex.size());
-	ret.viewport();
-	fbu.attachColor(ret);
-	LB_GL(glClear, GL_COLOR_BUFFER_BIT);
+	RenderToTextureSlate s(ret);
 	LB_GL(glBlendFunc, GL_SRC_ALPHA, GL_ONE);
 	ProgramUser u(pass);
 	for (auto const& l: levels)
 		u.filterMerge(l);
 	u.filterMerge(_baseTex);
-
-	LB_GL(glBlendFunc, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	return ret;
 }
 

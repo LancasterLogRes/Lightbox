@@ -35,8 +35,8 @@ struct Joint
 	Program shaded;
 	Program texture;
 	Program general;
-	Program hblur;
-	Program vblur;
+	Program hblur4;
+	Program vblur4;
 	Program hblur8;
 	Program vblur8;
 	Program hblur6;
