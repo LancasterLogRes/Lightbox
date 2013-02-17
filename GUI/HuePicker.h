@@ -28,6 +28,7 @@ protected:
 	HuePickerBody(Color _c = White, Grouping _grouping = NoGrouping);
 	
 	virtual bool event(Event* _e);
+	virtual void preDraw(unsigned);
 	virtual void draw(Slate const& _c, unsigned _l);
 	virtual void initGraphics();
 	virtual void finiGraphics();
@@ -45,6 +46,7 @@ private:
 	Program m_hueWheel;
 	Program m_hueWheelDodge;
 	EventHandler m_onHueChanged;
+	Texture2D m_hueWheelTex;
 };
 
 }

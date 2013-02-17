@@ -280,7 +280,7 @@ bool GUIApp::drawGraphics()
 							for (unsigned i = 0; i < levels.size(); ++i)
 								levels[i] = (i ? levels[i - 1] : baseTex).filter(m_joint.pass, Texture2D(baseTex.size() / (glowAmount << i)));
 							for (unsigned i = 0; i < levels.size(); ++i)
-								levels[i] = levels[i].filter(m_joint.vblur).filter(m_joint.hblur);//.filter(m_joint.hblur6);
+								levels[i] = levels[i].filter(m_joint.vblur4).filter(m_joint.hblur4);//.filter(m_joint.hblur6);
 
 							// Composite final texture.
 							glEnable(GL_SCISSOR_TEST);
@@ -300,15 +300,6 @@ bool GUIApp::drawGraphics()
 						}
 						else
 						{
-/*							FramebufferUser u(cache.fb);
-							iRect texRect = i.second.pos;
-							LB_GL(glViewport, texRect.x(), texRect.y(), texRect.w(), texRect.h());
-							LB_GL(glScissor, texRect.x(), texRect.y(), texRect.w(), texRect.h());
-							LB_GL(glClear, GL_COLOR_BUFFER_BIT);
-							GUIApp::joint().u_displaySize = (vec2)(fSize)texRect.size();
-							assert((iSize)texRect.size() == v->globalLayer().size());
-							iRect canvas(iCoord(0, 0), (iSize)texRect.size());
-							Slate con(canvas.inset(v->overdraw()), canvas);*/
 							RenderToTextureSlate con(cache.fb, i.second.pos, v->overdraw());
 							v.draw(con);
 							if (!v.view->m_isEnabled)

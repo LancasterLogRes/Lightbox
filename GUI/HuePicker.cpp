@@ -2,6 +2,7 @@
 #include <LGL.h>
 #include "Global.h"
 #include "GUIApp.h"
+#include "RenderToTextureSlate.h"
 #include "HuePicker.h"
 using namespace std;
 using namespace Lightbox;
@@ -30,6 +31,7 @@ void HuePickerBody::initGraphics()
 void HuePickerBody::finiGraphics()
 {
 	m_hueWheel = m_hueWheelDodge = Program();
+	m_hueWheelTex = Texture2D();
 }
 
 bool HuePickerBody::event(Event* _e)
@@ -56,6 +58,19 @@ void HuePickerBody::updateLayers()
 	layer(2).show(layer(1).isShown());
 }
 
+void HuePickerBody::preDraw(unsigned _l)
+{
+	iSize ts = rect().size();
+	if (_l == 1 && m_hueWheelTex.size() != ts)
+	{
+		m_hueWheelTex = Texture2D(ts);
+		RenderToTextureSlate con(m_hueWheelTex);
+		ProgramUser u(m_hueWheelDodge);
+		iSize thumbPx = con.toPixels(GUIApp::style().thumbDiameter / 2);
+		con.disc(iEllipse(rect().inset(innerMargin(effectiveGrouping())).inset(thumbPx)));
+	}
+}
+
 void HuePickerBody::draw(Slate const& _c, unsigned _l)
 {
 	iSize thumbPx = _c.toPixels(GUIApp::style().thumbDiameter / 2);
@@ -65,9 +80,14 @@ void HuePickerBody::draw(Slate const& _c, unsigned _l)
 	iEllipse e(inner);
 	if (_l < 2)
 	{
+		if (_l == 0)
 		{
-			ProgramUser u(_l ? m_hueWheelDodge : m_hueWheel);
+			ProgramUser u(m_hueWheel);
 			_c.disc(e.inset(thumbPx / 2));
+		}
+		else
+		{
+			_c.blit(m_hueWheelTex);
 		}
 		_c.disc(e.inset(thumbPx * 3 / 2), Black);
 	}
