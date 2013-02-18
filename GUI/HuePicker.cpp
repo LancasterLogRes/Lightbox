@@ -25,7 +25,12 @@ void HuePickerBody::initGraphics()
 	m_hueWheelDodge = Program("HueWheel.glsl", "dodge.vert", "frag");
 	m_hueWheelDodge.tie(GUIApp::joint().uniforms);
 	Super::initGraphics();
-	setLayers({{ layer(0), Layer(iMargin(), true), layer(1) }});
+	layer(1).setPremultiplied();
+}
+
+void HuePickerBody::resized()
+{
+	Super::resized();
 }
 
 void HuePickerBody::finiGraphics()
@@ -55,7 +60,6 @@ bool HuePickerBody::event(Event* _e)
 void HuePickerBody::updateLayers()
 {
 	Super::updateLayers();
-	layer(2).show(layer(1).isShown());
 }
 
 void HuePickerBody::preDraw(unsigned _l)
@@ -63,11 +67,20 @@ void HuePickerBody::preDraw(unsigned _l)
 	iSize ts = rect().size();
 	if (_l == 1 && m_hueWheelTex.size() != ts)
 	{
-		m_hueWheelTex = Texture2D(ts);
-		RenderToTextureSlate con(m_hueWheelTex);
-		ProgramUser u(m_hueWheelDodge);
-		iSize thumbPx = con.toPixels(GUIApp::style().thumbDiameter / 2);
-		con.disc(iEllipse(rect().inset(innerMargin(effectiveGrouping())).inset(thumbPx)));
+		glDisable(GL_SCISSOR_TEST);
+		Texture2D r(ts);
+		{
+			RenderToTextureSlate con(r);
+			iSize thumbPx = con.toPixels(GUIApp::style().thumbDiameter / 2);
+			iEllipse e(rect().inset(innerMargin(effectiveGrouping())).inset(thumbPx));
+			{
+				ProgramUser u(m_hueWheelDodge);
+				con.disc(e);
+			}
+			con.disc(e.inset(thumbPx * 3 / 3), Black);
+		}
+		m_hueWheelTex = GUIApp::joint().makeGlowerNear(r);
+		glEnable(GL_SCISSOR_TEST);
 	}
 }
 
@@ -75,24 +88,20 @@ void HuePickerBody::draw(Slate const& _c, unsigned _l)
 {
 	iSize thumbPx = _c.toPixels(GUIApp::style().thumbDiameter / 2);
 	iRect inner = rect().inset(innerMargin(effectiveGrouping()));
-	drawButton(_c, inner, color(), isChecked(), _l == 0, _l == 2, false);
+	drawButton(_c, inner, color(), isChecked(), _l == 0, _l == 1, false);
 	inner = inner.inset(thumbPx / 2.f);
 	iEllipse e(inner);
-	if (_l < 2)
+	if (_l == 0)
 	{
-		if (_l == 0)
 		{
 			ProgramUser u(m_hueWheel);
 			_c.disc(e.inset(thumbPx / 2));
-		}
-		else
-		{
-			_c.blit(m_hueWheelTex);
 		}
 		_c.disc(e.inset(thumbPx * 3 / 2), Black);
 	}
 	else
 	{
+		_c.blit(m_hueWheelTex);
 		iCoord p = e.pos() + iSize(fSize(-sin(m_hue * TwoPi), -cos(m_hue * TwoPi)) * fSize(e.radii() - thumbPx));
 		_c.glowThumb(p, m_middle.withHue(m_hue));
 	}

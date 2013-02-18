@@ -96,6 +96,7 @@ public:
 
 	static void refresh();
 	void update() { m_dirty = true; m_readyForCache = false; refresh(); }
+	void setPremultiplied(bool _on = true) { if (m_isPremultiplied != _on) { m_isPremultiplied = _on; update(); } }
 
 	// Private-ish stuff - less useful to classes outside GUIApp & View.
 	iRect globalLayer() const { return m_globalLayer; }

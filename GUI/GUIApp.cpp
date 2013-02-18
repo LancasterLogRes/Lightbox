@@ -218,7 +218,7 @@ bool GUIApp::drawGraphics()
 //					cnote << "SKIP:" << v;
 					renderDirect[cacheIndex] += v;
 				}
-				else if (v->isDirty() && (v->isReadyForCache() || v->glows() || v->isPremultiplied()))
+				else if (v->isDirty() && (v->isReadyForCache() || v->isPremultiplied()))
 				{
 //					cnote << "RENDER:" << v;
 					v.preDraw();
@@ -250,61 +250,10 @@ bool GUIApp::drawGraphics()
 					ViewLayerPtr v = i.first;
 					if (v->isDirty() && v->isReadyForCache())
 					{
-						// TODO: Remove.
-						if (v->glows())
-						{
-							iRect texRect = i.second.pos;
-							Texture2D baseTex(texRect.size());
-
-							// Generate base texture.
-							glDisable(GL_SCISSOR_TEST);
-							{
-								Framebuffer fb(Framebuffer::Create);
-								FramebufferUser fbu(fb);
-								baseTex.viewport();
-								fbu.attachColor(baseTex);
-								LB_GL(glClear, GL_COLOR_BUFFER_BIT);
-								GUIApp::joint().u_displaySize = (vec2)(fSize)texRect.size();
-								assert((iSize)texRect.size() == v->globalLayer().size());
-								iRect canvas(iCoord(0, 0), (iSize)texRect.size());
-								Slate con(canvas.inset(v->overdraw()), canvas);
-								v.draw(con);
-								if (!v.view->m_isEnabled)
-									con.rect(canvas, Color(0.f, .5f));
-							}
-
-							// Filter base texture.
-							LB_GL(glBlendFunc, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-							int glowAmount = m_joint.glowLevels;
-							vector<Texture2D> levels(glowAmount);
-							for (unsigned i = 0; i < levels.size(); ++i)
-								levels[i] = (i ? levels[i - 1] : baseTex).filter(m_joint.pass, Texture2D(baseTex.size() / (glowAmount << i)));
-							for (unsigned i = 0; i < levels.size(); ++i)
-								levels[i] = levels[i].filter(m_joint.vblur4).filter(m_joint.hblur4);//.filter(m_joint.hblur6);
-
-							// Composite final texture.
-							glEnable(GL_SCISSOR_TEST);
-							FramebufferUser fbu(cache.fb);
-							LB_GL(glViewport, texRect.x(), texRect.y(), texRect.w(), texRect.h());
-							LB_GL(glScissor, texRect.x(), texRect.y(), texRect.w(), texRect.h());
-							LB_GL(glClear, GL_COLOR_BUFFER_BIT);
-							ProgramUser u(m_joint.pass);
-//							LB_GL(glBlendFunc, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-							LB_GL(glBlendFunc, GL_SRC_ALPHA, GL_ONE);
-//							LB_GL(glBlendFunc, GL_SRC_ALPHA, GL_DST_ALPHA);
-//							LB_GL(glBlendFunc, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-							for (auto const& l: levels)
-								u.filterMerge(l);
-							u.filterMerge(baseTex);
-							LB_GL(glBlendFunc, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-						}
-						else
-						{
-							RenderToTextureSlate con(cache.fb, i.second.pos, v->overdraw());
-							v.draw(con);
-							if (!v.view->m_isEnabled)
-								con.rect(con.limits(), Color(0.f, .5f));
-						}
+						RenderToTextureSlate con(cache.fb, i.second.pos, v->overdraw());
+						v.draw(con);
+						if (!v.view->m_isEnabled)
+							con.rect(con.limits(), Color(0.f, .5f));
 						v->setDirty(false);
 					}
 				}

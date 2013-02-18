@@ -57,7 +57,7 @@ struct Joint
 	iSize lightEdgePixels;
 	iSize lightBedPixels;
 
-private:
+//private:
 	Texture2D cornerTex() const;
 	Texture2D thumbTex() const;
 };
