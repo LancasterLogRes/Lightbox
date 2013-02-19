@@ -2,6 +2,7 @@
 
 #include <functional>
 #include <Common/Flags.h>
+#include <Common/Color.h>
 #include <LGL/Texture2D.h>
 #include "Font.h"
 #include "View.h"
