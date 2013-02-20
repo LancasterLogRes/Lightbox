@@ -23,7 +23,7 @@ bool DirectionPickerBody::event(Event* _e)
 	TouchEvent* e = dynamic_cast<TouchEvent*>(_e);
 	if (e)
 	{
-		fCoord p = fCoord(fSize(e->local - geometry().pos()) / fSize(geometry().size())).clamped(0.f, 1.f);
+		fCoord p = fCoord(fSize(e->mmLocal() - geometry().pos()) / fSize(geometry().size())).clamped(0.f, 1.f);
 		if (dynamic_cast<TouchDownEvent*>(e))
 		{
 			lockPointer(e->id);

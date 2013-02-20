@@ -154,7 +154,7 @@ bool ViewBody::sensesEvent(Event* _e)
 	finalConstructor();
 
 	if (auto e = dynamic_cast<TouchEvent*>(_e))
-		return m_isShown && m_isEnabled && m_geometry.contains(e->local);
+		return m_isShown && m_isEnabled && m_geometry.contains(e->mmLocal());
 	else
 		return true;
 }
@@ -166,7 +166,7 @@ bool ViewBody::handleEvent(Event* _e)
 
 	auto p = m_geometry.pos();
 	if (auto e = dynamic_cast<TouchEvent*>(_e))
-		e->local -= p;
+		e->m_mmLocal -= p;
 
 	bool ret = false;
 	for (auto const& ch: m_children)
@@ -177,7 +177,7 @@ bool ViewBody::handleEvent(Event* _e)
 		}
 
 	if (auto e = dynamic_cast<TouchEvent*>(_e))
-		e->local += p;
+		e->m_mmLocal += p;
 
 	return ret;
 }

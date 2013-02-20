@@ -30,6 +30,8 @@ public:
 	iSize sizePixels() const { return iSize(m_width, m_height); }
 	fSize sizeMM() const { return fSize(m_widthMM, m_heightMM); }
 
+	float toPixels(float _mm) const { return _mm / m_widthMM * m_width; }
+
 	iCoord toPixels(fCoord _mm) const { return iCoord(round(_mm.x() / m_widthMM * m_width), round(_mm.y() / m_heightMM * m_height)); }
 	iSize toUnalignedPixels(fSize _mm) const { return iSize(round(_mm.w() / m_widthMM * m_width), round(_mm.h() / m_heightMM * m_height)); }
 	iRect toPixels(fRect _mm) const { return iRect(toPixels(_mm.topLeft()), toPixels(_mm.bottomRight())); }
@@ -42,6 +44,7 @@ public:
 	fSize fromPixels(iSize _px) const { return fSize(_px.w() * m_widthMM / m_width, _px.h() * m_heightMM / m_height); }
 	fRect fromPixels(iRect _px) const { return fRect(fromPixels(_px.pos()), fromPixels(_px.size())); }
 
+	float fromPixels(float _px) const { return _px * m_widthMM / m_width; }
 	fCoord fromPixels(fCoord _px) const { return fCoord(_px.x() * m_widthMM / m_width, _px.y() * m_heightMM / m_height); }
 	fSize fromPixels(fSize _px) const { return fSize(_px.w() * m_widthMM / m_width, _px.h() * m_heightMM / m_height); }
 	fRect fromPixels(fRect _px) const { return fRect(fromPixels(_px.pos()), fromPixels(_px.size())); }

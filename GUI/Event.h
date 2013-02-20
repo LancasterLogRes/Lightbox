@@ -12,9 +12,13 @@ struct Event
 
 struct TouchEvent: public Event
 {
-	TouchEvent(int _id, fCoord _local, iCoord _global): id(_id), local(_local), global(_global) {}
+	TouchEvent(int _id, fCoord _local, iCoord _global): id(_id), m_mmLocal(_local), global(_global) {}
+
+	iCoord local() const;
+	fCoord mmLocal() const { return m_mmLocal; }
+
 	int id;
-	fCoord local;
+	fCoord m_mmLocal;
 	iCoord global;
 };
 

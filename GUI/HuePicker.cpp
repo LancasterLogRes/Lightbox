@@ -46,7 +46,7 @@ bool HuePickerBody::event(Event* _e)
 	if (e && pointerLocked(e->id))
 	{
 		float s = min(geometry().w(), geometry().h());
-		fVector2 off = e->local - geometry().lerp(.5f, .5f);
+		fVector2 off = e->mmLocal() - geometry().lerp(.5f, .5f);
 		if (off.length() < s && off.length() > s / 8.5f)
 		{
 			setChecked(true, true);

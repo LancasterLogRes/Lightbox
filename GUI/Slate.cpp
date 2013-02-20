@@ -114,9 +114,9 @@ void Slate::rectOutline(fRect _inner, fMargin _outset, Color _c) const
 	u.triangleStrip(4);
 }
 
-void Slate::text(Font const& _f, iCoord _anchor, std::string const& _text, Color _c) const
+void Slate::text(Font const& _f, iCoord _anchor, std::string const& _text, Color _c, AnchorType _a) const
 {
-	_f.draw(_anchor + m_active.pos(), _text, _c.toRGBA());
+	(_f.isValid() ? _f : GUIApp::style().regular).draw(_anchor + m_active.pos(), _text, _c.toRGBA(), _a);
 }
 
 void Slate::glowThumb(iCoord _pos, Color _c, float _overglow) const

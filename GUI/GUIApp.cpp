@@ -406,9 +406,9 @@ bool GUIApp::motionEvent(int _id, iCoord _pos, int _direction)
 	if (m_pointerLock[_id])
 	{
 		auto gp = m_pointerLock[_id]->parent()->globalPos();
-		ev->local -= gp;
+		ev->m_mmLocal -= gp;
 		ret = m_pointerLock[_id]->handleEvent(ev);
-		ev->local += gp;
+		ev->m_mmLocal += gp;
 	}
 	if (!ret)
 		ret = m_root->handleEvent(ev);

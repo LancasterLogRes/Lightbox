@@ -35,7 +35,7 @@ bool LightPickerBody::event(Event* _e)
 	if (e && pointerLocked(e->id))
 	{
 		fRect geo = geometry().inset(0.f, GUIApp::style().thumbDiameter.h() / 2 + 2);
-		setLight(clamp(lext(e->local.y(), geo.bottom(), geo.top()), 0.f, 1.f), true);
+		setLight(clamp(lext(e->mmLocal().y(), geo.bottom(), geo.top()), 0.f, 1.f), true);
 		return true;
 	}
 	return Super::event(_e);

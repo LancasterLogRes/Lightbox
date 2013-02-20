@@ -31,6 +31,8 @@ public:
 	iRect main() const { return iRect(m_active.size()); }
 	iRect limits() const { return iRect(m_canvas.pos() - (iSize)m_active.pos(), m_canvas.size()); }
 
+	Slate sub(iRect _main) const { return Slate(_main.translated((iSize)m_active.pos()), m_canvas); }
+
 	iSize toPixels(fSize _mm) const;
 	iCoord toPixels(fCoord _mm) const;
 	iEllipse toPixels(fEllipse _mm) const { return (iEllipse)toPixelsF(_mm); }
@@ -61,7 +63,8 @@ public:
 	void circle(fEllipse _r, float _size, Color _c) const;
 	void circle(fEllipse _r, float _size) const;
 	// Note: Below here it doesn't make sense to use float coordinates as the operation must be pixel aligned.
-	void text(Font const& _f, iCoord _anchor, std::string const& _text, Color _c = Black) const;
+	void text(Font const& _f, iCoord _anchor, std::string const& _text, Color _c = Black, AnchorType _a = AtCenter) const;
+	void text(std::string const& _text, AnchorType _a = AtCenter, iCoord _anchor = iCoord(0, 0), Color _c = Black, Font const& _f = Font()) const { text(_f, _anchor, _text, _c , _a); }
 	void blit(Texture2D const& _tex, iCoord _dest = iCoord(0, 0)) const { blit(_tex, iRect(_dest, iSize(0, 0))); }
 	void blit(Texture2D const& _tex, iRect _dest) const { blit(iRect(0, 0, 0, 0), _tex, _dest); }
 	void blit(iRect _src, Texture2D const& _tex, iCoord _dest) const { blit(_src, _tex, iRect(_dest, iSize(0, 0))); }

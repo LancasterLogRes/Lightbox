@@ -65,6 +65,8 @@ public:
 	T length() const { return sqrt(lengthSquared()); }
 	T lengthSquared() const { return x()*x() + y()*y(); }
 
+	bool isNear(This _c, T _distance = 1) const { return subbed(_c).lengthSquared() < _distance * _distance; }
+
 	T min() const { return std::min(m_x, m_y); }
 	T max() const { return std::max(m_x, m_y); }
 	This& clamp(T _min, T _max) { m_x = (std::min(std::max((m_x, _min), _max))); m_y = (std::min(std::max(m_y, _min), _max)); return *this; }
@@ -101,6 +103,7 @@ public:
 	using Super::max;
 	using Super::minify;
 	using Super::maxify;
+	using Super::isNear;
 
 	R& clamp(T _min, T _max) { return Super::clamp(_min, _max); }
 	R clamped(T _min, T _max) const { return Super::clamped(_min, _max); }

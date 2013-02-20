@@ -28,6 +28,7 @@ public:
 	using Super::y;
 	using Super::setX;
 	using Super::setY;
+	using Super::isNear;
 	
 	bool operator<(Coord const& _c) const { return x() < _c.x() && y() < _c.y(); }
 	bool operator>(Coord const& _c) const { return x() > _c.x() && y() > _c.y(); }

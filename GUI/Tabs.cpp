@@ -30,7 +30,7 @@ bool TabsBody::event(Event* _e)
 {
 	if (TouchEvent* e = dynamic_cast<TouchDownEvent*>(_e))
 	{
-		fCoord pos = e->local - geometry().pos();
+		fCoord pos = e->mmLocal() - geometry().pos();
 		if (pos.y() > 0 && pos.y() < c_tabHeight && children().size())
 		{
 			fSize tabSize(geometry().width() / children().size(), c_tabHeight);

@@ -32,7 +32,7 @@ bool PatternPickerBody::event(Event* _e)
 	TouchEvent* e = dynamic_cast<TouchEvent*>(_e);
 	if (e && pointerLocked(e->id))
 	{
-		iCoord place = (iCoord)fCoord(fSize(e->local - geometry().pos()) / fSize(geometry().size()) * fSize(m_space));
+		iCoord place = (iCoord)fCoord(fSize(e->mmLocal() - geometry().pos()) / fSize(geometry().size()) * fSize(m_space));
 		setChecked(true, true);
 		setIndex(clamp<int>(place.x(), 0, m_space.w() - 1) + clamp<int>(place.y(), 0, m_space.h() - 1) * m_space.w(), true);
 		return true;

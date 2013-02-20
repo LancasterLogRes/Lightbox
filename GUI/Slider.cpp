@@ -38,12 +38,12 @@ bool SliderBody::event(Event* _e)
 		if (m_o == Vertical)
 		{
 			fRect geo = geometry().inset(0.f, GUIApp::style().thumbDiameter.h() / 2 + 2);
-			setValue(lerp(lext(e->local.y(), geo.bottom(), geo.top()), m_min, m_max), true);
+			setValue(lerp(lext(e->mmLocal().y(), geo.bottom(), geo.top()), m_min, m_max), true);
 		}
 		else
 		{
 			fRect geo = geometry().inset(GUIApp::style().thumbDiameter.w() / 2 + 2, 0);
-			setValue(lerp(lext(e->local.x(), geo.left(), geo.right()), m_min, m_max), true);
+			setValue(lerp(lext(e->mmLocal().x(), geo.left(), geo.right()), m_min, m_max), true);
 		}
 		return true;
 	}

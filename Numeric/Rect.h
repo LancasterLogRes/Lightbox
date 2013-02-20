@@ -98,6 +98,8 @@ public:
 	void include(xCoord _p) { Coord<Numeric> br = bottomRight().max(_p); Coord<Numeric> tl = m_pos.minify(_p); m_size = br - tl; }
 	// TODO
 	bool inside(Rect const&) const { return true; }
+	bool isAbove(Rect const& _r) const { return _r.top() >= bottom(); }
+	bool isBelow(Rect const& _r) const { return _r.bottom() <= top(); }
 
 	bool operator==(Rect const& _c) const { return m_pos == _c.m_pos && m_size == _c.m_size; }
 	bool operator!=(Rect const& _c) const { return !operator==(_c); }
