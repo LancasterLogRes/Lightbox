@@ -55,7 +55,7 @@ bool DirectionPickerBody::event(Event* _e)
 
 void DirectionPickerBody::initGraphics()
 {
-	setLayers({{ Layer(), Layer(borderMargin(), false, true), Layer(-innerMargin(m_grouping) / 2, false, true) }});
+	setLayers({{ Layer(), Layer(borderMargin(), Premultiplied), Layer(-innerMargin(m_grouping) / 2, Premultiplied) }});
 }
 
 void DirectionPickerBody::draw(Slate const& _c, unsigned _l)

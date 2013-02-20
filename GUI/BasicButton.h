@@ -13,7 +13,7 @@ namespace Lightbox
 class BasicButtonBody;
 typedef boost::intrusive_ptr<BasicButtonBody> BasicButton;
 
-void drawButton(Slate const& _c, iRect _inner, Color _color, bool _down, bool _base, bool _lit, bool _polish);
+void drawButton(Slate const& _c, iRect _inner, Color _color, bool _down, bool _base, bool _lit, bool _polish, bool _border = true);
 void drawBorder(Slate const& _con, iRect _inner, bool _base, bool _lit, Color _col);
 iMargin borderMargin();
 iMargin innerMargin(Grouping _grouping);

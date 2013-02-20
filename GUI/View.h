@@ -79,16 +79,24 @@ template <class _T> _T& operator<<(_T& _out, ViewBody* _v)
 
 static unsigned const c_viewLayerCount = 2;
 
+enum LayerAttribute
+{
+	DefaultAttributes = 0,
+	Premultiplied = 1,			///< True if the texture we render to is premultiplied.
+};
+LIGHTBOX_FLAGS_TYPE(LayerAttribute, LayerAttributes);
+
 class Layer
 {
 	friend class GUIApp;
 	friend class ViewBody;
 
 public:
-	Layer(iMargin _overdraw = iMargin(), bool _glows = false, bool _prex = false, bool _dirty = true): m_overdraw(_overdraw), m_glows(_glows), m_isPremultiplied(_prex), m_isShown(true), m_dirty(_dirty), m_readyForCache(false) {}
+	explicit Layer(LayerAttributes _a = DefaultAttributes): m_attributes(_a), m_isShown(true), m_dirty(true), m_readyForCache(false) {}
+	explicit Layer(iMargin _overdraw, LayerAttributes _a = DefaultAttributes): m_overdraw(_overdraw), m_attributes(_a), m_isShown(true), m_dirty(true), m_readyForCache(false) {}
 
-	bool glows() const { return m_glows; }
-	bool isPremultiplied() const { return m_isPremultiplied; }
+	LayerAttributes attributes() const { return m_attributes; }
+	bool isPremultiplied() const { return m_attributes & Premultiplied; }
 	iMargin overdraw() const { return m_overdraw; }
 	bool isShown() const { return m_isShown; }
 	void show(bool _isShown = true) { m_isShown = _isShown; refresh(); }
@@ -96,7 +104,8 @@ public:
 
 	static void refresh();
 	void update() { m_dirty = true; m_readyForCache = false; refresh(); }
-	void setPremultiplied(bool _on = true) { if (m_isPremultiplied != _on) { m_isPremultiplied = _on; update(); } }
+
+	void setAttributes(LayerAttributes _a) { if (m_attributes != _a) { m_attributes = _a; update(); } }
 
 	// Private-ish stuff - less useful to classes outside GUIApp & View.
 	iRect globalLayer() const { return m_globalLayer; }
@@ -107,13 +116,12 @@ public:
 	void setReadyForCache(bool _ready = true) { m_readyForCache = _ready; }
 
 private:
-	iMargin m_overdraw;		///< The margin of overdraw that we wanted for this layer when we called ViewBody::setLayers(), stored in pixels, for each active layer.
-	bool m_glows;			///< True if we glow.
-	bool m_isPremultiplied;	///< True if the texture we render to is premultiplied.
-	bool m_isShown;			///< Is this layer shown?
-	mutable bool m_dirty;	///< True if a redraw would result in a different canvas to the last.
-	bool m_readyForCache;	///< True if we had a direct redraw but the cache is still invalid.
-	iRect m_globalLayer;	///< Our full footprint in device coordinates; includes overdraw. Up to date at time of last call to gatherDrawers().
+	iMargin m_overdraw;				///< The margin of overdraw that we wanted for this layer when we called ViewBody::setLayers(), stored in pixels, for each active layer.
+	LayerAttributes m_attributes;	///< Attributes of the layer
+	bool m_isShown;					///< Is this layer shown?
+	mutable bool m_dirty;			///< True if a redraw would result in a different canvas to the last.
+	bool m_readyForCache;			///< True if we had a direct redraw but the cache is still invalid.
+	iRect m_globalLayer;			///< Our full footprint in device coordinates; includes overdraw. Up to date at time of last call to gatherDrawers().
 };
 
 class ViewLayerPtr
@@ -156,7 +164,7 @@ public:
 	std::string name() const;
 
 	void setParent(View const& _p);
-	void setGeometry(fRect _geometry) { m_geometry = _geometry; resized(); }
+	void setGeometry(fRect _geometry, bool _polish = true) { m_geometry = _geometry; if (_polish) m_geometry.resize(fit(_geometry.size())); resized(); }
 	void resize(fSize _size) { auto g = m_geometry; g.resize(_size); setGeometry(g); }
 	void setEnabled(bool _en) { m_isEnabled = _en; enabledChanged(); }
 	void show(bool _vi) { if (m_isShown != _vi) { m_isShown = _vi; shownChanged(); if (!m_parent || m_parent->isVisible()) visibilityChangedRecursive(m_isShown); } }

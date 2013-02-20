@@ -36,16 +36,61 @@ private:
 	pthread_t m_p;
 };
 
+class mutex
+{
+public:
+	mutex()
+	{
+		pthread_mutex_init(&m_p, nullptr);
+	}
+
+	~mutex()
+	{
+		pthread_mutex_destroy(&m_p);
+	}
+
+	void lock()
+	{
+		pthread_mutex_lock(&m_p);
+	}
+
+	bool try_lock()
+	{
+		return !pthread_mutex_trylock(&m_p);
+	}
+
+	void unlock()
+	{
+		pthread_mutex_unlock(&m_p);
+	}
+
+private:
+	pthread_mutex_t m_p;
+};
+
+template <class _T>
+class lock_guard
+{
+public:
+	lock_guard(_T& _t): m_t(_t) { m_t.lock(); }
+	~lock_guard() { m_t.unlock(); }
+
+private:
+	_T& m_t;
+};
+
 }
 
 #else
 
 #include <thread>
+#include <mutex>
 
 namespace Lightbox
 {
 
 using std::thread;
+using std::mutex;
 
 }
 

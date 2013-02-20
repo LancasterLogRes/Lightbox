@@ -252,6 +252,8 @@ template <class _T> _T defaultTo(_T _val, _T _default, _T _invalid = (_T)0)
 	return _val == _invalid ? _default : _val;
 }
 
+enum Orientation { Horizontal = 0, Vertical };
+
 /// Determine nth item in comma+space delimited string.
 std::string afterComma(char const* _s, unsigned _i);
 std::string demangled(char const* _n);

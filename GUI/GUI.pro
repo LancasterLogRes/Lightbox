@@ -25,7 +25,8 @@ SOURCES += \
     FontManager.cpp \
 	BakedFont.cpp \
     Slate.cpp \
-    RenderToTextureSlate.cpp
+    RenderToTextureSlate.cpp \
+    Slider.cpp
 
 HEADERS += \
     View.h \
@@ -49,7 +50,8 @@ HEADERS += \
     FontManager.h \
     BakedFont.h \
     Slate.h \
-    RenderToTextureSlate.h
+    RenderToTextureSlate.h \
+    Slider.h
 OTHER_FILES += \
     Shaders.glsl \
     HueWheel.glsl \

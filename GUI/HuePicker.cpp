@@ -25,7 +25,7 @@ void HuePickerBody::initGraphics()
 	m_hueWheelDodge = Program("HueWheel.glsl", "dodge.vert", "frag");
 	m_hueWheelDodge.tie(GUIApp::joint().uniforms);
 	Super::initGraphics();
-	layer(1).setPremultiplied();
+	layer(1).setAttributes(Premultiplied);
 }
 
 void HuePickerBody::resized()

@@ -42,7 +42,7 @@ static TextureCache s_tc;
 
 Layers BasicButtonBody::layers()
 {
-	return {{ Layer(), Layer(borderMargin(), false, true) }};
+	return {{ Layer(), Layer(borderMargin(), Premultiplied) }};
 }
 
 void BasicButtonBody::updateTexture()
@@ -103,12 +103,13 @@ void Lightbox::drawBorder(Slate const& _con, iRect _inner, bool _base, bool _lit
 		_con.glowRectOutline(_inner.outset(iMargin((lightBedPixels - lightEdgePixels + iSize(1, 1)) / 2, (lightBedPixels - lightEdgePixels) / 2)), _col);
 }
 
-void Lightbox::drawButton(Slate const& _c, iRect _inner, Color _color, bool _down, bool _base, bool _lit, bool _polish)
+void Lightbox::drawButton(Slate const& _c, iRect _inner, Color _color, bool _down, bool _base, bool _lit, bool _polish, bool _border)
 {
 	if (_base)
 	{
 		// Border fill
-		drawBorder(_c, _inner, true, false, _color);
+		if (_border)
+			drawBorder(_c, _inner, true, false, _color);
 
 		// Button texture
 		_c.rect(_inner, Color(_down ? .05f : .1f), _down ? .05f : -.1f);
