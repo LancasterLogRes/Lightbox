@@ -24,6 +24,7 @@ ViewBody::ViewBody():
 	m_stretch(1.f),
 	m_isShown(true),
 	m_isEnabled(true),
+	m_isAlive(false),
 	m_visibleLayoutChanged(true),
 	m_graphicsInitialized(false),
 	m_layers(1)
@@ -41,6 +42,8 @@ ViewBody::ViewBody():
 
 ViewBody::~ViewBody()
 {
+	setAlive(false);
+
 	delete m_layout;
 	m_layout = nullptr;
 
@@ -180,6 +183,17 @@ bool ViewBody::handleEvent(Event* _e)
 		e->m_mmLocal += p;
 
 	return ret;
+}
+
+void ViewBody::setAlive(bool _alive)
+{
+	if (_alive == m_isAlive)
+		return;
+	m_isAlive = _alive;
+	if (_alive)
+		GUIApp::get()->registerAlive(this);
+	else
+		GUIApp::get()->unregisterAlive(this);
 }
 
 void ViewBody::relayout()

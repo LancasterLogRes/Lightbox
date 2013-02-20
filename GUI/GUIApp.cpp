@@ -143,6 +143,25 @@ bool GUIApp::ImageCache::fit(iRect _g, ViewLayerPtr _v)
 	}
 }
 
+void GUIApp::registerAlive(View const& _v)
+{
+	m_alive.insert(_v);
+}
+
+void GUIApp::unregisterAlive(View const& _v)
+{
+	m_alive.erase(_v);
+}
+
+void GUIApp::tick()
+{
+	Super::tick();
+	TickEvent e;
+	e.now = runningTime();
+	for (View const& v: m_alive)
+		v->event(&e);
+}
+
 bool GUIApp::drawGraphics()
 {
 	m_root->initGraphicsRecursive();

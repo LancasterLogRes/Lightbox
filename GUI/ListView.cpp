@@ -9,7 +9,8 @@ using namespace Lightbox;
 ListViewBody::ListViewBody(ListModelPtr const& _model):
 	m_offset	(0),
 	m_model		(_model)
-{	
+{
+	noteItemsChanged();
 }
 
 ListViewBody::~ListViewBody()
@@ -48,7 +49,7 @@ bool ListViewBody::event(Event* _e)
 	else if (auto e = dynamic_cast<TouchMoveEvent*>(_e))
 	{
 		assert(pointerLocked(e->id));
-		iSize displacement = e->local() - m_downPos;
+		iSize displacement = m_downPos - e->local();
 		if (!m_scrollLatch && displacement.lengthSquared() > sqr(GUIApp::joint().display->toPixels(c_mmMinScrollDistance)))
 		{
 			// Switch to scroll mode.
@@ -57,7 +58,7 @@ bool ListViewBody::event(Event* _e)
 		}
 		if (m_scrollLatch)
 		{
-			m_offset = m_scrollOffset + displacement.h();
+			setOffset(m_scrollOffset + displacement.h());
 			scrolled(displacement);
 		}
 	}
@@ -65,12 +66,20 @@ bool ListViewBody::event(Event* _e)
 	return false;
 }
 
+void ListViewBody::setOffset(float _offset)
+{
+	if (_offset < 0)
+		m_offset = _offset / 2;
+	else if (_offset > m_totalHeight - rect().h())
+		m_offset = m_totalHeight - rect().h() + (_offset - (m_totalHeight - rect().h())) / 2;
+}
+
 void ListViewBody::draw(Slate const& _slate, unsigned)
 {
 	if (!m_model)
 		return;
 	unsigned itemCount = m_model->itemCount();
-	iCoord cursor(0, m_offset);
+	iCoord cursor(0, -m_offset);
 	for (unsigned i = 0; i < itemCount; ++i)
 	{
 		iSize itemSize = m_model->itemSize(i);
@@ -88,9 +97,26 @@ void ListViewBody::draw(Slate const& _slate, unsigned)
 	}
 }
 
+void ListViewBody::checkHeight()
+{
+	m_totalHeight = 0;
+	if (m_model)
+	{
+		unsigned itemCount = m_model->itemCount();
+		for (unsigned i = 0; i < itemCount; ++i)
+			m_totalHeight += m_model->itemSize(i).h();
+	}
+}
+
+void ListViewBody::initGraphics()
+{
+	checkHeight();
+}
+
 void ListViewBody::noteItemsChanged()
 {
 	// TODO: fix offset if neccessary.
+	checkHeight();
 	update();
 }
 

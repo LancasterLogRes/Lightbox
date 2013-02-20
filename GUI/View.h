@@ -223,6 +223,7 @@ public:
 	bool isShown() const { return m_isShown; }
 	bool isHidden() const { return !m_isShown; }
 	bool isVisible() const { return m_isShown && (!m_parent || parent()->isVisible()); }
+	bool isAlive() const { return m_isAlive; }
 	ChildIndex childIndex() const { return m_childIndex; }
 	fRect geometry() const { return m_geometry; }
 	View parent() const { return View(m_parent); }
@@ -265,6 +266,8 @@ protected:
 		ret->setParent(_parent);
 		return ret;
 	}
+
+	void setAlive(bool _alive);
 
 	void lockPointer(int _id);
 	void releasePointer(int _id);
@@ -309,6 +312,7 @@ private:
 	float m_stretch;					///< Stretch factor - used in layout algorithms.
 	bool m_isShown;						///< Whether we would indeed draw ourselves should our parent be visible. Necessary but not sufficient for being visible.
 	bool m_isEnabled;					///< Whether we are interactive. Doesn't affect visibility.
+	bool m_isAlive;						///< If true, event() gets called with a TickEvent object frequently.
 	mutable bool m_visibleLayoutChanged;	///< True if our, or any of our ancestors', layout has been changed and said view is visible.
 
 	bool m_graphicsInitialized;			///< True if we have initialized graphics (with initGraphics()) and not subsequently finalized (with finiGraphics()).

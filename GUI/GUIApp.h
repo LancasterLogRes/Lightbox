@@ -1,5 +1,7 @@
 #pragma once
 
+#include <array>
+#include <set>
 #include <tuple>
 #include <App/App.h>
 #include <Common/Time.h>
@@ -49,10 +51,14 @@ public:
 	virtual bool motionEvent(int _id, iCoord _pos, int _direction);
 	virtual bool keyEvent(int _code, int _direction);
 	virtual void go() { Super::go(); m_startTime = wallTime(); }
+	virtual void tick();
 
 	bool lockPointer(int _id, View const& _v);
 	bool releasePointer(int _id, View const& _v);
 	bool pointerLocked(int _id, View const& _v) const;
+
+	void registerAlive(View const& v);
+	void unregisterAlive(View const& v);
 
 private:
 	Frame m_root;
@@ -82,6 +88,7 @@ private:
 	template <class _S> friend _S& operator<<(_S& _out, ImageCache const& _ic);
 
 	std::array<View, s_maxPointers> m_pointerLock;
+	std::set<View> m_alive;
 };
 
 template <class _S> _S& operator<<(_S& _out, GUIApp::ImageCache const& _ic)

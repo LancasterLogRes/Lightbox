@@ -1,5 +1,6 @@
 #pragma once
 
+#include <Common/Time.h>
 #include <Numeric/Coord.h>
 
 namespace Lightbox
@@ -30,6 +31,11 @@ struct BatteryEvent: public Event
 {
 	BatteryEvent(int _level): level(_level) {}
 	int level;
+};
+
+struct TickEvent: public Event
+{
+	Time now;
 };
 
 }

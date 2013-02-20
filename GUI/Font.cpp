@@ -41,5 +41,8 @@ fRect Font::measure(std::string const& _text, bool _tight) const
 
 fRect Font::measurePx(std::string const& _text, bool _tight) const
 {
-	return GUIApp::fontManager().getInfo(m_definition).measure(_text, GUIApp::joint().display->toUnalignedPixels(fSize(0, m_mm)).h(), _tight);
+	if (GUIApp::joint().display)
+		return GUIApp::fontManager().getInfo(m_definition).measure(_text, GUIApp::joint().display->toUnalignedPixels(fSize(0, m_mm)).h(), _tight);
+	else
+		return fRect();
 }

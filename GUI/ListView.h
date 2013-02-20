@@ -31,6 +31,8 @@ public:
 	void setModel(ListModelPtr const& _model) { m_model = _model; noteItemsChanged(); }
 	void noteItemsChanged();
 	void noteItemChanged(unsigned _i);
+
+	void setOffset(float _offset);
 	
 protected:
 	explicit ListViewBody(ListModel* _model): ListViewBody(ListModelPtr(_model)) {}
@@ -42,11 +44,16 @@ protected:
 	virtual void pushed() { update(); }
 	virtual void scrolled(iSize) { update(); }
 	virtual void released(bool _properClick) { update(); }
+	virtual void initGraphics();
 	
 private:
 	float m_offset;
 	float m_targetOffset;
 	std::shared_ptr<ListModel> m_model;
+
+	void checkHeight();
+
+	unsigned m_totalHeight;
 
 	int m_downPointer;
 	iCoord m_downPos;
