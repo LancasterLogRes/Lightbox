@@ -58,11 +58,13 @@ bool ListViewBody::event(Event* _e)
 			// Switch to scroll mode.
 			m_scrollLatch = true;
 			m_scrollOffset = m_offset;
+			m_inertia = 0;
 		}
 		if (m_scrollLatch)
 		{
 			setOffset(m_scrollOffset - displacement.h());
 			scrolled(displacement);
+			m_inertia = m_inertia / 2 - displacement.h();
 		}
 		cdebug << boolalpha << e->id << "MOVED at" << e->mmLocal() << (e->id == m_downPointer) << geometry().contains(e->mmLocal()) << displacement << m_scrollLatch << m_scrollOffset << m_offset;
 	}
@@ -115,6 +117,12 @@ bool ListViewBody::physics(Time _d)
 	float maxOffset = m_totalHeight - geometry().h();
 	const Time c_hlOuter = FromMsecs<75>::value;
 	const Time c_mmOuter = FromMsecs<100>::value;
+
+	offset += m_inertia / 10;
+	m_inertia = halfLifeDecay(c_hlOuter, _d, m_inertia);
+	if (m_inertia > -0.1 && m_inertia < 0.1)
+		m_inertia = 0;
+
 	if (offset < 0)
 		offset = min<float>(0, halfLifeDecay(c_hlOuter, _d, offset) + float(_d) / c_mmOuter);
 	else if (offset > maxOffset)

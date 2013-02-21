@@ -62,6 +62,7 @@ private:
 	fCoord m_downPos;		// in mm
 	bool m_scrollLatch;
 	float m_scrollOffset;	// in mm
+	float m_inertia;
 };
 
 }
