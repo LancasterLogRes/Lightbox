@@ -30,31 +30,62 @@ private:
 };
 */
 
-class StringListModel: public ListModel
+class StringListAdaptor: public ListModel
 {
 public:
-	StringListModel(std::vector<std::string> const* _s): m_d(_s) {}
+	StringListAdaptor(std::vector<std::string> const* _s): m_d(_s) {}
 
 	virtual unsigned itemCount() { return m_d ? m_d->size() : 0; }
-	virtual void drawItem(unsigned _i, Slate const& _s);
+	virtual void drawItem(unsigned _i, Slate const& _s, bool _selected);
 	virtual fSize itemSize(unsigned _i);
 
 private:
 	std::vector<std::string> const* m_d;
 };
 
-void StringListModel::drawItem(unsigned _i, Slate const& _s)
+void StringListAdaptor::drawItem(unsigned _i, Slate const& _s, bool _selected)
 {
 	if (m_d && _i < m_d->size())
 	{
-		_s.text(m_d->at(_i), AtLeft, _s.main().inset(_s.toPixels(fSize(3, 3))).lerp(0, 0.5), White);
+		_s.text(m_d->at(_i), AtLeft, _s.main().inset(_s.toPixels(fSize(3, 3))).lerp(0, 0.5), White, GUIApp::style().small);
 	}
 }
 
-fSize StringListModel::itemSize(unsigned _i)
+fSize StringListAdaptor::itemSize(unsigned _i)
 {
 	if (m_d && _i < m_d->size())
-		return GUIApp::style().regular.measure(m_d->at(_i)).size() + fSize(6, 6);
+		return GUIApp::style().small.measure(m_d->at(_i)).size() + fSize(6, 6);
+	return fSize();
+}
+
+typedef std::pair<std::string, std::string> DoubleString;
+typedef std::vector<DoubleString> DoubleStrings;
+class DoubleStringsAdaptor: public ListModel
+{
+public:
+	DoubleStringsAdaptor(DoubleStrings const* _s): m_d(_s) {}
+
+	virtual unsigned itemCount() { return m_d ? m_d->size() : 0; }
+	virtual void drawItem(unsigned _i, Slate const& _s, bool _selected);
+	virtual fSize itemSize(unsigned _i);
+
+private:
+	DoubleStrings const* m_d;
+};
+
+void DoubleStringsAdaptor::drawItem(unsigned _i, Slate const& _s, bool _selected)
+{
+	if (m_d && _i < m_d->size())
+	{
+		_s.text(m_d->at(_i).first, AtLeft|AtTop, _s.main().inset(_s.toPixels(fSize(3, 3))).lerp(0, 0), Color(_selected ? 1.f : .5f), GUIApp::style().small);
+		_s.text(m_d->at(_i).second, AtLeft|AtBottom, _s.main().inset(_s.toPixels(fSize(3, 3))).lerp(0, 1), Color(_selected ? .75f : .25f), GUIApp::style().xsmall);
+	}
+}
+
+fSize DoubleStringsAdaptor::itemSize(unsigned _i)
+{
+	if (m_d && _i < m_d->size())
+		return GUIApp::style().small.measure(m_d->at(_i).first).size().vStacked(GUIApp::style().xsmall.measure(m_d->at(_i).second).size()) + fSize(6, 6);
 	return fSize();
 }
 
@@ -65,28 +96,9 @@ class TestViewBody: public ViewCreator<ViewBody, TestViewBody>
 public:
 	TestViewBody()
 	{
-
-		cdebug << "Testing pthread...";
-		{
-			pthread_mutex_t m;
-			pthread_mutex_init(&m, nullptr);
-			pthread_mutex_lock(&m);
-			pthread_mutex_unlock(&m);
-			pthread_mutex_destroy(&m);
-		}
-		cdebug << "OK";
-
-		cdebug << "Testing mutex...";
-		{
-			mutex m;
-			m.lock();
-			m.unlock();
-		}
-		cdebug << "OK";
-
 		for (int i = 0; i < 99; ++i)
-			m_l += "Item " + toString(i + 1);
-		ListView l = ListViewBody::spawn(this, new StringListModel(&m_l));
+			m_l += DoubleString("Item " + toString(i + 1), "Subtext for item " + toString(i + 1));
+		ListView l = ListViewBody::spawn(this, new DoubleStringsAdaptor(&m_l));
 		l->setGeometry(fRect(0, 0, 200, 480));
 	}
 
@@ -103,7 +115,7 @@ private:
 	{
 	}
 
-	std::vector<std::string> m_l;
+	DoubleStrings m_l;
 };
 
 MainView::MainView()

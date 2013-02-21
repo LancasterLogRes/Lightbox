@@ -90,6 +90,9 @@ public:
 	bool operator==(Size const& _c) const { return compare(_c); }
 	bool operator!=(Size const& _c) const { return !compare(_c); }
 
+	Size hStacked(Size _s) const { return Size(w() + _s.w(), std::max(h(), _s.h())); }
+	Size vStacked(Size _s) const { return Size(std::max(w(), _s.w()), h() + _s.h()); }
+
 private:
 	using Super::x;
 	using Super::y;

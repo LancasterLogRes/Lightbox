@@ -31,8 +31,10 @@ GUIApp::GUIApp():
 	m_style.bigBold = Font(20, FontDefinition("ubuntu", true));
 	m_style.regular = Font(17, FontDefinition("ubuntu", false));
 	m_style.bold = Font(17, FontDefinition("ubuntu", true));
-	m_style.small = Font(13, FontDefinition("ubuntu", false));
-	m_style.smallBold = Font(13, FontDefinition("ubuntu", true));
+	m_style.small = Font(14, FontDefinition("ubuntu", false));
+	m_style.smallBold = Font(14, FontDefinition("ubuntu", true));
+	m_style.xsmall = Font(11, FontDefinition("ubuntu", false));
+	m_style.xsmallBold = Font(11, FontDefinition("ubuntu", true));
 	m_style.thumbDiameter = fSize(40, 40);
 	m_style.lightEdgeSize = fSize(3, 3);
 	m_style.lightBedSize = fSize(5, 5);

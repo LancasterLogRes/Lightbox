@@ -9,6 +9,7 @@ using namespace Lightbox;
 ListViewBody::ListViewBody(ListModelPtr const& _model):
 	m_offset		(0),
 	m_model			(_model),
+	m_selected		(-1),
 	m_downPointer	(-1)
 {
 	noteItemsChanged();
@@ -43,7 +44,7 @@ bool ListViewBody::event(Event* _e)
 		if (e->id == m_downPointer)
 		{
 			m_downPointer = -1;
-			released(geometry().contains(e->mmLocal()) && !m_scrollLatch);
+			released(geometry().contains(e->mmLocal()) && !m_scrollLatch, e->mmLocal());
 		}
 		return true;
 	}
@@ -76,6 +77,27 @@ bool ListViewBody::event(Event* _e)
 	return false;
 }
 
+void ListViewBody::released(bool _properClick, fCoord _pos)
+{
+	if (geometry().contains(_pos) && _properClick)
+	{
+		fCoord cursor(0, -visibleOffset());
+		unsigned itemCount = m_model->itemCount();
+		for (unsigned i = 0; i < itemCount; ++i)
+		{
+			fSize itemSize = m_model->itemSize(i);
+			fRect itemRect(cursor, fSize(max(itemSize.w(), geometry().w()), itemSize.h()));
+			if (itemRect.contains(_pos))
+			{
+				m_selected = i;
+				break;
+			}
+			cursor.setY(cursor.y() + itemSize.h());
+		}
+	}
+	update();
+}
+
 void ListViewBody::setOffset(float _offset)
 {
 	if (m_offset != _offset)
@@ -104,21 +126,25 @@ bool ListViewBody::physics(Time _d)
 	return true;
 }
 
-void ListViewBody::draw(Slate const& _slate, unsigned)
+float ListViewBody::visibleOffset() const
 {
-	if (!m_model)
-		return;
-	unsigned itemCount = m_model->itemCount();
-
 	float offset = m_offset;
 	float maxOffset = m_totalHeight - geometry().h();
 	if (offset < 0)
 		offset /= 2;
 	else if (offset > maxOffset)
 		offset = (offset + maxOffset) / 2;
+	return offset;
+}
+
+void ListViewBody::draw(Slate const& _slate, unsigned)
+{
+	if (!m_model)
+		return;
+	unsigned itemCount = m_model->itemCount();
 
 	int drawn = 0;
-	fCoord cursor(0, -offset);
+	fCoord cursor(0, -visibleOffset());
 	for (unsigned i = 0; i < itemCount; ++i)
 	{
 		fSize itemSize = m_model->itemSize(i);
@@ -130,8 +156,9 @@ void ListViewBody::draw(Slate const& _slate, unsigned)
 		if (!r.isAbove(_slate.main()))
 		{
 			Slate subSlate = _slate.sub(r);
-			subSlate.rect(subSlate.main(), Color(0.1), 0.01);
-			m_model->drawItem(i, subSlate);
+			bool s = (int)i == m_selected;
+			subSlate.rect(subSlate.main(), Color(s ? 0.075 : 0.15), s ? 0.03 : -0.01);
+			m_model->drawItem(i, subSlate, s);
 			drawn++;
 		}
 		cursor.setY(cursor.y() + itemSize.h());

@@ -26,6 +26,8 @@ struct Style
 	Font bold;
 	Font small;
 	Font smallBold;
+	Font xsmall;
+	Font xsmallBold;
 	fSize thumbDiameter;
 	fSize lightEdgeSize;
 	fSize lightBedSize;

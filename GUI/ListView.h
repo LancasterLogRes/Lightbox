@@ -13,7 +13,7 @@ class ListModel
 {
 public:
 	virtual unsigned itemCount() = 0;
-	virtual void drawItem(unsigned _i, Slate const& _s) = 0;
+	virtual void drawItem(unsigned _i, Slate const& _s, bool _selected) = 0;
 	virtual fSize itemSize(unsigned _i) = 0;
 };
 
@@ -43,24 +43,25 @@ protected:
 
 	virtual void pushed() { update(); }
 	virtual void scrolled(fSize) { update(); }
-	virtual void released(bool _properClick) { (void)_properClick; update(); }
+	virtual void released(bool _properClick, fCoord _pos);
 	virtual void initGraphics();
 	
 private:
-	// offset is always in mm.
-	float m_offset;
-	float m_targetOffset;
+	float m_offset;			// in mm
 	std::shared_ptr<ListModel> m_model;
+	int m_selected;
+
 
 	bool physics(Time _d);
 	void checkHeight();
+	float visibleOffset() const;
 
-	float m_totalHeight;
+	float m_totalHeight;	// in mm
 
 	int m_downPointer;
-	fCoord m_downPos;	// in mm
+	fCoord m_downPos;		// in mm
 	bool m_scrollLatch;
-	float m_scrollOffset;
+	float m_scrollOffset;	// in mm
 };
 
 }
