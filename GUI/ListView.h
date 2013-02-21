@@ -14,7 +14,7 @@ class ListModel
 public:
 	virtual unsigned itemCount() = 0;
 	virtual void drawItem(unsigned _i, Slate const& _s) = 0;
-	virtual iSize itemSize(unsigned _i) = 0;
+	virtual fSize itemSize(unsigned _i) = 0;
 };
 
 typedef std::shared_ptr<ListModel> ListModelPtr;
@@ -42,11 +42,12 @@ protected:
 	virtual void draw(Slate const& _c, unsigned);
 
 	virtual void pushed() { update(); }
-	virtual void scrolled(iSize) { update(); }
-	virtual void released(bool _properClick) { update(); }
+	virtual void scrolled(fSize) { update(); }
+	virtual void released(bool _properClick) { (void)_properClick; update(); }
 	virtual void initGraphics();
 	
 private:
+	// offset is always in mm.
 	float m_offset;
 	float m_targetOffset;
 	std::shared_ptr<ListModel> m_model;
@@ -54,10 +55,10 @@ private:
 	bool physics(Time _d);
 	void checkHeight();
 
-	unsigned m_totalHeight;
+	float m_totalHeight;
 
 	int m_downPointer;
-	iCoord m_downPos;
+	fCoord m_downPos;	// in mm
 	bool m_scrollLatch;
 	float m_scrollOffset;
 };

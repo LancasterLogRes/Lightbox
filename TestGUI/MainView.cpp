@@ -21,7 +21,7 @@ public:
 
 	virtual unsigned itemCount() { return m_itemCount(); }
 	virtual void drawItem(unsigned _i, Slate const& _s) { m_drawItem(_i, _s); }
-	virtual iSize itemSize(unsigned _i) { return m_itemSize(_i); }
+	virtual fSize itemSize(unsigned _i) { return m_itemSize(_i); }
 
 private:
 	std::function<unsigned()> m_itemCount;
@@ -36,7 +36,7 @@ public:
 
 	virtual unsigned itemCount() { return m_d ? m_d->size() : 0; }
 	virtual void drawItem(unsigned _i, Slate const& _s);
-	virtual iSize itemSize(unsigned _i);
+	virtual fSize itemSize(unsigned _i);
 
 private:
 	std::vector<std::string> const* m_d;
@@ -50,11 +50,11 @@ void StringListModel::drawItem(unsigned _i, Slate const& _s)
 	}
 }
 
-iSize StringListModel::itemSize(unsigned _i)
+fSize StringListModel::itemSize(unsigned _i)
 {
 	if (m_d && _i < m_d->size())
-		return (iSize)GUIApp::style().regular.measurePx(m_d->at(_i)).size();
-	return iSize();
+		return GUIApp::style().regular.measure(m_d->at(_i)).size();
+	return fSize();
 }
 
 class TestViewBody: public ViewCreator<ViewBody, TestViewBody>

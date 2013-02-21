@@ -29,7 +29,7 @@ bool ListViewBody::event(Event* _e)
 		if (m_downPointer == -1)
 		{
 			cdebug << boolalpha << e->id << "DOWN at" << e->mmLocal() << geometry().contains(e->mmLocal());
-			m_downPos = e->local();
+			m_downPos = e->mmLocal();
 			m_downPointer = e->id;
 			m_scrollLatch = false;
 			lockPointer(e->id);
@@ -50,7 +50,7 @@ bool ListViewBody::event(Event* _e)
 	else if (auto e = dynamic_cast<TouchMoveEvent*>(_e))
 	{
 		assert(pointerLocked(e->id));
-		iSize displacement = e->local() - m_downPos;
+		fSize displacement = e->mmLocal() - m_downPos;
 		cdebug << boolalpha << e->id << "MOVE at" << e->mmLocal() << (e->id == m_downPointer) << geometry().contains(e->mmLocal()) << displacement << m_scrollLatch << m_scrollOffset << m_offset;
 		if (!m_scrollLatch && displacement.lengthSquared() > sqr(GUIApp::joint().display->toPixels(c_mmMinScrollDistance)))
 		{
@@ -89,12 +89,12 @@ void ListViewBody::setOffset(float _offset)
 bool ListViewBody::physics(Time _d)
 {
 	// Update offset state according to Time delta _d.
-	int offset = m_offset;
-	int maxOffset = m_totalHeight - rect().h();
+	float offset = m_offset;
+	float maxOffset = m_totalHeight - geometry().h();
 	if (offset < 0)
-		offset = min<float>(0, offset + toSeconds(_d) * 10);
+		offset = min<float>(0, offset + toSeconds(_d) * 1000);
 	else if (offset > maxOffset)
-		offset = max<float>(maxOffset, offset - toSeconds(_d) * 10);
+		offset = max<float>(maxOffset, offset - toSeconds(_d) * 1000);
 	if (offset == m_offset)
 		return false;
 	m_offset = offset;
@@ -108,18 +108,19 @@ void ListViewBody::draw(Slate const& _slate, unsigned)
 		return;
 	unsigned itemCount = m_model->itemCount();
 
-	int offset = m_offset;
-	int maxOffset = m_totalHeight - rect().h();
+	float offset = m_offset;
+	float maxOffset = m_totalHeight - geometry().h();
 	if (offset < 0)
 		offset /= 2;
 	else if (offset > maxOffset)
 		offset = (offset + maxOffset) / 2;
 
-	iCoord cursor(0, -offset);
+	fCoord cursor(0, -offset);
 	for (unsigned i = 0; i < itemCount; ++i)
 	{
-		iSize itemSize = m_model->itemSize(i);
-		iRect r(cursor, iSize(max(itemSize.w(), rect().w()), itemSize.h()));
+		fSize itemSize = m_model->itemSize(i);
+		fRect itemRect(cursor, fSize(max(itemSize.w(), geometry().w()), itemSize.h()));
+		iRect r = _slate.toPixels(itemRect);
 		// boundary glow effects will be killed
 		if (r.isBelow(_slate.main()))
 			break;

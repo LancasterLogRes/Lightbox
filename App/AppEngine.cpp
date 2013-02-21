@@ -41,6 +41,7 @@ AppEngine::AppEngine():
 	m_lastDrawTime(wallTime())
 {
 	s_this = this;
+	Lightbox::g_debugEnabled[50] = true;
 }
 #endif
 
@@ -139,9 +140,10 @@ void AppEngine::exec()
 	Time lastDraw = wallTime();
 	Time lastTick = wallTime();
 	Time lastIterate = wallTime();
+	Time begin = wallTime();
 	for (bool carryOn = true; carryOn;)
 	{
-		cdebug << "AppEngine: outer";
+		cbug(50) << textualTime(wallTime() - begin) << "AppEngine: tick";
 
 		if (wallTime() - lastTick >= FromSeconds<1>::value)
 		{
@@ -149,14 +151,19 @@ void AppEngine::exec()
 			lastTick = wallTime();
 		}
 
+		cbug(50) << textualTime(wallTime() - begin) << "AppEngine: iterate";
+
 		m_app->iterate(wallTime() - lastIterate);
 		lastIterate = wallTime();
 
-		if ((m_display && (/*true || */m_display->isAnimating())) && wallTime() - lastDraw >= c_frameTime)
+		cbug(50) << textualTime(wallTime() - begin) << "AppEngine: draw";
+
+		if ((m_display && (/*true || */m_display->isAnimating()))/* && wallTime() - lastDraw >= c_frameTime*/)
 		{
 			lastDraw = wallTime();
 			gfxDraw();
 			m_lastDrawTime = wallTime() - lastDraw;
+			cbug(50) << textualTime(wallTime() - begin) << "AppEngine: drawn in" << textualTime(m_lastDrawTime);
 			lastDraw = wallTime();
 		}
 		else
@@ -165,9 +172,9 @@ void AppEngine::exec()
 		// If not animating, we will block forever waiting for events.
 		// If animating, we loop until all events are read, then continue
 		// to draw the next frame of animation.
-		for (bool hadEvent = true; carryOn && hadEvent && (!m_display || !m_display->isAnimating() || wallTime() - lastDraw < FromSeconds<1>::value / 60);)
+		for (bool hadEvent = true; carryOn && hadEvent && (!m_display || !m_display->isAnimating() || wallTime() - lastDraw < FromSeconds<1>::value / 120);)
 		{
-			cdebug << "AppEngine: inner";
+			cbug(50) << textualTime(wallTime() - begin) << "AppEngine: events inner";
 #if LIGHTBOX_ANDROID
 			// Read all pending events.
 			int events;
@@ -187,9 +194,13 @@ void AppEngine::exec()
 			}
 #elif LIGHTBOX_USE_XLIB
 			for (; !(m_display && m_display->isAnimating()) && !XPending(xDisplay) && wallTime() - lastTick < FromSeconds<1>::value;)
+			{
+				cbug(50) << textualTime(wallTime() - begin) << "AppEngine: event wait";
 				usleep(20);
+			}
 			if (XPending(xDisplay) > 0)
 			{
+				cbug(50) << textualTime(wallTime() - begin) << "AppEngine: event interpret";
 				XEvent event;
 				XNextEvent(xDisplay, &event);
 
