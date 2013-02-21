@@ -23,13 +23,12 @@ static const float c_mmMinScrollDistance = 4;
 
 bool ListViewBody::event(Event* _e)
 {
-	// TODO: Scrolling.
 	if (auto e = dynamic_cast<TouchDownEvent*>(_e))
 	{
 		// Ignore second touches
 		if (m_downPointer == -1)
 		{
-			cdebug << boolalpha << e->id << "DOWN at" << e->mmLocal() << geometry().contains(e->mmLocal());
+//			cdebug << boolalpha << e->id << "DOWN at" << e->mmLocal() << geometry().contains(e->mmLocal());
 			m_downPos = e->mmLocal();
 			m_downPointer = e->id;
 			m_scrollLatch = false;
@@ -40,7 +39,7 @@ bool ListViewBody::event(Event* _e)
 	}
 	else if (auto e = dynamic_cast<TouchUpEvent*>(_e))
 	{
-		cdebug << boolalpha << e->id << "UP at" << e->mmLocal() << (e->id == m_downPointer) << geometry().contains(e->mmLocal());
+//		cdebug << boolalpha << e->id << "UP at" << e->mmLocal() << (e->id == m_downPointer) << geometry().contains(e->mmLocal());
 		if (e->id == m_downPointer)
 		{
 			m_downPointer = -1;
@@ -66,13 +65,13 @@ bool ListViewBody::event(Event* _e)
 			scrolled(displacement);
 			m_inertia = m_inertia / 2 - displacement.h();
 		}
-		cdebug << boolalpha << e->id << "MOVED at" << e->mmLocal() << (e->id == m_downPointer) << geometry().contains(e->mmLocal()) << displacement << m_scrollLatch << m_scrollOffset << m_offset;
+//		cdebug << boolalpha << e->id << "MOVED at" << e->mmLocal() << (e->id == m_downPointer) << geometry().contains(e->mmLocal()) << displacement << m_scrollLatch << m_scrollOffset << m_offset;
 	}
 	else if (auto e = dynamic_cast<IterateEvent*>(_e))
 	{
 		if (m_downPointer == -1)
 		{
-			cdebug << "ITERATE of" << textualTime(e->delta);
+//			cdebug << "ITERATE of" << textualTime(e->delta);
 			setAlive(physics(e->delta));
 		}
 	}
@@ -92,6 +91,7 @@ void ListViewBody::released(bool _properClick, fCoord _pos)
 			if (itemRect.contains(_pos))
 			{
 				m_selected = i;
+				selected();
 				break;
 			}
 			cursor.setY(cursor.y() + itemSize.h());
@@ -110,6 +110,12 @@ void ListViewBody::setOffset(float _offset)
 	}
 }
 
+void ListViewBody::selected()
+{
+	if (m_onSelected)
+		m_onSelected(this);
+}
+
 bool ListViewBody::physics(Time _d)
 {
 	// Update offset state according to Time delta _d.
@@ -122,6 +128,11 @@ bool ListViewBody::physics(Time _d)
 	m_inertia = halfLifeDecay(c_hlOuter, _d, m_inertia);
 	if (m_inertia > -0.1 && m_inertia < 0.1)
 		m_inertia = 0;
+	if (offset < -rect().h() / 2 || offset > m_totalHeight + rect().h() / 2)
+	{
+		offset = clamp<float, float>(offset, -rect().h() / 2, m_totalHeight + rect().h() / 2);
+		m_inertia = 0;
+	}
 
 	if (offset < 0)
 		offset = min<float>(0, halfLifeDecay(c_hlOuter, _d, offset) + float(_d) / c_mmOuter);
@@ -136,8 +147,8 @@ bool ListViewBody::physics(Time _d)
 
 float ListViewBody::visibleOffset() const
 {
-	float offset = m_offset;
 	float maxOffset = m_totalHeight - geometry().h();
+	float offset = m_offset;
 	if (offset < 0)
 		offset /= 2;
 	else if (offset > maxOffset)
@@ -192,7 +203,7 @@ void ListViewBody::initGraphics()
 
 void ListViewBody::noteItemsChanged()
 {
-	// TODO: fix offset if neccessary.
+	// TODO: fix offset if necessary.
 	checkHeight();
 	update();
 }

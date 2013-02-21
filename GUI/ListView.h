@@ -44,6 +44,7 @@ protected:
 	virtual void pushed() { update(); }
 	virtual void scrolled(fSize) { update(); }
 	virtual void released(bool _properClick, fCoord _pos);
+	virtual void selected();
 	virtual void initGraphics();
 	
 private:
@@ -63,6 +64,8 @@ private:
 	bool m_scrollLatch;
 	float m_scrollOffset;	// in mm
 	float m_inertia;
+
+	EventHandler m_onSelected;
 };
 
 }

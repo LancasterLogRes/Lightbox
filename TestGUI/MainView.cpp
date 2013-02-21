@@ -1,11 +1,6 @@
 #include <Common/Common.h>
 #include <Common/thread.h>
-#include <GUI/TextLabel.h>
-#include <GUI/ToggleButton.h>
-#include <GUI/ListView.h>
-#include <GUI/HuePicker.h>
-#include <GUI/Slate.h>
-#include <GUI/GUIApp.h>
+#include <GUI.h>
 #include "Global.h"
 #include "MainView.h"
 using namespace std;
@@ -100,6 +95,8 @@ public:
 			m_l += DoubleString("Item " + toString(i + 1), "Subtext for item " + toString(i + 1));
 		ListView l = ListViewBody::spawn(this, new DoubleStringsAdaptor(&m_l));
 		l->setGeometry(fRect(0, 0, 200, 480));
+		MarkdownView m = MarkdownViewBody::spawn(this, "Hello world! This is a nice long piece of text for the MarkdownView object to wrap nicely. It has multiple sentences and even...\nA new-line!");
+		m->setGeometry(fRect(200, 0, 600, 480));
 	}
 
 private:

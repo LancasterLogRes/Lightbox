@@ -27,7 +27,8 @@ SOURCES += \
     Slate.cpp \
     RenderToTextureSlate.cpp \
     Slider.cpp \
-    ListView.cpp
+    ListView.cpp \
+    MarkdownView.cpp
 
 HEADERS += \
     View.h \
@@ -53,7 +54,8 @@ HEADERS += \
     Slate.h \
     RenderToTextureSlate.h \
     Slider.h \
-    ListView.h
+    ListView.h \
+    MarkdownView.h
 OTHER_FILES += \
     Shaders.glsl \
     HueWheel.glsl \
