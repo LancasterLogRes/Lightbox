@@ -47,14 +47,17 @@ Layers BasicButtonBody::layers()
 
 void BasicButtonBody::updateTexture()
 {
-	Font f = m_font.isValid() ? m_font : GUIApp::style().bold;
-	string t = boost::algorithm::to_upper_copy(m_text);
-	Texture2D baseText(iSize(f.measurePx(t).size()) + (iSize)GUIApp::joint().glowPixels * 2);
+	if (m_text.size())
 	{
-		RenderToTextureSlate c(baseText);
-		c.text(f, iCoord(baseText.size() / 2), t, Color(1.f / (GUIApp::joint().glowLevels * 2 + 1)));
+		Font f = m_font.isValid() ? m_font : GUIApp::style().bold;
+		string t = boost::algorithm::to_upper_copy(m_text);
+		Texture2D baseText(iSize(f.measurePx(t).size()) + (iSize)GUIApp::joint().glowPixels * 2);
+		{
+			RenderToTextureSlate c(baseText);
+			c.text(f, iCoord(baseText.size() / 2), t, Color(1.f / (GUIApp::joint().glowLevels * 2 + 1)));
+		}
+		m_glowText = GUIApp::joint().makeGlowerNear(baseText);
 	}
-	m_glowText = GUIApp::joint().makeGlowerNear(baseText);
 }
 
 void BasicButtonBody::initGraphics()

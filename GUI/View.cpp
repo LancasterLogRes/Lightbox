@@ -107,6 +107,28 @@ void ViewBody::setParent(View const& _p)
 	}
 }
 
+void ViewBody::polishLayout()
+{
+	if (m_layoutDirty)
+	{
+		relayout();
+		m_layoutDirty = false;
+	}
+}
+
+void ViewBody::noteMetricsChanged()
+{
+	if (m_parent)
+		m_parent->noteLayoutDirty();
+
+}
+
+void ViewBody::noteLayoutDirty()
+{
+	noteMetricsChanged();
+	m_layoutDirty = true;
+}
+
 void ViewBody::setLayers(Layers const& _l)
 {
 	m_layers = _l;

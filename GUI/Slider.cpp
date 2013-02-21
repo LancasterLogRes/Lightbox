@@ -72,7 +72,7 @@ void SliderBody::draw(Slate const& _c, unsigned _l)
 		fRect inner = outer.inset(GUIApp::style().thumbDiameter.w() / 2, (GUIApp::style().thumbDiameter.h() - c_innerMM) / 2);
 		if (_l == 0)
 		{
-			Lightbox::drawButton(_c, _c.toPixels(outer), White, true, true, false, false, false);
+			Lightbox::drawButton(_c, rect(), White, true, true, false, false, false);
 			Lightbox::drawButton(_c, _c.toPixels(inner), White, false, true, false, true, false);
 		}
 		else

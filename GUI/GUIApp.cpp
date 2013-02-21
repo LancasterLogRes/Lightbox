@@ -184,6 +184,7 @@ void GUIApp::iterate(Time _d)
 
 bool GUIApp::drawGraphics()
 {
+	m_root->polishLayoutRecursive();
 	m_root->initGraphicsRecursive();
 
 	bool stillDirty = false;

@@ -42,7 +42,7 @@ AppEngine::AppEngine():
 	m_lastDrawTime(wallTime())
 {
 	s_this = this;
-	Lightbox::g_debugEnabled[50] = true;
+//	Lightbox::g_debugEnabled[50] = true;
 }
 #endif
 

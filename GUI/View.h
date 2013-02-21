@@ -171,7 +171,7 @@ public:
 	void hide() { show(false); }
 
 	void setChildIndex(ChildIndex _i) { if (m_parent) { m_references++; m_parent->m_children.erase(this); m_childIndex = _i; m_parent->m_children.insert(this); m_references--; } else m_childIndex = _i; noteMetricsChanged(); }
-	void setLayout(Layout* _newLayout) { m_layout = _newLayout; m_layout->m_view = this; noteLayoutDirty(); }
+	void setLayout(Layout* _newLayout) { m_layout = _newLayout; if (m_layout) { m_layout->m_view = this; noteLayoutDirty(); } }
 	void setStretch(float _stretch) { m_stretch = _stretch; noteMetricsChanged(); }
 
 	View withChildIndex(ChildIndex _i) { setChildIndex(_i); return this; }
@@ -246,8 +246,9 @@ public:
 	void update(int _layer = -1);
 	void relayout();
 
-	void noteMetricsChanged() { if (m_parent) m_parent->noteLayoutDirty(); }
-	void noteLayoutDirty() { noteMetricsChanged(); relayout(); }
+	void noteMetricsChanged();
+	void noteLayoutDirty();
+	void polishLayout();
 
 	fSize minimumSize(fSize _space = fSize(32768.f, 32768.f)) const { return specifyMinimumSize(_space); }
 	fSize maximumSize(fSize _space = fSize(32768.f, 32768.f)) const { return specifyMaximumSize(_space); }
@@ -299,6 +300,7 @@ private:
 	void executeDraw(Slate const& _c, unsigned _layer);
 	void initGraphicsRecursive() { if (!m_graphicsInitialized) { initGraphics(); m_graphicsInitialized = true; } for (auto const& c: m_children) c->initGraphicsRecursive(); }
 	void finiGraphicsRecursive() { for (auto const& c: m_children) c->finiGraphicsRecursive(); if (m_graphicsInitialized) { finiGraphics(); m_graphicsInitialized = false; } }
+	void polishLayoutRecursive() { if (m_layoutDirty) { polishLayout(); for (auto const& c: m_children) c->polishLayoutRecursive(); } }
 	void visibilityChangedRecursive(bool _newRootVisibility) { for (auto const& c: m_children) if (c->m_isShown) c->visibilityChangedRecursive(_newRootVisibility); visibilityChanged(); }
 
 	fRect m_geometry;					///< Relative to the parent's coordinate system, in mm. (0, 0) is at parent's top left. Typically unused.
@@ -313,7 +315,8 @@ private:
 	bool m_isShown;						///< Whether we would indeed draw ourselves should our parent be visible. Necessary but not sufficient for being visible.
 	bool m_isEnabled;					///< Whether we are interactive. Doesn't affect visibility.
 	bool m_isAlive;						///< If true, event() gets called with a IterateEvent object frequently.
-	mutable bool m_visibleLayoutChanged;	///< True if our, or any of our ancestors', layout has been changed and said view is visible.
+	bool m_layoutDirty;					///<
+	mutable bool m_visibleLayoutChanged;///< True if our, or any of our ancestors', layout has been changed and said view is visible.
 
 	bool m_graphicsInitialized;			///< True if we have initialized graphics (with initGraphics()) and not subsequently finalized (with finiGraphics()).
 

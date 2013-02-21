@@ -27,7 +27,7 @@ using namespace Lightbox;
 #elif !defined(LIGHTBOX_CROSS)
 #endif
 
-#if 0
+#if 1
 static const int c_defaultWidth = 1440;
 static const int c_defaultHeight = 800;
 static const int c_defaultWidthMM = 800;
