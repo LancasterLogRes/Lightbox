@@ -2,6 +2,7 @@
 
 #include <boost/utility.hpp>
 #include <Common/Global.h>
+#include <Common/Time.h>
 #include <Numeric/Coord.h>
 #include "Global.h"
 
@@ -26,6 +27,7 @@ public:
 	virtual void sendInitialEvents() {}
 
 	virtual void tick() {}
+	virtual void iterate(Time) {}
 
 	virtual foreign_vector<uint8_t const> state() { return foreign_vector<uint8_t const>(); }
 	virtual void setState(foreign_vector<uint8_t> const&) {}

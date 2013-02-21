@@ -51,6 +51,7 @@ private:
 	float m_targetOffset;
 	std::shared_ptr<ListModel> m_model;
 
+	bool physics(Time _d);
 	void checkHeight();
 
 	unsigned m_totalHeight;

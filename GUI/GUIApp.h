@@ -51,7 +51,7 @@ public:
 	virtual bool motionEvent(int _id, iCoord _pos, int _direction);
 	virtual bool keyEvent(int _code, int _direction);
 	virtual void go() { Super::go(); m_startTime = wallTime(); }
-	virtual void tick();
+	virtual void iterate(Time _d);
 
 	bool lockPointer(int _id, View const& _v);
 	bool releasePointer(int _id, View const& _v);

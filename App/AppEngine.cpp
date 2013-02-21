@@ -138,13 +138,19 @@ void AppEngine::exec()
 
 	Time lastDraw = wallTime();
 	Time lastTick = wallTime();
+	Time lastIterate = wallTime();
 	for (bool carryOn = true; carryOn;)
 	{
+		cdebug << "AppEngine: outer";
+
 		if (wallTime() - lastTick >= FromSeconds<1>::value)
 		{
 			m_app->tick();
 			lastTick = wallTime();
 		}
+
+		m_app->iterate(wallTime() - lastIterate);
+		lastIterate = wallTime();
 
 		if ((m_display && (/*true || */m_display->isAnimating())) && wallTime() - lastDraw >= c_frameTime)
 		{
@@ -161,6 +167,7 @@ void AppEngine::exec()
 		// to draw the next frame of animation.
 		for (bool hadEvent = true; carryOn && hadEvent && (!m_display || !m_display->isAnimating() || wallTime() - lastDraw < FromSeconds<1>::value / 60);)
 		{
+			cdebug << "AppEngine: inner";
 #if LIGHTBOX_ANDROID
 			// Read all pending events.
 			int events;

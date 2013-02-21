@@ -312,7 +312,7 @@ private:
 	float m_stretch;					///< Stretch factor - used in layout algorithms.
 	bool m_isShown;						///< Whether we would indeed draw ourselves should our parent be visible. Necessary but not sufficient for being visible.
 	bool m_isEnabled;					///< Whether we are interactive. Doesn't affect visibility.
-	bool m_isAlive;						///< If true, event() gets called with a TickEvent object frequently.
+	bool m_isAlive;						///< If true, event() gets called with a IterateEvent object frequently.
 	mutable bool m_visibleLayoutChanged;	///< True if our, or any of our ancestors', layout has been changed and said view is visible.
 
 	bool m_graphicsInitialized;			///< True if we have initialized graphics (with initGraphics()) and not subsequently finalized (with finiGraphics()).

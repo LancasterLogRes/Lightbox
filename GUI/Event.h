@@ -33,9 +33,9 @@ struct BatteryEvent: public Event
 	int level;
 };
 
-struct TickEvent: public Event
+struct IterateEvent: public Event
 {
-	Time now;
+	Time delta;
 };
 
 }

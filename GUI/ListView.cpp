@@ -7,8 +7,9 @@ using namespace std;
 using namespace Lightbox;
 
 ListViewBody::ListViewBody(ListModelPtr const& _model):
-	m_offset	(0),
-	m_model		(_model)
+	m_offset		(0),
+	m_model			(_model),
+	m_downPointer	(-1)
 {
 	noteItemsChanged();
 }
@@ -49,7 +50,8 @@ bool ListViewBody::event(Event* _e)
 	else if (auto e = dynamic_cast<TouchMoveEvent*>(_e))
 	{
 		assert(pointerLocked(e->id));
-		iSize displacement = m_downPos - e->local();
+		iSize displacement = e->local() - m_downPos;
+		cdebug << boolalpha << e->id << "MOVE at" << e->mmLocal() << (e->id == m_downPointer) << geometry().contains(e->mmLocal()) << displacement << m_scrollLatch << m_scrollOffset << m_offset;
 		if (!m_scrollLatch && displacement.lengthSquared() > sqr(GUIApp::joint().display->toPixels(c_mmMinScrollDistance)))
 		{
 			// Switch to scroll mode.
@@ -58,20 +60,46 @@ bool ListViewBody::event(Event* _e)
 		}
 		if (m_scrollLatch)
 		{
-			setOffset(m_scrollOffset + displacement.h());
+			setOffset(m_scrollOffset - displacement.h());
 			scrolled(displacement);
 		}
+		cdebug << boolalpha << e->id << "MOVED at" << e->mmLocal() << (e->id == m_downPointer) << geometry().contains(e->mmLocal()) << displacement << m_scrollLatch << m_scrollOffset << m_offset;
 	}
-
+	else if (auto e = dynamic_cast<IterateEvent*>(_e))
+	{
+		if (m_downPointer == -1)
+		{
+			cdebug << "ITERATE of" << textualTime(e->delta);
+			setAlive(physics(e->delta));
+		}
+	}
 	return false;
 }
 
 void ListViewBody::setOffset(float _offset)
 {
-	if (_offset < 0)
-		m_offset = _offset / 2;
-	else if (_offset > m_totalHeight - rect().h())
-		m_offset = m_totalHeight - rect().h() + (_offset - (m_totalHeight - rect().h())) / 2;
+	if (m_offset != _offset)
+	{
+		m_offset = _offset;
+		update(0);
+		setAlive(true);
+	}
+}
+
+bool ListViewBody::physics(Time _d)
+{
+	// Update offset state according to Time delta _d.
+	int offset = m_offset;
+	int maxOffset = m_totalHeight - rect().h();
+	if (offset < 0)
+		offset = min<float>(0, offset + toSeconds(_d) * 10);
+	else if (offset > maxOffset)
+		offset = max<float>(maxOffset, offset - toSeconds(_d) * 10);
+	if (offset == m_offset)
+		return false;
+	m_offset = offset;
+	update(0);
+	return true;
 }
 
 void ListViewBody::draw(Slate const& _slate, unsigned)
@@ -79,7 +107,15 @@ void ListViewBody::draw(Slate const& _slate, unsigned)
 	if (!m_model)
 		return;
 	unsigned itemCount = m_model->itemCount();
-	iCoord cursor(0, -m_offset);
+
+	int offset = m_offset;
+	int maxOffset = m_totalHeight - rect().h();
+	if (offset < 0)
+		offset /= 2;
+	else if (offset > maxOffset)
+		offset = (offset + maxOffset) / 2;
+
+	iCoord cursor(0, -offset);
 	for (unsigned i = 0; i < itemCount; ++i)
 	{
 		iSize itemSize = m_model->itemSize(i);

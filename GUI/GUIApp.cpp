@@ -146,18 +146,20 @@ bool GUIApp::ImageCache::fit(iRect _g, ViewLayerPtr _v)
 void GUIApp::registerAlive(View const& _v)
 {
 	m_alive.insert(_v);
+	m_joint.display->setAnimating();
 }
 
 void GUIApp::unregisterAlive(View const& _v)
 {
 	m_alive.erase(_v);
+	m_joint.display->releaseAnimating();
 }
 
-void GUIApp::tick()
+void GUIApp::iterate(Time _d)
 {
-	Super::tick();
-	TickEvent e;
-	e.now = runningTime();
+	Super::iterate(_d);
+	IterateEvent e;
+	e.delta = _d;
 	for (View const& v: m_alive)
 		v->event(&e);
 }
