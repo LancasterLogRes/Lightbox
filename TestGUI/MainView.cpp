@@ -1,4 +1,5 @@
 #include <Common/Common.h>
+#include <Common/thread.h>
 #include <GUI/TextLabel.h>
 #include <GUI/ToggleButton.h>
 #include <GUI/ListView.h>
@@ -46,14 +47,14 @@ void StringListModel::drawItem(unsigned _i, Slate const& _s)
 {
 	if (m_d && _i < m_d->size())
 	{
-		_s.text(m_d->at(_i), AtLeft, _s.main().lerp(0, 0.5), White);
+		_s.text(m_d->at(_i), AtLeft, _s.main().inset(_s.toPixels(fSize(3, 3))).lerp(0, 0.5), White);
 	}
 }
 
 fSize StringListModel::itemSize(unsigned _i)
 {
 	if (m_d && _i < m_d->size())
-		return GUIApp::style().regular.measure(m_d->at(_i)).size();
+		return GUIApp::style().regular.measure(m_d->at(_i)).size() + fSize(6, 6);
 	return fSize();
 }
 
@@ -64,6 +65,25 @@ class TestViewBody: public ViewCreator<ViewBody, TestViewBody>
 public:
 	TestViewBody()
 	{
+
+		cdebug << "Testing pthread...";
+		{
+			pthread_mutex_t m;
+			pthread_mutex_init(&m, nullptr);
+			pthread_mutex_lock(&m);
+			pthread_mutex_unlock(&m);
+			pthread_mutex_destroy(&m);
+		}
+		cdebug << "OK";
+
+		cdebug << "Testing mutex...";
+		{
+			mutex m;
+			m.lock();
+			m.unlock();
+		}
+		cdebug << "OK";
+
 		for (int i = 0; i < 99; ++i)
 			m_l += "Item " + toString(i + 1);
 		ListView l = ListViewBody::spawn(this, new StringListModel(&m_l));

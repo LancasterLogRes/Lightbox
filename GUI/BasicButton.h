@@ -58,6 +58,7 @@ protected:
 	virtual void released(bool _withFinger) { setDown(false); setLit(false); if (_withFinger) tapped(); }
 	virtual fSize specifyMinimumSize(fSize) const;
 	virtual void initGraphics();
+	virtual void finiGraphics();
 	virtual void enabledChanged();
 	virtual void updateLayers() { layer(1).show(isEnabled() && isLit()); }
 

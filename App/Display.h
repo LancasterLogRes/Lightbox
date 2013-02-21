@@ -30,24 +30,24 @@ public:
 	iSize sizePixels() const { return iSize(m_width, m_height); }
 	fSize sizeMM() const { return fSize(m_widthMM, m_heightMM); }
 
-	float toPixels(float _mm) const { return _mm / m_widthMM * m_width; }
+	float toPixels(float _mm) const { assert(this); return _mm / m_widthMM * m_width; }
 
-	iCoord toPixels(fCoord _mm) const { return iCoord(round(_mm.x() / m_widthMM * m_width), round(_mm.y() / m_heightMM * m_height)); }
-	iSize toUnalignedPixels(fSize _mm) const { return iSize(round(_mm.w() / m_widthMM * m_width), round(_mm.h() / m_heightMM * m_height)); }
-	iRect toPixels(fRect _mm) const { return iRect(toPixels(_mm.topLeft()), toPixels(_mm.bottomRight())); }
+	iCoord toPixels(fCoord _mm) const { assert(this); return iCoord(round(_mm.x() / m_widthMM * m_width), round(_mm.y() / m_heightMM * m_height)); }
+	iSize toUnalignedPixels(fSize _mm) const { assert(this); return iSize(round(_mm.w() / m_widthMM * m_width), round(_mm.h() / m_heightMM * m_height)); }
+	iRect toPixels(fRect _mm) const { assert(this); return iRect(toPixels(_mm.topLeft()), toPixels(_mm.bottomRight())); }
 
-	fCoord toPixelsF(fCoord _mm) const { return fCoord(_mm.x() / m_widthMM * m_width, _mm.y() / m_heightMM * m_height); }
-	fSize toPixelsF(fSize _mm) const { return fSize(_mm.w() / m_widthMM * m_width, _mm.h() / m_heightMM * m_height); }
-	fRect toPixelsF(fRect _mm) const { return fRect(toPixelsF(_mm.pos()), toPixelsF(_mm.size())); }
+	fCoord toPixelsF(fCoord _mm) const { assert(this); return fCoord(_mm.x() / m_widthMM * m_width, _mm.y() / m_heightMM * m_height); }
+	fSize toPixelsF(fSize _mm) const { assert(this); return fSize(_mm.w() / m_widthMM * m_width, _mm.h() / m_heightMM * m_height); }
+	fRect toPixelsF(fRect _mm) const { assert(this); return fRect(toPixelsF(_mm.pos()), toPixelsF(_mm.size())); }
 
-	fCoord fromPixels(iCoord _px) const { return fCoord(_px.x() * m_widthMM / m_width, _px.y() * m_heightMM / m_height); }
-	fSize fromPixels(iSize _px) const { return fSize(_px.w() * m_widthMM / m_width, _px.h() * m_heightMM / m_height); }
-	fRect fromPixels(iRect _px) const { return fRect(fromPixels(_px.pos()), fromPixels(_px.size())); }
+	fCoord fromPixels(iCoord _px) const { assert(this); return fCoord(_px.x() * m_widthMM / m_width, _px.y() * m_heightMM / m_height); }
+	fSize fromPixels(iSize _px) const { assert(this); return fSize(_px.w() * m_widthMM / m_width, _px.h() * m_heightMM / m_height); }
+	fRect fromPixels(iRect _px) const { assert(this); return fRect(fromPixels(_px.pos()), fromPixels(_px.size())); }
 
-	float fromPixels(float _px) const { return _px * m_widthMM / m_width; }
-	fCoord fromPixels(fCoord _px) const { return fCoord(_px.x() * m_widthMM / m_width, _px.y() * m_heightMM / m_height); }
-	fSize fromPixels(fSize _px) const { return fSize(_px.w() * m_widthMM / m_width, _px.h() * m_heightMM / m_height); }
-	fRect fromPixels(fRect _px) const { return fRect(fromPixels(_px.pos()), fromPixels(_px.size())); }
+	float fromPixels(float _px) const { assert(this); return _px * m_widthMM / m_width; }
+	fCoord fromPixels(fCoord _px) const { assert(this); return fCoord(_px.x() * m_widthMM / m_width, _px.y() * m_heightMM / m_height); }
+	fSize fromPixels(fSize _px) const { assert(this); return fSize(_px.w() * m_widthMM / m_width, _px.h() * m_heightMM / m_height); }
+	fRect fromPixels(fRect _px) const { assert(this); return fRect(fromPixels(_px.pos()), fromPixels(_px.size())); }
 
 #if LIGHTBOX_USE_XLIB
 	void* xDisplay() const { return m_xDisplay; }

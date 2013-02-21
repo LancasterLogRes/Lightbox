@@ -43,6 +43,12 @@ GUIApp::~GUIApp()
 {
 }
 
+void GUIApp::go()
+{
+	Super::go();
+	m_startTime = wallTime();
+}
+
 void GUIApp::initGraphics(Display& _d)
 {
 	cnote << "Initializing GUI graphics";
@@ -145,14 +151,17 @@ bool GUIApp::ImageCache::fit(iRect _g, ViewLayerPtr _v)
 
 void GUIApp::registerAlive(View const& _v)
 {
+	lock_guard<mutex> l(x_alive);
 	m_alive.insert(_v);
 	m_joint.display->setAnimating();
 }
 
 void GUIApp::unregisterAlive(View const& _v)
 {
+	lock_guard<mutex> l(x_alive);
 	m_alive.erase(_v);
-	m_joint.display->releaseAnimating();
+	if (m_alive.empty())
+		m_joint.display->releaseAnimating();
 }
 
 void GUIApp::iterate(Time _d)
@@ -160,7 +169,14 @@ void GUIApp::iterate(Time _d)
 	Super::iterate(_d);
 	IterateEvent e;
 	e.delta = _d;
-	for (View const& v: m_alive)
+
+	std::set<View> alive;
+	{
+		x_alive.lock();
+		alive = m_alive;
+		x_alive.unlock();
+	}
+	for (View const& v: alive)
 		v->event(&e);
 }
 
@@ -413,12 +429,15 @@ bool GUIApp::keyEvent(int _code, int _direction)
 bool GUIApp::motionEvent(int _id, iCoord _pos, int _direction)
 {
 	TouchEvent* ev = nullptr;
-	if (_direction > 0)
-		ev = new TouchDownEvent(_id, joint().display->fromPixels(_pos), _pos);
-	else if (_direction < 0)
-		ev = new TouchUpEvent(_id, joint().display->fromPixels(_pos), _pos);
-	else if (m_pointerLock[_id])
-		ev = new TouchMoveEvent(_id, joint().display->fromPixels(_pos), _pos);
+	if (joint().display)
+	{
+		if (_direction > 0)
+			ev = new TouchDownEvent(_id, joint().display->fromPixels(_pos), _pos);
+		else if (_direction < 0)
+			ev = new TouchUpEvent(_id, joint().display->fromPixels(_pos), _pos);
+		else if (m_pointerLock[_id])
+			ev = new TouchMoveEvent(_id, joint().display->fromPixels(_pos), _pos);
+	}
 
 	if (!ev)
 		return false;

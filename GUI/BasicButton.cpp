@@ -64,6 +64,11 @@ void BasicButtonBody::initGraphics()
 	updateLayers();
 }
 
+void BasicButtonBody::finiGraphics()
+{
+	m_glowText = Texture2D();
+}
+
 void BasicButtonBody::setLit(bool _lit)
 {
 	if (m_isLit != _lit)

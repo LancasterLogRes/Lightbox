@@ -38,7 +38,6 @@ void TestGUIApp::sendInitialEvents()
 void TestGUIApp::go()
 {
 	Super::go();
-
 	m_mainView = new MainView;
 	m_mainView->setParent(root());
 	root()->setLayout(new OverlayLayout);

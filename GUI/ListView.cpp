@@ -52,7 +52,7 @@ bool ListViewBody::event(Event* _e)
 		assert(pointerLocked(e->id));
 		fSize displacement = e->mmLocal() - m_downPos;
 		cdebug << boolalpha << e->id << "MOVE at" << e->mmLocal() << (e->id == m_downPointer) << geometry().contains(e->mmLocal()) << displacement << m_scrollLatch << m_scrollOffset << m_offset;
-		if (!m_scrollLatch && displacement.lengthSquared() > sqr(GUIApp::joint().display->toPixels(c_mmMinScrollDistance)))
+		if (!m_scrollLatch && displacement.lengthSquared() > sqr(c_mmMinScrollDistance))
 		{
 			// Switch to scroll mode.
 			m_scrollLatch = true;
@@ -91,10 +91,12 @@ bool ListViewBody::physics(Time _d)
 	// Update offset state according to Time delta _d.
 	float offset = m_offset;
 	float maxOffset = m_totalHeight - geometry().h();
+	const Time c_hlOuter = FromMsecs<75>::value;
+	const Time c_mmOuter = FromMsecs<100>::value;
 	if (offset < 0)
-		offset = min<float>(0, offset + toSeconds(_d) * 1000);
+		offset = min<float>(0, halfLifeDecay(c_hlOuter, _d, offset) + float(_d) / c_mmOuter);
 	else if (offset > maxOffset)
-		offset = max<float>(maxOffset, offset - toSeconds(_d) * 1000);
+		offset = max<float>(maxOffset, maxOffset + halfLifeDecay(c_hlOuter, _d, offset - maxOffset) - float(_d) / c_mmOuter);
 	if (offset == m_offset)
 		return false;
 	m_offset = offset;
@@ -115,6 +117,7 @@ void ListViewBody::draw(Slate const& _slate, unsigned)
 	else if (offset > maxOffset)
 		offset = (offset + maxOffset) / 2;
 
+	int drawn = 0;
 	fCoord cursor(0, -offset);
 	for (unsigned i = 0; i < itemCount; ++i)
 	{
@@ -129,9 +132,11 @@ void ListViewBody::draw(Slate const& _slate, unsigned)
 			Slate subSlate = _slate.sub(r);
 			subSlate.rect(subSlate.main(), Color(0.1), 0.01);
 			m_model->drawItem(i, subSlate);
+			drawn++;
 		}
 		cursor.setY(cursor.y() + itemSize.h());
 	}
+	cdebug << "LVB: drawn" << drawn;
 }
 
 void ListViewBody::checkHeight()

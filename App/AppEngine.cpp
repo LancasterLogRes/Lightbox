@@ -1,4 +1,5 @@
 #include "Global.h"
+#include <Common/thread.h>
 #if LIGHTBOX_ANDROID
 #include <jni.h>
 #include <android_native_app_glue.h>
@@ -144,7 +145,6 @@ void AppEngine::exec()
 	for (bool carryOn = true; carryOn;)
 	{
 		cbug(50) << textualTime(wallTime() - begin) << "AppEngine: tick";
-
 		if (wallTime() - lastTick >= FromSeconds<1>::value)
 		{
 			m_app->tick();
@@ -152,12 +152,14 @@ void AppEngine::exec()
 		}
 
 		cbug(50) << textualTime(wallTime() - begin) << "AppEngine: iterate";
-
+		{
+			mutex m;
+			lock_guard<mutex> l(m);
+		}
 		m_app->iterate(wallTime() - lastIterate);
 		lastIterate = wallTime();
 
 		cbug(50) << textualTime(wallTime() - begin) << "AppEngine: draw";
-
 		if ((m_display && (/*true || */m_display->isAnimating()))/* && wallTime() - lastDraw >= c_frameTime*/)
 		{
 			lastDraw = wallTime();

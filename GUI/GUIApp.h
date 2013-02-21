@@ -1,5 +1,6 @@
 #pragma once
 
+#include <Common/thread.h>
 #include <array>
 #include <set>
 #include <tuple>
@@ -50,7 +51,7 @@ public:
 	virtual void finiGraphics(Display& _d);
 	virtual bool motionEvent(int _id, iCoord _pos, int _direction);
 	virtual bool keyEvent(int _code, int _direction);
-	virtual void go() { Super::go(); m_startTime = wallTime(); }
+	virtual void go();
 	virtual void iterate(Time _d);
 
 	bool lockPointer(int _id, View const& _v);
@@ -89,6 +90,8 @@ private:
 
 	std::array<View, s_maxPointers> m_pointerLock;
 	std::set<View> m_alive;
+	mutex x_alive;
+
 };
 
 template <class _S> _S& operator<<(_S& _out, GUIApp::ImageCache const& _ic)

@@ -4,6 +4,7 @@
 
 #include <functional>
 #include <pthread.h>
+#include "Global.h"
 
 namespace Lightbox
 {
