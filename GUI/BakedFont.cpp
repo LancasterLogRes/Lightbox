@@ -115,9 +115,11 @@ void BakedFont::draw(fCoord _anchor, string const& _text, RGBA _c, AnchorType _t
 
 	assert(m_program.isValid());
 
-	std::vector<std::array<GLshort, 2> > layout(_text.size() * 6);
-	std::vector<std::array<GLushort, 2> > source(_text.size() * 6);
-	std::vector<std::array<GLubyte, 2> > size(_text.size() * 6);
+	unsigned charCount = _text.size();
+
+	std::vector<std::array<GLshort, 2> > layout(charCount * 6);
+	std::vector<std::array<GLushort, 2> > source(charCount * 6);
+	std::vector<std::array<GLubyte, 2> > size(charCount * 6);
 
 	float width = 0;
 	for (uint8_t c: _text)
@@ -130,14 +132,17 @@ void BakedFont::draw(fCoord _anchor, string const& _text, RGBA _c, AnchorType _t
 	float x = _t & AtLeft ? _anchor.x() - bb.left() : _t & AtRight ? _anchor.x() - bb.right() : (_anchor.x() - bb.middle().x());
 	float y = _t & AtTop ? _anchor.y() - bb.top() : _t & AtBottom ? _anchor.y() - bb.bottom() : _t & AtBaseline ? _anchor.y() : (_anchor.y() - bb.middle().y());
 
-	for (unsigned i = 0; i < _text.size(); ++i)
+	for (unsigned i = 0; i < charCount; ++i)
 	{
+		assert (i < _text.size());
 		stbtt_aligned_quad q;
-		stbtt_GetBakedQuad((stbtt_bakedchar*)m_charData, 512, 512, _text[i] - s_charDataFirst, &x, &y, &q, 1);
+		stbtt_GetBakedQuad((stbtt_bakedchar*)m_charData, m_texture.size().w(), m_texture.size().h(), _text[i] - s_charDataFirst, &x, &y, &q, 1);
 		for (int j = 0; j < 6; ++j)
-			layout[i * 6 + j] = {{(GLshort)q.x0, (GLshort)q.y0}},
-			source[i * 6 + j] = {{(GLushort)(q.s0 * 512), (GLushort)(q.t0 * 512)}},
+		{
+			layout[i * 6 + j] = {{(GLshort)q.x0, (GLshort)q.y0}};
+			source[i * 6 + j] = {{(GLushort)(q.s0 * m_texture.size().w()), (GLushort)(q.t0 * m_texture.size().h())}};
 			size[i * 6 + j] = {{GLubyte(q.x1 - q.x0), GLubyte(q.y1 - q.y0)}};
+		}
 	}
 
 	ProgramUser u(m_program);
@@ -145,12 +150,12 @@ void BakedFont::draw(fCoord _anchor, string const& _text, RGBA _c, AnchorType _t
 	m_tex = m_texture;
 	m_texSize = fVector2(m_texture.size().w(), m_texture.size().h());
 	m_index.setData(m_buffer, 2);
-	for (int off = 0; off < (int)_text.size(); off += s_maxAtOnce)
+	for (int off = 0; off < (int)charCount; off += s_maxAtOnce)
 	{
 		m_layout.setStaticData(layout.data() + off * 6, 2);
 		m_source.setStaticData(source.data() + off * 6, 2);
 		m_size.setStaticData(size.data() + off * 6, 2);
-		u.triangles(min<int>(_text.size() - off, s_maxAtOnce) * 6);
+		u.triangles(min<int>(charCount - off, s_maxAtOnce) * 6);
 	}
 }
 

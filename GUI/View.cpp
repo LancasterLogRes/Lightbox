@@ -1,8 +1,8 @@
 #include <regex>
+#include <Common/StreamIO.h>
 #include <LGL.h>
 #include <App/Display.h>
 #include <App/AppEngine.h>
-#include <Common/StreamIO.h>
 #include "GUIApp.h"
 #include "Slate.h"
 #include "View.h"
@@ -50,10 +50,19 @@ ViewBody::~ViewBody()
 	clearChildren();
 }
 
+void ViewBody::setThreadsafe()
+{
+	if (!m_mutex)
+		m_mutex = shared_ptr<mutex>(new mutex);
+}
+
 void ViewBody::executeDraw(Slate const& _c, unsigned _layer)
 {
 	if (m_graphicsInitialized)
+	{
+		ViewLock l(this);
 		draw(_c, _layer);
+	}
 }
 
 void ViewBody::clearChildren()

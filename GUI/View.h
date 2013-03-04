@@ -6,6 +6,7 @@
 #include <boost/utility.hpp>
 #include <boost/intrusive_ptr.hpp>
 #include <boost/any.hpp>
+#include <Common/thread.h>
 #include <Common/Pimpl.h>
 #include <Common/Flags.h>
 #include <Common/MemberMap.h>
@@ -140,10 +141,21 @@ public:
 
 typedef std::vector<Layer> Layers;
 
+class ViewLock
+{
+public:
+	inline ViewLock(ViewBody* _v);
+	inline ~ViewLock();
+
+private:
+	ViewBody* m_v;
+};
+
 class ViewBody: public boost::noncopyable
 {
 	template <class _T, class _I> friend class ViewCreator;
 	friend class ViewLayerPtr;
+	friend class ViewLock;
 	friend class GUIApp;
 	friend class Slate;
 	inline friend void intrusive_ptr_add_ref(ViewBody* _v);
@@ -169,6 +181,7 @@ public:
 	void setEnabled(bool _en) { m_isEnabled = _en; enabledChanged(); }
 	void show(bool _vi) { if (m_isShown != _vi) { m_isShown = _vi; shownChanged(); if (!m_parent || m_parent->isVisible()) visibilityChangedRecursive(m_isShown); } }
 	void hide() { show(false); }
+	void setThreadsafe();
 
 	void setChildIndex(ChildIndex _i) { if (m_parent) { m_references++; m_parent->m_children.erase(this); m_childIndex = _i; m_parent->m_children.insert(this); m_references--; } else m_childIndex = _i; noteMetricsChanged(); }
 	void setLayout(Layout* _newLayout) { m_layout = _newLayout; if (m_layout) { m_layout->m_view = this; noteLayoutDirty(); } }
@@ -318,6 +331,7 @@ private:
 	bool m_layoutDirty;					///<
 	mutable bool m_visibleLayoutChanged;///< True if our, or any of our ancestors', layout has been changed and said view is visible.
 
+	std::shared_ptr<mutex> m_mutex;		///< The mutex of this object if we're thread-safe - nullptr if not (default).
 	bool m_graphicsInitialized;			///< True if we have initialized graphics (with initGraphics()) and not subsequently finalized (with finiGraphics()).
 
 	Layers m_layers;					///< The definitions of each layer.
@@ -350,6 +364,18 @@ inline void ViewLayerPtr::draw(Slate const& _c) const
 inline Layer* ViewLayerPtr::get() const
 {
 	return &(view->m_layers[layer]);
+}
+
+inline ViewLock::ViewLock(ViewBody* _v): m_v(_v)
+{
+	if (m_v->m_mutex)
+		m_v->m_mutex->lock();
+}
+
+inline ViewLock::~ViewLock()
+{
+	if (m_v->m_mutex)
+		m_v->m_mutex->unlock();
 }
 
 template <class _Inherits, class _ViewBody>

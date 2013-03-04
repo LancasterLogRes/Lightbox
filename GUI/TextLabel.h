@@ -21,8 +21,8 @@ public:
 	Font const& font() const { return m_font; }
 	Color const& color() const { return m_color; }
 
-	void setText(std::string const& _text) { m_text = _text; update(); }
-	void setFont(Font const& _font) { m_font = _font; update(); }
+	void setText(std::string const& _text) { ViewLock l(this); m_text = _text; update(); }
+	void setFont(Font const& _font) { ViewLock l(this); m_font = _font; update(); }
 	void setColor(Color const& _color) { m_color = _color; update(); }
 	void setRule(bool _enable = true) { m_rule = _enable; update(); }
 
