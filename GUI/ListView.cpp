@@ -43,29 +43,31 @@ bool ListViewBody::event(Event* _e)
 		if (e->id == m_downPointer)
 		{
 			m_downPointer = -1;
-			released(geometry().contains(e->mmLocal()) && !m_scrollLatch, e->mmLocal());
+			released(geometry().contains(e->mmLocal()) && !m_scrollLatch, e->mmLocal() - geometry().pos());
 		}
 		return true;
 	}
 	else if (auto e = dynamic_cast<TouchMoveEvent*>(_e))
 	{
-		assert(pointerLocked(e->id));
-		fSize displacement = e->mmLocal() - m_downPos;
-		cdebug << boolalpha << e->id << "MOVE at" << e->mmLocal() << (e->id == m_downPointer) << geometry().contains(e->mmLocal()) << displacement << m_scrollLatch << m_scrollOffset << m_offset;
-		if (!m_scrollLatch && displacement.lengthSquared() > sqr(c_mmMinScrollDistance))
+		if (pointerLocked(e->id))
 		{
-			// Switch to scroll mode.
-			m_scrollLatch = true;
-			m_scrollOffset = m_offset;
-			m_inertia = 0;
+			fSize displacement = e->mmLocal() - m_downPos;
+			cdebug << boolalpha << e->id << "MOVE at" << e->mmLocal() << (e->id == m_downPointer) << geometry().contains(e->mmLocal()) << displacement << m_scrollLatch << m_scrollOffset << m_offset;
+			if (!m_scrollLatch && displacement.lengthSquared() > sqr(c_mmMinScrollDistance))
+			{
+				// Switch to scroll mode.
+				m_scrollLatch = true;
+				m_scrollOffset = m_offset;
+				m_inertia = 0;
+			}
+			if (m_scrollLatch)
+			{
+				setOffset(m_scrollOffset - displacement.h());
+				scrolled(displacement);
+				m_inertia = m_inertia / 2 - displacement.h();
+			}
+//			cdebug << boolalpha << e->id << "MOVED at" << e->mmLocal() << (e->id == m_downPointer) << geometry().contains(e->mmLocal()) << displacement << m_scrollLatch << m_scrollOffset << m_offset;
 		}
-		if (m_scrollLatch)
-		{
-			setOffset(m_scrollOffset - displacement.h());
-			scrolled(displacement);
-			m_inertia = m_inertia / 2 - displacement.h();
-		}
-//		cdebug << boolalpha << e->id << "MOVED at" << e->mmLocal() << (e->id == m_downPointer) << geometry().contains(e->mmLocal()) << displacement << m_scrollLatch << m_scrollOffset << m_offset;
 	}
 	else if (auto e = dynamic_cast<IterateEvent*>(_e))
 	{
@@ -80,7 +82,7 @@ bool ListViewBody::event(Event* _e)
 
 void ListViewBody::released(bool _properClick, fCoord _pos)
 {
-	if (geometry().contains(_pos) && _properClick)
+	if (_properClick)
 	{
 		fCoord cursor(0, -visibleOffset());
 		unsigned itemCount = m_model->itemCount();
@@ -120,7 +122,7 @@ bool ListViewBody::physics(Time _d)
 {
 	// Update offset state according to Time delta _d.
 	float offset = m_offset;
-	float maxOffset = m_totalHeight - geometry().h();
+	float maxOffset = max(0.f, m_totalHeight - geometry().h());
 	const Time c_hlOuter = FromMsecs<75>::value;
 	const Time c_mmOuter = FromMsecs<100>::value;
 
@@ -147,7 +149,7 @@ bool ListViewBody::physics(Time _d)
 
 float ListViewBody::visibleOffset() const
 {
-	float maxOffset = m_totalHeight - geometry().h();
+	float maxOffset = max(0.f, m_totalHeight - geometry().h());
 	float offset = m_offset;
 	if (offset < 0)
 		offset /= 2;

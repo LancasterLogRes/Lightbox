@@ -93,7 +93,6 @@ private:
 	std::array<View, s_maxPointers> m_pointerLock;
 	std::set<View> m_alive;
 	mutex x_alive;
-
 };
 
 template <class _S> _S& operator<<(_S& _out, GUIApp::ImageCache const& _ic)
