@@ -23,6 +23,7 @@ GUIApp::GUIApp():
 	m_showCachePage(-1)
 {
 	m_root = FrameBody::create();
+	m_root->m_isRoot = true;
 
 	m_style.fore = Color(.5f);
 	m_style.back = Color(0.f);
@@ -291,6 +292,8 @@ bool GUIApp::drawGraphics()
 					if (v->isDirty() && v->isReadyForCache())
 					{
 						RenderToTextureSlate con(cache.fb, i.second.pos, v->overdraw());
+						if (v.view->m_prefill.a() > 0.f && v.layer == 0)
+							con.rect(con.limits(), v.view->m_prefill);
 						v.draw(con);
 						if (!v.view->m_isEnabled)
 							con.rect(con.limits(), Color(0.f, .5f));
@@ -345,8 +348,10 @@ bool GUIApp::drawGraphics()
 ///						c.offset = joint().display->fromPixels(v.view->m_globalRect).topLeft();
 						LB_GL(glEnable, GL_SCISSOR_TEST);
 						LB_GL(glScissor, globalLayer.x(), joint().display->sizePixels().h() - globalLayer.bottom(), globalLayer.w(), globalLayer.h());
-						v.draw(c);
 						iRect canvas(iCoord(0, 0), globalLayer.size());
+						if (v.view->m_prefill.a() > 0.f && v.layer == 0)
+							c.rect(canvas, v.view->m_prefill);
+						v.draw(c);
 						if (!v.view->m_isEnabled && v.layer == 0)
 							c.rect(canvas, Color(0.f, .5f));
 						LB_GL(glDisable, GL_SCISSOR_TEST);

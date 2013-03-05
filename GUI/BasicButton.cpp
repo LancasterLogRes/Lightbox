@@ -9,10 +9,8 @@
 using namespace std;
 using namespace Lightbox;
 
-BasicButtonBody::BasicButtonBody(std::string const& _text, Color _c, Font _f, Grouping _grouping):
-	m_text(_text),
+BasicButtonBody::BasicButtonBody(Color _c, Grouping _grouping):
 	m_color(_c),
-	m_font(_f),
 	m_grouping(_grouping),
 	m_isLit(false),
 	m_isDown(false)
@@ -45,31 +43,10 @@ Layers BasicButtonBody::layers()
 	return {{ Layer(), Layer(borderMargin(), Premultiplied) }};
 }
 
-void BasicButtonBody::updateTexture()
-{
-	if (m_text.size())
-	{
-		Font f = m_font.isValid() ? m_font : GUIApp::style().bold;
-		string t = boost::algorithm::to_upper_copy(m_text);
-		Texture2D baseText(iSize(f.measurePx(t).size()) + (iSize)GUIApp::joint().glowPixels * 2);
-		{
-			RenderToTextureSlate c(baseText);
-			c.text(f, iCoord(baseText.size() / 2), t, Color(1.f / (GUIApp::joint().glowLevels * 2 + 1)));
-		}
-		m_glowText = GUIApp::joint().makeGlowerNear(baseText);
-	}
-}
-
 void BasicButtonBody::initGraphics()
 {
-	updateTexture();
 	setLayers(layers());
 	updateLayers();
-}
-
-void BasicButtonBody::finiGraphics()
-{
-	m_glowText = Texture2D();
 }
 
 void BasicButtonBody::setLit(bool _lit)
@@ -148,23 +125,13 @@ void BasicButtonBody::draw(Slate const& _c, unsigned _l)
 {
 	auto inner = rect().inset(innerMargin(effectiveGrouping()));
 	drawButton(_c, inner, m_color, m_isDown, _l == 0, _l == 1, true);
-	if (_l == 0)
-		_c.text(m_font.isValid() ? m_font : m_isDown ? GUIApp::style().bold : GUIApp::style().regular, inner.lerp(.5f, .5f), boost::algorithm::to_upper_copy(m_text), Color(m_color.hue(), m_color.sat() * .75f, m_color.value() * .75f));
-	if (_l == 1)
-	{
-		ProgramUser u(GUIApp::joint().colorize);
-		u.uniform("u_amplitude") = 2.f;
-		u.uniform("u_overglow") = 1.f;
-		u.uniform("u_color") = (fVector4)m_color.toRGBA();
-		_c.blit(m_glowText, inner.lerp(.5f, .5f) - (iSize)m_glowText.size() / 2);
-	}
 }
 
 bool BasicButtonBody::event(Event* _e)
 {
 	if (auto e = dynamic_cast<TouchDownEvent*>(_e))
 	{
-		cdebug << m_text << ":" << boolalpha << e->id << "DOWN at" << e->mmLocal() << geometry().contains(e->mmLocal());
+		cdebug << "Button:" << boolalpha << e->id << "DOWN at" << e->mmLocal() << geometry().contains(e->mmLocal());
 		m_downPointer = e->id;
 		lockPointer(e->id);
 		pushed();
@@ -172,7 +139,7 @@ bool BasicButtonBody::event(Event* _e)
 	}
 	else if (auto e = dynamic_cast<TouchUpEvent*>(_e))
 	{
-		cdebug << m_text << ":" << boolalpha << e->id << "UP at" << e->mmLocal() << m_isDown << (e->id == m_downPointer) << geometry().contains(e->mmLocal());
+		cdebug << "Button:" << boolalpha << e->id << "UP at" << e->mmLocal() << m_isDown << (e->id == m_downPointer) << geometry().contains(e->mmLocal());
 		if (m_isDown && e->id == m_downPointer)
 		{
 			m_downPointer = -1;
@@ -193,10 +160,4 @@ void BasicButtonBody::enabledChanged()
 {
 	Super::enabledChanged();
 	updateLayers();
-}
-
-fSize BasicButtonBody::specifyMinimumSize(fSize) const
-{
-	// Until Fonts work without renderer.
-	return GUIApp::get() ? GUIApp::style().bold.measure(m_text).size() : fSize(0, 0);
 }

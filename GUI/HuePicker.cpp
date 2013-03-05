@@ -8,7 +8,7 @@ using namespace std;
 using namespace Lightbox;
 
 HuePickerBody::HuePickerBody(Color _c, Grouping _grouping):
-	ViewCreator(string(), _c, Font(), _grouping),
+	ViewCreator(_c, _grouping),
 	m_hue(-1.f),
 	m_middle(White)
 {

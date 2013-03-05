@@ -20,3 +20,7 @@
 #include "MarkdownView.h"
 #include "Slider.h"
 #include "ListView.h"
+#include "DropListView.h"
+#include "Adaptors.h"
+#include "ListModel.h"
+#include "ListModelUser.h"

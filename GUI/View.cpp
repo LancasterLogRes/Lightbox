@@ -1,4 +1,4 @@
-#include <regex>
+#include <boost/range/adaptors.hpp>
 #include <Common/StreamIO.h>
 #include <LGL.h>
 #include <App/Display.h>
@@ -25,6 +25,7 @@ ViewBody::ViewBody():
 	m_isShown(true),
 	m_isEnabled(true),
 	m_isAlive(false),
+	m_isRoot(false),
 	m_visibleLayoutChanged(true),
 	m_graphicsInitialized(false),
 	m_layers(1)
@@ -96,8 +97,14 @@ void ViewBody::setParent(View const& _p)
 	{
 		auto op = m_parent;
 		if (m_parent)
+		{
 			m_parent->m_children.erase(this);
+		}
 		m_parent = _p.get();
+
+		if (!m_parent || m_parent->isVisible())
+			visibilityChangedRecursive(m_isShown);
+
 		if (_p)
 		{
 			if (_p->m_children.size())
@@ -109,6 +116,7 @@ void ViewBody::setParent(View const& _p)
 			// We can safely kill this safety measure now.
 			finalConstructor();
 		}
+
 		if (op)
 			op->noteLayoutDirty();
 		if (m_parent)
@@ -203,10 +211,11 @@ bool ViewBody::handleEvent(Event* _e)
 		e->m_mmLocal -= p;
 
 	bool ret = false;
-	for (auto const& ch: m_children)
-		if (ch->sensesEvent(_e) && ch->handleEvent(_e))
+	for (auto const& ch: boost::adaptors::reverse(m_children))
+		if (ch->sensesEvent(_e))
 		{
-			ret = true;
+			if (ch->handleEvent(_e))
+				ret = true;
 			break;
 		}
 

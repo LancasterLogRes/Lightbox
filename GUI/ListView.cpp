@@ -8,11 +8,9 @@ using namespace Lightbox;
 
 ListViewBody::ListViewBody(ListModelPtr const& _model):
 	m_offset		(0),
-	m_model			(_model),
-	m_selected		(-1),
 	m_downPointer	(-1)
 {
-	noteItemsChanged();
+	setModel(_model);
 }
 
 ListViewBody::~ListViewBody()
@@ -85,18 +83,17 @@ void ListViewBody::released(bool _properClick, fCoord _pos)
 	if (_properClick)
 	{
 		fCoord cursor(0, -visibleOffset());
-		unsigned itemCount = m_model->itemCount();
-		for (unsigned i = 0; i < itemCount; ++i)
+		unsigned iC = itemCount();
+		for (unsigned i = 0; i < iC; ++i)
 		{
-			fSize itemSize = m_model->itemSize(i);
-			fRect itemRect(cursor, fSize(max(itemSize.w(), geometry().w()), itemSize.h()));
+			fSize iS = itemSize(i);
+			fRect itemRect(cursor, fSize(max(iS.w(), geometry().w()), iS.h()));
 			if (itemRect.contains(_pos))
 			{
-				m_selected = i;
-				selected();
+				setCurrentId(id(i));
 				break;
 			}
-			cursor.setY(cursor.y() + itemSize.h());
+			cursor.setY(cursor.y() + iS.h());
 		}
 	}
 	update();
@@ -112,10 +109,11 @@ void ListViewBody::setOffset(float _offset)
 	}
 }
 
-void ListViewBody::selected()
+void ListViewBody::currentChanged(ModelId)
 {
-	if (m_onSelected)
-		m_onSelected(this);
+	update();
+	if (m_onCurrentChanged)
+		m_onCurrentChanged(this);
 }
 
 bool ListViewBody::physics(Time _d)
@@ -160,16 +158,14 @@ float ListViewBody::visibleOffset() const
 
 void ListViewBody::draw(Slate const& _slate, unsigned)
 {
-	if (!m_model)
-		return;
-	unsigned itemCount = m_model->itemCount();
+	unsigned iC = itemCount();
 
 	int drawn = 0;
 	fCoord cursor(0, -visibleOffset());
-	for (unsigned i = 0; i < itemCount; ++i)
+	for (unsigned i = 0; i < iC; ++i)
 	{
-		fSize itemSize = m_model->itemSize(i);
-		fRect itemRect(cursor, fSize(max(itemSize.w(), geometry().w()), itemSize.h()));
+		fSize iS = itemSize(i);
+		fRect itemRect(cursor, fSize(max(iS.w(), geometry().w()), iS.h()));
 		iRect r = _slate.toPixels(itemRect);
 		// boundary glow effects will be killed
 		if (r.isBelow(_slate.main()))
@@ -177,12 +173,12 @@ void ListViewBody::draw(Slate const& _slate, unsigned)
 		if (!r.isAbove(_slate.main()))
 		{
 			Slate subSlate = _slate.sub(r);
-			bool s = (int)i == m_selected;
+			bool s = id(i) == currentId();
 			subSlate.rect(subSlate.main(), Color(s ? 0.075 : 0.15), s ? 0.03 : -0.01);
-			m_model->drawItem(i, subSlate, s);
+			drawItem(i, subSlate);
 			drawn++;
 		}
-		cursor.setY(cursor.y() + itemSize.h());
+		cursor.setY(cursor.y() + iS.h());
 	}
 	cdebug << "LVB: drawn" << drawn;
 }
@@ -190,12 +186,9 @@ void ListViewBody::draw(Slate const& _slate, unsigned)
 void ListViewBody::checkHeight()
 {
 	m_totalHeight = 0;
-	if (m_model)
-	{
-		unsigned itemCount = m_model->itemCount();
-		for (unsigned i = 0; i < itemCount; ++i)
-			m_totalHeight += m_model->itemSize(i).h();
-	}
+	unsigned iC = itemCount();
+	for (unsigned i = 0; i < iC; ++i)
+		m_totalHeight += itemSize(i).h();
 }
 
 void ListViewBody::initGraphics()
@@ -203,14 +196,15 @@ void ListViewBody::initGraphics()
 	checkHeight();
 }
 
-void ListViewBody::noteItemsChanged()
+void ListViewBody::itemsChanged()
 {
 	// TODO: fix offset if necessary.
 	checkHeight();
 	update();
 }
 
-void ListViewBody::noteItemChanged(unsigned)
+void ListViewBody::itemChanged(unsigned)
 {
-	noteItemsChanged();
+	// height changes won't work here :(
+	update();
 }

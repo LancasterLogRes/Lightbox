@@ -9,6 +9,7 @@
 #include <Common/thread.h>
 #include <Common/Pimpl.h>
 #include <Common/Flags.h>
+#include <Common/Color.h>
 #include <Common/MemberMap.h>
 #include <App/Display.h>
 #include "Global.h"
@@ -235,7 +236,7 @@ public:
 	bool isEnabled() const { return m_isEnabled; }
 	bool isShown() const { return m_isShown; }
 	bool isHidden() const { return !m_isShown; }
-	bool isVisible() const { return m_isShown && (!m_parent || parent()->isVisible()); }
+	bool isVisible() const { return m_isShown && (m_isRoot || (m_parent && parent()->isVisible())); }
 	bool isAlive() const { return m_isAlive; }
 	ChildIndex childIndex() const { return m_childIndex; }
 	fRect geometry() const { return m_geometry; }
@@ -267,6 +268,8 @@ public:
 	fSize maximumSize(fSize _space = fSize(32768.f, 32768.f)) const { return specifyMaximumSize(_space); }
 	fSize fit(fSize _space) const { return specifyFit(_space); }
 
+	void setPrefill(Color _c) { m_prefill = _c; Layer::refresh(); }
+
 //protected:
 //	virtual MemberMap propertyMap() const { return MemberMap(); }
 
@@ -287,6 +290,7 @@ protected:
 	void releasePointer(int _id);
 	bool pointerLocked(int _id);
 
+//	void setPrefill(Color _c) { m_prefill = _c; Layer::refresh(); }
 	void setLayers(Layers const& _l);
 	Layer& layer(unsigned _i) { return m_layers[std::min<unsigned>(_i, m_layers.size() - 1)]; }
 
@@ -328,8 +332,10 @@ private:
 	bool m_isShown;						///< Whether we would indeed draw ourselves should our parent be visible. Necessary but not sufficient for being visible.
 	bool m_isEnabled;					///< Whether we are interactive. Doesn't affect visibility.
 	bool m_isAlive;						///< If true, event() gets called with a IterateEvent object frequently.
+	bool m_isRoot;						///< True if we are the the root view. There's only one.
 	bool m_layoutDirty;					///<
 	mutable bool m_visibleLayoutChanged;///< True if our, or any of our ancestors', layout has been changed and said view is visible.
+	Color m_prefill;					///< If alpha > 0.f, will pre-fill the widget's space with this.
 
 	std::shared_ptr<mutex> m_mutex;		///< The mutex of this object if we're thread-safe - nullptr if not (default).
 	bool m_graphicsInitialized;			///< True if we have initialized graphics (with initGraphics()) and not subsequently finalized (with finiGraphics()).

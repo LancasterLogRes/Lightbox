@@ -28,7 +28,8 @@ SOURCES += \
     RenderToTextureSlate.cpp \
     Slider.cpp \
     ListView.cpp \
-    MarkdownView.cpp
+	MarkdownView.cpp \
+DropListView.cpp
 
 HEADERS += \
     View.h \
@@ -55,8 +56,19 @@ HEADERS += \
     RenderToTextureSlate.h \
     Slider.h \
     ListView.h \
-    MarkdownView.h
+	MarkdownView.h \
+	Adaptors.h \
+DropListView.h
 OTHER_FILES += \
     Shaders.glsl \
     HueWheel.glsl \
     LightBar.glsl
+
+HEADERS += \
+    ListModel.h
+
+HEADERS += \
+    ListModelUser.h
+
+SOURCES += \
+    ListModelUser.cpp

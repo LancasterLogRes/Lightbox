@@ -33,8 +33,7 @@ public:
 	void toggle(bool _userEvent = false) { setChecked(!isChecked(), _userEvent); }
 
 protected:
-	ToggleButtonBody(std::string const& _text = std::string(), Color _c = White, Font _f = Font(), Grouping _grouping = NoGrouping);
-	ToggleButtonBody(std::string const& _text, Color _c, Grouping _grouping): ToggleButtonBody(_text, _c, Font(), _grouping) {}
+	explicit ToggleButtonBody(Color _c = White, Grouping _grouping = NoGrouping);
 
 	virtual void pushed() { setDown(true); }
 	virtual void released(bool _withFinger);
@@ -52,5 +51,12 @@ private:
 
 inline ToggleButton const& operator^(ToggleButton const& _a, ToggleButton const& _b) { _a->setExclusiveWith(_b); return _a; }
 template <class _T> inline _T const& operator<<(_T const& _t, ToggleButton const& _a) { _a->setOnChecked(_t); return _t; }
+
+class TextToggleButtonBody: public TextualButtonCreator<ToggleButtonBody, TextToggleButtonBody>
+{
+public:
+	template <class ... _P> TextToggleButtonBody(_P ... _args): TextualButtonCreator(_args ... ) {}
+};
+typedef boost::intrusive_ptr<TextToggleButtonBody> TextToggleButton;
 
 }

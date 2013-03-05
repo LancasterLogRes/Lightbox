@@ -6,7 +6,7 @@ using namespace std;
 using namespace Lightbox;
 
 PatternPickerBody::PatternPickerBody(Color _c, Grouping _grouping):
-	ViewCreator(string(), _c, Font(), _grouping),
+	ViewCreator(_c, _grouping),
 	m_index(0),
 	m_space(12, 12)
 {

@@ -5,8 +5,8 @@
 using namespace std;
 using namespace Lightbox;
 
-ToggleButtonBody::ToggleButtonBody(std::string const& _text, Color _c, Font _f, Grouping _grouping):
-	ViewCreator(_text, _c, _f, _grouping),
+ToggleButtonBody::ToggleButtonBody(Color _c, Grouping _grouping):
+	ViewCreator(_c, _grouping),
 	m_isChecked(true)
 {
 	setDown();
