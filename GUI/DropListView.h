@@ -19,6 +19,7 @@ public:
 	~DropListViewBody();
 
 	void setOnCurrentChanged(EventHandler const& _h) { m_onCurrentChanged = _h; }
+	DropListView withOnCurrentChanged(EventHandler const& _h) { setOnCurrentChanged(_h); return this; }
 
 protected:
 	explicit DropListViewBody(ListModel* _model): DropListViewBody(ListModelPtr(_model)) {}

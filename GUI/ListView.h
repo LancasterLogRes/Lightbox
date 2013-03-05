@@ -20,7 +20,6 @@ public:
 	~ListViewBody();
 
 	void setOnCurrentChanged(EventHandler const& _h) { m_onCurrentChanged = _h; }
-	
 	ListView withOnCurrentChanged(EventHandler const& _h) { setOnCurrentChanged(_h); return this; }
 
 protected:
@@ -36,7 +35,7 @@ protected:
 	virtual void initGraphics();
 
 	virtual void currentChanged(ModelId);
-	virtual void itemsChanged();
+	virtual void modelChanged();
 	virtual void itemChanged(unsigned _i);
 
 private:

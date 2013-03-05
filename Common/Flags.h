@@ -54,15 +54,15 @@ public:
 		Flags operator|(Flags _x) const { return Flags(long(v) | long(_x.v)); }
 		Flags operator^(_Enum _x) const { return Flags(long(v) ^ long(_x)); }
 		Flags operator^(Flags _x) const { return Flags(long(v) ^ long(_x.v)); }
+		Flags operator~() const { return Flags(~long(v)); }
+		Flags operator<<(int _i) const { return Flags(long(v) << _i); }
+		Flags operator>>(int _i) const { return Flags(long(v) >> _i); }
 		Flags& operator&=(_Enum _x) { return (*this) = operator&(_x); }
 		Flags& operator&=(Flags _x) { return (*this) = operator&(_x); }
 		Flags& operator|=(_Enum _x) { return (*this) = operator|(_x); }
 		Flags& operator|=(Flags _x) { return (*this) = operator|(_x); }
 		Flags& operator^=(_Enum _x) { return (*this) = operator^(_x); }
 		Flags& operator^=(Flags _x) { return (*this) = operator^(_x); }
-		Flags operator~() { return Flags(~long(v)); }
-		Flags operator<<(int _i) const { return Flags(long(v) << _i); }
-		Flags operator>>(int _i) const { return Flags(long(v) >> _i); }
 		Flags& operator<<=(int _i) { return (*this) = operator<<(_i); }
 		Flags& operator>>=(int _i) { return (*this) = operator>>(_i); }
 
@@ -73,7 +73,9 @@ public:
 		bool operator!=(Flags _c) const { return v != _c.v; }
 		bool operator<(Flags _c) const { return v < _c.v; }
 
-		operator unsigned() const { return (unsigned)v; }
+//		operator unsigned() const { return (unsigned)v; }
+		unsigned asUnsigned() const { return (unsigned)v; }
+		explicit operator bool() const { return (unsigned)v; }
 		_Enum highestSet() const { return _Enum(Lightbox::highestBitOnly(long(v))); }
 
 private:

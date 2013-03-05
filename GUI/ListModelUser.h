@@ -15,15 +15,15 @@ public:
 	int index(ModelId _id) const { ensureIndexed(); return m_rids.count(_id) ? m_rids.at(_id) : -1; }
 
 	ModelId currentId() const { return m_currentId; }
-	void setCurrentId(ModelId _id) { m_currentId = _id; currentChanged(m_currentId); }
+	void setCurrentId(ModelId _id) { if (m_currentId != _id) { m_currentId = _id; currentChanged(m_currentId); } }
 
 	void setModel(ListModel* _model) { m_model = ListModelPtr(_model); noteModelChanged(); }
-	void setModel(ListModelPtr const& _model) { m_model = _model; noteModelChanged(); }
+	void setModel(ListModelPtr const& _model) { if (m_model != _model) { m_model = _model; noteModelChanged(); } }
 
 	// Called when the model itself has been changed, or when any id/index pairings have been changed (e.g. items added/removed or changing id).
 	void noteModelChanged() { indexDirty(); modelChanged(); }
 	// Called when the basic data (not the Id) of an item has changed within the model.
-	void noteItemChanged(ModelId _id) { itemChanged(_id); }
+	void noteItemChanged(ModelId _id) { itemChanged(_id); if (currentId() == _id) currentChanged(_id); }
 
 	std::shared_ptr<ListModel> const& model() const { return m_model; }
 

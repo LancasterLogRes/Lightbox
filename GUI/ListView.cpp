@@ -196,7 +196,7 @@ void ListViewBody::initGraphics()
 	checkHeight();
 }
 
-void ListViewBody::itemsChanged()
+void ListViewBody::modelChanged()
 {
 	// TODO: fix offset if necessary.
 	checkHeight();
