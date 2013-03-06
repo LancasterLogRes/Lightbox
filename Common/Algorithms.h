@@ -47,6 +47,61 @@
 namespace Lightbox
 {
 
+template <class _U, class _V>
+std::vector<_U> keys(std::map<_U, _V> const& _m)
+{
+	std::vector<_U> ret;
+	for (auto const& i: _m)
+		ret += i.first;
+	return ret;
+}
+
+template <class _U, class _V>
+std::vector<_U> keys(std::unordered_map<_U, _V> const& _m)
+{
+	std::vector<_U> ret;
+	for (auto const& i: _m)
+		ret += i.first;
+	return ret;
+}
+
+template <class _T, class _V>
+std::vector<_T> vector_cast(_V const& _v)
+{
+	std::vector<_T> ret;
+	for (auto const& i: _v)
+		ret += (_T)i;
+	return ret;
+}
+
+template <class _T> typename _T::element_type at(_T const& _t, unsigned _i)
+{
+	for (auto const& x: _t)
+		if (!_i--)
+			return x;
+	return typename _T::element_type();
+}
+
+template <class _T, class _U> std::pair<_T, _U> withKeyHash(std::map<_T, _U> const& _t, size_t _h)
+{
+	for (auto const& x: _t)
+		if (std::hash<_T>()(x.first) == _h)
+			return x;
+	return std::pair<_T, _U>();
+}
+
+template <class _T, class _L>
+typename _T::iterator remove_if(_T& _t, _L const& _cond)
+{
+	auto it = _t.begin();
+	for (; it != _t.end();)
+		if (_cond(*it))
+			it = _t.erase(it);
+		else
+			++it;
+	return it;
+}
+
 template <class _T> std::set<_T>& operator+=(std::set<_T>& _a, std::set<_T> const& _b)
 {
 	for (_T const& t: _b)
