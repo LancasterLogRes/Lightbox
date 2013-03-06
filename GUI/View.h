@@ -152,6 +152,12 @@ private:
 	ViewBody* m_v;
 };
 
+struct TouchTracker
+{
+	fCoord downPos;		// in local mm
+	bool swipeLatch;
+};
+
 class ViewBody: public boost::noncopyable
 {
 	template <class _T, class _I> friend class ViewCreator;
@@ -296,11 +302,15 @@ protected:
 
 	virtual void preDraw(unsigned) {}
 	virtual void draw(Slate const& _c, unsigned _layer);
-	virtual bool event(Event*) { return false; }
+	virtual bool event(Event*);
 	virtual void resized() { m_visibleLayoutChanged = true; relayout(); update(); }
 	virtual void shownChanged() { m_visibleLayoutChanged = true; update(); }
 	virtual void visibilityChanged() {}
 	virtual void enabledChanged() { update(); }
+
+	virtual bool pushed(unsigned _id, fCoord _pos) { (void)_id; (void)_pos; return false; }	// @return true to track.
+	virtual void swiped(unsigned _id, fCoord _pos, fSize _dis) { (void)_id; (void)_pos; (void)_dis; }
+	virtual void released(unsigned _id, bool _withFinger, fCoord _pos) { (void)_id; (void)_withFinger; (void)_pos; }
 
 	virtual fSize specifyMinimumSize(fSize) const;	// default is determined by layout.
 	virtual fSize specifyMaximumSize(fSize) const;	// default is determined by layout.
@@ -344,6 +354,8 @@ private:
 
 	fRect m_globalRectMM;				///< Our basic footprint in device coordinates in mm; this doesn't include overdraw. Up to date at time of last call to gatherDrawers().
 	iRect m_globalRect;					///< Our basic footprint in device coordinates; this doesn't include overdraw. Up to date at time of last call to gatherDrawers().
+
+	std::map<unsigned, TouchTracker> m_touches;
 };
 
 inline void intrusive_ptr_add_ref(ViewBody* _v)

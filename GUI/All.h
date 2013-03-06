@@ -24,3 +24,4 @@
 #include "Adaptors.h"
 #include "ListModel.h"
 #include "ListModelUser.h"
+#include "SensitiveView.h"

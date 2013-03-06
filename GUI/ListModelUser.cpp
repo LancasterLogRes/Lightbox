@@ -1,4 +1,5 @@
 #include <Common/Global.h>
+#include <Common/Algorithms.h>
 #include "Global.h"
 #include "ListModelUser.h"
 using namespace std;
@@ -19,4 +20,12 @@ void ListModelUser::ensureIndexed() const
 				m_rids[m_ids[i]] = i;
 		}
 	}
+}
+
+void ListModelUser::clearDeadSelection()
+{
+	bool changed = false;
+	remove_if(m_selected, [&](ModelId id){ if (index(id) == -1) { changed = true; return true; } return false; });
+	if (changed)
+		selectionChanged();
 }

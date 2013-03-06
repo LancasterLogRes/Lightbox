@@ -6,9 +6,7 @@
 using namespace std;
 using namespace Lightbox;
 
-ListViewBody::ListViewBody(ListModelPtr const& _model):
-	m_offset		(0),
-	m_downPointer	(-1)
+ListViewBody::ListViewBody(ListModelPtr const& _model)
 {
 	setModel(_model);
 }
@@ -17,10 +15,10 @@ ListViewBody::~ListViewBody()
 {
 }
 
-static const float c_mmMinScrollDistance = 4;
-
 bool ListViewBody::event(Event* _e)
 {
+	static const float c_mmMinScrollDistance = 4;
+
 	if (auto e = dynamic_cast<TouchDownEvent*>(_e))
 	{
 		// Ignore second touches
@@ -90,7 +88,12 @@ void ListViewBody::released(bool _properClick, fCoord _pos)
 			fRect itemRect(cursor, fSize(max(iS.w(), geometry().w()), iS.h()));
 			if (itemRect.contains(_pos))
 			{
-				setCurrentId(id(i));
+				if (!isSelected(id(i)))
+					setSelected(id(i));
+				else if (selectionMethod() == SelectionMethod::One && m_notifyOnReselect)
+					noteSelectionChanged();
+				else if (selectionMethod() == SelectionMethod::Many)
+					resetSelected(id(i));
 				break;
 			}
 			cursor.setY(cursor.y() + iS.h());
@@ -109,11 +112,11 @@ void ListViewBody::setOffset(float _offset)
 	}
 }
 
-void ListViewBody::currentChanged(ModelId)
+void ListViewBody::selectionChanged()
 {
 	update();
-	if (m_onCurrentChanged)
-		m_onCurrentChanged(this);
+	if (m_onSelectionChanged)
+		m_onSelectionChanged(this);
 }
 
 bool ListViewBody::physics(Time _d)
@@ -173,7 +176,7 @@ void ListViewBody::draw(Slate const& _slate, unsigned)
 		if (!r.isAbove(_slate.main()))
 		{
 			Slate subSlate = _slate.sub(r);
-			bool s = id(i) == currentId();
+			bool s = isSelected(id(i));
 			subSlate.rect(subSlate.main(), Color(s ? 0.075 : 0.15), s ? 0.03 : -0.01);
 			drawItem(i, subSlate);
 			drawn++;
@@ -203,7 +206,7 @@ void ListViewBody::modelChanged()
 	update();
 }
 
-void ListViewBody::itemChanged(unsigned)
+void ListViewBody::itemChanged(ModelId _id)
 {
 	// height changes won't work here :(
 	update();

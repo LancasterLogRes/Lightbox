@@ -1,5 +1,6 @@
 #pragma once
 
+#include "SensitiveView.h"
 #include "Frame.h"
 #include "ListView.h"
 #include "BasicButton.h"
@@ -18,8 +19,8 @@ public:
 	typedef ViewCreator<BasicButtonBody, DropListViewBody> Super;
 	~DropListViewBody();
 
-	void setOnCurrentChanged(EventHandler const& _h) { m_onCurrentChanged = _h; }
-	DropListView withOnCurrentChanged(EventHandler const& _h) { setOnCurrentChanged(_h); return this; }
+	void setOnSelectionChanged(EventHandler const& _h) { m_onSelectionChanged = _h; }
+	DropListView withOnSelectionChanged(EventHandler const& _h) { setOnSelectionChanged(_h); return this; }
 
 protected:
 	explicit DropListViewBody(ListModel* _model): DropListViewBody(ListModelPtr(_model)) {}
@@ -29,13 +30,13 @@ protected:
 	virtual void draw(Slate const& _c, unsigned _l);
 
 	virtual void tapped();
-	virtual void currentChanged(ModelId) { update(); if (m_onCurrentChanged) m_onCurrentChanged(this); }
+	virtual void selectionChanged() { update(); if (m_onSelectionChanged) m_onSelectionChanged(this); }
 
 private:
-	View m_back;
+	SensitiveView m_back;
 	ListView m_list;
 
-	EventHandler m_onCurrentChanged;
+	EventHandler m_onSelectionChanged;
 };
 
 }

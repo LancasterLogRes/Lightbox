@@ -78,6 +78,50 @@ void ViewBody::clearChildren()
 	}
 }
 
+bool ViewBody::event(Event* _e)
+{
+	static const float c_mmMinScrollDistance = 4;
+
+	if (auto e = dynamic_cast<TouchDownEvent*>(_e))
+	{
+		fCoord p = fCoord(e->mmLocal() - geometry().pos());
+		if (pushed(e->id, p))
+		{
+			m_touches[e->id].downPos = p;
+			m_touches[e->id].swipeLatch = false;
+			lockPointer(e->id);
+			return true;
+		}
+	}
+	else if (auto e = dynamic_cast<TouchUpEvent*>(_e))
+	{
+		if (m_touches.count(e->id))
+		{
+			fCoord p = fCoord(e->mmLocal() - geometry().pos());
+			released(e->id, geometry().contains(e->mmLocal()) && !m_touches[e->id].swipeLatch, p);
+			m_touches.erase(e->id);
+			return true;
+		}
+	}
+	else if (auto e = dynamic_cast<TouchMoveEvent*>(_e))
+	{
+		if (m_touches.count(e->id))
+		{
+			fCoord p = fCoord(e->mmLocal() - geometry().pos());
+			fSize displacement = e->mmLocal() - m_touches[e->id].downPos;
+			if (!m_touches[e->id].swipeLatch && displacement.lengthSquared() > sqr(c_mmMinScrollDistance))
+			{
+				// Switch to scroll mode.
+				m_touches[e->id].swipeLatch = true;
+			}
+			if (m_touches[e->id].swipeLatch)
+				swiped(e->id, p, displacement);
+			return true;
+		}
+	}
+	return false;
+}
+
 void ViewBody::update(int _layer)
 {
 	if (_layer >= 0)
@@ -144,6 +188,7 @@ void ViewBody::noteLayoutDirty()
 {
 	noteMetricsChanged();
 	m_layoutDirty = true;
+	Layer::refresh();
 }
 
 void ViewBody::setLayers(Layers const& _l)
@@ -203,9 +248,6 @@ bool ViewBody::sensesEvent(Event* _e)
 
 bool ViewBody::handleEvent(Event* _e)
 {
-	if (event(_e))
-		return true;
-
 	auto p = m_geometry.pos();
 	if (auto e = dynamic_cast<TouchEvent*>(_e))
 		e->m_mmLocal -= p;
@@ -221,6 +263,9 @@ bool ViewBody::handleEvent(Event* _e)
 
 	if (auto e = dynamic_cast<TouchEvent*>(_e))
 		e->m_mmLocal += p;
+
+	if (!ret && event(_e))
+		return true;
 
 	return ret;
 }

@@ -1,7 +1,9 @@
 #pragma once
 
+#include <utility>
 #include <memory>
 #include <vector>
+#include <set>
 #include <Numeric/Coord.h>
 
 namespace Lightbox
@@ -14,6 +16,16 @@ static const ModelId UnknownModelId = (ModelId)-1;
 
 typedef std::vector<ModelId> ModelIds;
 inline ModelIds modelIds(unsigned _count) { ModelIds ret(_count); for (unsigned i = 0; i < _count; ++i) ret[i] = i; return ret; }
+
+template <class _T>
+ModelIds hashedToModelIds(_T const& _m)
+{
+	ModelIds ret;
+	std::hash<typename _T::value_type> h;
+	for (auto const& i: _m)
+		ret += h(i);
+	return ret;
+}
 
 class ListModel
 {

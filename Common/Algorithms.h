@@ -82,12 +82,36 @@ template <class _T> typename _T::element_type at(_T const& _t, unsigned _i)
 	return typename _T::element_type();
 }
 
+template <class _T> std::set<_T> toSet(std::vector<_T> const& _v)
+{
+	std::set<_T> ret;
+	for (_T const& t: _v)
+		ret.insert(t);
+	return ret;
+}
+
+template <class _T> std::vector<_T> toVector(std::set<_T> const& _v)
+{
+	std::vector<_T> ret;
+	for (_T const& t: _v)
+		ret.push_back(t);
+	return ret;
+}
+
 template <class _T, class _U> std::pair<_T, _U> withKeyHash(std::map<_T, _U> const& _t, size_t _h)
 {
 	for (auto const& x: _t)
 		if (std::hash<_T>()(x.first) == _h)
 			return x;
 	return std::pair<_T, _U>();
+}
+
+template <class _T> _T withHash(std::set<_T> const& _t, size_t _h)
+{
+	for (auto const& x: _t)
+		if (std::hash<_T>()(x) == _h)
+			return x;
+	return _T();
 }
 
 template <class _T, class _L>

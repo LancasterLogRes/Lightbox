@@ -29,7 +29,9 @@ SOURCES += \
     Slider.cpp \
     ListView.cpp \
 	MarkdownView.cpp \
-DropListView.cpp
+DropListView.cpp \
+SensitiveView.cpp \
+	ListModelUser.cpp
 
 HEADERS += \
     View.h \
@@ -58,17 +60,12 @@ HEADERS += \
     ListView.h \
 	MarkdownView.h \
 	Adaptors.h \
-DropListView.h
+DropListView.h \
+SensitiveView.h \
+	ListModel.h \
+	ListModelUser.h
+
 OTHER_FILES += \
     Shaders.glsl \
     HueWheel.glsl \
     LightBar.glsl
-
-HEADERS += \
-    ListModel.h
-
-HEADERS += \
-    ListModelUser.h
-
-SOURCES += \
-    ListModelUser.cpp

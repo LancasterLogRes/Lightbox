@@ -24,6 +24,10 @@ public:
 	bool operator==(Margin _c) const { return compare(_c); }
 	bool operator!=(Margin _c) const { return !compare(_c); }
 
+	Numeric l() const { return Super::m_x; }
+	Numeric t() const { return Super::m_y; }
+	Numeric r() const { return Super::m_z; }
+	Numeric b() const { return Super::m_w; }
 	Numeric left() const { return Super::m_x; }
 	Numeric top() const { return Super::m_y; }
 	Numeric right() const { return Super::m_z; }

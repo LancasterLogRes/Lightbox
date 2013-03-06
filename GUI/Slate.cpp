@@ -20,6 +20,11 @@ fSize Slate::toPixelsF(fSize _mm) const
 	return GUIApp::joint().display->toPixelsF(_mm);
 }
 
+fMargin Slate::toPixelsF(fMargin _mm) const
+{
+	return GUIApp::joint().display->toPixelsF(_mm);
+}
+
 fCoord Slate::toPixelsF(fCoord _mm) const
 {
 	return GUIApp::joint().display->toPixelsF(_mm);

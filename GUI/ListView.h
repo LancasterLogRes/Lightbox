@@ -19,8 +19,10 @@ public:
 	typedef ViewCreator<ViewBody, ListViewBody> Super;
 	~ListViewBody();
 
-	void setOnCurrentChanged(EventHandler const& _h) { m_onCurrentChanged = _h; }
-	ListView withOnCurrentChanged(EventHandler const& _h) { setOnCurrentChanged(_h); return this; }
+	void setNotifyOnReselect(bool _en = true) { m_notifyOnReselect = _en; }
+
+	void setOnSelectionChanged(EventHandler const& _h) { m_onSelectionChanged = _h; }
+	ListView withOnSelectionChanged(EventHandler const& _h) { setOnSelectionChanged(_h); return this; }
 
 protected:
 	explicit ListViewBody(ListModel* _model): ListViewBody(ListModelPtr(_model)) {}
@@ -34,9 +36,9 @@ protected:
 	virtual void released(bool _properClick, fCoord _pos);
 	virtual void initGraphics();
 
-	virtual void currentChanged(ModelId);
+	virtual void selectionChanged();
 	virtual void modelChanged();
-	virtual void itemChanged(unsigned _i);
+	virtual void itemChanged(ModelId _id);
 
 private:
 	void setOffset(float _offset);
@@ -44,8 +46,8 @@ private:
 	void checkHeight();
 	float visibleOffset() const;
 
-	float m_offset;			// in mm
-	int m_downPointer;
+	float m_offset = 0;		// in mm
+	int m_downPointer = -1;
 	fCoord m_downPos;		// in mm
 	bool m_scrollLatch;
 	float m_scrollOffset;	// in mm
@@ -54,7 +56,9 @@ private:
 	// Cached info
 	mutable float m_totalHeight;	// in mm
 
-	EventHandler m_onCurrentChanged;
+	bool m_notifyOnReselect = false;
+
+	EventHandler m_onSelectionChanged;
 };
 
 }

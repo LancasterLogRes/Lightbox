@@ -35,9 +35,11 @@ public:
 
 	iSize toPixels(fSize _mm) const;
 	iCoord toPixels(fCoord _mm) const;
+	iMargin toPixels(fMargin _mm) const { return (iMargin)toPixelsF(_mm); }
 	iEllipse toPixels(fEllipse _mm) const { return (iEllipse)toPixelsF(_mm); }
 	iRect toPixels(fRect _mm) const { return (iRect)toPixelsF(_mm); }
 
+	fMargin toPixelsF(fMargin _mm) const;
 	fSize toPixelsF(fSize _mm) const;
 	fCoord toPixelsF(fCoord _mm) const;
 	fEllipse toPixelsF(fEllipse _mm) const { return fEllipse(toPixelsF(_mm.center()), toPixelsF(_mm.radii())); }
