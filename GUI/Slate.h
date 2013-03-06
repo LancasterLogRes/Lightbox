@@ -63,7 +63,9 @@ public:
 	void disc(fEllipse _r, Color _c) const;
 	void disc(iEllipse _r, Color _c) const { disc(fEllipse(_r), _c); }
 	void circle(fEllipse _r, float _size, Color _c) const;
+	void circle(iEllipse _r, float _size, Color _c) const { circle(fEllipse(_r), _size, _c); }
 	void circle(fEllipse _r, float _size) const;
+	void circle(iEllipse _r, float _size) const { circle(fEllipse(_r), _size); }
 	// Note: Below here it doesn't make sense to use float coordinates as the operation must be pixel aligned.
 	void text(Font const& _f, iCoord _anchor, std::string const& _text, Color _c = Black, AnchorType _a = AtCenter) const;
 	void text(std::string const& _text, AnchorType _a = AtCenter, iCoord _anchor = iCoord(0, 0), Color _c = Black, Font const& _f = Font()) const { text(_f, _anchor, _text, _c , _a); }
