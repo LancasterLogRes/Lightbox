@@ -46,6 +46,7 @@ void DropListViewBody::tapped()
 
 	m_list->setModel(model());
 	m_list->setSelected(selected());
+	m_list->ensureVisible(selected());
 	m_back->setParent(GUIApp::root());
 	m_back->setOnTapped([=](SensitiveView)
 	{

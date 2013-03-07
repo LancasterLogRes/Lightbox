@@ -102,13 +102,21 @@ void ListViewBody::released(bool _properClick, fCoord _pos)
 	update();
 }
 
-void ListViewBody::setOffset(float _offset)
+void ListViewBody::setOffset(float _offset, bool _animate)
 {
-	if (m_offset != _offset)
+	auto clamped = clamp(_offset, offsetBounds());
+	if (m_offset != clamped)
 	{
-		m_offset = _offset;
+		if (_animate)
+		{
+			m_offset = _offset;
+			setAlive(true);
+		}
+		else
+		{
+			m_offset = clamped;
+		}
 		update(0);
-		setAlive(true);
 	}
 }
 
@@ -123,7 +131,7 @@ bool ListViewBody::physics(Time _d)
 {
 	// Update offset state according to Time delta _d.
 	float offset = m_offset;
-	float maxOffset = max(0.f, m_totalHeight - geometry().h());
+	auto bounds = offsetBounds();
 	const Time c_hlOuter = FromMsecs<75>::value;
 	const Time c_mmOuter = FromMsecs<100>::value;
 
@@ -137,10 +145,10 @@ bool ListViewBody::physics(Time _d)
 		m_inertia = 0;
 	}
 
-	if (offset < 0)
-		offset = min<float>(0, halfLifeDecay(c_hlOuter, _d, offset) + float(_d) / c_mmOuter);
-	else if (offset > maxOffset)
-		offset = max<float>(maxOffset, maxOffset + halfLifeDecay(c_hlOuter, _d, offset - maxOffset) - float(_d) / c_mmOuter);
+	if (offset < bounds.first)
+		offset = min<float>(bounds.first, bounds.first + halfLifeDecay(c_hlOuter, _d, offset - bounds.first) + float(_d) / c_mmOuter);
+	else if (offset > bounds.second)
+		offset = max<float>(bounds.second, bounds.second + halfLifeDecay(c_hlOuter, _d, offset - bounds.second) - float(_d) / c_mmOuter);
 	if (offset == m_offset)
 		return false;
 	m_offset = offset;
@@ -159,12 +167,28 @@ float ListViewBody::visibleOffset() const
 	return offset;
 }
 
+void ListViewBody::ensureVisible(ModelId _id)
+{
+	float y = 0;
+	unsigned iC = itemCount();
+	for (unsigned i = 0; i < iC; ++i)
+		if (id(i) == _id)
+		{
+			y += itemSize(i).h() / 2;
+			setOffset(y - geometry().height() / 2, false);
+			return;
+		}
+		else
+			y += itemSize(i).h();
+}
+
 void ListViewBody::draw(Slate const& _slate, unsigned)
 {
 	unsigned iC = itemCount();
 
 	int drawn = 0;
 	fCoord cursor(0, -visibleOffset());
+	_slate.rect(_slate.main(), Black);
 	for (unsigned i = 0; i < iC; ++i)
 	{
 		fSize iS = itemSize(i);
@@ -177,7 +201,8 @@ void ListViewBody::draw(Slate const& _slate, unsigned)
 		{
 			Slate subSlate = _slate.sub(r);
 			bool s = isSelected(id(i));
-			subSlate.rect(subSlate.main(), Color(s ? 0.075 : 0.15), s ? 0.03 : -0.01);
+			if (s)
+				subSlate.rect(subSlate.main(), Color(s ? 0.075 : 0.15), s ? 0.03 : -0.01);
 			drawItem(i, subSlate);
 			drawn++;
 		}

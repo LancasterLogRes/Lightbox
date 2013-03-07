@@ -1,5 +1,6 @@
 #pragma once
 
+#include <utility>
 #include <memory>
 #include "ListModel.h"
 #include "ListModelUser.h"
@@ -19,6 +20,8 @@ public:
 	typedef ViewCreator<ViewBody, ListViewBody> Super;
 	~ListViewBody();
 
+	void ensureVisible(ModelId _id);
+
 	void setNotifyOnReselect(bool _en = true) { m_notifyOnReselect = _en; }
 
 	void setOnSelectionChanged(EventHandler const& _h) { m_onSelectionChanged = _h; }
@@ -30,6 +33,7 @@ protected:
 
 	virtual bool event(Event* _e);
 	virtual void draw(Slate const& _c, unsigned);
+	virtual void resized() { setOffset(m_offset, false); Super::resized(); }
 
 	virtual void pushed() { update(); }
 	virtual void scrolled(fSize) { update(); }
@@ -41,7 +45,8 @@ protected:
 	virtual void itemChanged(ModelId _id);
 
 private:
-	void setOffset(float _offset);
+	std::pair<float, float> offsetBounds() const { return std::make_pair(0.f, std::max(0.f, m_totalHeight - geometry().h())); }
+	void setOffset(float _offset, bool _animate = true);
 	bool physics(Time _d);
 	void checkHeight();
 	float visibleOffset() const;

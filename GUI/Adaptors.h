@@ -15,58 +15,81 @@ namespace Lightbox
 typedef std::pair<std::string, std::string> DoubleString;
 typedef std::vector<DoubleString> DoubleStrings;
 
-static const fSize c_indicatorRadius = fSize(10, 10);
+static const fSize c_indicatorRadius = fSize(6, 6);
 static const float c_indicatorMargin = 8;
+static const fSize c_indicatorBorder = fSize(3, 3);
+
+enum class IndicatorType
+{
+	None = 0,
+	Circle,
+	Outline
+};
+
+/*class LayoutPresenter: public ListModel
+{
+};*/
 
 template <class _T>
 class PairPresenter: public ListModel
 {
 public:
-	Font const& effectiveFont() const { return m_font.isValid() ? m_font : GUIApp::style().regular; }
-	Font const& effectiveSubFont() const { return m_subFont.isValid() ? m_font : GUIApp::style().small; }
+	Font const& effectiveFont(bool _s) const { Font const& f = _s && m_selectedFont.isValid() ? m_selectedFont : m_font; return f.isValid() ? f : _s ? GUIApp::style().bold : GUIApp::style().regular; }
+	Font const& effectiveSubFont(bool _s) const { Font const& f = _s && m_selectedSubFont.isValid() ? m_selectedSubFont : m_subFont; return f.isValid() ? f : _s ? GUIApp::style().smallBold : GUIApp::style().small; }
 	void setMargin(fMargin const& _m) { m_margin = _m; }
 	void setFont(Font const& _f, Font const& _sub) { m_font = _f; m_subFont = _sub; }
 	void setColor(Color _c, Color _sub) { m_color = _c; m_subColor = _sub; }
 	void setSelectedColor(Color _c, Color _sub) { m_selectedColor = _c; m_selectedSubColor = _sub; }
-	void setIndicator(bool _en) { m_indicator = _en; }
+	void setIndicator(IndicatorType _t = IndicatorType::Circle) { m_indicator = _t; }
 
 	void drawItem(unsigned, ModelId _id, Slate const& _s, bool _selected)
 	{
 		auto const& it = ((_T*)this)->_T::get(_id);
-		auto inner = _s.main().inset(_s.toPixels(m_margin));
-		if (m_indicator)
+		auto pm = _s.toPixels(m_margin);
+		auto inner = _s.main().inset(pm);
+		if (m_indicator == IndicatorType::Circle)
 		{
 			auto ir = _s.toPixels(c_indicatorRadius);
 			inner = inner.inset(iMargin(ir.w(), 0, 0, 0));
 			if (_selected)
 				_s.disc(iEllipse(inner.lerp(0, 0.5), ir), m_selectedColor);
 			else
-				_s.circle(iEllipse(inner.lerp(0, 0.5), ir), 1, m_color);
+				_s.disc(iEllipse(inner.lerp(0, 0.5), ir / 2), m_color);
 			inner = inner.inset(iMargin(ir.w() + _s.toPixels(fSize(c_indicatorMargin, 0)).w(), 0, 0, 0));
 		}
-		_s.text(it.first, AtLeft|AtTop, inner.lerp(0, 0), _selected ? m_selectedColor : m_color, effectiveFont());
-		_s.text(it.second, AtLeft|AtBottom, inner.lerp(0, 1), _selected ? m_selectedSubColor : m_subColor, effectiveSubFont());
+		else if (m_indicator == IndicatorType::Outline)
+		{
+			if (_selected)
+				_s.rectInline(inner, iMargin(_s.toPixels(c_indicatorBorder)), m_selectedColor);
+			inner = inner.inset(_s.toPixels(m_margin + fMargin(c_indicatorBorder)));
+		}
+		_s.text(it.first, AtLeft|AtTop, inner.lerp(0, 0), _selected ? m_selectedColor : m_color, effectiveFont(_selected));
+		_s.text(it.second, AtLeft|AtBottom, inner.lerp(0, 1), _selected ? m_selectedSubColor : m_subColor, effectiveSubFont(_selected));
 	}
 
 	fSize itemSize(unsigned, ModelId _id)
 	{
 		auto const& it = ((_T*)this)->_T::get(_id);
-		fSize ret = effectiveFont().measure(it.first).size().vStacked(effectiveSubFont().measure(it.second).size());
+		fSize ret = effectiveFont(true).measure(it.first).size().vStacked(effectiveSubFont(true).measure(it.second).size());
 		ret += m_margin.extra();
-		if (m_indicator)
+		if (m_indicator == IndicatorType::Circle)
 			ret = ret.hStacked(fSize(c_indicatorMargin, 0)).hStacked(2 * c_indicatorRadius);
+		else if (m_indicator == IndicatorType::Outline)
+			ret = ret + m_margin.extra() + c_indicatorBorder * 2;
 		return ret;
 	}
 
 private:
-	fMargin m_margin = fMargin(3, 3, 3, 3);
+	fMargin m_margin = fMargin(3);
 	Font m_font;
 	Font m_subFont;
+	Font m_selectedFont;
+	Font m_selectedSubFont;
 	Color m_color = Color(.5f);
 	Color m_subColor = Color(.25f);
 	Color m_selectedColor = Color(1.f);
 	Color m_selectedSubColor = Color(.75f);
-	bool m_indicator;
+	IndicatorType m_indicator;
 };
 
 class DoubleStringsAdaptor: public PairPresenter<DoubleStringsAdaptor>
