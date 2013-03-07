@@ -20,6 +20,8 @@
 
 #pragma once
 
+#include <fstream>
+#include <ios>
 #include <cassert>
 #include <string>
 #include <iterator>
@@ -46,6 +48,26 @@
 
 namespace Lightbox
 {
+
+inline void dumpInto(std::string const& _fn, foreign_vector<uint8_t const> const& _data)
+{
+	std::ofstream out;
+	out.open(_fn, std::ios_base::out|std::ios_base::trunc|std::ios_base::binary);
+	out.write((char*)_data.data(), _data.size());
+}
+
+inline size_t fileSize(std::string const& _filename)
+{
+	std::ifstream is;
+	is.open(_filename.c_str(), std::ios::in | std::ios::binary);
+	if (is.is_open())
+	{
+		is.seekg(0, std::ios::end);
+		return is.tellg();
+	}
+	else
+		return 0;
+}
 
 template <class _U, class _V>
 std::vector<_U> keys(std::map<_U, _V> const& _m)

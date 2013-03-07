@@ -82,6 +82,18 @@ private:
 
 }
 
+#elif LIGHTBOX_PI
+
+#include <boost/thread.hpp>
+
+namespace Lightbox
+{
+
+using boost::thread;
+using boost::mutex;
+
+}
+
 #else
 
 #include <thread>

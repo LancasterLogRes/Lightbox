@@ -10,6 +10,12 @@ namespace Lightbox
 class MarkdownViewBody;
 typedef boost::intrusive_ptr<MarkdownViewBody> MarkdownView;
 
+struct RichTextNode
+{
+
+	std::string data;
+};
+
 class MarkdownViewBody: public ViewCreator<ViewBody, MarkdownViewBody>
 {
 	friend class ViewBody;
