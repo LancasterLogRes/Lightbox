@@ -22,10 +22,10 @@ void ListModelUser::ensureIndexed() const
 	}
 }
 
-void ListModelUser::clearDeadSelection()
+void ListModelUser::clearDeadSelection(bool _force)
 {
 	bool changed = false;
 	remove_if(m_selected, [&](ModelId id){ if (index(id) == -1) { changed = true; return true; } return false; });
-	if (changed)
+	if (changed || _force)
 		selectionChanged();
 }

@@ -14,6 +14,9 @@ struct Joint
 	Joint();
 
 	void init(Display& _d);
+	void init1(Display& _d);
+	void init2(Display& _d);
+	void init3(Display& _d);
 	void fini();
 
 	Texture2D makeGlowerFar(Texture2D _baseTex) const;

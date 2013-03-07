@@ -175,7 +175,8 @@ void ListViewBody::ensureVisible(ModelId _id)
 		if (id(i) == _id)
 		{
 			y += itemSize(i).h() / 2;
-			setOffset(y - geometry().height() / 2, false);
+			if (m_offset > y - itemSize(i).h() / 2 || m_offset + geometry().height() < y + itemSize(i).h() / 2)
+				setOffset(y - geometry().height() / 2, false);
 			return;
 		}
 		else
@@ -231,7 +232,7 @@ void ListViewBody::modelChanged()
 	update();
 }
 
-void ListViewBody::itemChanged(ModelId _id)
+void ListViewBody::itemChanged(ModelId)
 {
 	// height changes won't work here :(
 	update();

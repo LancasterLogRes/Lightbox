@@ -17,6 +17,13 @@ Joint::Joint(): display(nullptr)
 
 void Joint::init(Display& _d)
 {
+	init1(_d);
+	init2(_d);
+	init3(_d);
+}
+
+void Joint::init1(Display& _d)
+{
 	display = &_d;
 	displaySizePixels = _d.sizePixels();
 	displaySizeMM = _d.sizeMM();
@@ -30,7 +37,10 @@ void Joint::init(Display& _d)
 			uc[2 * i + 1] = cos(i / 72.f * TwoPi);
 		unitCircle72 = Buffer<float>(uc);
 	}
+}
 
+void Joint::init2(Display& _d)
+{
 	shaded = Program("Shaders.glsl", "view");
 	flat = Program("Shaders.glsl", "flat");
 	texture = Program("Shaders.glsl", "texture");
@@ -49,7 +59,10 @@ void Joint::init(Display& _d)
 	texture.tie(uniforms);
 	general.tie(uniforms);
 	colorize.tie(uniforms);
+}
 
+void Joint::init3(Display& _d)
+{
 	u_displaySize = uniforms["displaySize"];
 	u_minusY = uniforms["minusY"];
 	offsetScale = uniforms["offsetScale"];
@@ -65,7 +78,7 @@ void Joint::init(Display& _d)
 	glowLevels = Lightbox::log2(ceil(_d.toPixelsF(fSize(0, 2)).h()));
 	lightEdgePixels = display->toUnalignedPixels(GUIApp::style().lightEdgeSize);
 	lightBedPixels = display->toUnalignedPixels(GUIApp::style().lightBedSize);
-	glowPixels = iSize(1 << (glowLevels * 2 + 1));
+	glowPixels = iSize(1 << (glowLevels * 2 + 0));	// was + 1
 	cnote << "glowLevels:" << glowLevels << "glowPixels:" << glowPixels << "lightEdgePixels:" << lightEdgePixels;
 	glowAlpha = 1.f - (glowLevels - 1) * .125f;
 

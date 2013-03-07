@@ -23,7 +23,7 @@ ModelIds hashedToModelIds(_T const& _m)
 	ModelIds ret;
 	std::hash<typename _T::value_type> h;
 	for (auto const& i: _m)
-		ret += h(i);
+		ret.push_back(h(i));
 	return ret;
 }
 

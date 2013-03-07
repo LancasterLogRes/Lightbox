@@ -114,8 +114,8 @@ template <class _T> _T withHash(std::set<_T> const& _t, size_t _h)
 	return _T();
 }
 
-template <class _T, class _L>
-typename _T::iterator remove_if(_T& _t, _L const& _cond)
+template <class _T, class _U>
+typename _T::iterator remove_if(_T& _t, _U const& _cond)
 {
 	auto it = _t.begin();
 	for (; it != _t.end();)

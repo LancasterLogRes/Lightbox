@@ -20,8 +20,7 @@ SOURCES += \
     PatternPicker.cpp \
     DirectionPicker.cpp \
     Frame.cpp \
-    Collated.cpp \
-    ProgressBar.cpp \
+	ProgressBar.cpp \
     FontManager.cpp \
 	BakedFont.cpp \
     Slate.cpp \
@@ -32,6 +31,8 @@ SOURCES += \
 DropListView.cpp \
 SensitiveView.cpp \
 	ListModelUser.cpp
+
+!android: SOURCES += Collated.cpp
 
 HEADERS += \
     View.h \

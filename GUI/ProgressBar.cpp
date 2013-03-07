@@ -1,6 +1,7 @@
 #include <Common/Global.h>
 #include <GUI/GUIApp.h>
 #include "Global.h"
+#include "Slate.h"
 #include "ProgressBar.h"
 using namespace std;
 using namespace Lightbox;

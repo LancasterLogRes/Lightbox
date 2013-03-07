@@ -1,6 +1,8 @@
 #include <Common/Global.h>
 #include "GUIApp.h"
 #include "Global.h"
+#include "Slate.h"
+#include "BasicButton.h"
 #include "DirectionPicker.h"
 using namespace std;
 using namespace Lightbox;

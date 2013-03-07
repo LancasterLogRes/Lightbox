@@ -26,6 +26,7 @@ ViewBody::ViewBody():
 	m_isEnabled(true),
 	m_isAlive(false),
 	m_isRoot(false),
+	m_layoutDirty(true),
 	m_visibleLayoutChanged(true),
 	m_graphicsInitialized(false),
 	m_layers(1)

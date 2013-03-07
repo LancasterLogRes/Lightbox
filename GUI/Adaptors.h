@@ -17,7 +17,6 @@ typedef std::vector<DoubleString> DoubleStrings;
 
 static const fSize c_indicatorRadius = fSize(6, 6);
 static const float c_indicatorMargin = 8;
-static const fSize c_indicatorBorder = fSize(3, 3);
 
 enum class IndicatorType
 {
@@ -44,7 +43,6 @@ public:
 
 	void drawItem(unsigned, ModelId _id, Slate const& _s, bool _selected)
 	{
-		auto const& it = ((_T*)this)->_T::get(_id);
 		auto pm = _s.toPixels(m_margin);
 		auto inner = _s.main().inset(pm);
 		if (m_indicator == IndicatorType::Circle)
@@ -60,9 +58,10 @@ public:
 		else if (m_indicator == IndicatorType::Outline)
 		{
 			if (_selected)
-				_s.rectInline(inner, iMargin(_s.toPixels(c_indicatorBorder)), m_selectedColor);
-			inner = inner.inset(_s.toPixels(m_margin + fMargin(c_indicatorBorder)));
+				_s.glowRectInline(inner, m_selectedColor);
+			inner = inner.inset(_s.toPixels(m_margin + fMargin(GUIApp::style().lightEdgeSize)));
 		}
+		auto const& it = ((_T*)this)->_T::get(_id);
 		_s.text(it.first, AtLeft|AtTop, inner.lerp(0, 0), _selected ? m_selectedColor : m_color, effectiveFont(_selected));
 		_s.text(it.second, AtLeft|AtBottom, inner.lerp(0, 1), _selected ? m_selectedSubColor : m_subColor, effectiveSubFont(_selected));
 	}
@@ -75,7 +74,7 @@ public:
 		if (m_indicator == IndicatorType::Circle)
 			ret = ret.hStacked(fSize(c_indicatorMargin, 0)).hStacked(2 * c_indicatorRadius);
 		else if (m_indicator == IndicatorType::Outline)
-			ret = ret + m_margin.extra() + c_indicatorBorder * 2;
+			ret = ret + m_margin.extra() + GUIApp::style().lightEdgeSize * 2;
 		return ret;
 	}
 
@@ -113,15 +112,42 @@ public:
 	void setMargin(fMargin const& _m) { m_margin = _m; }
 	void setColor(Color _c) { m_color = _c; }
 	void setSelectedColor(Color _c) { m_selectedColor = _c; }
+	void setIndicator(IndicatorType _t = IndicatorType::Circle) { m_indicator = _t; }
 
 	void drawItem(unsigned, ModelId _id, Slate const& _s, bool _selected)
 	{
-		_s.text(((_T*)this)->_T::get(_id), AtCenter, _s.main().inset(_s.toPixels(m_margin)).lerp(.5f, .5f), _selected ? m_selectedColor : m_color, effectiveFont());
+		auto pm = _s.toPixels(m_margin);
+		auto inner = _s.main().inset(pm);
+		if (m_indicator == IndicatorType::Circle)
+		{
+			auto ir = _s.toPixels(c_indicatorRadius);
+			inner = inner.inset(iMargin(ir.w(), 0, 0, 0));
+			if (_selected)
+				_s.disc(iEllipse(inner.lerp(0, 0.5), ir), m_selectedColor);
+			else
+				_s.disc(iEllipse(inner.lerp(0, 0.5), ir / 2), m_color);
+			inner = inner.inset(iMargin(ir.w() + _s.toPixels(fSize(c_indicatorMargin, 0)).w(), 0, 0, 0));
+		}
+		else if (m_indicator == IndicatorType::Outline)
+		{
+			if (_selected)
+				_s.glowRectInline(inner, m_selectedColor);
+			inner = inner.inset(_s.toPixels(m_margin + fMargin(GUIApp::style().lightEdgeSize)));
+		}
+		auto const& it = ((_T*)this)->_T::get(_id);
+		_s.text(it, AtCenter, inner.lerp(.5f, .5f), _selected ? m_selectedColor : m_color, effectiveFont());
 	}
 
 	fSize itemSize(unsigned, ModelId _id)
 	{
-		return effectiveFont().measure(((_T*)this)->_T::get(_id)).size() + m_margin.extra();
+		auto const& it = ((_T*)this)->_T::get(_id);
+		auto ret = effectiveFont().measure(it).size();
+		ret += m_margin.extra();
+		if (m_indicator == IndicatorType::Circle)
+			ret = ret.hStacked(fSize(c_indicatorMargin, 0)).hStacked(2 * c_indicatorRadius);
+		else if (m_indicator == IndicatorType::Outline)
+			ret = ret + m_margin.extra() + GUIApp::style().lightEdgeSize * 2;
+		return ret;
 	}
 
 private:
@@ -129,6 +155,7 @@ private:
 	fMargin m_margin = fMargin(3, 3, 3, 3);
 	Color m_color = Color(.5f);
 	Color m_selectedColor = Color(1.f);
+	IndicatorType m_indicator;
 };
 
 class StringsAdaptor: public SinglePresenter<StringsAdaptor>

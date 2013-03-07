@@ -1,6 +1,8 @@
 #include <Common/Global.h>
+#include <Common/StreamIO.h>
 #include <GUI/GUIApp.h>
 #include "Global.h"
+#include "Slate.h"
 #include "PatternPicker.h"
 using namespace std;
 using namespace Lightbox;

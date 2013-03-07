@@ -43,7 +43,7 @@ public:
 
 	void noteSelectionChanged() { if (m_suspendingEvents) m_selectionChanged = true; else selectionChanged(); }
 	// Called when the model itself has been changed, or when any id/index pairings have been changed (e.g. items added/removed or changing id).
-	void noteModelChanged() { indexDirty(); modelChanged(); clearDeadSelection(); }
+	void noteModelChanged(bool _forceSelectionChanged = true) { indexDirty(); modelChanged(); clearDeadSelection(_forceSelectionChanged); }
 	// Called when the basic data (not the Id) of an item has changed within the model.
 	void noteItemChanged(ModelId _id) { itemChanged(_id); }
 
@@ -61,7 +61,7 @@ protected:
 private:
 	void indexDirty() { m_dirty = true; }
 	void ensureIndexed() const;
-	void clearDeadSelection();
+	void clearDeadSelection(bool _force);
 
 	// The data model
 	std::shared_ptr<ListModel> m_model;
