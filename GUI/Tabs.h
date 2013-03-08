@@ -20,6 +20,7 @@ public:
 	~TabsBody();
 
 	void addTab(std::string const& _title, View const& _page);
+	void focusTab(View const& _page);
 	
 protected:
 	TabsBody();
