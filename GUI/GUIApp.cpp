@@ -406,7 +406,7 @@ bool GUIApp::drawGraphics()
 	Slate con(rr, rr);
 	iRect infoRect(rr.bottomRight() - iCoord(200, 54), iSize(190, 44));
 	con.rect(infoRect.outset(3), Color(1.f, .5f));
-	Font f(ByPixels, 16, "ubuntu");
+	Font f(Metric::Pixels, 16, "ubuntu");
 	iCoord p = infoRect.topLeft();
 	f.draw(p, info, RGBA::Black, AtTop|AtLeft);
 	cnote << info;

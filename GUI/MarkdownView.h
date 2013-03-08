@@ -10,9 +10,17 @@ namespace Lightbox
 class MarkdownViewBody;
 typedef boost::intrusive_ptr<MarkdownViewBody> MarkdownView;
 
+enum class RichTextNodeType
+{
+	Text,
+	FontWeight,
+	FontFace,
+	Color
+};
+
 struct RichTextNode
 {
-
+	RichTextNodeType type;
 	std::string data;
 };
 

@@ -38,6 +38,30 @@ Color Color::withConstantLight(float _hue, float _sat, float _value, float _alph
 	return Color(_hue, _sat, _value / maxTotal, _alpha);
 }
 
+inline int fromHex(char _a, char _b)
+{
+	if (_a != '0')
+		return fromHex('0', _a) * 16 + fromHex('0', _b);
+	else
+		return (_b >= '0' && _b <= '9') ? _b - '0' : (_b >= 'a' && _b <= 'f') ? _b - 'a' + 10 : (_b >= 'A' && _b <= 'F') ? _b - 'A' + 10 : 0;
+}
+
+Color Color::interpret(string const& _s)
+{
+	if (_s.size() > 1 && _s[0] == '#')
+	{
+		if (_s.size() == 4)
+			return Color(RGB8Space, fromHex(_s[1], _s[1]), fromHex(_s[2], _s[2]), fromHex(_s[3], _s[3]));
+		else if (_s.size() == 5)
+			return Color(RGBA8Space, fromHex(_s[1], _s[1]), fromHex(_s[2], _s[2]), fromHex(_s[3], _s[3]), fromHex(_s[4], _s[4]));
+		else if (_s.size() == 7)
+			return Color(RGB8Space, fromHex(_s[1], _s[2]), fromHex(_s[3], _s[4]), fromHex(_s[5], _s[6]));
+		else if (_s.size() == 9)
+			return Color(RGBA8Space, fromHex(_s[1], _s[2]), fromHex(_s[3], _s[4]), fromHex(_s[5], _s[6]), fromHex(_s[7], _s[8]));
+	}
+	return Color();
+}
+
 void Color::convertFrom(ColorSpace _cc, float _x, float _y, float _z, float _w)
 {
 	if (_cc == RGBA8Space || _cc == RGB8Space)
