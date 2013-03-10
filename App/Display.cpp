@@ -29,7 +29,7 @@ using namespace Lightbox;
 
 #if 1
 static const int c_defaultWidth = 1440;
-static const int c_defaultHeight = 800;
+static const int c_defaultHeight = 864;
 static const int c_defaultWidthMM = 800;
 static const int c_defaultHeightMM = 480;
 #elif 0

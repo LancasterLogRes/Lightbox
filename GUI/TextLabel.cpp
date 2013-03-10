@@ -6,7 +6,12 @@
 using namespace std;
 using namespace Lightbox;
 
-TextLabelBody::TextLabelBody(std::string const& _text, Color _color, Font const& _font): m_text(_text), m_font(_font), m_color(_color), m_rule(false)
+TextLabelBody::TextLabelBody(std::string const& _text, Color _color, Font const& _font, Alignment _a):
+	m_text(_text),
+	m_font(_font),
+	m_color(_color),
+	m_rule(false),
+	m_alignment(_a)
 {
 }
 
@@ -21,15 +26,17 @@ bool TextLabelBody::event(Event* _e)
 
 void TextLabelBody::draw(Slate const& _c, unsigned)
 {
-	iRect geo = rect();
+	iRect r = rect();
 	Font f = m_font.isValid() ? m_font : GUIApp::style().small;
 	Color c = m_color.isValid() ? m_color : GUIApp::style().fore;
-	_c.text(f, geo.lerp(.5f, .5f), m_text, c);
-	int w = fRect(f.measurePx(m_text).size() + fSize(16, 0)).width() / 2;
+	iCoord p = r.lerp((m_alignment & AlignLeft) ? 0.f : (m_alignment & AlignRight) ? 1.f : .5f, (m_alignment & AlignTop) ? 0.f : (m_alignment & AlignBottom) ? 1.f : .5f);
+	AnchorType a = ((m_alignment & AlignTop) ? AtTop : (m_alignment & AlignBottom) ? AtBottom : (m_alignment & AlignBaselineCenter) ? AtBaseline : AtCenter) | ((m_alignment & AlignLeft) ? AtLeft : (m_alignment & AlignRight) ? AtRight : AtCenter) | ((m_alignment & AlignTightVertical) ? TightVertical : AnchorFlags(0));
+	_c.text(f, p, m_text, c, a);
+	int w = fRect(f.pxMeasure(m_text).size() + fSize(16, 0)).width() / 2;
 	if (m_rule)
 	{
-		_c.rect(geo.lerp(0, .5f, .5f, .5f).outset(0, 1, 0, 0).inset(0, 0, w, 0), c);
-		_c.rect(geo.lerp(.5f, .5f, 1.f, .5f).outset(0, 1, 0, 0).inset(w, 0, 0, 0), c);
+		_c.rect(r.lerp(0, .5f, .5f, .5f).outset(0, 1, 0, 0).inset(0, 0, w, 0), c);
+		_c.rect(r.lerp(.5f, .5f, 1.f, .5f).outset(0, 1, 0, 0).inset(w, 0, 0, 0), c);
 	}
 }
 

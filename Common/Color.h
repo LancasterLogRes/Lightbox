@@ -81,6 +81,7 @@ public:
 	RGBA toRGBA() const { return (RGBA&&)convertTo(RGBASpace); }
 	RGBA8 toRGBA8() const { auto r = convertTo(RGBA8Space); return RGBA8(r.x(), r.y(), r.z(), r.w()); }
 	static Color fromRGB(std::array<float, 3> _rgb) { return Color(RGBSpace, _rgb[0], _rgb[1], _rgb[2]); }
+	static Color interpret(std::string const& _s);
 
 	inline explicit operator RGBA() const { return toRGBA(); }
 	inline explicit operator RGBA8() const { return toRGBA8(); }

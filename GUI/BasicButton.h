@@ -131,7 +131,7 @@ private:
 		{
 			Font f = m_font.isValid() ? m_font : GUIApp::style().bold;
 			std::string t = boost::algorithm::to_upper_copy(m_text);
-			Texture2D baseText(iSize(f.measurePx(t).size()) + (iSize)GUIApp::joint().glowPixels * 2);
+			Texture2D baseText(iSize(f.pxMeasure(t).size()) + (iSize)GUIApp::joint().glowPixels * 2);
 			{
 				RenderToTextureSlate c(baseText);
 				c.text(f, iCoord(baseText.size() / 2), t, Color(1.f / (GUIApp::joint().glowLevels * 2 + 1)));

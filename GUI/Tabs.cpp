@@ -27,6 +27,12 @@ void TabsBody::addTab(std::string const& _title, View const& _page)
 	_page->setParent(this);
 }
 
+void TabsBody::focusTab(View const& _page)
+{
+	for (auto const& c: children())
+		c->show(c == _page);
+}
+
 bool TabsBody::event(Event* _e)
 {
 	if (TouchEvent* e = dynamic_cast<TouchDownEvent*>(_e))

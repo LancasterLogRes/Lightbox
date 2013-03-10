@@ -116,13 +116,52 @@ template <class _T> inline typename is_flag<_T>::FlagsType::Flag fromIndex(unsig
 		BOOST_PP_SEQ_FOR_EACH(LIGHTBOX_ENUM_S2F, N, X) \
 		return N(0); \
 	} \
-    template <class _S> \
-    inline _S& operator<<(_S& _out, N _p) \
+	template <class _S> \
+	inline _S& operator<<(_S& _out, N _p) \
 	{ \
 		return _out << toString(_p); \
 	} \
-    template <class _S> \
-    inline _S& operator>>(_S& _in, N& _p) \
+	template <class _S> \
+	inline _S& operator>>(_S& _in, N& _p) \
+	{ \
+		std::string s; \
+		_in >> s; \
+		_p = to ## N(s); \
+		return _in; \
+	}
+
+#define LIGHTBOX_ENUM_CLASS_S2F(R, DataType, Flag) \
+	if (_v == LIGHTBOX_ENUM_MAKESTRING(Flag)) \
+		return DataType::Flag;
+#define LIGHTBOX_ENUM_CLASS_F2S(R, DataType, Flag) \
+	if (_v == DataType::Flag) \
+		return LIGHTBOX_FLAGS_MAKESTRING(Flag);
+#define LIGHTBOX_ENUM_CLASS_F2N(R, DataType, Flag) \
+	if (_v == DataType::Flag) \
+		return shortened(LIGHTBOX_FLAGS_MAKESTRING(Flag));
+#define LIGHTBOX_ENUM_CLASS_STRINGABLE(N, X) \
+	inline char const* toString(N _v) \
+	{ \
+		BOOST_PP_SEQ_FOR_EACH(LIGHTBOX_ENUM_CLASS_F2S, N, X) \
+		return #N "(0)"; \
+	} \
+	inline std::string toNick(N _v) \
+	{ \
+		BOOST_PP_SEQ_FOR_EACH(LIGHTBOX_ENUM_CLASS_F2N, N, X) \
+		return #N "(0)"; \
+	} \
+	inline N to ## N(std::string const& _v) \
+	{ \
+		BOOST_PP_SEQ_FOR_EACH(LIGHTBOX_ENUM_CLASS_S2F, N, X) \
+		return N(0); \
+	} \
+	template <class _S> \
+	inline _S& operator<<(_S& _out, N _p) \
+	{ \
+		return _out << toString(_p); \
+	} \
+	template <class _S> \
+	inline _S& operator>>(_S& _in, N& _p) \
 	{ \
 		std::string s; \
 		_in >> s; \

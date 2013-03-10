@@ -39,7 +39,7 @@ void Joint::init1(Display& _d)
 	}
 }
 
-void Joint::init2(Display& _d)
+void Joint::init2(Display&)
 {
 	shaded = Program("Shaders.glsl", "view");
 	flat = Program("Shaders.glsl", "flat");

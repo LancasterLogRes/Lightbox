@@ -16,6 +16,54 @@ FontInfo::FontInfo(foreign_vector<uint8_t const> const& _ttfData):
 	stbtt_InitFont(&*m_info, m_data.data(), 0);
 }
 
+CharMetrics FontInfo::metrics(Char _char, Char _nChar, float _size, bool _tight) const
+{
+	if (!m_info)
+		return CharMetrics();
+
+	// Keep everything as non-units for now - might be wrong if it does clever pixel hinting, but probably not very...
+	float scale = stbtt_ScaleForMappingEmToPixels(&*m_info, _size);
+
+	CharMetrics ret;
+	if (_char == '\n')
+	{
+		int ascent;
+		int descent;
+		int lineGap;
+		stbtt_GetFontVMetrics(&*m_info, &ascent, &descent, &lineGap);
+		ret.advance = fSize(-numeric_limits<float>::infinity(), (ascent - descent + lineGap) * scale);
+	}
+	else
+	{
+		int fx;
+		int tx;
+		int fy;
+		int ty;
+		if (stbtt_GetCodepointBox(&*m_info, _char, &fx, &fy, &tx, &ty))
+		{
+			if (!_tight)
+			{
+				int ascent;
+				int descent;
+				int lineGap;
+				stbtt_GetFontVMetrics(&*m_info, &ascent, &descent, &lineGap);
+				fy = descent;
+				ty = ascent;
+			}
+			ret.glyph.include(fCoord(fx, -fy) * scale);
+			ret.glyph.include(fCoord(tx, -ty) * scale);
+		}
+		int advance;
+		int leftSideBearing;
+		stbtt_GetCodepointHMetrics(&*m_info, _char, &advance, &leftSideBearing);
+		if (_nChar != ' ')
+			advance += stbtt_GetCodepointKernAdvance(&*m_info, _char, _nChar);
+		ret.advance = fSize(advance * scale, 0);
+	}
+	return ret;
+}
+
+
 fRect FontInfo::measure(std::string const& _text, float _size, bool _tight) const
 {
 	if (!m_info)
@@ -43,15 +91,17 @@ fRect FontInfo::measure(std::string const& _text, float _size, bool _tight) cons
 			int tx;
 			int fy;
 			int ty;
-			stbtt_GetCodepointBox(&*m_info, c, &fx, &fy, &tx, &ty);
-			if (!_tight)
+			if (stbtt_GetCodepointBox(&*m_info, c, &fx, &fy, &tx, &ty))
 			{
-				fy = descent;
-				ty = ascent;
+				if (!_tight)
+				{
+					fy = descent;
+					ty = ascent;
+				}
+				box.include(cursor + iCoord(fx, -fy));
+				box.include(cursor + iCoord(tx, -ty));
 			}
 			stbtt_GetCodepointHMetrics(&*m_info, c, &advance, &leftSideBearing);
-			box.include(cursor + iCoord(fx, -fy));
-			box.include(cursor + iCoord(tx, -ty));
 			cursor += iSize(advance, 0);
 			if ((i + 1) < _text.size())
 				cursor += iSize(stbtt_GetCodepointKernAdvance(&*m_info, c, (&c)[1]), 0);
@@ -62,7 +112,7 @@ fRect FontInfo::measure(std::string const& _text, float _size, bool _tight) cons
 
 BakedFont::BakedFont(Font const& _f, FontInfo const& _info): m_f(_f), m_info(_info)
 {
-	float pxSize(GUIApp::joint().display->toUnalignedPixels(fSize(0, _f.mmSize())).height());
+	m_pxSize = GUIApp::joint().display->toUnalignedPixels(fSize(0, _f.mmSize())).height();
 
 	m_program = Program("Shaders.glsl", "font");
 	m_program.tie(GUIApp::joint().uniforms);
@@ -76,12 +126,12 @@ BakedFont::BakedFont(Font const& _f, FontInfo const& _info): m_f(_f), m_info(_in
 	m_texSize = m_program.uniform("u_texSize");
 
 	m_charData = new stbtt_bakedchar[s_charDataCount];
-	iSize bitmap(max<int>(32, pxSize * 4), max<int>(512, pxSize * 4));
+	iSize bitmap(max<int>(32, m_pxSize * 4), max<int>(512, m_pxSize * 4));
 	unsigned char* tempBitmap;
 	while (true)
 	{
 		tempBitmap = new unsigned char[bitmap.w()*bitmap.h()];
-		int by = stbtt_BakeFontBitmap(_info.m_data.data(), 0, stbtt_ScaleForMappingEmToPixels(&*(_info.m_info), pxSize) / stbtt_ScaleForPixelHeight(&*(_info.m_info), pxSize) * pxSize, tempBitmap, bitmap.w(), bitmap.h(), s_charDataFirst, s_charDataCount, (stbtt_bakedchar*)m_charData);
+		int by = stbtt_BakeFontBitmap(_info.m_data.data(), 0, stbtt_ScaleForMappingEmToPixels(&*(_info.m_info), m_pxSize) / stbtt_ScaleForPixelHeight(&*(_info.m_info), m_pxSize) * m_pxSize, tempBitmap, bitmap.w(), bitmap.h(), s_charDataFirst, s_charDataCount, (stbtt_bakedchar*)m_charData);
 		if (by > 0)
 			break;
 		delete [] tempBitmap;
@@ -126,8 +176,7 @@ void BakedFont::draw(fCoord _anchor, string const& _text, RGBA _c, AnchorType _t
 		if (c >= (int)s_charDataFirst && c < int(s_charDataFirst + s_charDataCount))
 			width += ((stbtt_bakedchar*)m_charData)[c - s_charDataFirst].xadvance;
 
-	float pxSize(GUIApp::joint().display->toUnalignedPixels(fSize(0, m_f.mmSize())).height());
-	fRect bb = m_info.measure(_text, pxSize, _t & TightVertical);
+	fRect bb = m_info.measure(_text, m_pxSize, _t & TightVertical);
 
 	float x = _t & AtLeft ? _anchor.x() - bb.left() : _t & AtRight ? _anchor.x() - bb.right() : (_anchor.x() - bb.middle().x());
 	float y = _t & AtTop ? _anchor.y() - bb.top() : _t & AtBottom ? _anchor.y() - bb.bottom() : _t & AtBaseline ? _anchor.y() : (_anchor.y() - bb.middle().y());
@@ -159,7 +208,7 @@ void BakedFont::draw(fCoord _anchor, string const& _text, RGBA _c, AnchorType _t
 	}
 }
 
-fRect BakedFont::measurePx(std::string const& _text) const
+fRect BakedFont::pxMeasure(std::string const& _text) const
 {
 	float width = 0;
 	for (char c: _text)
@@ -169,5 +218,5 @@ fRect BakedFont::measurePx(std::string const& _text) const
 
 fRect BakedFont::measureMm(std::string const& _text) const
 {
-	return measurePx(_text) * float(GUIApp::joint().displaySizeMM.height() / GUIApp::joint().displaySizePixels.height());
+	return pxMeasure(_text) * float(GUIApp::joint().displaySizeMM.height() / GUIApp::joint().displaySizePixels.height());
 }

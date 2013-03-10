@@ -26,13 +26,27 @@ enum AnchorFlags
 
 LIGHTBOX_FLAGS_TYPE(AnchorFlags, AnchorType);
 
+struct CharMetrics
+{
+	fRect glyph;
+	fSize advance;
+};
+
+template <class _S> _S& operator<<(_S& _out, CharMetrics const& _m)
+{
+	_out << "CharMetrics(" << _m.glyph << _m.advance << ")";
+	return _out;
+}
+
+typedef uint32_t Char;
+
 class BakedFont;
 typedef std::shared_ptr<BakedFont> BakedFontPtr;
 
-enum Metric
+enum class Metric
 {
-	ByPixels = 0,
-	ByMillis
+	Pixels,
+	Millis
 };
 
 class Font
@@ -40,7 +54,9 @@ class Font
 public:
 	Font(): m_mm(0) {}
 	Font(float _mm, std::string _family, bool _bold = false): Font(_mm, FontDefinition(_family, _bold)) {}
-	Font(float _mm, FontDefinition const& _d): Font(ByMillis, _mm, _d) {}
+	Font(float _mm, FontDefinition const& _d): Font(Metric::Millis, _mm, _d) {}
+
+	/// @warning If _m == Metric::Pixels, these won't work unless there's a display available.
 	Font(Metric _m, float _u, std::string _family, bool _bold = false): Font(_m, _u, FontDefinition(_family, _bold)) {}
 	Font(Metric _m, float _u, FontDefinition const& _d);
 
@@ -48,10 +64,17 @@ public:
 	FontDefinition const& definition() const { return m_definition; }
 	float mmSize() const { return m_mm; }
 
+	void setBold(bool _bold) { m_definition.bold = _bold; m_baked.reset(); }
+	void setMmSize(float _mm) { m_mm = _mm; m_baked.reset(); }
+
 	void draw(fCoord _anchor, std::string const& _text, RGBA _c = RGBA::Black, AnchorType _t = AtCenter) const;
 	void draw(iCoord _anchor, std::string const& _text, RGBA _c = RGBA::Black, AnchorType _t = AtCenter) const;
 	fRect measure(std::string const& _text, bool _tight = false) const;
-	fRect measurePx(std::string const& _text, bool _tight = false) const;
+	CharMetrics metrics(Char _char, Char _nChar, bool _tight = false) const;
+
+	float pxSize() const;		///< @warning Won't work if there's no display.
+	fRect pxMeasure(std::string const& _text, bool _tight = false) const;		///< @warning Won't work if there's no display.
+	CharMetrics pxMetrics(Char _char, Char _nChar, bool _tight = false) const;	///< @warning Won't work if there's no display.
 
 	bool isValid() const { return m_mm > 0; }
 	bool isNull() const { return m_mm == 0; }
