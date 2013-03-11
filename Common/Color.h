@@ -127,6 +127,27 @@ static const Color Magenta = Color(0.8333333, 1, 1);
 static const Color Cyan = Color(0.5, 1, 1);
 static const Color Black = Color(0);
 
+static const Color Orange = Color(0.0833, 1, 1);
+static const Color Pink = Color(0.97222, 0.5, 1);
+static const Color SalmonPink = Color(0.05, 0.5, 1);
+
+static const Color DarkRed = Color(0, 1, 0.5);
+static const Color DarkBlue = Color(0.666666, 1, 0.5);
+static const Color DarkGreen = Color(0.333333, 1, 0.5);
+static const Color DarkYellow = Color(0.166666, 1, 0.5);
+static const Color DarkMagenta = Color(0.8333333, 1, 0.5);
+static const Color DarkCyan = Color(0.5, 1, 0.5);
+
+static const Color LightRed = Color(0, 0.5, 1);
+static const Color LightBlue = Color(0.666666, 0.5, 1);
+static const Color LightGreen = Color(0.333333, 0.5, 1);
+static const Color LightYellow = Color(0.166666, 0.5, 1);
+static const Color LightMagenta = Color(0.8333333, 0.5, 1);
+static const Color LightCyan = Color(0.5, 0.5, 1);
+
+static const Color WarmWhite = Color(0.12, 0.08, 1);
+static const Color ColdWhite = Color(0.62, 0.08, 1);
+
 static const Color NullColor(-1, 0, 0, 0);
 
 static const Colors NullColors;
