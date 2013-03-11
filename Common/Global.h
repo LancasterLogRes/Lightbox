@@ -226,6 +226,13 @@ struct Name \
 #define LIGHTBOX_FINALIZING_LIBRARY
 #endif
 
+#define LIGHTBOX_LIBRARY_HEADER(TARGET) \
+	extern "C" __attribute__ ((visibility ("default"))) Lightbox::LibraryInfo const& lightboxLibraryInfo ## TARGET();
+
+#define LIGHTBOX_LIBRARY(TARGET) \
+	extern "C" __attribute__ ((visibility ("default"))) Lightbox::LibraryInfo const& lightboxLibraryInfo ## TARGET() { static const Lightbox::LibraryInfo s_ret{ LIGHTBOX_BUILD_DATE }; return s_ret; }
+
+
 typedef int16_t v4hi __attribute__ ((vector_size (8)));
 typedef float v4sf __attribute__ ((vector_size (16)));
 typedef int32_t i4sf __attribute__ ((vector_size (16)));
@@ -233,6 +240,8 @@ typedef double d4sf __attribute__ ((vector_size (32)));
 
 namespace Lightbox
 {
+
+struct LibraryInfo { uint64_t buildDate; };
 
 template <unsigned _Size> struct Int {};
 template <unsigned _Size> struct Uint {};
