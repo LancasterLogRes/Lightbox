@@ -333,7 +333,7 @@ public:
 	foreign_vector& tied(std::shared_ptr<void> const& _lock) { m_lock = _lock; return *this; }
 	std::shared_ptr<void> const& tie() { return m_lock; }
 	foreign_vector<_T> next() const { return foreign_vector<_T>(m_data + m_count, m_count).tied(m_lock); }
-	foreign_vector<_T> cropped(unsigned _begin, unsigned _count = (unsigned)-1) const { return foreign_vector<_T>(m_data + _begin, _count == (unsigned)-1 ? m_count - _begin : _count).tied(m_lock); }
+	foreign_vector<_T> cropped(unsigned _begin, int _count = -1) const { if (m_data && _begin + std::max(0, _count) <= m_count) return foreign_vector<_T>(m_data + _begin, _count < 0 ? m_count - _begin : _count).tied(m_lock); else return foreign_vector<_T>(); }
 	void retarget(_T const* _d, size_t _s) { m_data = _d; m_count = _s; }
 	void retarget(std::vector<_T> const& _t) { m_data = _t.data(); m_count = _t.size(); }
 

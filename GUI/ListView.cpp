@@ -58,9 +58,11 @@ bool ListViewBody::event(Event* _e)
 			}
 			if (m_scrollLatch)
 			{
-				setOffset(m_scrollOffset - displacement.h());
+				float movement = m_offset - (m_scrollOffset - displacement.h());
+				setOffset(m_scrollOffset - displacement.h(), true);
 				scrolled(displacement);
-				m_inertia = m_inertia / 2 - displacement.h();
+				m_inertia = m_inertia / 2 - movement * 50;
+				cdebug << "Increased inertia to" << m_inertia;
 			}
 //			cdebug << boolalpha << e->id << "MOVED at" << e->mmLocal() << (e->id == m_downPointer) << geometry().contains(e->mmLocal()) << displacement << m_scrollLatch << m_scrollOffset << m_offset;
 		}
@@ -71,6 +73,11 @@ bool ListViewBody::event(Event* _e)
 		{
 //			cdebug << "ITERATE of" << textualTime(e->delta);
 			setAlive(physics(e->delta));
+		}
+		else
+		{
+			m_inertia /= 2;
+			cdebug << "Reducing inertia by half: " << m_inertia;
 		}
 	}
 	return false;
@@ -104,7 +111,7 @@ void ListViewBody::released(bool _properClick, fCoord _pos)
 
 void ListViewBody::setOffset(float _offset, bool _animate)
 {
-	auto clamped = clamp(_offset, offsetBounds());
+	auto clamped = clamp(_offset, offsetBounds(_animate));
 	if (m_offset != clamped)
 	{
 		if (_animate)
@@ -131,7 +138,7 @@ bool ListViewBody::physics(Time _d)
 {
 	// Update offset state according to Time delta _d.
 	float offset = m_offset;
-	auto bounds = offsetBounds();
+	auto bounds = offsetBounds(false);
 	const Time c_hlOuter = FromMsecs<75>::value;
 	const Time c_mmOuter = FromMsecs<100>::value;
 
@@ -158,12 +165,12 @@ bool ListViewBody::physics(Time _d)
 
 float ListViewBody::visibleOffset() const
 {
-	float maxOffset = max(0.f, m_totalHeight - geometry().h());
-	float offset = m_offset;
-	if (offset < 0)
-		offset /= 2;
-	else if (offset > maxOffset)
-		offset = (offset + maxOffset) / 2;
+	auto bounds = offsetBounds(false);
+	float offset = clamp(m_offset, offsetBounds(true));
+	if (offset < bounds.first)
+		offset = (1.f - sqr(1.f - (offset - bounds.first) / -geometry().h())) * -geometry().h() / 2 + bounds.first;
+	else if (offset > bounds.second)
+		offset = (1.f - sqr(1.f - (offset - bounds.second) / geometry().h())) * geometry().h() / 2 + bounds.second;
 	return offset;
 }
 

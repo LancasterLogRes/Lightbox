@@ -45,7 +45,7 @@ protected:
 	virtual void itemChanged(ModelId _id);
 
 private:
-	std::pair<float, float> offsetBounds() const { return std::make_pair(0.f, std::max(0.f, m_totalHeight - geometry().h())); }
+	std::pair<float, float> offsetBounds(bool _maximal) const { return std::make_pair(_maximal ? -geometry().h() : 0.f, std::max(0.f, _maximal ? m_totalHeight : (m_totalHeight - geometry().h()))); }
 	void setOffset(float _offset, bool _animate = true);
 	bool physics(Time _d);
 	void checkHeight();
