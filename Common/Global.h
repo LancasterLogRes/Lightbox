@@ -278,9 +278,15 @@ template <> struct Packed<float> { static const bool value = true; typedef v4sf 
 template <> struct Packed<double> { static const bool value = true; typedef d4sf type; };
 template <> struct Packed<int32_t> { static const bool value = true; typedef i4sf type; };
 
-static const float Pi = 3.1415926535898;
-static const float TwoPi = Pi * 2.0;
-static const float HalfPi = Pi / 2.0;
+static const double Pi = 3.1415926535898;
+static const double TwoPi = Pi * 2.0;
+static const double HalfPi = Pi / 2.0;
+
+template <class _T> constexpr inline _T pi() { return _T(Pi); }
+template <class _T> constexpr inline _T twoPi() { return _T(TwoPi); }
+template <class _T> constexpr inline _T halfPi() { return _T(HalfPi); }
+
+template <class _T> _T sqrt(_T _n) { return ::sqrt(_n); }
 
 static const double s_tolerance = 1e-8;
 
