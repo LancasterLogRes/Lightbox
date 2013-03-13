@@ -44,10 +44,10 @@ protected:
 	virtual fSize specifyFit(fSize _space) const;
 
 private:
-	float xC(float _sign) { return m_direction.x() + sin(Pi / 4.f) * _sign * m_direction.rx(); }
-	float yC(float _sign) { return m_direction.y() + sin(Pi / 4.f) * _sign * m_direction.ry(); }
-	float wC(float _xc) { return fabs(_xc - m_direction.x()) / sin(Pi / 4); }
-	float hC(float _yc) { return fabs(_yc - m_direction.y()) / sin(Pi / 4); }
+	float xC(float _sign) { return m_direction.x() + sin(halfPi<float>() / 2) * _sign * m_direction.rx(); }
+	float yC(float _sign) { return m_direction.y() + sin(halfPi<float>() / 2) * _sign * m_direction.ry(); }
+	float wC(float _xc) { return fabs(_xc - m_direction.x()) / sin(halfPi<float>() / 2); }
+	float hC(float _yc) { return fabs(_yc - m_direction.y()) / sin(halfPi<float>() / 2); }
 
 	fEllipse m_direction;
 	Mode m_mode;

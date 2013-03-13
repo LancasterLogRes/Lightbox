@@ -104,11 +104,11 @@ public:
 		{
 			twist = acos(clamp(y / sqrt(lenXY), -1.f, 1.f)); // 0 -- pi
 			if (x > 0)
-				twist = TwoPi - twist;
+				twist = twoPi<float>() - twist;
 		}
 
 		//Quaternion q = q1 * Quaternion::rotation(Vector3<T>(0, 0, 1), twist);
-		//std::cout<<"DEBUG QUATERNION: "<<_v<<"&"<<_up<<" --> "<<q.axis()<<"&"<<q.angle()*180.f/Pi<<std::endl;
+		//std::cout<<"DEBUG QUATERNION: "<<_v<<"&"<<_up<<" --> "<<q.axis()<<"&"<<q.angle()*180.f/pi<float>()<<std::endl;
 
 		return q1 * Quaternion::rotation(Vector3<T>(0, 0, 1), twist);
 	}

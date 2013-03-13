@@ -50,7 +50,7 @@ bool HuePickerBody::event(Event* _e)
 		if (off.length() < s && off.length() > s / 8.5f)
 		{
 			setChecked(true, true);
-			setHue(atan2(off.x(), off.y()) / TwoPi + 0.5f, true);
+			setHue(atan2(off.x(), off.y()) / twoPi<float>() + 0.5f, true);
 			return true;
 		}
 	}
@@ -102,7 +102,7 @@ void HuePickerBody::draw(Slate const& _c, unsigned _l)
 	else
 	{
 		_c.blit(m_hueWheelTex);
-		iCoord p = e.pos() + iSize(fSize(-sin(m_hue * TwoPi), -cos(m_hue * TwoPi)) * fSize(e.radii() - thumbPx));
+		iCoord p = e.pos() + iSize(fSize(-sin(m_hue * twoPi<float>()), -cos(m_hue * twoPi<float>())) * fSize(e.radii() - thumbPx));
 		_c.glowThumb(p, m_middle.withHue(m_hue));
 	}
 	return;

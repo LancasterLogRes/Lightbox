@@ -25,7 +25,9 @@ SOURCES += Common.cpp \
     RGBA8.cpp \
     RGBA.cpp \
 	thread.cpp \
-	fix_fft.cpp
+	fix_fft.cpp \
+	fixmath.cpp
+
 HEADERS += Common.h Global.h \
     Time.h \
     GraphParameters.h \
@@ -34,7 +36,8 @@ HEADERS += Common.h Global.h \
     Color.h \
     Trivial.h \
     BoolArray.h \
-    FFTW.h \
+	Fixed.h \
+	FFTW.h \
     UnitTesting.h \
     Maths.h \
     StreamIO.h \
@@ -51,13 +54,5 @@ HEADERS += Common.h Global.h \
     RGBA8.h \
     RGBA.h \
 	thread.h \
-	fix_fft.h
-
-HEADERS += \
-    Fixed.h
-
-HEADERS += \
-    fixmath.h
-
-SOURCES += \
-    fixmath.cpp
+	fix_fft.h \
+	fixmath.h

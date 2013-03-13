@@ -30,7 +30,7 @@ string id(float _y) { return toString(_y); }
 string ms(float _x){ return toString(round(_x * 1000)) + (!_x ? "ms" : ""); }
 string msL(float _x, float _y) { return toString(round(_x * 1000)) + "ms (" + toString(round(_y * 100)) + "%)"; }
 
-class BeatDetector: public EventCompilerImpl
+class BeatDetector: public EventCompilerNativeImpl<float>
 {
 public:
 	BeatDetector(): halfLife(0.01) {}
@@ -41,7 +41,7 @@ public:
 	double halfLife;
 
 private:
-	Historied<HighEnergy> highEnergy;
+	Historied<HighEnergy<>> highEnergy;
 
 	virtual StreamEvents init()
 	{

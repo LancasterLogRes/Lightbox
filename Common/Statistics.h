@@ -68,6 +68,8 @@ template <class T>
 typename element_of<T>::type mean(T const& _distro)
 {
 	typename element_of<T>::type ret = zero_of<typename element_of<T>::type>::value();
+	if (!_distro.size())
+		return ret;
 	for (auto v: _distro)
 		ret += v;
 	return ret / _distro.size();
@@ -80,6 +82,8 @@ typename element_of<T>::type mean(T const& _begin, T const& _end)
 	unsigned j = 0;
 	for (T i = _begin; i != _end; ++i, ++j)
 		ret += *i;
+	if (!j)
+		return ret;
 	return ret / j;
 }
 
@@ -87,6 +91,8 @@ template <class T>
 typename element_of<T>::type variance(T const& _distro, typename element_of<T>::type _mean)
 {
 	typename element_of<T>::type ret = zero_of<typename element_of<T>::type>::value();
+	if (!_distro.size())
+		return ret;
 	for (auto v: _distro)
 		ret += sqr(v - _mean);
 	return ret / _distro.size();
@@ -99,6 +105,8 @@ typename element_of<T>::type variance(T const& _begin, T const& _end, typename e
 	unsigned j = 0;
 	for (T i = _begin; i != _end; ++i, ++j)
 		ret += sqr(*i - _mean);
+	if (!j)
+		return ret;
 	return ret / j;
 }
 
@@ -141,8 +149,10 @@ typename element_of<T>::type sigma(T const& _begin, T const& _end)
 template <class T>
 T normal(T _x, T _mu, T _sigma)
 {
+	if (!_sigma)
+		return 0;
 	T ep = -(sqr(_x - _mu) / (2 * sqr(_sigma)));
-	T pb = sqrt(2 * Pi * _sigma);
+	T pb = sqrt(twoPi<T>() * _sigma);
 	return exp(ep) / pb;
 }
 
@@ -179,6 +189,8 @@ T nnormal(T _x, Gaussian _muSigma)
 template <class T>
 typename element_of<T>::type pInDistro(typename element_of<T>::type _v, T const& _distro, typename element_of<T>::type _backupSigma = 0)
 {
+	if (!_distro.size())
+		return 0;
 	typedef typename element_of<T>::type E;
 	E m = mean(_distro);
 	E s = _distro.size() > 1 ? sigma(_distro, m) : _backupSigma ? _backupSigma : m;

@@ -286,7 +286,8 @@ template <class _T> constexpr inline _T pi() { return _T(Pi); }
 template <class _T> constexpr inline _T twoPi() { return _T(TwoPi); }
 template <class _T> constexpr inline _T halfPi() { return _T(HalfPi); }
 
-template <class _T> _T sqrt(_T _n) { return ::sqrt(_n); }
+template <class _T> inline _T sqrt(_T _n) { return ::sqrt(_n); }
+template <class _T> inline _T atan2(_T _n, _T _m) { return ::atan2(_n, _m); }
 
 static const double s_tolerance = 1e-8;
 

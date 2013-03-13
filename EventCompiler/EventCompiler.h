@@ -38,7 +38,7 @@ public:
 	static EventCompiler create(EventCompilerImpl* _i) { EventCompiler ret; ret.m_impl = std::shared_ptr<EventCompilerImpl>(_i); return ret; }
 
 	StreamEvents init(unsigned _bands, Time _hop, Time _nyquist) { if (m_impl) { m_impl->m_t = 0; m_impl->m_bands = _bands; m_impl->m_hop = _hop; m_impl->m_nyquist = _nyquist; m_impl->initPres(); return m_impl->init(); } return StreamEvents(); }
-	StreamEvents compile(std::vector<float> const& _mag, std::vector<float> const& _phase, std::vector<float> const& _wave) { if (m_impl) { m_impl->executePres(m_impl->m_t, _mag, _phase, _wave); auto ret = m_impl->compile(m_impl->m_t, _mag, _phase, _wave); m_impl->m_t += m_impl->m_hop; return ret; } else return StreamEvents(); }
+	template <class _T, class _W> StreamEvents compile(std::vector<_T> const& _mag, std::vector<_T> const& _phase, std::vector<_W> const& _wave) { if (m_impl) return m_impl->doCompile(_mag, _phase, _wave); else return StreamEvents(); }
 	Members<EventCompilerImpl> properties() { return m_impl ? Members<EventCompilerImpl>(m_impl->propertyMap(), m_impl) : Members<EventCompilerImpl>(); }
 	Members<EventCompilerImpl> state() { return m_impl ? Members<EventCompilerImpl>(m_impl->stateMap(), m_impl) : Members<EventCompilerImpl>(); }
 

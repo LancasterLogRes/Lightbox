@@ -40,6 +40,7 @@
 #include "Global.h"
 #include "Maths.h"
 #include "UnitTesting.h"
+#include "Fixed.h"
 
 #undef _C
 #undef _P
@@ -95,6 +96,8 @@ std::vector<_T> vector_cast(_V const& _v)
 		ret += (_T)i;
 	return ret;
 }
+
+template <class _T> std::vector<_T> const& vector_cast(_T const& _v) { return _v; }
 
 template <class _T> typename _T::element_type at(_T const& _t, unsigned _i)
 {
@@ -741,6 +744,23 @@ void packTransform(_A _a, _B _b, unsigned _s, _Fxform const& _xform)
 	}
 }
 
+template <class _A, class _B, class _F>
+typename element_of<_A>::type genCombine(_A _a, _B _b, size_t _s, _F const& _f, typename element_of<_A>::type _init = 0)
+{
+	typedef typename element_of<_A>::type ElementType;
+	return genCombine<ElementType, _F>(&*_a, &*_b, _s, _f, _init);
+}
+
+template <class _T, class _F>
+_T genCombine(_T const* _a, _T const* _b, size_t _s, _F const& _f, _T _init = 0)
+{
+	_T const* la =_a + _s;
+	auto ret = _init;
+	for (; _a != la; ++_a, ++_b)
+		_f(ret, *_a, *_b);
+	return ret;
+}
+
 template <class _A, class _B>
 typename element_of<_A>::type similarity(_A _a, _B _b, unsigned _s)
 {
@@ -749,12 +769,17 @@ typename element_of<_A>::type similarity(_A _a, _B _b, unsigned _s)
 	   [=](float const* acc) { return -(acc[0] + acc[1] + acc[2] + acc[3]); });
 }
 
-template <class _A, class _B>
-typename element_of<_A>::type correlation(_A _a, _B _b, unsigned _s)
+template <class _T> inline _T correlation(std::vector<_T> _a, std::vector<_T> _b) { return correlation(_a.begin(), _b.begin(), min(_a.size(), _b.size())); }
+template <class _T> inline _T correlation(typename std::vector<_T>::const_iterator _a, typename std::vector<_T>::const_iterator _b, unsigned _s) { return correlation(&*_a, &*_b, _s); }
+
+inline float correlation(float const* _a, float const* _b, unsigned _s)
 {
-	return packCombine(_a, _b, _s,
-	   [](v4sf& acc, v4sf const& a, v4sf const& b) { acc = acc + a * b; },
-	   [=](float const* acc) { return acc[0] + acc[1] + acc[2] + acc[3]; });
+	return packCombine(_a, _b, _s, [](v4sf& acc, v4sf const& a, v4sf const& b) { acc = acc + a * b; }, [=](float const* acc) { return acc[0] + acc[1] + acc[2] + acc[3]; });
+}
+
+template <size_t _I, size_t _F> inline Fixed<_I, _F> correlation(Fixed<_I, _F> const* _a, Fixed<_I, _F> const* _b, unsigned _s)
+{
+	return genCombine(_a, _b, _s, [](Fixed<_I, _F>& acc, Fixed<_I, _F> const& a, Fixed<_I, _F> const& b) { acc += a * b; });
 }
 
 template <class _A, class _B>
@@ -765,11 +790,6 @@ typename element_of<_A>::type dissimilarity(_A _a, _B _b, unsigned _s)
 	   [=](float const* acc) { return acc[0] + acc[1] + acc[2] + acc[3]; });
 }
 
-template <class _T>
-_T correlation(std::vector<_T> _a, std::vector<_T> _b)
-{
-	return correlation(_a.begin(), _b.begin(), min(_a.size(), _b.size()));
-}
 
 template <class _F, class _It>
 std::vector<typename element_of<_It>::type> autocross(_It _begin, int _s, _F const& _f, unsigned _maxPeriod)
@@ -788,7 +808,6 @@ void autocross(_It _begin, int _s, _F const& _f, unsigned _maxPeriod, unsigned _
 {
 	typedef typename element_of<_It>::type T;
 	int rs = std::min<int>(_maxPeriod, _s - 1);
-	std::vector<T> ret(rs);
 	_It ap = _begin;
 	for (int p = 0; p < rs; ++p, ++ap)
 		// Add new, subtract old.

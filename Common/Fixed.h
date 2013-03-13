@@ -417,6 +417,12 @@ public: // constructors
 		return static_cast<double>(m_data) / Fixed::one;
 	}
 
+	explicit operator unsigned() const { return to_uint(); }
+	explicit operator int() const { return to_int(); }
+	explicit operator float() const { return to_float(); }
+	explicit operator double() const { return to_double(); }
+	explicit operator bool() const { return !!m_data; }
+
 	base_type to_raw() const
 	{
 		return m_data;
@@ -450,6 +456,7 @@ struct FixedMathAux
 
 template <std::size_t I, std::size_t F> inline Fixed<I, F> sqrt(Fixed<I, F> _x) { return FixedMathAux<I, F>::sqrt(_x); }
 template <std::size_t I, std::size_t F> inline Fixed<I, F> atan2(Fixed<I, F> _x, Fixed<I, F> _y) { return FixedMathAux<I, F>::atan2(_x, _y); }
+template <std::size_t I, std::size_t F> inline Fixed<I, F> pi() { return Fixed<I, F>::pi(); }
 template <std::size_t I, std::size_t F> inline bool isFinite(Fixed<I, F>) { return true; }
 
 template <>

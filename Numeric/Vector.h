@@ -124,7 +124,7 @@ public:
 	void normalizeTo(T _mag) { slash(length() / _mag); }
 	
 //	const fVector2 toPolar() const { return fVector2(frac((abs(x()) > 0.0 ? atan2(z(), x()) : (z() > 0.0 ? PIBY2 : -PIBY2)) / PI2 + 1.0),  acos(y() / length()) / PI); }
-	Vector2<T> toPolar() const { return Vector2<T>(frac(atan2(z(), x()) / TwoPi + 1.0), acos(y() / length()) / Pi); }
+	Vector2<T> toPolar() const { return Vector2<T>(frac(atan2(z(), x()) / twoPi<float>() + 1.0), acos(y() / length()) / pi<float>()); }
 
 	bool isSignificant() const { return lengthSquared() > s_tolerance; }
 	bool isXYSignificant() const { return sqr(x()) + sqr(y()) > s_tolerance; }

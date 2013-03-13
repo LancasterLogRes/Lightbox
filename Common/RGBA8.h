@@ -36,8 +36,8 @@ namespace Lightbox
 class RGBA8
 {
 public:
-	RGBA8() { m_a = 255; }
-	explicit RGBA8(uint8_t _val) { m_r = _val; m_g = _val; m_b = _val; }
+	RGBA8(): m_a(255) {}
+	explicit RGBA8(uint8_t _val, uint8_t _a = 255): m_r(_val), m_g(_val), m_b(_val), m_a(_a) {}
 	RGBA8(uint8_t _r, uint8_t _g, uint8_t _b, uint8_t _a = 255) { m_r = _r; m_g = _g; m_b = _b; m_a = _a; }
 	RGBA8(RGBA8 const& _s) { m_r = _s.m_r; m_g = _s.m_g; m_b = _s.m_b; m_a = _s.m_a; }
 	RGBA8& operator=(RGBA8 const& _s) { m_r = _s.m_r; m_g = _s.m_g; m_b = _s.m_b; m_a = _s.m_a; return *this; }

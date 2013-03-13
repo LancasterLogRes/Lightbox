@@ -33,8 +33,8 @@ void Joint::init1(Display& _d)
 		vector<float> uc(74 * 2);
 		uc[0] = uc[1] = 0.f;
 		for (unsigned i = 1; i < 74; ++i)
-			uc[2 * i] = sin(i / 72.f * TwoPi),
-			uc[2 * i + 1] = cos(i / 72.f * TwoPi);
+			uc[2 * i] = sin(i / 72.f * twoPi<float>()),
+			uc[2 * i + 1] = cos(i / 72.f * twoPi<float>());
 		unitCircle72 = Buffer<float>(uc);
 	}
 }
