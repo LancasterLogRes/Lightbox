@@ -12,6 +12,8 @@ DirectionPickerBody::DirectionPickerBody(Color _c, Grouping _grouping):
 	m_mode(Point),
 	m_color(_c),
 	m_grouping(_grouping),
+	m_enableH(true),
+	m_enableV(true),
 	m_lastSign(-1, -1)
 {
 }
@@ -26,6 +28,10 @@ bool DirectionPickerBody::event(Event* _e)
 	if (e)
 	{
 		fCoord p = fCoord(fSize(e->mmLocal() - geometry().pos()) / fSize(geometry().size())).clamped(0.f, 1.f);
+		if (!m_enableH)
+			p.setX(0);
+		if (!m_enableV)
+			p.setY(0);
 		if (dynamic_cast<TouchDownEvent*>(e))
 		{
 			lockPointer(e->id);

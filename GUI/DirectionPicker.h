@@ -30,6 +30,7 @@ public:
 	void setOnDirectionChanged(EventHandler const& _t) { m_onDirectionChanged = _t; }
 	void setColor(Color _c) { m_color = _c; update(); }
 	void setMiddle(Color _c) { if (m_middle != _c) { m_middle = _c; /*update();*/ } }	// Not required for now.
+	void setActiveDimensions(bool _h, bool _v) { m_enableH = _h; m_enableV = _v; update(); }
 
 	DirectionPicker withOnDirectionChanged(EventHandler const& _t) { setOnDirectionChanged(_t); return this; }
 
@@ -53,6 +54,9 @@ private:
 	Color m_color;
 	Color m_middle;
 	Grouping m_grouping;
+
+	bool m_enableH;
+	bool m_enableV;
 
 	iSize m_lastSign;
 	bool m_dragCenter;
