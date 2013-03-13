@@ -64,7 +64,7 @@ void FFTW::process()
 		float p = (re * re + im * im) / float(m_arity);
 		float m = (isFinite(p) && p != 0.f) ? sqrt(p) : 0;
 		m_mag[i] = m;
-        m_phase[i] = atan2(re, im) + Pi;
+		m_phase[i] = ::atan2(re, im) + Pi;
         while (m_phase[i] >= Pi * 2)
             m_phase[i] -= Pi * 2;
 /*		if (m_phase[i] < 0)

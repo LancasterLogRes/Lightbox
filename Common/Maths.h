@@ -35,6 +35,8 @@ namespace Lightbox
 
 static const float MinusInfinity = -std::numeric_limits<float>::infinity();
 
+template <class _T> _T sqrt(_T _n) { return ::sqrt(_n); }
+
 /// Linear interpolate with templated fixed-point (thousandths) factor.
 template <int _x> inline float lerp(float _a, float _b) { return _a * (1.f - _x / 1000.f) + _b * _x / 1000.f; }
 

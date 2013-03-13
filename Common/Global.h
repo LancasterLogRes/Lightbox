@@ -300,6 +300,66 @@ inline _T highestBitOnly(_T _w)
 	return _w & ~v;
 }
 
+inline int32_t highestBitOnly(int32_t _w)
+{
+	int32_t v = _w >> 1;
+	v |= v >> 1;
+	v |= v >> 2;
+	v |= v >> 4;
+	v |= v >> 8;
+	v |= v >> 16;
+	return _w & ~v;
+}
+
+inline uint32_t highestBitOnly(uint32_t _w)
+{
+	uint32_t v = _w >> 1;
+	v |= v >> 1;
+	v |= v >> 2;
+	v |= v >> 4;
+	v |= v >> 8;
+	v |= v >> 16;
+	return _w & ~v;
+}
+
+inline int16_t highestBitOnly(int16_t _w)
+{
+	int16_t v = _w >> 1;
+	v |= v >> 1;
+	v |= v >> 2;
+	v |= v >> 4;
+	v |= v >> 8;
+	return _w & ~v;
+}
+
+inline uint16_t highestBitOnly(uint16_t _w)
+{
+	uint16_t v = _w >> 1;
+	v |= v >> 1;
+	v |= v >> 2;
+	v |= v >> 4;
+	v |= v >> 8;
+	return _w & ~v;
+}
+
+inline int8_t highestBitOnly(int8_t _w)
+{
+	int8_t v = _w >> 1;
+	v |= v >> 1;
+	v |= v >> 2;
+	v |= v >> 4;
+	return _w & ~v;
+}
+
+inline uint8_t highestBitOnly(uint8_t _w)
+{
+	uint8_t v = _w >> 1;
+	v |= v >> 1;
+	v |= v >> 2;
+	v |= v >> 4;
+	return _w & ~v;
+}
+
 inline unsigned log2(unsigned _i)
 {
 	unsigned ret = 0;

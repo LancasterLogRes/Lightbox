@@ -26,6 +26,7 @@
 #include "BoolArray.h"
 #include "Color.h"
 #include "FFTW.h"
+#include "Fixed.h"
 #include "GraphParameters.h"
 #include "Peaks.h"
 #include "MemberCollection.h"
