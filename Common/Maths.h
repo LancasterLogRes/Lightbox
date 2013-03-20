@@ -135,6 +135,27 @@ decltype(_T()[0]) makeUnitMagnitude(_T& _v)
 			i /= m;
 }
 
+template <class _T>
+void makeUnitSum(_T& _v)
+{
+	auto total = _v[0] - _v[0];
+	for (auto const& n: _v)
+		total += n;
+	if (total > 0)
+	{
+		auto scale = 1 / total;
+		for (auto& p: _v)
+			p *= scale;
+	}
+	else
+	{
+		total = 1;
+		total /= _v.size();
+		for (auto& p: _v)
+			p = total;
+	}
+}
+
 inline double fracPart(double _f) { double r; return modf(_f, &r); }
 
 /// Is the number finite?

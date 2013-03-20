@@ -92,12 +92,14 @@ template <class _T, class _V>
 std::vector<_T> vector_cast(_V const& _v)
 {
 	std::vector<_T> ret;
-	for (auto const& i: _v)
-		ret += (_T)i;
+	ret.reserve(_v.size());
+	auto ve = _v.data() + _v.size();
+	for (auto v = _v.data(); v != ve; ++v)
+		ret += (_T)*v;
 	return ret;
 }
 
-template <class _T> std::vector<_T> const& vector_cast(_T const& _v) { return _v; }
+template <class _T> std::vector<_T> const& vector_cast(std::vector<_T> const& _v) { return _v; }
 
 template <class _T> typename _T::element_type at(_T const& _t, unsigned _i)
 {
@@ -199,6 +201,9 @@ std::tuple<typename std::remove_const<typename std::remove_reference<decltype(_T
 	}
 	return ret;
 }
+
+template <class _T>
+void valmove(_T* _dest, _T const* _src, size_t _n) { memmove(_dest, _src, _n * sizeof(_T)); }
 
 template <class _T>
 void valcpy(_T* _d, _T const* _s, unsigned _n, unsigned _dstride = 1, unsigned _sstride = 1)
@@ -744,13 +749,12 @@ void packTransform(_A _a, _B _b, unsigned _s, _Fxform const& _xform)
 	}
 }
 
-template <class _A, class _B, class _F>
+/*template <class _A, class _B, class _F>
 typename element_of<_A>::type genCombine(_A _a, _B _b, size_t _s, _F const& _f, typename element_of<_A>::type _init = 0)
 {
 	typedef typename element_of<_A>::type ElementType;
 	return genCombine<ElementType, _F>(&*_a, &*_b, _s, _f, _init);
-}
-
+}*/
 template <class _T, class _F>
 _T genCombine(_T const* _a, _T const* _b, size_t _s, _F const& _f, _T _init = 0)
 {
@@ -760,6 +764,18 @@ _T genCombine(_T const* _a, _T const* _b, size_t _s, _F const& _f, _T _init = 0)
 		_f(ret, *_a, *_b);
 	return ret;
 }
+//template <class _T, class _U, class _F> inline typename element_of<_T>::type genCombine(_T _a, _U _b, unsigned _s, _F const& _f, typename element_of<_T>::type _init = 0) { return genCombine(&*_a, &*_b, _s, _f, _init); }
+//template <class _T, class _F> inline _T genCombine(std::vector<_T> _a, std::vector<_T> _b, _F const& _f, _T _init = 0) { return genCombine(_a.begin(), _b.begin(), min(_a.size(), _b.size()), _f, _init); }
+
+template <class _T, class _F>
+void genTransform(_T* _a, _T const* _b, size_t _s, _F const& _f)
+{
+	_T* la =_a + _s;
+	for (; _a != la; ++_a, ++_b)
+		_f(*_a, *_b);
+}
+//template <class _T, class _U, class _F> inline void genTransform(_T _a, _U _b, unsigned _s, _F const& _f) { return genTransformRaw(&*_a, &*_b, _s, _f); }
+//template <class _T, class _F> inline void genTransform(std::vector<_T> _a, std::vector<_T> _b, _F const& _f) { return genTransform(_a.begin(), _b.begin(), std::min(_a.size(), _b.size()), _f); }
 
 template <class _A, class _B>
 typename element_of<_A>::type similarity(_A _a, _B _b, unsigned _s)
@@ -769,17 +785,37 @@ typename element_of<_A>::type similarity(_A _a, _B _b, unsigned _s)
 	   [=](float const* acc) { return -(acc[0] + acc[1] + acc[2] + acc[3]); });
 }
 
-template <class _T> inline _T correlation(std::vector<_T> _a, std::vector<_T> _b) { return correlation(_a.begin(), _b.begin(), min(_a.size(), _b.size())); }
-template <class _T> inline _T correlation(typename std::vector<_T>::const_iterator _a, typename std::vector<_T>::const_iterator _b, unsigned _s) { return correlation(&*_a, &*_b, _s); }
-
 inline float correlation(float const* _a, float const* _b, unsigned _s)
 {
+#if LIGHTBOX_NATIVE&&0
 	return packCombine(_a, _b, _s, [](v4sf& acc, v4sf const& a, v4sf const& b) { acc = acc + a * b; }, [=](float const* acc) { return acc[0] + acc[1] + acc[2] + acc[3]; });
+#else
+/*	float const* la = _a + _s;
+	float ret = 0;
+	for (; _a != la; ++_a, ++_b)
+		ret += *_a * *_b;
+	return ret;*/
+	return genCombine(_a, _b, _s, [](float& acc, float const& a, float const& b) { acc += a * b; });
+#endif
 }
 
 template <size_t _I, size_t _F> inline Fixed<_I, _F> correlation(Fixed<_I, _F> const* _a, Fixed<_I, _F> const* _b, unsigned _s)
 {
 	return genCombine(_a, _b, _s, [](Fixed<_I, _F>& acc, Fixed<_I, _F> const& a, Fixed<_I, _F> const& b) { acc += a * b; });
+}
+
+template <class _T> inline _T correlation(std::vector<_T> const& _a, std::vector<_T> const& _b) { return correlation(_a.data(), _b.data(), std::min(_a.size(), _b.size())); }
+template <class _T> inline _T correlation(typename std::vector<_T>::const_iterator _a, typename std::vector<_T>::const_iterator _b, unsigned _s) { return correlation(&*_a, &*_b, _s); }
+
+LIGHTBOX_UNITTEST(4, "correlation")
+{
+	std::vector<float> v(1024);
+	std::generate_n(v.begin(), v.size(), [](){return rand() / float(RAND_MAX);});
+	float c = correlation(v, v);
+
+	auto vf = vector_cast<Fixed<10, 22>>(v);
+	auto cf = correlation(vf, vf);
+	LIGHTBOX_REQUIRE_APPROXIMATES(c, (float)cf);
 }
 
 template <class _A, class _B>

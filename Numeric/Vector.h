@@ -70,6 +70,8 @@ typedef Vector2<int> iV2;
 template <class _T> inline Vector2<_T> operator*(_T _s, Vector2<_T> _v) { return _v *= _s; }
 template <class _T> inline Vector2<_T> operator/(_T _s, Vector2<_T> _v) { return _v /= _s; }
 
+template <class _T> struct ApproximationTest<Vector2<_T>> { static bool test(Vector2<_T> _a, Vector2<_T> _b) { return _a.approximates(_b); } };
+
 template <class T> class Vector3;
 template <class _S, class _T> _S& operator<<(_S& _out, Vector3<_T> const& _me);
 template <class _S, class _T> _S& operator>>(_S& _in, Vector3<_T>& _me);
@@ -144,6 +146,8 @@ private:
 
 template <class _T> inline Vector3<_T> operator*(_T _s, Vector3<_T> _v) { return _v *= _s; }
 template <class _T> inline Vector3<_T> operator/(_T _s, Vector3<_T> _v) { return _v /= _s; }
+
+template <class _T> struct ApproximationTest<Vector3<_T>> { static bool test(Vector3<_T> _a, Vector3<_T> _b) { return _a.approximates(_b); } };
 
 typedef Vector3<double> dVector3;
 typedef Vector3<float> fVector3;

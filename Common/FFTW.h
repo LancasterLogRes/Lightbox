@@ -57,6 +57,7 @@ private:
 
 #endif
 
+template <class FixedType = Fixed16>
 class FixedFFT
 {
 public:
@@ -75,22 +76,22 @@ public:
 	unsigned arity() const { return m_arity; }
 	unsigned bands() const { return m_arity / 2 + 1; }
 	int16_t* in() const { return (int16_t*)m_real.data(); }
-	std::vector<Fixed16> const& mag() const { return m_mag; }
-	std::vector<Fixed16> const& phase() const { return m_phase; }
+	std::vector<FixedType> const& mag() const { return m_mag; }
+	std::vector<FixedType> const& phase() const { return m_phase; }
 
 	void process()
 	{
 		fix_fft(m_real.data(), m_imag.data(), log2(m_arity), 0);
 		for (unsigned i = 0; i <= m_arity / 2; i++)
 		{
-			Fixed16 re = Fixed<1, 15>::from_base(m_real[i]);//(i == m_arity / 2) ? 0 : m_work[i];
-			Fixed16 im = Fixed<1, 15>::from_base(m_imag[i]);//i ? m_work[m_arity - i] : 0;
-			Fixed16 p = (re * re + im * im) / float(m_arity);
-			Fixed16 m = (isFinite(p) && p != 0.f) ? sqrt(p) : 0;
+			FixedType re = Fixed<1, 15>::from_base(m_real[i]);//(i == m_arity / 2) ? 0 : m_work[i];
+			FixedType im = Fixed<1, 15>::from_base(m_imag[i]);//i ? m_work[m_arity - i] : 0;
+			FixedType p = (re * re + im * im) / float(m_arity);
+			FixedType m = (isFinite(p) && p != 0.f) ? sqrt(p) : 0;
 			m_mag[i] = m;
-			m_phase[i] = atan2(re, im) + Fixed16::pi();
-			while (m_phase[i] >= Fixed16::pi() * Fixed16(2))
-				m_phase[i] -= Fixed16::pi() * Fixed16(2);
+			m_phase[i] = atan2(re, im) + pi<FixedType>();
+			while (m_phase[i] >= twoPi<FixedType>())
+				m_phase[i] -= twoPi<FixedType>();
 		}
 	}
 
@@ -98,8 +99,23 @@ private:
 	unsigned m_arity;
 	std::vector<int16_t> m_real;
 	std::vector<int16_t> m_imag;
-	std::vector<Fixed16> m_mag;
-	std::vector<Fixed16> m_phase;
+	std::vector<FixedType> m_mag;
+	std::vector<FixedType> m_phase;
+};
+
+template <class _N> struct FFT {};
+template <> struct FFT<float>
+{
+	typedef FFTW type;
+	static int16_t* inInt16(type&) { return nullptr; }
+	static float* inFloat(type& _t) { return _t.in(); }
+};
+
+template <size_t I, size_t F> struct FFT<Fixed<I, F>>
+{
+	typedef FixedFFT<Fixed<I, F>> type;
+	static int16_t* inInt16(type& _t) { return _t.in(); }
+	static float* inFloat(type&) { return nullptr; }
 };
 
 }

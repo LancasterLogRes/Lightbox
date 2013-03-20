@@ -23,7 +23,7 @@
 #include <cstdint>
 #include <type_traits>
 #include <boost/operators.hpp>
-#include "fixmath.h"
+#include "UnitTesting.h"
 
 namespace Lightbox
 {
@@ -103,7 +103,7 @@ void divide(const Fixed<I, F> &numerator, const Fixed<I, F> &denominator, Fixed<
 	static_assert(detail::type_from_size < I + F >::next_size::is_specialized, "");
 	typedef typename Fixed<I, F>::next_type next_type;
 	typedef typename Fixed<I, F>::base_type base_type;
-	static const std::size_t fractional_bits = Fixed<I, F>::fractional_bits;
+	const std::size_t fractional_bits = Fixed<I, F>::fractional_bits;
 	next_type t(numerator.to_raw());
 	t <<= fractional_bits;
 	quotient  = Fixed<I, F>::from_base(detail::next_to_base<base_type>(t / denominator.to_raw()));
@@ -116,7 +116,7 @@ void divide(Fixed<I, F> numerator, Fixed<I, F> denominator, Fixed<I, F> &quotien
 	// NOTE: division is broken for large types :-(
 	// especially when dealing with negative quantities
 	typedef typename Fixed<I, F>::base_type base_type;
-	static const int bits = Fixed<I, F>::total_bits;
+	const int bits = Fixed<I, F>::total_bits;
 	if (denominator == 0)
 	{
 		throw divide_by_zero();
@@ -171,7 +171,7 @@ void multiply(const Fixed<I, F> &lhs, const Fixed<I, F> &rhs, Fixed<I, F> &resul
 	static_assert(detail::type_from_size < I + F >::next_size::is_specialized, "");
 	typedef typename Fixed<I, F>::next_type next_type;
 	typedef typename Fixed<I, F>::base_type base_type;
-	static const std::size_t fractional_bits = Fixed<I, F>::fractional_bits;
+	const std::size_t fractional_bits = Fixed<I, F>::fractional_bits;
 	next_type t(static_cast<next_type>(lhs.to_raw()) * static_cast<next_type>(rhs.to_raw()));
 	t >>= fractional_bits;
 	result = Fixed<I, F>::from_base(next_to_base<base_type>(t));
@@ -184,9 +184,9 @@ template <std::size_t I, std::size_t F>
 void multiply(const Fixed<I, F> &lhs, const Fixed<I, F> &rhs, Fixed<I, F> &result, typename std::enable_if < !detail::type_from_size < I + F >::next_size::is_specialized >::type* = 0)
 {
 	typedef typename Fixed<I, F>::base_type base_type;
-	static const std::size_t fractional_bits = Fixed<I, F>::fractional_bits;
-	static const std::size_t integer_mask    = Fixed<I, F>::integer_mask;
-	static const std::size_t fractional_mask = Fixed<I, F>::fractional_mask;
+	const std::size_t fractional_bits = Fixed<I, F>::fractional_bits;
+	const std::size_t integer_mask    = Fixed<I, F>::integer_mask;
+	const std::size_t fractional_mask = Fixed<I, F>::fractional_mask;
 	// more costly but doesn't need a larger type
 	const base_type a_hi = (lhs.to_raw() & integer_mask) >> fractional_bits;
 	const base_type b_hi = (rhs.to_raw() & integer_mask) >> fractional_bits;
@@ -380,8 +380,9 @@ public: // constructors
 
 	Fixed& operator/=(const Fixed& n)
 	{
-		Fixed temp;
-		detail::divide(*this, n, *this, temp);
+//		Fixed temp;
+//		detail::divide(*this, n, *this, temp);
+		*this = m_data && n.m_data ? to_float() / n.to_float() : 0;
 		return *this;
 	}
 
@@ -434,8 +435,6 @@ public: // constructors
 		swap(m_data, rhs.m_data);
 	}
 
-	static Fixed pi() { static const Fixed s_ret = 3.1415925535898; return s_ret; }
-
 private:
 	// this makes it simpler to create a fixed point object from
 	// a native type without scaling
@@ -452,40 +451,13 @@ private:
 template <std::size_t I, std::size_t F>
 struct FixedMathAux
 {
+	static Fixed<16, 16> sqrt(Fixed<16, 16> _x) { return ::sqrt(_x.to_float()); }
+	static Fixed<16, 16> atan2(Fixed<16, 16> _x, Fixed<16, 16> _y) { return ::atan2(_x.to_float(), _y.to_float()); }
 };
 
 template <std::size_t I, std::size_t F> inline Fixed<I, F> sqrt(Fixed<I, F> _x) { return FixedMathAux<I, F>::sqrt(_x); }
 template <std::size_t I, std::size_t F> inline Fixed<I, F> atan2(Fixed<I, F> _x, Fixed<I, F> _y) { return FixedMathAux<I, F>::atan2(_x, _y); }
-template <std::size_t I, std::size_t F> inline Fixed<I, F> pi() { return Fixed<I, F>::pi(); }
 template <std::size_t I, std::size_t F> inline bool isFinite(Fixed<I, F>) { return true; }
-
-template <>
-struct FixedMathAux<16, 16>
-{
-	/*
-	static Fixed<16, 16> sqrt(Fixed<16, 16> _x)
-	{
-		uint32_t t, q, b, r;
-		r = _x.to_raw();
-		b = 0x40000000;
-		q = 0;
-		while (b > 0x40)
-		{
-			t = q + b;
-			if ( r >= t )
-			{
-				r -= t;
-				q = t + b; // equivalent to q += 2*b
-			}
-			r <<= 1;
-			b >>= 1;
-		}
-		q >>= 8;
-		return Fixed<16, 16>::from_base(q);
-	}*/
-	static Fixed<16, 16> sqrt(Fixed<16, 16> _x) { return Fixed<16, 16>::from_base(fix16_sqrt(_x.to_raw())); }
-	static Fixed<16, 16> atan2(Fixed<16, 16> _x, Fixed<16, 16> _y) { return Fixed<16, 16>::from_base(fix16_atan2(_x.to_raw(), _y.to_raw())); }
-};
 
 template <class _S, std::size_t I, std::size_t F>
 _S& operator<<(_S& _out, Fixed<I, F> const& _f)
@@ -495,6 +467,8 @@ _S& operator<<(_S& _out, Fixed<I, F> const& _f)
 }
 
 typedef Fixed<16, 16> Fixed16;
+typedef Fixed<5, 27> Fixed5x27;
+typedef Fixed<8, 24> Fixed8x24;
 
 }
 

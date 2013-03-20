@@ -25,8 +25,8 @@ SOURCES += Common.cpp \
     RGBA8.cpp \
     RGBA.cpp \
 	thread.cpp \
-	fix_fft.cpp \
-	fixmath.cpp
+	fix_fft.cpp
+#	fixmath.cpp
 
 HEADERS += Common.h Global.h \
     Time.h \
@@ -54,5 +54,5 @@ HEADERS += Common.h Global.h \
     RGBA8.h \
     RGBA.h \
 	thread.h \
-	fix_fft.h \
-	fixmath.h
+	fix_fft.h
+#	fixmath.h

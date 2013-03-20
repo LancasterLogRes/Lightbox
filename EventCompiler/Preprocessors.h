@@ -404,21 +404,21 @@ private:
 	unsigned m_count;
 };
 
-template <class _PP, unsigned _ds = 8>
+// Slightly faster version of Historied - it only does a memmove every _MoveEvery inputs.
+template <class _PP, unsigned _DefaultHistorySize = 0, unsigned _MoveEvery = 1>
 class SlowHistoried: public _PP
 {
 public:
 	typedef typename Info<_PP>::ScalarType Scalar;
 
-	SlowHistoried(unsigned _s = _ds): m_data(_s) {}
+	SlowHistoried(unsigned _s = _DefaultHistorySize) { setHistory(_s); }
 
-	SlowHistoried& setHistory(unsigned _s) { m_data.clear(); m_data.resize(_s + 4, 0); m_offset = 0; return *this; }
+	SlowHistoried& setHistory(unsigned _s) { m_data.clear(); m_data.resize(_s + _MoveEvery - 1, 0); m_offset = 0; return *this; }
 
 	void init(EventCompilerImpl* _eci)
 	{
 		cdebug << "Historied::init";
 		_PP::init(_eci);
-		setHistory(m_data.size() - 4);
 	}
 
 	void resetBefore(unsigned _bins) {}
@@ -428,18 +428,18 @@ public:
 		_PP::execute(_eci, _t, _mag, _phase, _wave);
 		if (_PP::changed())
 		{
-			m_data[m_data.size() - 4 + m_offset] = _PP::get();
+			m_data[m_data.size() - _MoveEvery + m_offset] = _PP::get();
 			++m_offset;
-			if (m_offset == 4)
+			if (m_offset == _MoveEvery)
 			{
-				memmove(m_data.data(), m_data.data() + 4, (m_data.size() - 4) * sizeof(Scalar));
+				valmove(m_data.data(), m_data.data() + _MoveEvery, m_data.size() - _MoveEvery);
 				m_offset = 0;
 			}
 		}
 	}
 
 	bool changed() const { return _PP::changed(); }
-	foreign_vector<Scalar> get() const { return foreign_vector<Scalar>(const_cast<Scalar*>(m_data.data()) + m_offset, m_data.size() - 4); }
+	foreign_vector<Scalar> get() const { return foreign_vector<Scalar>(const_cast<Scalar*>(m_data.data()) + m_offset, m_data.size() - _MoveEvery); }
 
 private:
 	vector<Scalar> m_data;
@@ -472,7 +472,7 @@ public:
 		_PP::execute(_eci, _t, _mag, _phase, _wave);
 		if (_PP::changed())
 		{
-			memmove(m_data.data(), m_data.data() + 1, (m_data.size() - 1) * sizeof(ElementType));
+			valmove(m_data.data(), m_data.data() + 1, m_data.size() - 1);
 			m_data[m_data.size() - 1] = _PP::get();
 		}
 	}
@@ -504,10 +504,10 @@ public:
 		{
 			auto const& h = _PP::get();
 			assert(isFinite(h[0]));
-			unsigned s = h.size() - 4;
+			unsigned s = h.size();
 			if (m_lastAc.empty())
-				m_lastAc.resize(s / 4, 0.0001);
-			autocross(h.begin(), s, _X::call, s / 4, 4, m_lastAc);
+				m_lastAc.resize(s / 2, 0.0001);
+			autocross(h.begin(), s, _X::call, s / 2, 1, m_lastAc);
 			assert(isFinite(m_lastAc[0]));
 		}
 	}
@@ -571,8 +571,9 @@ private:
 };
 
 template <class _N = float> struct CallSimilarity { inline static _N call(typename vector<_N>::const_iterator _a, typename vector<_N>::const_iterator _b, unsigned _s) { return similarity(_a, _b, _s); } };
-template <class _N = float> struct CallCorrelation { inline static _N call(typename vector<_N>::const_iterator _a, typename vector<_N>::const_iterator _b, unsigned _s) { return correlation(_a, _b, _s); } };
+template <class _N = float> struct CallCorrelation { inline static _N call(typename vector<_N>::const_iterator _a, typename vector<_N>::const_iterator _b, unsigned _s) { return correlation<_N>(_a, _b, _s); } };
 template <class _N = float> struct CallDissimilarity { inline static _N call(typename vector<_N>::const_iterator _a, typename vector<_N>::const_iterator _b, unsigned _s) { return dissimilarity(_a, _b, _s); } };
+template <class _N = float> struct CallCorrelationPtr { inline static _N call(_N const* _a, _N const* _b, unsigned _s) { return correlation(_a, _b, _s); } };
 
 /*
 template <class _PP> using Correlated = Crossed<_PP, CallCorrelation>;
@@ -582,6 +583,7 @@ template <class _PP> using Dissimilarity = Crossed<_PP, CallDissimilarity>;
 template <class _PP> class Correlated: public Crossed<_PP, CallCorrelation<typename Info<_PP>::ScalarType>> {};
 template <class _PP> class Similarity: public Crossed<_PP, CallSimilarity<typename Info<_PP>::ScalarType>> {};
 template <class _PP> class Dissimilarity: public Crossed<_PP, CallDissimilarity<typename Info<_PP>::ScalarType>> {};
+template <class _PP> class CorrelatedPtr: public DirectCrossed<_PP, CallCorrelationPtr<typename Info<_PP>::ScalarType>> {};
 
 template <class _PP>
 class AreaNormalized: public _PP

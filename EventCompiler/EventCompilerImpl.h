@@ -91,6 +91,7 @@ public:
 
 	virtual StreamEvents doCompile(std::vector<float> const& _mag, std::vector<float> const& _phase, std::vector<float> const& _wave) = 0;
 	virtual StreamEvents doCompile(std::vector<Fixed16> const& _mag, std::vector<Fixed16> const& _phase, std::vector<Fixed16> const& _wave) = 0;
+	virtual StreamEvents doCompile(std::vector<Fixed<11, 21>> const& _mag, std::vector<Fixed<11, 21>> const& _phase, std::vector<Fixed<11, 21>> const& _wave) = 0;
 
 	template <class _Out, class _This, class _In> static StreamEvents crossCompile(_This* _this, std::vector<_In> const& _mag, std::vector<_In> const& _phase, std::vector<_In> const& _wave, typename std::enable_if<!std::is_same<_Out, _In>::value>::type* = 0)
 	{
@@ -138,6 +139,7 @@ public:
 protected:
 	virtual StreamEvents doCompile(std::vector<float> const&, std::vector<float> const&, std::vector<float> const&) { m_t += m_hop; return StreamEvents(); }
 	virtual StreamEvents doCompile(std::vector<Fixed16> const&, std::vector<Fixed16> const&, std::vector<Fixed16> const&) { m_t += m_hop; return StreamEvents(); }
+	virtual StreamEvents doCompile(std::vector<Fixed<11, 21>> const&, std::vector<Fixed<11, 21>> const&, std::vector<Fixed<11, 21>> const&) { m_t += m_hop; return StreamEvents(); }
 };
 
 template <class _Native>
@@ -155,6 +157,7 @@ protected:
 private:
 	virtual StreamEvents doCompile(std::vector<float> const& _mag, std::vector<float> const& _phase, std::vector<float> const& _wave) { return crossCompile<Native>(this, _mag, _phase, _wave); }
 	virtual StreamEvents doCompile(std::vector<Fixed16> const& _mag, std::vector<Fixed16> const& _phase, std::vector<Fixed16> const& _wave) { return crossCompile<Native>(this, _mag, _phase, _wave); }
+	virtual StreamEvents doCompile(std::vector<Fixed<11, 21>> const& _mag, std::vector<Fixed<11, 21>> const& _phase, std::vector<Fixed<11, 21>> const& _wave) { return crossCompile<Native>(this, _mag, _phase, _wave); }
 };
 
 }

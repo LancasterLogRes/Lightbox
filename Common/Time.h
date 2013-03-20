@@ -134,6 +134,7 @@ inline uint64_t periodToBpm(Time _p)
 }
 
 std::string textualTime(Time _t, Time _largest = OneHour, Time _smallestOptional = ZeroTime, Time _smallestRequired = 2*OneHour);
+inline std::string minTextualTime(Time _t) { return textualTime(_t, ZeroTime, ZeroTime, 2 * OneHour); }
 float sensiblePrior(Time _period);
 
 static const Time msecs = FromMsecs<1>::value;

@@ -154,6 +154,8 @@ private:
 	T twiceArcCosA() const { return 2 * acos(w()); }
 };
 
+template <class _T> struct ApproximationTest<Quaternion<_T>> { static bool test(Quaternion<_T> _a, Quaternion<_T> _b) { return _a.approximates(_b); } };
+
 typedef Quaternion<float> fQuaternion;
 typedef Quaternion<double> dQuaternion;
 

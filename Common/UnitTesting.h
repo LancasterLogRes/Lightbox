@@ -70,6 +70,8 @@ struct UnitTesting<-1>
 	static bool go() { return true; }
 };
 
+template <class _T> struct ApproximationTest { static bool test(_T _a, _T _b) { return fabs(_a - _b) < fabs(std::min(_a, _b)) * .01f; } };
+
 struct UnitTestBase
 {
 	template <class _U, class _V> static void requireEqual(_U _u, _V _v, char const* _desc)
@@ -95,7 +97,7 @@ struct UnitTestBase
 	template <class _U, class _V> static void requireApproximates(_U _u, _V _v, char const* _desc)
 	{
 		++g_unitTestPassCount;
-		if (!_u.approximates(_v))
+		if (!ApproximationTest<_U>::test(_u, (_U)_v))
 		{
 			std::stringstream ss;
 			ss << _desc << " !(" << _u << " ~= " << _v << ")";

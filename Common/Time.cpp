@@ -47,7 +47,7 @@ std::string Lightbox::textualTime(Time _t, Time _d, Time _i, Time _m)
 		if ((_i >= OneMsec || !us) && _m >= OneMsec)
 			ss << ms << "ms";
 		else
-			ss << us << "us";
+			ss << ms << ((us < 10) ? ".00" : (us < 100) ? ".0" : ".") << us << "ms";
 	else if (_d < OneMinute && !h && !m)
 		if ((_i >= OneSecond || (!ms && !us)) && _m >= OneSecond)
 			ss << s << "s";
