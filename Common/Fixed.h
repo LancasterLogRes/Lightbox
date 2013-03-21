@@ -247,9 +247,7 @@ public:
 
 public: // constructors
 
-	Fixed() : m_data(0)
-	{
-	}
+	Fixed(){}
 
 	template <std::size_t _I, std::size_t _F> Fixed(Fixed<_I, _F> const& _f): m_data(bit_convert<F, _F, base_type, typename Fixed<_I, _F>::base_type>::exec(_f.to_raw()))
 	{
@@ -455,6 +453,7 @@ struct FixedMathAux
 	static Fixed<16, 16> atan2(Fixed<16, 16> _x, Fixed<16, 16> _y) { return ::atan2(_x.to_float(), _y.to_float()); }
 };
 
+template <std::size_t I, std::size_t F> inline Fixed<I, F> abs(Fixed<I, F> _x) { return _x < 0 ? -_x : _x; }
 template <std::size_t I, std::size_t F> inline Fixed<I, F> sqrt(Fixed<I, F> _x) { return FixedMathAux<I, F>::sqrt(_x); }
 template <std::size_t I, std::size_t F> inline Fixed<I, F> atan2(Fixed<I, F> _x, Fixed<I, F> _y) { return FixedMathAux<I, F>::atan2(_x, _y); }
 template <std::size_t I, std::size_t F> inline bool isFinite(Fixed<I, F>) { return true; }

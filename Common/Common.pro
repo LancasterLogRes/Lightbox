@@ -15,7 +15,7 @@ win32 {
 android: LIBS += -llog
 
 SOURCES += Common.cpp \
-    FFTW.cpp \
+	FFT.cpp \
     Maths.cpp \
     StreamIO.cpp \
     Global.cpp \
@@ -37,7 +37,7 @@ HEADERS += Common.h Global.h \
     Trivial.h \
     BoolArray.h \
 	Fixed.h \
-	FFTW.h \
+	FFT.h \
     UnitTesting.h \
     Maths.h \
     StreamIO.h \

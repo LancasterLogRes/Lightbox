@@ -183,6 +183,10 @@ template <class T> inline T clamp(T _v)
 	return _v < (T)0 ? (T)0 : _v < (T)1 ? _v : (T)1;
 }
 
+inline double abs(double _v) { return ::fabs(_v); }
+inline float abs(float _v) { return ::fabs(_v); }
+template <class _T> inline _T abs(_T _v) { return ::abs(_v); }
+
 template <class _T> _T cubed(_T _x) { return _x * _x * _x; }
 
 std::vector<float> solveQuadratic(float a, float b, float c);

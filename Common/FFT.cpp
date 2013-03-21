@@ -18,37 +18,45 @@
  * along with Noted.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef LIGHTBOX_ANDROID
+#if !LIGHTBOX_ANDROID
 
 #include <cmath>
 #include <unistd.h>
 #include <mutex>
 #include <fftw3.h>
 #include "Maths.h"
-#include "FFTW.h"
+#include "FFT.h"
 using namespace std;
 using namespace Lightbox;
 
-FFTW::FFTW(unsigned _arity): m_arity(_arity), m_plan(nullptr)
+void FFT<float>::setArity(unsigned _arity)
 {
+	m_arity = _arity;
 	static std::mutex m;
 	m.lock();
-	m_in = (float *)fftwf_malloc(sizeof(float) * m_arity);
-	m_work = (float *)fftwf_malloc(sizeof(float) * m_arity);
-	m_plan = fftwf_plan_r2r_1d(m_arity, m_in, m_work, FFTW_R2HC, FFTW_MEASURE);
+	if (m_in)
+		fftwf_free(m_in);
+	if (m_work)
+		fftwf_free(m_work);
+	if (m_plan)
+		fftwf_destroy_plan(m_plan);
+	if (m_arity > 0)
+	{
+		m_in = (float *)fftwf_malloc(sizeof(float) * m_arity);
+		m_work = (float *)fftwf_malloc(sizeof(float) * m_arity);
+		m_plan = fftwf_plan_r2r_1d(m_arity, m_in, m_work, FFTW_R2HC, FFTW_MEASURE);
+	}
+	else
+	{
+		m_in = m_work = nullptr;
+		m_plan = nullptr;
+	}
 	m.unlock();
 	m_mag.resize(m_arity / 2 + 1);
 	m_phase.resize(m_arity / 2 + 1);
 }
 
-FFTW::~FFTW()
-{
-	if (m_in) fftwf_free(m_in);
-	if (m_work) fftwf_free(m_work);
-	if (m_plan) fftwf_destroy_plan(m_plan);
-}
-
-void FFTW::process()
+void FFT<float>::process()
 {
 /*	for (unsigned i = 0; i < m_arity; i++)
 		if (m_in[i] > 1.f || m_in[i] < -1.f)

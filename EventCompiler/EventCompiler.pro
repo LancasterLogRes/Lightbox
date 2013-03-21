@@ -8,9 +8,11 @@ HEADERS += StreamEvent.h \
     Preprocessors.h \
     Track.h \
     EventType.h \
-    Character.h
+	Character.h \
+	Compiler.h
 
 SOURCES += \
     Preprocessors.cpp \
     Track.cpp \
-    StreamEvent.cpp
+	StreamEvent.cpp \
+	Compiler.cpp

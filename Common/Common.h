@@ -25,7 +25,7 @@
 #include "Angular.h"
 #include "BoolArray.h"
 #include "Color.h"
-#include "FFTW.h"
+#include "FFT.h"
 #include "Fixed.h"
 #include "GraphParameters.h"
 #include "Peaks.h"

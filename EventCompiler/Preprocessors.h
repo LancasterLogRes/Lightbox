@@ -90,13 +90,13 @@ template <class _N> GaussianMag<_N> operator*(GaussianMag<_N> const& _a, Gaussia
 template <class _N> GaussianMag<_N> operator-(GaussianMag<_N> const& _a, GaussianMag<_N> const& _b) { return GaussianMag<_N>(_a.mean - _b.mean, _a.sigma - _b.sigma, _a.mag - _b.mag); }
 
 template <int _Base, int _Exp>
-struct Float
+struct FloatValue
 {
-	constexpr static float value = Float<_Base, _Exp + 1>::value / 10.f;
+	constexpr static float value = FloatValue<_Base, _Exp + 1>::value / 10.f;
 };
 
 template <int _Base>
-struct Float<_Base, 0>
+struct FloatValue<_Base, 0>
 {
 	static constexpr float value = _Base;
 };
@@ -851,7 +851,7 @@ private:
 	GenGaussian<typename Super::ElementType> m_last;
 };
 
-template <class _PP, class _TroughRatio = Float<1, 0> >
+template <class _PP, class _TroughRatio = FloatValue<1, 0> >
 class TroughLimit: public _PP
 {
 public:
