@@ -243,11 +243,12 @@ private:
 	static const base_type integer_mask    = ~fractional_mask;
 
 public:
-	static const base_type one = base_type(1) << fractional_bits;
+	static const unsigned long one = 1ul << fractional_bits;
 
 public: // constructors
 
-	Fixed(){}
+	Fixed() = default;
+	Fixed(const Fixed& o) = default;
 
 	template <std::size_t _I, std::size_t _F> Fixed(Fixed<_I, _F> const& _f): m_data(bit_convert<F, _F, base_type, typename Fixed<_I, _F>::base_type>::exec(_f.to_raw()))
 	{
@@ -282,10 +283,6 @@ public: // constructors
 	Fixed(double n) : m_data(static_cast<base_type>(n* one))
 	{
 		// TODO: assert in range!
-	}
-
-	Fixed(const Fixed& o) : m_data(o.m_data)
-	{
 	}
 
 	Fixed& operator=(const Fixed& o)
@@ -380,7 +377,14 @@ public: // constructors
 	{
 //		Fixed temp;
 //		detail::divide(*this, n, *this, temp);
-		*this = m_data && n.m_data ? to_float() / n.to_float() : 0;
+		return operator/=(n.to_float());
+	}
+
+	Fixed& operator/=(float n)
+	{
+//		Fixed temp;
+//		detail::divide(*this, n, *this, temp);
+		*this = m_data && n != 0 ? to_float() / n : 0;
 		return *this;
 	}
 
@@ -433,6 +437,8 @@ public: // constructors
 		swap(m_data, rhs.m_data);
 	}
 
+	Fixed abs() const { return Fixed::from_base(::abs(m_data)); }
+
 private:
 	// this makes it simpler to create a fixed point object from
 	// a native type without scaling
@@ -453,7 +459,7 @@ struct FixedMathAux
 	static Fixed<16, 16> atan2(Fixed<16, 16> _x, Fixed<16, 16> _y) { return ::atan2(_x.to_float(), _y.to_float()); }
 };
 
-template <std::size_t I, std::size_t F> inline Fixed<I, F> abs(Fixed<I, F> _x) { return _x < 0 ? -_x : _x; }
+template <std::size_t I, std::size_t F> inline Fixed<I, F> abs(Fixed<I, F> _x) { return _x.abs(); }
 template <std::size_t I, std::size_t F> inline Fixed<I, F> sqrt(Fixed<I, F> _x) { return FixedMathAux<I, F>::sqrt(_x); }
 template <std::size_t I, std::size_t F> inline Fixed<I, F> atan2(Fixed<I, F> _x, Fixed<I, F> _y) { return FixedMathAux<I, F>::atan2(_x, _y); }
 template <std::size_t I, std::size_t F> inline bool isFinite(Fixed<I, F>) { return true; }

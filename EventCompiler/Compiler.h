@@ -82,6 +82,8 @@ public:
 		m_acc.resize(m_windowSize, 0);
 
 		m_ec.init(m_fft.bands(), toBase(m_input->hop(), m_input->rate()), toBase(2, m_input->rate()));
+
+		cnote << m_window;
 	}
 
 	void fini()
@@ -110,19 +112,26 @@ public:
 		// Accumulate (misusing m_fft.in as a temporary input buffer)...
 		m_input->copyTo(m_inputChannel, m_fft.in());
 
+		float m = 0;
+		for (auto f = m_fft.in(), fe = m_fft.in() + m_input->hop(); f != fe; ++f)
+			m += (float)*f;
+//		cnote << "Incoming:" << (m / m_input->hop());
+
 		// Scale
 		InputType mi = 0;
 		auto ie = m_fft.in() + m_input->hop();
 		for (auto i = m_fft.in(); i != ie; ++i)
-			mi = abs(std::max(mi, *i));
+			mi = std::max(mi, abs(*i));
 
 		// InputType, if it's Fixed<1, 15> can't go over 1, so we'll have to switch to OutputType for the multiplication.
 		OutputType g = std::min(m_gain, 1.f / (float)mi);
+		m_vu = (float)mi * (float)g;
+		m_highVu = std::max(m_vu, m_highVu);
+//		cnote << "Max:" << mi << "(float)Max" << (float)mi << "Max gain:" << (1.f / (float)mi) << "Gain: " << m_gain << "float-Scale:" << std::min(m_gain, 1.f / (float)mi) << "Scale:" << g << "VU" << m_vu;
 		auto o = m_acc.data() + constPart;
 		for (auto i = m_fft.in(); i != ie; ++i, ++o)
 			*o = g * OutputType(*i);
-		m_vu = (float)mi * (float)g;
-		m_highVu = std::max(m_vu, m_highVu);
+//		cnote << "Buffer: " << mean(m_acc);
 
 		// Prepare waveform for FFT...
 		unsigned accOffset = m_zeroPhase ? m_windowSize / 2 : 0;
@@ -137,6 +146,11 @@ public:
 		a = m_acc.data();
 		for (auto de = m_fft.in() + m_windowSize; d != de; ++d, ++w, ++a)
 			*d = *w * *a;
+
+		m = 0;
+		for (auto f = m_fft.in(), fe = m_fft.in() + m_windowSize; f != fe; ++f)
+			m += (float)*f;
+//		cnote << "FFT-in: " << (m / m_windowSize);
 	}
 	void iterateFFT() { m_fft.process(); }
 	void iterateEvents() { m_ses = m_ec.compile(m_fft.mag(), m_fft.phase(), m_acc); }
