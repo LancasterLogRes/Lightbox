@@ -30,7 +30,9 @@
 namespace Lightbox
 {
 
-struct LIGHTBOX_API Track
+LIGHTBOX_TEXTUAL_ENUM(OutputFormat, XMLFormat, NiceFormat, BinaryFormat, AutoFormat)
+
+struct Track
 {
 	std::multimap<Time, StreamEvent> events;
 	std::vector<Time> syncPoints;
@@ -87,8 +89,16 @@ struct LIGHTBOX_API Track
 		}
 	}
 
-	LIGHTBOX_API void readFile(std::string const& _filename);
-	LIGHTBOX_API void updateSyncPoints();
+	void readFile(std::string const& _filename, OutputFormat _f = AutoFormat);
+	void writeFile(std::string const& _filename, OutputFormat _f = AutoFormat);
+
+	void read(std::istream& _in, OutputFormat _f = XMLFormat);
+	void write(std::ostream& _out, OutputFormat _f = XMLFormat);
+
+	void readXML(std::istream& _in);
+	void writeXML(std::ostream& _out);
+
+	void updateSyncPoints();
 };
 
 }

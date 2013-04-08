@@ -368,7 +368,6 @@ public:
 
 	void init(EventCompilerImpl* _eci)
 	{
-		cdebug << "Historied::init";
 		_PP::init(_eci);
 		setHistory(m_data.size());
 		m_count = 0;
@@ -417,7 +416,6 @@ public:
 
 	void init(EventCompilerImpl* _eci)
 	{
-		cdebug << "Historied::init";
 		_PP::init(_eci);
 	}
 
@@ -714,7 +712,7 @@ public:
 		_PP::execute(_eci, _t, _mag, _phase, _wave);
 		if (_PP::changed())
 		{
-			m_delta = fabs(_PP::get() - m_last);
+			m_delta = abs(_PP::get() - m_last);
 			m_last = _PP::get();
 		}
 	}

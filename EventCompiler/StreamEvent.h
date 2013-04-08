@@ -93,6 +93,9 @@ struct StreamEvent
 	}
 	StreamEvent assignedTo(int _ch) const { StreamEvent ret = *this; ret.assign(_ch); return ret; }
 
+	Time period() const { return fromSeconds(constancy); }
+	Time phase() const { return fromSeconds(jitter); }
+
 	bool operator==(StreamEvent const& _c) const { return type == _c.type && temperature == _c.temperature && strength == _c.strength; }
 	bool operator!=(StreamEvent const& _c) const { return !operator==(_c); }
 	bool operator<(StreamEvent const& _c) const { return type < _c.type; }
@@ -304,7 +307,9 @@ inline StreamEvents noComment(StreamEvents const& _se)
 
 inline std::ostream& operator<<(std::ostream& _out, StreamEvent const& _e)
 {
-	return _out << "{" << int(_e.channel) << ":" << _e.type << "@" << _e.strength << "$" << _e.character << "/" << _e.temperature << /*std::hex << int(_e.temperature[0]) << "," << int(_e.temperature[1]) << "," << int(_e.temperature[2]) <<*/ "}";
+	if (_e.type == PeriodSet)
+		return _out << "{" << int(_e.channel) << ":" << _e.type << "@" << _e.strength << "/" << _e.temperature << ";" << (60 / _e.constancy) << "," << _e.jitter << "}";
+	return _out << "{" << int(_e.channel) << ":" << _e.type << "@" << _e.strength << "$" << _e.character << "/" << _e.temperature << "/" << _e.jitter << "/" << _e.constancy << "}";
 }
 
 }

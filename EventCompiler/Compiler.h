@@ -82,8 +82,6 @@ public:
 		m_acc.resize(m_windowSize, 0);
 
 		m_ec.init(m_fft.bands(), toBase(m_input->hop(), m_input->rate()), toBase(2, m_input->rate()));
-
-		cnote << m_window;
 	}
 
 	void fini()
