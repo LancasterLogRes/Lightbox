@@ -84,6 +84,25 @@ std::vector<float> Lightbox::windowFunction(unsigned _size, WindowFunction _f, f
 	return ret;
 }
 
+static float s_toneFrequencies[12][8];
+
+static void populateToneFrequencies()
+{
+	for (int t = 0; t < 12; ++t)
+	{
+		s_toneFrequencies[t][0] = 27.5f * pow(2, (t - 9) / 12.f);
+		for (int o = 1; o < 8; ++o)
+			s_toneFrequencies[t][o] = s_toneFrequencies[t][o - 1] * 2;
+	}
+}
+
+float Lightbox::toneFrequency(unsigned _t, unsigned _o)
+{
+	if (s_toneFrequencies[9][0] != 27.5f)
+		populateToneFrequencies();
+	return s_toneFrequencies[clamp(_t, 0u, 11u)][clamp(_o, 0u, 7u)];
+}
+
 std::vector<float> Lightbox::zeroPhaseWindow(std::vector<float> const& _w)
 {
 	std::vector<float> ret(_w.size());

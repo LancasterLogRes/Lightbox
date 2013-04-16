@@ -84,6 +84,17 @@ public:
 	inline Time hop() const { return m_hop; }
 	inline Time nyquist() const { return m_nyquist; }
 	inline unsigned rate() const { return s_baseRate / m_nyquist * 2; }
+	inline float band(float _frequency) const { return _frequency * m_windowSeconds; }
+
+	StreamEvents doInit(unsigned _bands, Time _hop, Time _nyquist)
+	{
+		m_bands = _bands;
+		m_hop = _hop;
+		m_nyquist = _nyquist;
+		m_windowSeconds = toSeconds(windowSize());
+		initPres();
+		return init();
+	}
 
 	virtual StreamEvents init() { return StreamEvents(); }
 	virtual MemberMap propertyMap() const { return NullMemberMap; }
@@ -124,6 +135,9 @@ private:
 	Time m_nyquist;
 	unsigned m_bands;
 	Time m_t;
+
+	// Cached...
+	float m_windowSeconds;
 };
 
 template <class _Native>

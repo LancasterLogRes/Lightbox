@@ -235,4 +235,15 @@ std::vector<float> zeroPhaseWindow(std::vector<float> const& _w);
 /// Returns a window that is the given window element-wise scaled by the factor _f.
 std::vector<float> scaledWindow(std::vector<float> const& _w, float _f);
 
+inline float toneFrequency(float _t) { return 27.5f * pow(2, (_t - 9) / 12.f); }
+inline float toneFrequency(float _t, float _o) { return toneFrequency(_t + _o * 12); }
+float toneFrequency(unsigned _t, unsigned _o);
+
+LIGHTBOX_UNITTEST(7, "toneFrequency")
+{
+	requireEqual(toneFrequency(9u, 4u), 440.f, "Multiples population");
+	requireApproximates(toneFrequency(0u, 0u), 16.35f, "Octave population");
+	requireApproximates(toneFrequency(10u, 7u), 3729.31f, "General population");
+}
+
 }
