@@ -67,6 +67,8 @@ struct Executor
 	std::vector<_Native> const& m_wave;
 };
 
+class CompilerGraph;
+
 class EventCompilerImpl
 {
 	friend class EventCompiler;
@@ -84,17 +86,9 @@ public:
 	inline Time hop() const { return m_hop; }
 	inline Time nyquist() const { return m_nyquist; }
 	inline unsigned rate() const { return s_baseRate / m_nyquist * 2; }
-	inline float band(float _frequency) const { return _frequency * m_windowSeconds; }
+	inline float band(float _frequency) const { return clamp<float>(_frequency * m_windowSeconds, 0.f, m_bands - 1.f); }
 
-	StreamEvents doInit(unsigned _bands, Time _hop, Time _nyquist)
-	{
-		m_bands = _bands;
-		m_hop = _hop;
-		m_nyquist = _nyquist;
-		m_windowSeconds = toSeconds(windowSize());
-		initPres();
-		return init();
-	}
+	StreamEvents doInit(unsigned _bands, Time _hop, Time _nyquist);
 
 	virtual StreamEvents init() { return StreamEvents(); }
 	virtual MemberMap propertyMap() const { return NullMemberMap; }
@@ -127,6 +121,10 @@ public:
 		return ret;
 	}
 
+	inline Time time() const { return m_t; }
+	void registerGraph(CompilerGraph* _g) { m_graphs.push_back(_g); }
+	std::vector<CompilerGraph*> const& graphs() const { return m_graphs; }
+
 protected:
 	virtual void initPres() {}
 
@@ -138,7 +136,57 @@ private:
 
 	// Cached...
 	float m_windowSeconds;
+
+	std::vector<CompilerGraph*> m_graphs;
 };
+
+class CompilerGraph
+{
+public:
+	CompilerGraph(EventCompilerImpl* _ec): m_ec(_ec)
+	{
+		m_ec->registerGraph(this);
+	}
+	virtual ~CompilerGraph() {}
+
+	EventCompilerImpl* ec() const { return m_ec; }
+
+	virtual void init() {}
+
+protected:
+	EventCompilerImpl* m_ec;
+};
+
+class GraphSpectrum: public CompilerGraph
+{
+public:
+	GraphSpectrum(EventCompilerImpl* _ec, unsigned _bandCount, float _min = 0, float _delta = 1): CompilerGraph(_ec), m_bandCount(_bandCount), m_min(_min), m_delta(_delta) {}
+
+	std::map<Time, std::vector<float> > const& data() const { return m_data; }
+	float min() const { return m_min; }
+	float delta() const { return m_delta; }
+
+	virtual void init()
+	{
+		m_data.clear();
+	}
+
+	template <class _T> void shift(_T const& _a)
+	{
+		assert(_a.size() == m_bandCount);
+		m_data[m_ec->time()].resize(m_bandCount);
+		float* f = m_data[m_ec->time()].data();
+		for (auto t: _a)
+			*f++ = (float)t;
+	}
+
+private:
+	unsigned m_bandCount;
+	std::map<Time, std::vector<float>> m_data;
+	float m_min;
+	float m_delta;
+};
+
 
 template <class _Native>
 class NullEventCompiler: public EventCompilerImpl

@@ -22,6 +22,7 @@
 
 #include <cmath>
 #include <vector>
+#include <array>
 #include <map>
 
 #include "Global.h"
@@ -30,6 +31,7 @@ namespace Lightbox
 {
 
 template <class _T> struct zero_of { static _T value() { return _T(0); } };
+template <class _T, size_t _Z> struct zero_of<std::array<_T, _Z>> { static std::array<_T, _Z> value() { std::array<_T, _Z> r; r.fill(0); return r; } };
 
 /// Square a number.
 template <class T> inline T sqr(T _t) { return _t * _t; }

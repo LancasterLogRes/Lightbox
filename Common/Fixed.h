@@ -438,6 +438,7 @@ public: // constructors
 	}
 
 	Fixed abs() const { return Fixed::from_base(::abs(m_data)); }
+	Fixed mod1() const { return Fixed::from_base(m_data & (one - 1)); }
 
 private:
 	// this makes it simpler to create a fixed point object from
@@ -460,6 +461,7 @@ struct FixedMathAux
 };
 
 template <std::size_t I, std::size_t F> inline Fixed<I, F> abs(Fixed<I, F> _x) { return _x.abs(); }
+template <std::size_t I, std::size_t F> inline Fixed<I, F> mod1(Fixed<I, F> _x) { return _x.mod1(); }
 template <std::size_t I, std::size_t F> inline Fixed<I, F> sqrt(Fixed<I, F> _x) { return FixedMathAux<I, F>::sqrt(_x); }
 template <std::size_t I, std::size_t F> inline Fixed<I, F> atan2(Fixed<I, F> _x, Fixed<I, F> _y) { return FixedMathAux<I, F>::atan2(_x, _y); }
 template <std::size_t I, std::size_t F> inline bool isFinite(Fixed<I, F>) { return true; }

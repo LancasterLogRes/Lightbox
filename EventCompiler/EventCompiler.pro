@@ -16,3 +16,6 @@ SOURCES += \
     Track.cpp \
 	StreamEvent.cpp \
 	Compiler.cpp
+
+SOURCES += \
+    EventCompilerImpl.cpp

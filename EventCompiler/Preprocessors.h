@@ -103,6 +103,7 @@ struct FloatValue<_Base, 0>
 
 template <class _E> struct get_scalar { typedef _E type; };
 template <class _E> struct get_scalar<vector<_E>> { typedef typename get_scalar<_E>::type type; };
+template <class _E, size_t _Z> struct get_scalar<array<_E, _Z>> { typedef typename get_scalar<_E>::type type; };
 template <class _E> struct get_scalar<foreign_vector<_E>> { typedef typename get_scalar<_E>::type type; };
 template <class _E> struct get_scalar<GenGaussian<_E>> { typedef typename get_scalar<_E>::type type; };
 template <class _E> struct get_scalar<GaussianMag<_E>> { typedef typename get_scalar<_E>::type type; };
@@ -316,15 +317,34 @@ private:
 	Scalar m_acc;
 };
 
+template <class _T> struct DownsampleHelper
+{
+	static void accumulate(_T& _acc, _T const& _x) { _acc += _x; }
+	static void scale(_T& _acc, _T _s) { _acc *= _s; }
+};
+template <class _T, size_t _Z> struct DownsampleHelper<array<_T, _Z>>
+{
+	static void accumulate(array<_T, _Z>& _acc, array<_T, _Z> const& _x)
+	{
+		_T* la = _acc.data() + _Z;
+		_T* a = _acc.data();
+		_T const* x = _x.data();
+		for (; a != la; ++a, ++x)
+			*a += *x;
+	}
+	static void scale(array<_T, _Z>& _acc, _T _s) { for (auto& i: _acc) i *= _s; }
+};
+
 template <class _PP, unsigned _df = 1u>
 class Downsampled: public _PP
 {
 public:
 	typedef typename Info<_PP>::ScalarType Scalar;
+	typedef typename Info<_PP>::ElementType ElementType;
 
-	Downsampled(unsigned _f = _df): m_factor(_f), m_acc(0), m_count(_f) {}
+	Downsampled(unsigned _f = _df): m_factor(_f), m_acc(zero_of<ElementType>::value()), m_count(_f) {}
 
-	Downsampled& setDownsample(unsigned _f) { m_factor = _f; m_acc = 0; m_count = _f; return *this; }
+	Downsampled& setDownsample(unsigned _f) { m_factor = _f; m_acc = zero_of<ElementType>::value(); m_count = _f; m_scale = 1 / (Scalar)_f; return *this; }
 
 	void init(EventCompilerImpl* _eci)
 	{
@@ -342,17 +362,20 @@ public:
 		}
 		else
 		{
-			m_acc += _PP::get();
+			DownsampleHelper<ElementType>::accumulate(m_acc, _PP::get());
 			++m_count;
+			if (m_count == m_factor)
+				DownsampleHelper<ElementType>::scale(m_acc, m_scale);
 		}
 	}
 
-	Scalar get() const { return m_acc / m_count; }
+	ElementType const& get() const { return m_acc; }
 	bool changed() const { return m_count == m_factor; }
 
 private:
 	unsigned m_factor;
-	Scalar m_acc;
+	ElementType m_acc;
+	Scalar m_scale;
 	unsigned m_count;
 };
 
@@ -482,6 +505,31 @@ public:
 private:
 	vector<ElementType> m_data;
 	unsigned m_count;
+};
+
+template <class _PP>
+class GenSum: public _PP
+{
+public:
+	typedef typename Info<_PP>::ScalarType Scalar;
+	typedef Scalar ElementType;
+
+	void execute(EventCompilerImpl* _eci, Time _t, vector<Scalar> const& _mag, vector<Scalar> const& _phase, std::vector<Scalar> const& _wave)
+	{
+		_PP::execute(_eci, _t, _mag, _phase, _wave);
+		if (_PP::changed())
+		{
+			m_last = 0;
+			for (auto i: _PP::get())
+				m_last += i;
+		}
+	}
+
+	bool changed() const { return _PP::changed(); }
+	ElementType get() const { return m_last; }
+
+private:
+	ElementType m_last;
 };
 
 template <class _PP, class _X>
@@ -649,6 +697,36 @@ private:
 	vector<Scalar> m_data;
 };
 
+template <class _PP>
+class RangeNormalized: public _PP
+{
+public:
+	typedef typename Info<_PP>::ScalarType Scalar;
+
+	RangeNormalized() {}
+
+	void init(EventCompilerImpl* _eci)
+	{
+		_PP::init(_eci);
+		m_data.clear();
+	}
+	void execute(EventCompilerImpl* _eci, Time _t, vector<Scalar> const& _mag, vector<Scalar> const& _phase, std::vector<Scalar> const& _wave)
+	{
+		_PP::execute(_eci, _t, _mag, _phase, _wave);
+		if (_PP::changed())
+		{
+			m_data = _PP::get();
+			normalize(m_data);
+		}
+	}
+	using _PP::changed;
+
+	vector<Scalar> const& get() const { return m_data; }
+
+private:
+	vector<Scalar> m_data;
+};
+
 template <class _PP1, class _PP2>
 class Subbed: public _PP1, public _PP2
 {
@@ -675,6 +753,33 @@ public:
 
 private:
 	TT m_last;
+};
+
+template <class _PP, unsigned _factorX1000000 = 1000000>
+class Scaled: public _PP
+{
+public:
+	typedef typename Info<_PP>::ScalarType Scalar;
+	typedef typename Info<_PP>::ElementType TT;
+
+	void init(EventCompilerImpl* _eci)
+	{
+		_PP::init(_eci);
+		m_last = 0;
+		m_scale = _factorX1000000 / (Scalar)1000000;
+	}
+	void execute(EventCompilerImpl* _eci, Time _t, vector<Scalar> const& _mag, vector<Scalar> const& _phase, std::vector<Scalar> const& _wave)
+	{
+		_PP::execute(_eci, _t, _mag, _phase, _wave);
+		m_last = _PP::get() * m_scale;
+	}
+	bool changed() const { return _PP::changed(); }
+
+	TT const& get() const { return m_last; }
+
+private:
+	TT m_last;
+	Scalar m_scale;
 };
 
 template <class _PP>
@@ -964,5 +1069,366 @@ public:
 		return std::get<_I>(tu);
 	}
 };
+
+
+static const std::array<float, 26> s_barkBands = {{ 100, 200, 300, 400, 510, 630, 770, 920, 1080, 1270, 1480, 1720, 2000, 2320, 2700, 3150, 3700, 4400, 5300, 6400, 7700, 9500, 12000, 15500, 20500, 27000 }};
+static const std::array<float, 26> s_barkCentres = {{ 50, 150, 250, 350, 450, 570, 700, 840, 1000, 1170, 1370, 1600, 1850, 2150, 2500, 2900, 3400, 4000, 4800, 5800, 7000, 8500, 10500, 13500, 17500, 22500 }};
+
+template <class _F>
+class BandRemapper
+{
+public:
+	template <class _T>
+	void init(EventCompilerImpl* _ec, _T const& _bf)
+	{
+		m_bands.resize(_bf.size());
+		for (unsigned i = 0; i < _bf.size(); ++i)
+			m_bands[i] = clamp<int, int>(_ec->band(_bf[i]), 0, _ec->bands() - 1);
+	}
+	std::vector<_F> spectrum(std::vector<_F> const& _mag) const
+	{
+		std::vector<_F> ret(m_bands.size());
+		for (unsigned i = 0; i < 26; ++i)
+			ret[i] = mag(_mag, i);
+		return ret;
+	}
+	_F mag(std::vector<_F> const& _mag, unsigned _i) const
+	{
+		_F ret = 0;
+		for (unsigned i = _i ? m_bands[_i - 1] : 0; i < m_bands[_i]; ++i)
+			ret += _mag[i];
+		return ret;
+	}
+
+private:
+	std::vector<unsigned> m_bands;
+};
+
+static const float s_fr[] = { 20, 25, 31.5, 40, 50, 63, 80, 100, 125, 160, 200, 250, 315, 400, 500, 630, 800, 1000, 1250, 1600, 2000, 2500, 3150, 4000, 5000, 6300, 8000, 10000, 12500 };
+static const float s_af[] = { 0.532, 0.506, 0.480, 0.455, 0.432, 0.409, 0.387, 0.367, 0.349, 0.330, 0.315, 0.301, 0.288, 0.276, 0.267, 0.259, 0.253, 0.250, 0.246, 0.244, 0.243, 0.243, 0.243, 0.242, 0.242, 0.245, 0.254, 0.271, 0.301 };
+static const float s_Lu[] = { -31.6, -27.2, -23.0, -19.1, -15.9, -13.0, -10.3, -8.1, -6.2, -4.5, -3.1, -2.0, -1.1, -0.4, 0.0, 0.3, 0.5, 0.0, -2.7, -4.1, -1.0, 1.7, 2.5, 1.2, -2.1, -7.1, -11.2, -10.7, -3.1 };
+static const float s_Tf[] = { 78.5, 68.7, 59.5, 51.1, 44.0, 37.5, 31.5, 26.5, 22.1, 17.9, 14.4, 11.4, 8.6, 6.2, 4.4, 3.0, 2.2, 2.4, 3.5, 1.7, -1.3, -4.2, -6.0, -5.4, -1.5, 6.0, 12.6, 13.9, 12.3 };
+
+template <class T, class U>
+static inline T cubicInterpolateIndex(T const* _data, int _len, U _index)
+{
+	int fi = (int)floor(_index);
+	T pi = _index - floor(_index);
+	if (pi == 0)
+		return _data[fi];
+	if (fi >= _len - 1)
+		return _data[_len - 1];
+	if (fi <= 0)
+		return _data[0];
+
+	T m = _data[fi + 1] - _data[fi];
+	T mi = fi ? (_data[fi + 1] - _data[fi - 1]) / 2.f : m;
+	T mia1 = (fi < _len - 2) ? (_data[fi + 2] - _data[fi]) / 2.f : m;
+	T pi2 = sqr(pi);
+	T pi3 = cubed(pi);
+
+	return	_data[fi] * (1.f - 3.f * pi2 + 2.f * pi3) + mi * (pi - 2.f * pi2 + pi3) + _data[fi + 1] * (3.f * pi2 - 2.f * pi3) - mia1 * (pi2 - pi3);
+}
+
+template <class T>
+inline T interpolateValue(T const* _l, unsigned _s, float _v)
+{
+	if (_v <= _l[0])
+		return 0;
+	if (_v >= _l[_s - 1])
+		return _s - 1;
+	T const* i = std::lower_bound(_l, _l + _s, _v);
+	if (*i == _v)
+		return i - _l;
+	assert(*i > _v);
+	assert(i != _l);
+	return (i - _l) + (_v - *i) / (*i - *(i - 1));
+}
+
+template <class _F>
+class Phon
+{
+public:
+	template <class _T>
+	void init(_T const& _centres)
+	{
+		m_Tf.resize(_centres.size());
+		m_Lu.resize(_centres.size());
+		m_af.resize(_centres.size());
+		for (unsigned i = 0; i < m_Tf.size(); i++)
+		{
+			float b = interpolateValue(s_fr, 29, _centres[i]);
+			m_Tf[i] = cubicInterpolateIndex(s_Tf, 29, b);
+			m_Lu[i] = cubicInterpolateIndex(s_Lu, 29, b);
+			m_af[i] = cubicInterpolateIndex(s_af, 29, b);
+		}
+	}
+
+	_F value(_F _mag, unsigned _i) const
+	{
+		float db = max(0.f, log10((float)_mag) * 20 + 90);
+		return (_F)log10((pow(10.f, (db - 94.f + m_Lu.at(_i)) / 10.f * m_af.at(_i)) - pow(0.4f * pow(10.f, (m_Tf.at(_i) + m_Lu.at(_i)) / 10.f - 9.f), m_af.at(_i))) / 4.47e-3f + 1.15f) / 0.025f;
+	}
+
+private:
+	std::vector<float> m_Tf;
+	std::vector<float> m_Lu;
+	std::vector<float> m_af;
+};
+
+template <unsigned _From = 0, unsigned _To = 26, class _ScalarType = float>
+class BarkPhonSum
+{
+public:
+	typedef _ScalarType ElementType;
+	typedef _ScalarType Scalar;
+
+	void init(EventCompilerImpl* _eci)
+	{
+		m_bark.init(_eci, s_barkBands);
+		m_phon.init(s_barkCentres);
+		m_last = 0;
+	}
+	void execute(EventCompilerImpl*, Time, std::vector<Scalar> const& _mag, std::vector<Scalar> const&, std::vector<Scalar> const&)
+	{
+		m_last = 0;
+		for (unsigned cb = _From; cb < _To; ++cb)
+			m_last += m_phon.value(m_bark.mag(_mag, cb), cb);
+	}
+	ElementType get() const { return m_last; }
+	bool changed() const { return true; }
+
+private:
+	ElementType m_last;
+	BandRemapper<Scalar> m_bark;
+	Phon<Scalar> m_phon;
+};
+
+template <unsigned _From = 0, unsigned _To = 26, class _ScalarType = float>
+class BarkPhon
+{
+public:
+	typedef _ScalarType Scalar;
+	typedef array<Scalar, _To - _From> ElementType;
+
+	void init(EventCompilerImpl* _eci)
+	{
+		m_bark.init(_eci, s_barkBands);
+		m_phon.init(s_barkCentres);
+		m_last.fill(0);
+	}
+	void execute(EventCompilerImpl*, Time, std::vector<Scalar> const& _mag, std::vector<Scalar> const&, std::vector<Scalar> const&)
+	{
+		for (unsigned cb = _From; cb < _To; ++cb)
+			m_last[cb - _From] = m_phon.value(m_bark.mag(_mag, cb), cb);
+	}
+	ElementType get() const { return m_last; }
+	bool changed() const { return true; }
+
+private:
+	ElementType m_last;
+	BandRemapper<Scalar> m_bark;
+	Phon<Scalar> m_phon;
+};
+
+template <class _PP>
+class DeltaPeak: public _PP
+{
+public:
+	typedef _PP Super;
+	typedef typename Info<_PP>::ElementType ElementType;
+	typedef typename Info<_PP>::ScalarType Scalar;
+
+	void init(EventCompilerImpl* _eci)
+	{
+		Super::init(_eci);
+		m_last = m_trough = m_lastInput = 0;
+	}
+	void execute(EventCompilerImpl* _eci, Time _t, std::vector<Scalar> const& _mag, std::vector<Scalar> const& _phase, std::vector<Scalar> const& _wave)
+	{
+		Super::execute(_eci, _t, _mag, _phase, _wave);
+		auto l = Super::get();
+		m_last = 0;
+		if (l < m_lastInput)
+		{
+			if (l > m_trough)
+				m_last = l - m_trough;
+			m_trough = l;
+		}
+		m_lastInput = l;
+	}
+	ElementType const& get() const { return m_last; }
+	bool changed() const { return Super::changed(); }
+
+private:
+	ElementType m_last;
+	ElementType m_trough;
+	ElementType m_lastInput;
+};
+
+template <unsigned _FromHz = 0, unsigned _ToHz = 96000, class _ScalarType = float>
+class Power
+{
+public:
+	typedef _ScalarType ElementType;
+	typedef _ScalarType Scalar;
+
+	void init(EventCompilerImpl* _eci)
+	{
+		m_last = 0;
+		m_from = _eci->band(_FromHz);
+		m_to = _eci->band(_ToHz);
+	}
+	void execute(EventCompilerImpl*, Time, std::vector<Scalar> const& _mag, std::vector<Scalar> const&, std::vector<Scalar> const&)
+	{
+		m_last = 0;
+		for (unsigned i = m_from; i < m_to; ++i)
+			m_last += sqr(_mag[i]);
+	}
+	ElementType get() const { return m_last; }
+	bool changed() const { return true; }
+
+private:
+	ElementType m_last;
+	unsigned m_from;
+	unsigned m_to;
+};
+
+template <unsigned _FromHz = 0, unsigned _ToHz = 96000, class _ScalarType = float>
+class DeltaPower: public Deltad<Power<_FromHz, _ToHz, _ScalarType>> {};
+
+/*
+// Chord
+{
+	array<float, 12> chord;
+	chord.fill(0);
+	float tmaga = 0;
+	float tmagb = 0;
+	float tsim = 0;
+	for (unsigned t = 0; t < 12; ++t)
+	{
+		// calculate mt, the maximum i that is in range [_f, _t) for the tone t.
+		for (unsigned o = 0; o < 8; ++o)
+		{
+			unsigned fi = max<int>(_f, (int)round(band(toneFrequency(t - .5f, (float)o))));
+			unsigned ti = min<int>(_t, (int)round(band(toneFrequency(t + .5f, (float)o))));
+			if (fi < _t || ti >= _f)
+				for (unsigned i = fi; i < ti; ++i)
+					chord[o] += sqr((1.f - fabs(mod1(_phase[i] - m_phase[i] + 1) - mod1(m_phase[i] - m_lphase[i] + 1))) * _mag[i]);
+		}
+
+		tsim += m_lastChord[_b][t] * chord[t];
+		tmaga += sqr(m_lastChord[_b][t]);
+		tmagb += sqr(chord[t]);
+	}
+	float tot = 0;
+	for (unsigned t = 0; t < 12; ++t)
+	{
+		m_lastChord[_b][t] = max(0.00000001f, m_lastChord[_b][t] * chord[t]);
+		tot += m_lastChord[_b][t];
+	}
+	float scale = 1.f / tot;
+	for (unsigned t = 0; t < 12; ++t)
+		m_lastChord[_b][t] *= scale;
+
+	return tsim / (sqrt(tmaga) * sqrt(tmagb));
+}
+*/
+template <unsigned _FromHz = 0, unsigned _ToHz = 96000, class _ScalarType = float>
+class BandwiseMagIncrease
+{
+	typedef _ScalarType ElementType;
+	typedef _ScalarType Scalar;
+
+	void init(EventCompilerImpl* _eci)
+	{
+		m_last = 0;
+		m_from = _eci->band(_FromHz);
+		m_to = _eci->band(_ToHz);
+		m_lastIn.clear();
+	}
+	void execute(EventCompilerImpl*, Time _t, std::vector<Scalar> const& _mag, std::vector<Scalar> const&, std::vector<Scalar> const&)
+	{
+		m_last = 0;
+		auto* li = m_lastIn.data();
+		if (m_lastIn.size())
+			for (unsigned b = m_from; b < m_to; ++b, ++li)
+			{
+				m_last += sqr(max<Scalar>(0, _mag[b] - *li));
+				*li = _mag[b];
+			}
+		else
+		{
+			m_lastIn.reserve(m_to - m_from);
+			for (unsigned b = m_from; b < m_to; ++b)
+				m_lastIn.push_back(_mag[b]);
+		}
+	}
+	ElementType get() const { return m_last; }
+	bool changed() const { return true; }
+
+private:
+	ElementType m_last;
+	std::vector<Scalar> m_lastIn;
+	unsigned m_from;
+	unsigned m_to;
+};
+
+template <unsigned _FromHz = 0, unsigned _ToHz = 96000, class _ScalarType = float, bool _Invert = false>
+class TonalPower
+{
+public:
+	typedef _ScalarType ElementType;
+	typedef _ScalarType Scalar;
+
+	void init(EventCompilerImpl* _eci)
+	{
+		m_last = 0;
+		m_from = _eci->band(_FromHz);
+		m_to = _eci->band(_ToHz);
+		m_lphase.clear();
+		m_phase.clear();
+	}
+	void execute(EventCompilerImpl*, Time, std::vector<Scalar> const& _mag, std::vector<Scalar> const& _phase, std::vector<Scalar> const&)
+	{
+		m_last = 0;
+		if (m_lphase.size())
+		{
+			for (unsigned i = m_from; i < m_to; ++i)
+			{
+				m_last += sqr(((_Invert ? 1.f : 0.f) + (_Invert ? -1.f : 1.f) * abs(mod1(_phase[i] - m_phase[i] + 1) - mod1(m_phase[i] - m_lphase[i] + 1))) * _mag[i]);
+				m_lphase[i - m_from] = m_phase[i - m_from];
+				m_phase[i - m_from] = _phase[i];
+			}
+		}
+		else if (m_phase.size())
+		{
+			m_lphase.reserve(m_to - m_from);
+			for (unsigned i = m_from; i < m_to; ++i)
+			{
+				m_lphase.push_back(m_phase[i - m_from]);
+				m_phase[i - m_from] = _phase[i];
+			}
+		}
+		else
+		{
+			m_phase.reserve(m_to - m_from);
+			for (unsigned i = m_from; i < m_to; ++i)
+				m_phase.push_back(_phase[i]);
+		}
+	}
+	ElementType get() const { return m_last; }
+	bool changed() const { return true; }
+
+private:
+	ElementType m_last;
+	unsigned m_from;
+	unsigned m_to;
+	std::vector<Scalar> m_phase;
+	std::vector<Scalar> m_lphase;
+};
+
+template <unsigned _FromHz = 0, unsigned _ToHz = 96000, class _ScalarType = float>
+class NonTonalPower: public TonalPower<_FromHz, _ToHz, _ScalarType, true> {};
 
 }

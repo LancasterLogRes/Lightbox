@@ -122,8 +122,11 @@ void normalize(_T& _v)
 	auto r = range(_v);
 	auto d = r.second - r.first;
 	if (d > 0)
-		for (auto v: _v)
-			v = (v - r.first) / d;
+	{
+		auto s = 1 / d;
+		for (auto& v: _v)
+			v = (v - r.first) * s;
+	}
 }
 
 template <class _T>
@@ -131,8 +134,11 @@ decltype(_T()[0]) makeUnitMagnitude(_T& _v)
 {
 	auto m = magnitudeOf(_v);
 	if (m)
-		for (auto i: _v)
-			i /= m;
+	{
+		auto s = 1 / m;
+		for (auto& i: _v)
+			i *= s;
+	}
 }
 
 template <class _T>
