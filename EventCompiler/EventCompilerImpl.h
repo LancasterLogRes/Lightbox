@@ -160,11 +160,12 @@ protected:
 class GraphSpectrum: public CompilerGraph
 {
 public:
-	GraphSpectrum(EventCompilerImpl* _ec, unsigned _bandCount, float _min = 0, float _delta = 1): CompilerGraph(_ec), m_bandCount(_bandCount), m_min(_min), m_delta(_delta) {}
+	GraphSpectrum(EventCompilerImpl* _ec, unsigned _bandCount, float _min = 0, float _delta = 1, bool _post = false): CompilerGraph(_ec), m_bandCount(_bandCount), m_min(_min), m_delta(_delta) , m_post(_post){}
 
 	std::map<Time, std::vector<float> > const& data() const { return m_data; }
 	float min() const { return m_min; }
 	float delta() const { return m_delta; }
+	bool isPost() const { return m_post; }
 
 	virtual void init()
 	{
@@ -185,6 +186,7 @@ private:
 	std::map<Time, std::vector<float>> m_data;
 	float m_min;
 	float m_delta;
+	bool m_post;
 };
 
 

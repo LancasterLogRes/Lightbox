@@ -25,6 +25,7 @@ namespace Lightbox
 {
 
 std::string id(float _y) { return toString(_y); }
+std::string idL(float _x, float _y) { return toString(_x) + " (" + toString(std::round(_y * 100)) + "%)"; }
 std::string ms(float _x){ return toString(std::round(_x * 1000)) + (!_x ? "ms" : ""); }
 std::string msL(float _x, float _y) { return toString(std::round(_x * 1000)) + "ms (" + toString(std::round(_y * 100)) + "%)"; }
 std::string bpm(float _x) { return _x ? toString(std::round(toBpm(fromSeconds(_x)) * 10) / 10) : std::string("inf bpm"); }

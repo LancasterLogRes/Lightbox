@@ -29,7 +29,8 @@ namespace Lightbox
 LIGHTBOX_TEXTUAL_ENUM_INHERITS(EventType, uint8_t,
 				NoEvent,
 				Attack, Sustain, Decay, Release,
-				SyncPoint, PeriodSet, PeriodTweak, PeriodReset, Tick, Beat, Bar, Cycle,
+				SyncPoint, PeriodSet, PeriodTweak, PeriodReset,
+				RhythmSet, RhythmReset, Bar, Beat,
 				Comment, GraphSpecComment, AuxComment, RhythmCandidatesComment, RhythmVectorComment, HistoryComment, PhaseVectorComment, PhaseCandidatesComment, LastBarDistanceComment,
 				WorkingComment, PDFComment,
 				Graph, GraphUnder, GraphBar)

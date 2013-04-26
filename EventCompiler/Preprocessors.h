@@ -1222,13 +1222,41 @@ public:
 		for (unsigned cb = _From; cb < _To; ++cb)
 			m_last[cb - _From] = m_phon.value(m_bark.mag(_mag, cb), cb);
 	}
-	ElementType get() const { return m_last; }
+	ElementType const& get() const { return m_last; }
 	bool changed() const { return true; }
 
 private:
 	ElementType m_last;
 	BandRemapper<Scalar> m_bark;
 	Phon<Scalar> m_phon;
+};
+
+template <unsigned _From, unsigned _To, class _ScalarType>
+class GenSum<BarkPhon<_From, _To, _ScalarType>>: public BarkPhon<_From, _To, _ScalarType>
+{
+public:
+	typedef BarkPhon<_From, _To, _ScalarType> Super;
+	typedef _ScalarType ElementType;
+	typedef _ScalarType Scalar;
+
+	void init(EventCompilerImpl* _eci)
+	{
+		Super::init(_eci);
+		m_last = 0;
+	}
+	void execute(EventCompilerImpl* _eci, Time _t, std::vector<Scalar> const& _mag, std::vector<Scalar> const& _phase, std::vector<Scalar> const& _wave)
+	{
+		Super::execute(_eci, _t, _mag, _phase, _wave);
+		auto const& x = Super::get();
+		m_last = 0;
+		for (unsigned cb = _From; cb < _To; ++cb)
+			m_last += x[cb];
+	}
+	ElementType get() const { return m_last; }
+	bool changed() const { return true; }
+
+private:
+	ElementType m_last;
 };
 
 template <class _PP>
