@@ -122,6 +122,7 @@ public:
 	}
 
 	inline Time time() const { return m_t; }
+	inline unsigned index() const { return m_t / m_hop; }
 	void registerGraph(CompilerGraph* _g) { m_graphs.push_back(_g); }
 	std::vector<CompilerGraph*> const& graphs() const { return m_graphs; }
 
@@ -143,26 +144,56 @@ private:
 class CompilerGraph
 {
 public:
-	CompilerGraph(EventCompilerImpl* _ec): m_ec(_ec)
+	CompilerGraph(EventCompilerImpl* _ec, std::string const& _name): m_ec(_ec), m_name(_name)
 	{
 		m_ec->registerGraph(this);
 	}
 	virtual ~CompilerGraph() {}
 
 	EventCompilerImpl* ec() const { return m_ec; }
+	std::string const& name() const { return m_name; }
 
 	virtual void init() {}
 
 protected:
 	EventCompilerImpl* m_ec;
+	std::string m_name;
+};
+
+class GraphChart: public CompilerGraph
+{
+public:
+	GraphChart(EventCompilerImpl* _ec, std::string const& _name): CompilerGraph(_ec, _name) {}
+
+	std::vector<float> const& data() const { return m_data; }
+
+	virtual void init()
+	{
+		m_data.clear();
+	}
+
+	template <class _T> void operator<<(_T const& _a) { shift(_a); }
+	template <class _T> void shift(_T const& _a)
+	{
+		unsigned i = ec()->index();
+		float l = m_data.size() ? m_data.back() : 0;
+		m_data.reserve(i + 1);
+		while (m_data.size() < i)
+			m_data.push_back(l);
+		m_data.push_back((float)_a);
+	}
+
+private:
+	std::vector<float> m_data;
 };
 
 class GraphSpectrum: public CompilerGraph
 {
 public:
-	GraphSpectrum(EventCompilerImpl* _ec, unsigned _bandCount, float _min = 0, float _delta = 1, bool _post = false): CompilerGraph(_ec), m_bandCount(_bandCount), m_min(_min), m_delta(_delta) , m_post(_post){}
+	GraphSpectrum(EventCompilerImpl* _ec, std::string const& _name, unsigned _bandCount, float _min = 0, float _delta = 1, bool _post = false): CompilerGraph(_ec, _name), m_bandCount(_bandCount), m_min(_min), m_delta(_delta) , m_post(_post){}
 
 	std::map<Time, std::vector<float> > const& data() const { return m_data; }
+	unsigned bandCount() const { return m_bandCount; }
 	float min() const { return m_min; }
 	float delta() const { return m_delta; }
 	bool isPost() const { return m_post; }
@@ -188,7 +219,6 @@ private:
 	float m_delta;
 	bool m_post;
 };
-
 
 template <class _Native>
 class NullEventCompiler: public EventCompilerImpl

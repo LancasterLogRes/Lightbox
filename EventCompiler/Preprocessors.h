@@ -435,7 +435,7 @@ public:
 
 	SlowHistoried(unsigned _s = _DefaultHistorySize) { setHistory(_s); }
 
-	SlowHistoried& setHistory(unsigned _s) { m_data.clear(); m_data.resize(_s + _MoveEvery - 1, 0); m_offset = 0; return *this; }
+	SlowHistoried& setHistory(unsigned _s) { m_data = vector<Scalar>(_s + _MoveEvery - 1, 0.5); m_offset = 0; return *this; }
 
 	void init(EventCompilerImpl* _eci)
 	{
@@ -552,8 +552,9 @@ public:
 			assert(isFinite(h[0]));
 			unsigned s = h.size();
 			if (m_lastAc.empty())
-				m_lastAc.resize(s / 2, 0.0001);
+				m_lastAc.resize(s / 2, 0.5);
 			autocross(h.begin(), s, _X::call, s / 2, 1, m_lastAc);
+//			m_lastAc = autocross(h.begin(), s, _X::call, s / 2);
 			assert(isFinite(m_lastAc[0]));
 		}
 	}
@@ -1243,6 +1244,7 @@ public:
 	{
 		Super::init(_eci);
 		m_last = 0;
+		m_scale = 1 / Scalar(_To - _From) / 100;
 	}
 	void execute(EventCompilerImpl* _eci, Time _t, std::vector<Scalar> const& _mag, std::vector<Scalar> const& _phase, std::vector<Scalar> const& _wave)
 	{
@@ -1251,11 +1253,49 @@ public:
 		m_last = 0;
 		for (unsigned cb = _From; cb < _To; ++cb)
 			m_last += x[cb];
+		m_last *= m_scale;
 	}
 	ElementType get() const { return m_last; }
 	bool changed() const { return true; }
 
 private:
+	ElementType m_last;
+	Scalar m_scale;
+};
+
+template <class _PP>
+class DiffSum: public _PP
+{
+};
+
+template <unsigned _From, unsigned _To, class _ScalarType>
+class DiffSum<BarkPhon<_From, _To, _ScalarType>>: public BarkPhon<_From, _To, _ScalarType>
+{
+public:
+	typedef BarkPhon<_From, _To, _ScalarType> Super;
+	typedef _ScalarType ElementType;
+	typedef _ScalarType Scalar;
+
+	void init(EventCompilerImpl* _eci)
+	{
+		Super::init(_eci);
+		m_last = 0;
+		m_in.fill(0);
+	}
+	void execute(EventCompilerImpl* _eci, Time _t, std::vector<Scalar> const& _mag, std::vector<Scalar> const& _phase, std::vector<Scalar> const& _wave)
+	{
+		Super::execute(_eci, _t, _mag, _phase, _wave);
+		auto const& x = Super::get();
+		m_last *= .9;
+		for (unsigned cb = _From; cb < _To; ++cb)
+			m_last += abs(x[cb] - m_in[cb]);
+		m_in = x;
+	}
+	ElementType get() const { return m_last; }
+	bool changed() const { return true; }
+
+private:
+	typename Super::ElementType m_in;
 	ElementType m_last;
 };
 
