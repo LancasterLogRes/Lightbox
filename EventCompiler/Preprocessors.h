@@ -1254,6 +1254,7 @@ public:
 		for (unsigned cb = _From; cb < _To; ++cb)
 			m_last += x[cb];
 		m_last *= m_scale;
+		m_last -= 0.5;
 	}
 	ElementType get() const { return m_last; }
 	bool changed() const { return true; }

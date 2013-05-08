@@ -190,7 +190,16 @@ private:
 class GraphSpectrum: public CompilerGraph
 {
 public:
-	GraphSpectrum(EventCompilerImpl* _ec, std::string const& _name, unsigned _bandCount, float _min = 0, float _delta = 1, bool _post = false): CompilerGraph(_ec, _name), m_bandCount(_bandCount), m_min(_min), m_delta(_delta) , m_post(_post){}
+	GraphSpectrum(EventCompilerImpl* _ec, std::string const& _name): CompilerGraph(_ec, _name) {}
+	template <class ... _P> GraphSpectrum(EventCompilerImpl* _ec, std::string const& _name, _P ... _p): CompilerGraph(_ec, _name) { setup(_p ...); }
+
+	void setup(unsigned _bandCount, float _min = 0, float _delta = 1, bool _post = false)
+	{
+		m_bandCount = _bandCount;
+		m_min = _min;
+		m_delta = _delta;
+		m_post = _post;
+	}
 
 	std::map<Time, std::vector<float> > const& data() const { return m_data; }
 	unsigned bandCount() const { return m_bandCount; }
