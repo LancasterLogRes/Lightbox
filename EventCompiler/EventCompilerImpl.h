@@ -160,23 +160,58 @@ protected:
 	std::string m_name;
 };
 
+template <class _N>
+class XO
+{
+public:
+	XO(_N _scale = 1, _N _offset = 0): m_scale(_scale), m_offset(_offset) {}
+	static XO toUnity(Range _r) { return XO(1 / (_r.second - _r.first), _r.first / (_r.second - _r.first)); }
+
+	_N apply(_N _v) const { return _v * m_scale + m_offset; }
+	Range apply(Range _v) const { return Range(apply(_v.first), apply(_v.second)); }
+
+	_N scale() const { return m_scale; }
+	_N offset() const { return m_offset; }
+
+private:
+	_N m_scale;
+	_N m_offset;
+};
+
+typedef XO<float> XOf;
+
 class GraphChart: public CompilerGraph
 {
 public:
 	GraphChart(EventCompilerImpl* _ec, std::string const& _name): CompilerGraph(_ec, _name) {}
+	template <class ... _P> GraphChart(EventCompilerImpl* _ec, std::string const& _name, _P ... _p): GraphChart(_ec, _name) { setup(_p ...); }
+
+	void setup(std::string const& _ylabel = "", XOf _ytx = XOf(), Range _yrangeHint = AutoRange)
+	{
+		m_ylabel = _ylabel;
+		m_ytx = _ytx;
+		m_yrangeHint = _yrangeHint;
+	}
 
 	std::vector<float> const& data() const { return m_data; }
+
+	std::string ylabel() const { return m_ylabel; }
+
+	Range yrangeReal() const { return m_yrangeReal; }
+	Range yrangeHint() const { return m_yrangeHint; }
 
 	virtual void init()
 	{
 		m_data.clear();
+		m_yrangeReal = AutoRange;
 	}
 
 	template <class _T> void operator<<(_T const& _a) { shift(_a); }
 	template <class _T> void shift(_T const& _a)
 	{
 		unsigned i = ec()->index();
-		float l = m_data.size() ? m_data.back() : 0;
+		float l = m_data.size() ? m_data.back() : _a;
+		widenToFit(m_yrangeReal, _a);
 		m_data.reserve(i + 1);
 		while (m_data.size() < i)
 			m_data.push_back(l);
@@ -184,6 +219,11 @@ public:
 	}
 
 private:
+	std::string m_ylabel;
+	XOf m_ytx;
+	Range m_yrangeHint;
+
+	Range m_yrangeReal;
 	std::vector<float> m_data;
 };
 
@@ -193,40 +233,63 @@ public:
 	GraphSpectrum(EventCompilerImpl* _ec, std::string const& _name): CompilerGraph(_ec, _name) {}
 	template <class ... _P> GraphSpectrum(EventCompilerImpl* _ec, std::string const& _name, _P ... _p): CompilerGraph(_ec, _name) { setup(_p ...); }
 
-	void setup(unsigned _bandCount, float _min = 0, float _delta = 1, bool _post = false)
+	void setup(unsigned _bandCount, std::string _xlabel = "", std::string _ylabel = "", XOf _xtx = XOf(), XOf _ytx = XOf(), Range _yrangeHint = AutoRange)
 	{
 		m_bandCount = _bandCount;
-		m_min = _min;
-		m_delta = _delta;
-		m_post = _post;
+		m_xlabel = _xlabel;
+		m_ylabel = _ylabel;
+		m_xtx = _xtx;
+		m_ytx = _ytx;
+		m_yrangeHint = _yrangeHint;
 	}
 
 	std::map<Time, std::vector<float> > const& data() const { return m_data; }
 	unsigned bandCount() const { return m_bandCount; }
-	float min() const { return m_min; }
-	float delta() const { return m_delta; }
-	bool isPost() const { return m_post; }
+
+	XOf xtx() const { return m_xtx; }
+
+	std::string xlabel() const { return m_xlabel; }
+	std::string ylabel() const { return m_ylabel; }
+
+	Range xrangeReal() const { return m_xrangeReal; }
+	Range yrangeReal() const { return m_yrangeReal; }
+	Range yrangeHint() const { return m_yrangeHint; }
 
 	virtual void init()
 	{
 		m_data.clear();
+		m_xrangeReal = m_xtx.apply(std::make_pair(0, m_bandCount - 1));
+		m_yrangeReal = AutoRange;
 	}
 
+	template <class _T> void operator<<(_T const& _a) { shift(_a); }
 	template <class _T> void shift(_T const& _a)
 	{
 		assert(_a.size() == m_bandCount);
 		m_data[m_ec->time()].resize(m_bandCount);
 		float* f = m_data[m_ec->time()].data();
 		for (auto t: _a)
-			*f++ = (float)t;
+		{
+			float v = m_ytx.apply((float)t);
+			if (isFinite(m_yrangeReal.first))
+				widenToFit(m_yrangeReal, v);
+			else
+				m_yrangeReal = std::make_pair(v, v);
+			*f++ = v;
+		}
 	}
 
 private:
 	unsigned m_bandCount;
+	std::string m_xlabel;
+	std::string m_ylabel;
+	XOf m_xtx;
+	XOf m_ytx;
+	Range m_yrangeHint;
+
+	Range m_xrangeReal;
+	Range m_yrangeReal;
 	std::map<Time, std::vector<float>> m_data;
-	float m_min;
-	float m_delta;
-	bool m_post;
 };
 
 template <class _Native>
