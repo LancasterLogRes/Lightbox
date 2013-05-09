@@ -10,9 +10,12 @@ StreamEvents EventCompilerImpl::doInit(unsigned _bands, Time _hop, Time _nyquist
 	m_nyquist = _nyquist;
 	m_t = 0;
 	m_windowSeconds = toSeconds(windowSize());
+	for (CompilerGraph* g: m_graphs)
+		g->preinit();
 	initPres();
+	init();
 	for (CompilerGraph* g: m_graphs)
 		g->init();
-	return init();
+	return StreamEvents();
 }
 
