@@ -10,12 +10,17 @@ StreamEvents EventCompilerImpl::doInit(unsigned _bands, Time _hop, Time _nyquist
 	m_nyquist = _nyquist;
 	m_t = 0;
 	m_windowSeconds = toSeconds(windowSize());
-	for (CompilerGraph* g: m_graphs)
-		g->preinit();
+	for (auto g: m_graphs)
+		g.second->preinit();
 	initPres();
 	init();
-	for (CompilerGraph* g: m_graphs)
-		g->init();
+	for (auto g: m_graphs)
+		g.second->init();
 	return StreamEvents();
 }
 
+void EventCompilerImpl::registerGraph(CompilerGraph* _g)
+{
+	assert(!m_graphs.count(_g->name()));
+	m_graphs.insert(std::make_pair(_g->name(), _g));
+}

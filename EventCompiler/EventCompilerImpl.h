@@ -123,8 +123,10 @@ public:
 
 	inline Time time() const { return m_t; }
 	inline unsigned index() const { return m_t / m_hop; }
-	void registerGraph(CompilerGraph* _g) { m_graphs.push_back(_g); }
-	std::vector<CompilerGraph*> const& graphs() const { return m_graphs; }
+	void registerGraph(CompilerGraph* _g);
+	std::vector<CompilerGraph*> graphs() const { return values(m_graphs); }
+	std::map<std::string, CompilerGraph*> const& graphMap() const { return m_graphs; }
+	CompilerGraph* graph(std::string _name) const { if (m_graphs.count(_name)) return m_graphs.at(_name); return nullptr; }
 
 protected:
 	virtual void initPres() {}
@@ -138,7 +140,7 @@ private:
 	// Cached...
 	float m_windowSeconds;
 
-	std::vector<CompilerGraph*> m_graphs;
+	std::map<std::string, CompilerGraph*> m_graphs;
 };
 
 class CompilerGraph
@@ -285,6 +287,7 @@ public:
 	}
 	virtual void setupFromParent() { CompilerGraph::setupFromParent(); if (auto p = dynamic_cast<GraphSparseDense*>(parent())) { m_xlabel = p->m_xlabel; m_ylabel = p->m_ylabel, m_xtx = p->m_xtx, m_ytx = p->m_ytx, m_yrangeHint = p->m_yrangeHint; } }
 
+	std::vector<float> const& dataPoint(int _index) const { auto it = m_data.upper_bound(_index); if (it == m_data.begin()) return NullVectorFloat; else return (--it)->second; }
 	std::map<Time, std::vector<float> > const& data() const { return m_data; }
 
 	XOf xtx() const { return m_xtx; }
@@ -292,6 +295,8 @@ public:
 	std::string xlabel() const { return m_xlabel; }
 	std::string ylabel() const { return m_ylabel; }
 
+	virtual Range xrangeReal() const = 0;
+	virtual Range xrangeHint() const { return AutoRange; }
 	Range yrangeReal() const { return m_yrangeReal; }
 	Range yrangeHint() const { return m_yrangeHint; }
 
@@ -345,12 +350,12 @@ public:
 		m_maxGraphSize = 0;
 	}
 
-	Range xrangeReal() const { return xtx().apply(std::make_pair(0, m_maxGraphSize - 1)); }
+	virtual Range xrangeReal() const { return xtx().apply(std::make_pair(0, m_maxGraphSize - 1)); }
 
 	template <class _T> void operator<<(_T const& _a) { shift(_a); }
 	template <class _T> void shift(_T const& _a, unsigned _offset = 0)
 	{
-		GraphSparseDense::shift(_a);
+		GraphSparseDense::shift(_a, _offset);
 		m_maxGraphSize = std::max<unsigned>(m_maxGraphSize, _a.size());
 	}
 
@@ -373,7 +378,7 @@ public:
 	virtual void setupFromParent() { GraphSparseDense::setupFromParent(); if (auto p = dynamic_cast<GraphSparseDenseConstSize*>(parent())) { m_graphSize = p->m_graphSize; } }
 
 	unsigned graphSize() const { return m_graphSize; }
-	Range xrangeReal() const { return xtx().apply(std::make_pair(0, m_graphSize - 1)); }
+	virtual Range xrangeReal() const { return xtx().apply(std::make_pair(0, m_graphSize - 1)); }
 
 	template <class _T> void shift(_T const& _a, unsigned _offset = 0)
 	{

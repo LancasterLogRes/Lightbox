@@ -88,6 +88,15 @@ std::vector<_U> keys(std::unordered_map<_U, _V> const& _m)
 	return ret;
 }
 
+template <class _U, class _V>
+std::vector<_V> values(std::map<_U, _V> const& _m)
+{
+	std::vector<_V> ret;
+	for (auto const& i: _m)
+		ret += i.second;
+	return ret;
+}
+
 template <class _T, class _V>
 std::vector<_T> vector_cast(_V const& _v)
 {
