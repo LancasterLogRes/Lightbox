@@ -288,7 +288,7 @@ public:
 	virtual void setupFromParent() { CompilerGraph::setupFromParent(); if (auto p = dynamic_cast<GraphSparseDense*>(parent())) { m_xlabel = p->m_xlabel; m_ylabel = p->m_ylabel, m_xtx = p->m_xtx, m_ytx = p->m_ytx, m_yrangeHint = p->m_yrangeHint; } }
 
 	std::vector<float> const& dataPoint(int _index) const { auto it = m_data.upper_bound(_index); if (it == m_data.begin()) return NullVectorFloat; else return (--it)->second; }
-	std::map<Time, std::vector<float> > const& data() const { return m_data; }
+	std::map<int, std::vector<float> > const& data() const { return m_data; }
 
 	XOf xtx() const { return m_xtx; }
 
@@ -309,8 +309,8 @@ public:
 
 	template <class _T> void shift(_T const& _a, int _offset = 0)
 	{
-		m_data[m_ec->time()].resize(_a.size());
-		float* f = m_data[m_ec->time()].data();
+		m_data[m_ec->index()].resize(_a.size());
+		float* f = m_data[m_ec->index()].data();
 		unsigned s = _a.size();
 		unsigned i = (s - _offset) % s;
 		for (auto t: _a)
@@ -334,7 +334,7 @@ private:
 	Range m_yrangeHint;
 
 	Range m_yrangeReal;
-	std::map<Time, std::vector<float>> m_data;
+	std::map<int, std::vector<float>> m_data;
 };
 
 class GraphHistogram: public GraphSparseDense

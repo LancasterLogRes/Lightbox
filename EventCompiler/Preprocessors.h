@@ -379,13 +379,13 @@ private:
 	unsigned m_count;
 };
 
-template <class _PP, unsigned _ds = 8>
+template <class _PP, unsigned _defaultSize = 8>
 class Historied: public _PP
 {
 public:
 	typedef typename Info<_PP>::ScalarType Scalar;
 
-	Historied(unsigned _s = _ds): m_data(_s) {}
+	Historied(unsigned _s = _defaultSize): m_data(_s) {}
 
 	Historied& setHistory(unsigned _s) { m_data.clear(); m_data.resize(_s + 4, 0); m_count = 0; return *this; }
 
@@ -435,7 +435,7 @@ public:
 
 	SlowHistoried(unsigned _s = _DefaultHistorySize) { setHistory(_s); }
 
-	SlowHistoried& setHistory(unsigned _s) { m_data = vector<Scalar>(_s + _MoveEvery - 1, 0.5); m_offset = 0; return *this; }
+	SlowHistoried& setHistory(unsigned _s) { m_data = vector<Scalar>(_s + _MoveEvery - 1, 0.0); m_offset = 0; return *this; }
 
 	void init(EventCompilerImpl* _eci)
 	{
@@ -449,18 +449,18 @@ public:
 		_PP::execute(_eci, _t, _mag, _phase, _wave);
 		if (_PP::changed())
 		{
-			m_data[m_data.size() - _MoveEvery + m_offset] = _PP::get();
 			++m_offset;
 			if (m_offset == _MoveEvery)
 			{
 				valmove(m_data.data(), m_data.data() + _MoveEvery, m_data.size() - _MoveEvery);
 				m_offset = 0;
 			}
+			m_data[m_data.size() - _MoveEvery + m_offset] = _PP::get();
 		}
 	}
 
 	bool changed() const { return _PP::changed(); }
-	foreign_vector<Scalar> get() const { return foreign_vector<Scalar>(const_cast<Scalar*>(m_data.data()) + m_offset, m_data.size() - _MoveEvery); }
+	foreign_vector<Scalar> get() const { return foreign_vector<Scalar>(const_cast<Scalar*>(m_data.data()) + m_offset, m_data.size() - _MoveEvery + 1); }
 
 private:
 	vector<Scalar> m_data;
@@ -552,8 +552,8 @@ public:
 			assert(isFinite(h[0]));
 			unsigned s = h.size();
 			if (m_lastAc.empty())
-				m_lastAc.resize(s / 2, 0.5);
-			autocross(h.begin(), s, _X::call, s / 2, 1, m_lastAc);
+				m_lastAc.resize((s - 1) / 2, 0);
+			autocross(h.begin(), s, _X::call, (s - 1) / 2, 1, m_lastAc);
 //			m_lastAc = autocross(h.begin(), s, _X::call, s / 2);
 			assert(isFinite(m_lastAc[0]));
 		}
@@ -621,6 +621,7 @@ template <class _N = float> struct CallSimilarity { inline static _N call(typena
 template <class _N = float> struct CallCorrelation { inline static _N call(typename vector<_N>::const_iterator _a, typename vector<_N>::const_iterator _b, unsigned _s) { return correlation<_N>(_a, _b, _s); } };
 template <class _N = float> struct CallDissimilarity { inline static _N call(typename vector<_N>::const_iterator _a, typename vector<_N>::const_iterator _b, unsigned _s) { return dissimilarity(_a, _b, _s); } };
 template <class _N = float> struct CallCorrelationPtr { inline static _N call(_N const* _a, _N const* _b, unsigned _s) { return correlation(_a, _b, _s); } };
+template <class _N = float> struct CallSimilarityPtr { inline static _N call(_N const* _a, _N const* _b, unsigned _s) { return similarity(_a, _b, _s); } };
 
 /*
 template <class _PP> using Correlated = Crossed<_PP, CallCorrelation>;
@@ -631,6 +632,7 @@ template <class _PP> class Correlated: public Crossed<_PP, CallCorrelation<typen
 template <class _PP> class Similarity: public Crossed<_PP, CallSimilarity<typename Info<_PP>::ScalarType>> {};
 template <class _PP> class Dissimilarity: public Crossed<_PP, CallDissimilarity<typename Info<_PP>::ScalarType>> {};
 template <class _PP> class CorrelatedPtr: public DirectCrossed<_PP, CallCorrelationPtr<typename Info<_PP>::ScalarType>> {};
+template <class _PP> class SimilarityPtr: public DirectCrossed<_PP, CallSimilarityPtr<typename Info<_PP>::ScalarType>> {};
 
 template <class _PP>
 class AreaNormalized: public _PP
@@ -884,6 +886,37 @@ public:
 
 private:
 	Scalar m_last;
+};
+
+
+template <class _PP, size_t _N = 8>
+class MinusLast: public _PP
+{
+public:
+	typedef typename Info<_PP>::ScalarType Scalar;
+
+	void init(EventCompilerImpl* _eci) { _PP::init(_eci); m_mean = 0; m_lastN.fill(0); m_scale = 1 / Scalar(_N); }
+	void execute(EventCompilerImpl* _eci, Time _t, vector<Scalar> const& _mag, vector<Scalar> const& _phase, std::vector<Scalar> const& _wave)
+	{
+		_PP::execute(_eci, _t, _mag, _phase, _wave);
+		if (_PP::changed())
+		{
+			Scalar l = _PP::get();
+			m_last = l - m_mean;
+			m_mean += (l - m_lastN[0]) * m_scale;
+			valmove(&m_lastN[0], &m_lastN[1], _N - 1);
+			m_lastN[_N - 1] = l;
+		}
+	}
+
+	Scalar get() const { return m_last; }
+	bool changed() const { return true; }
+
+private:
+	Scalar m_last;
+	Scalar m_mean;
+	std::array<Scalar, _N> m_lastN;
+	Scalar m_scale;
 };
 
 template <unsigned _HzFrom, unsigned _HzTo, class _N = float>
@@ -1250,11 +1283,10 @@ public:
 	{
 		Super::execute(_eci, _t, _mag, _phase, _wave);
 		auto const& x = Super::get();
-		m_last = 0;
 		for (unsigned cb = _From; cb < _To; ++cb)
 			m_last += x[cb];
 		m_last *= m_scale;
-		m_last -= 0.5;
+//		m_last -= 0.5;
 	}
 	ElementType get() const { return m_last; }
 	bool changed() const { return true; }

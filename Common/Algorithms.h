@@ -785,7 +785,7 @@ void genTransform(_T* _a, _T const* _b, size_t _s, _F const& _f)
 }
 //template <class _T, class _U, class _F> inline void genTransform(_T _a, _U _b, unsigned _s, _F const& _f) { return genTransformRaw(&*_a, &*_b, _s, _f); }
 //template <class _T, class _F> inline void genTransform(std::vector<_T> _a, std::vector<_T> _b, _F const& _f) { return genTransform(_a.begin(), _b.begin(), std::min(_a.size(), _b.size()), _f); }
-
+/*
 template <class _A, class _B>
 typename element_of<_A>::type similarity(_A _a, _B _b, unsigned _s)
 {
@@ -793,7 +793,7 @@ typename element_of<_A>::type similarity(_A _a, _B _b, unsigned _s)
 	   [](v4sf& acc, v4sf const& a, v4sf const& b) { v4sf ab = a - b; acc = acc + ab * ab; },
 	   [=](float const* acc) { return -(acc[0] + acc[1] + acc[2] + acc[3]); });
 }
-
+*/
 inline float correlation(float const* _a, float const* _b, unsigned _s)
 {
 #if LIGHTBOX_NATIVE&&0
@@ -808,13 +808,26 @@ inline float correlation(float const* _a, float const* _b, unsigned _s)
 #endif
 }
 
+inline float similarity(float const* _a, float const* _b, unsigned _s)
+{
+	return genCombine(_a, _b, _s, [](float& acc, float const& a, float const& b) { acc -= sqr(a - b); });
+}
+
 template <size_t _I, size_t _F> inline Fixed<_I, _F> correlation(Fixed<_I, _F> const* _a, Fixed<_I, _F> const* _b, unsigned _s)
 {
 	return genCombine(_a, _b, _s, [](Fixed<_I, _F>& acc, Fixed<_I, _F> const& a, Fixed<_I, _F> const& b) { acc += a * b; });
 }
 
+template <size_t _I, size_t _F> inline Fixed<_I, _F> similarity(Fixed<_I, _F> const* _a, Fixed<_I, _F> const* _b, unsigned _s)
+{
+	return genCombine(_a, _b, _s, [](Fixed<_I, _F>& acc, Fixed<_I, _F> const& a, Fixed<_I, _F> const& b) { acc -= sqr(a - b); });
+}
+
 template <class _T> inline _T correlation(std::vector<_T> const& _a, std::vector<_T> const& _b) { return correlation(_a.data(), _b.data(), std::min(_a.size(), _b.size())); }
 template <class _T> inline _T correlation(typename std::vector<_T>::const_iterator _a, typename std::vector<_T>::const_iterator _b, unsigned _s) { return correlation(&*_a, &*_b, _s); }
+template <class _T> inline _T similarity(std::vector<_T> const& _a, std::vector<_T> const& _b) { return similarity(_a.data(), _b.data(), std::min(_a.size(), _b.size())); }
+template <class _T> inline _T similarity(typename std::vector<_T>::const_iterator _a, typename std::vector<_T>::const_iterator _b, unsigned _s) { return similarity(&*_a, &*_b, _s); }
+inline float similarity(std::vector<float>::const_iterator _a, std::vector<float>::const_iterator _b, unsigned _s) { return similarity(&*_a, &*_b, _s); }
 
 LIGHTBOX_UNITTEST(4, "correlation")
 {
@@ -851,12 +864,17 @@ std::vector<typename element_of<_It>::type> autocross(_It _begin, int _s, _F con
 template <class _F, class _It>
 void autocross(_It _begin, int _s, _F const& _f, unsigned _maxPeriod, unsigned _movingBy, std::vector<typename element_of<_It>::type>& _ret)
 {
+//	_ret = autocross(_begin, _s, _f, _maxPeriod);
+//	return;
 	typedef typename element_of<_It>::type T;
-	int rs = std::min<int>(_maxPeriod, _s - 1);
-	_It ap = _begin;
-	for (int p = 0; p < rs; ++p, ++ap)
+	int lagPeriods = std::min<int>(_maxPeriod, _s - 1 - _movingBy);
+	_It outgoingEnd = _begin;
+	_It incomingEnd = std::next(_begin, _s - _movingBy);
+	_It incomingStart = incomingEnd;
+	float samplesUsed = _s - _movingBy;
+	for (int lagPeriod = 0; lagPeriod < lagPeriods; ++lagPeriod, ++outgoingEnd, --samplesUsed, --incomingStart)
 		// Add new, subtract old.
-		_ret[p] += (_f(std::next(_begin, _s - p), std::next(ap, _s - p), _movingBy) - _f(_begin, ap, _movingBy)) / (_s - p);
+		_ret[lagPeriod] += (_f(incomingStart, incomingEnd, _movingBy) - _f(_begin, outgoingEnd, _movingBy)) / samplesUsed;
 }
 
 template <class _F, class _U>
