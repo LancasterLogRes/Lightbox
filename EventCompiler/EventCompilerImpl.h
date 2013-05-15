@@ -174,6 +174,7 @@ public:
 	std::set<CompilerGraph*> const& children() const { return m_children; }
 	EventCompilerImpl* ec() const { return m_ec; }
 	std::string const& name() const { return m_name; }
+	void setStore(DataStore* _s) { m_store = _s; }
 
 	virtual void preinit()
 	{
@@ -288,6 +289,7 @@ private:
 	std::vector<float> m_data;
 };
 
+
 class GraphSparseDense: public CompilerGraph
 {
 public:
@@ -357,7 +359,7 @@ public:
 					i = 0;
 			}
 
-			m_store->shiftBuffer(ec()->index(), f);
+			m_store->shiftBuffer(ec()->index(), foreign_vector<float>(&*f, _a.size()));
 		}
 	}
 
@@ -370,6 +372,81 @@ private:
 
 	Range m_yrangeReal;
 	std::map<int, std::vector<float>> m_data;
+};
+
+class GraphDenseDenseFixed: public CompilerGraph
+{
+public:
+	GraphDenseDenseFixed(GraphDenseDenseFixed& _ec, std::string const& _name): CompilerGraph(_ec, _name) {}
+	GraphDenseDenseFixed(EventCompilerImpl* _ec, std::string const& _name): CompilerGraph(_ec, _name) {}
+	template <class ... _P> GraphDenseDenseFixed(EventCompilerImpl* _ec, std::string const& _name, _P ... _p): CompilerGraph(_ec, _name) { setup(_p ...); }
+
+	void setup(unsigned _graphSize, std::string _xlabel = "", std::string _ylabel = "", XOf _xtx = XOf(), XOf _ytx = XOf(), Range _yrangeHint = AutoRange)
+	{
+		CompilerGraph::setup();
+		m_graphSize = _graphSize;
+		m_xlabel = _xlabel;
+		m_ylabel = _ylabel;
+		m_xtx = _xtx;
+		m_ytx = _ytx;
+		m_yrangeHint = _yrangeHint;
+	}
+	virtual void setupFromParent() { CompilerGraph::setupFromParent(); if (auto p = dynamic_cast<GraphDenseDenseFixed*>(parent())) { m_xlabel = p->m_xlabel; m_ylabel = p->m_ylabel, m_xtx = p->m_xtx, m_ytx = p->m_ytx, m_yrangeHint = p->m_yrangeHint; m_graphSize = p->m_graphSize; } }
+
+	XOf xtx() const { return m_xtx; }
+
+	std::string xlabel() const { return m_xlabel; }
+	std::string ylabel() const { return m_ylabel; }
+
+	unsigned graphSize() const { return m_graphSize; }
+
+	virtual Range xrangeReal() const { return xtx().apply(std::make_pair(0, m_graphSize - 1)); }
+	virtual Range xrangeHint() const { return AutoRange; }
+	Range yrangeReal() const { return m_yrangeReal; }
+	Range yrangeHint() const { return m_yrangeHint; }
+
+	virtual void init()
+	{
+		CompilerGraph::init();
+		m_yrangeReal = AutoRange;
+		if (m_store)
+			m_store->init(m_graphSize, true);
+	}
+
+	template <class _T> void shift(_T const& _a, int _offset = 0)
+	{
+		assert(_a.size() == m_graphSize);
+
+		if (m_store)
+		{
+			float f[_a.size()];
+
+			unsigned i = (m_graphSize - _offset) % m_graphSize;
+			for (auto t: _a)
+			{
+				f[i] = m_ytx.apply((float)t);
+				if (isFinite(m_yrangeReal.first))
+					widenToFit(m_yrangeReal, f[i]);
+				else
+					m_yrangeReal = std::make_pair(f[i], f[i]);
+				i++;
+				if (i == m_graphSize)
+					i = 0;
+			}
+
+			m_store->shiftBuffer(ec()->index(), foreign_vector<float>(&*f, _a.size()));
+		}
+	}
+
+private:
+	std::string m_xlabel;
+	std::string m_ylabel;
+	XOf m_xtx;
+	XOf m_ytx;
+	Range m_yrangeHint;
+
+	Range m_yrangeReal;
+	unsigned m_graphSize = 0;
 };
 
 class GraphHistogram: public GraphSparseDense
