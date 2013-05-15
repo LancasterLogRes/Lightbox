@@ -43,9 +43,8 @@ public:
 private:
 	Historied<HighEnergy<>> highEnergy;
 
-	virtual StreamEvents init()
+	virtual void init()
 	{
-		StreamEvents ret;
 		unsigned const c_historySize = FromMsecs<100>::value / hop();
 		highEnergy.setHistory(c_historySize);
 
@@ -57,7 +56,6 @@ private:
 		m_lastBL = 0.f;
 		m_lastLastBL = 0.f;
 		m_decayedBL = 0.f;
-		return ret;
 	}
 
 	virtual StreamEvents compile(Time, vector<float> const&, vector<float> const&, std::vector<float> const&)
@@ -72,9 +70,9 @@ private:
 		float beatLikelihood = -log(prob);
 
 		// Graph the latest values directly (on the timeline).
-		ret.push_back(StreamEvent(highEnergy.HighEnergy::get(), 0.0f));
-		ret.push_back(StreamEvent(beatLikelihood, 0.9f));
-		ret.push_back(StreamEvent(m_decayedBL, 0.5f));
+//		ret.push_back(StreamEvent(highEnergy.HighEnergy::get(), 0.0f));
+//		ret.push_back(StreamEvent(beatLikelihood, 0.9f));
+//		ret.push_back(StreamEvent(m_decayedBL, 0.5f));
 
 		if (beatLikelihood < m_lastBL && m_lastBL > m_lastLastBL)
 		{

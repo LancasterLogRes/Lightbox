@@ -35,6 +35,7 @@ namespace Lightbox
 {
 
 inline std::string id(float _y) { return toString(_y); }
+inline std::string idL(float _x, float _y) { return toString(_x) + " (" + toString(round(_y * 100)) + "%)"; }
 inline std::string ms(float _x){ return toString(round(_x * 1000)) + (!_x ? "ms" : ""); }
 inline std::string msL(float _x, float _y) { return toString(round(_x * 1000)) + "ms (" + toString(round(_y * 100)) + "%)"; }
 
@@ -90,7 +91,7 @@ public:
 
 	StreamEvents doInit(unsigned _bands, Time _hop, Time _nyquist);
 
-	virtual StreamEvents init() { return StreamEvents(); }
+	virtual void init() {}
 	virtual MemberMap propertyMap() const { return NullMemberMap; }
 	virtual MemberMap stateMap() const { return NullMemberMap; }
 
@@ -127,6 +128,8 @@ public:
 	std::vector<CompilerGraph*> graphs() const { return values(m_graphs); }
 	std::map<std::string, CompilerGraph*> const& graphMap() const { return m_graphs; }
 	CompilerGraph* graph(std::string _name) const { if (m_graphs.count(_name)) return m_graphs.at(_name); return nullptr; }
+
+	virtual unsigned version() const { return 1; }
 
 protected:
 	virtual void initPres() {}
@@ -213,6 +216,9 @@ protected:
 
 	DataStore* m_store = nullptr;
 };
+
+typedef std::pair<float, float> Range;
+Range static const AutoRange = {std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity()};
 
 template <class _N>
 class XO

@@ -31,9 +31,8 @@ LIGHTBOX_TEXTUAL_ENUM_INHERITS(EventType, uint8_t,
 				Attack, Sustain, Decay, Release,
 				SyncPoint, PeriodSet, PeriodTweak, PeriodReset,
 				RhythmSet, RhythmReset, Bar, Beat,
-				Comment, GraphSpecComment, AuxComment, RhythmCandidatesComment, RhythmVectorComment, HistoryComment, PhaseVectorComment, PhaseCandidatesComment, LastBarDistanceComment,
-				WorkingComment, PDFComment,
-				Graph, GraphUnder, GraphBar)
+				LastEventType
+)
 
 typedef std::set<EventType> EventTypes;
 
@@ -42,24 +41,9 @@ inline EventTypes operator|(EventTypes _a, EventType _b) { _a.insert(_b); return
 inline EventTypes operator|(EventType _a, EventTypes _b) { _b.insert(_a); return _b; }
 
 static const EventType BeginStandard = Attack;
-static const EventType EndStandard = Comment;
+static const EventType EndStandard = LastEventType;
 static const EventTypes AllEventTypes = { Attack, PeriodSet };
 static const EventTypes JustAttack = { Attack };
-
-inline bool isGraph(EventType _e)
-{
-	return _e >= Graph;
-}
-
-inline bool isComment(EventType _e)
-{
-	return _e >= Comment && _e < SyncPoint;
-}
-
-inline bool isStandard(EventType _e)
-{
-	return _e >= BeginStandard && _e < EndStandard;
-}
 
 inline bool isChannelSpecific(EventType _e)
 {

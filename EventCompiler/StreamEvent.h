@@ -72,17 +72,10 @@ static const int CompatibilityChannel = std::numeric_limits<int>::max();
 
 struct StreamEvent
 {
-	struct Aux
-	{
-	public:
-		virtual ~Aux() {}
-	};
-
-	StreamEvent(EventType _type, float _strength, float _temperature, Character _character, float _jitter = .5f, float _constancy = .5f, int8_t _position = -1, float _surprise = 1.f, Aux* _aux = nullptr): type(_type), position(_position), character(_character), channel(-1), temperature(_temperature), strength(_strength), surprise(_surprise), jitter(_jitter), constancy(_constancy), m_aux(std::shared_ptr<Aux>(_aux)) { }
-	StreamEvent(float _strength, float _temperature): type(Graph), position(0), character(Dull), channel(-1), temperature(_temperature), strength(_strength), surprise(1.f), jitter(0.5f), constancy(0.5f) {}
-	StreamEvent(EventType _type, float _strength, float _temperature, Time _period, int _position): type(_type), position(_position), character(Dull), channel(-1), temperature(_temperature), strength(_strength), surprise(1.f), jitter(0), constancy(toSeconds(_period)), m_aux(nullptr) {}
-	StreamEvent(EventType _type, float _strength, Time _period, Time _phase): type(_type), position(0), character(Dull), channel(-1), temperature(0.f), strength(_strength), surprise(1.f), jitter(toSeconds(_phase)), constancy(toSeconds(_period)), m_aux(nullptr) {}
-	StreamEvent(EventType _type, float _temperature, Time _period, Aux* _aux): type(_type), position(0), character(Dull), channel(-1), temperature(_temperature), strength(0.f), surprise(1.f), jitter(0.5f), constancy(toSeconds(_period)), m_aux(_aux) {}
+	StreamEvent(EventType _type, float _strength, float _temperature, Character _character, float _jitter = .5f, float _constancy = .5f, int8_t _position = -1, float _surprise = 1.f): type(_type), position(_position), character(_character), channel(-1), temperature(_temperature), strength(_strength), surprise(_surprise), jitter(_jitter), constancy(_constancy) { }
+	StreamEvent(EventType _type, float _strength, float _temperature, Time _period, int _position): type(_type), position(_position), character(Dull), channel(-1), temperature(_temperature), strength(_strength), surprise(1.f), jitter(0), constancy(toSeconds(_period)) {}
+	StreamEvent(EventType _type, float _strength, Time _period, Time _phase): type(_type), position(0), character(Dull), channel(-1), temperature(0.f), strength(_strength), surprise(1.f), jitter(toSeconds(_phase)), constancy(toSeconds(_period)) {}
+	StreamEvent(EventType _type, float _temperature, Time _period): type(_type), position(0), character(Dull), channel(-1), temperature(_temperature), strength(0.f), surprise(1.f), jitter(0.5f), constancy(toSeconds(_period)) {}
 	StreamEvent(EventType _type = NoEvent): type(_type), position(0), character(Dull), channel(-1), temperature(-1.f), strength(1.f), surprise(1.f), jitter(0.5f), constancy(0.5f) {}
 
 	void assign(int _channel)
@@ -101,10 +94,6 @@ struct StreamEvent
 	bool operator!=(StreamEvent const& _c) const { return !operator==(_c); }
 	bool operator<(StreamEvent const& _c) const { return type < _c.type; }
 
-	void sanitize() { memset(&m_aux, 0, sizeof(m_aux)); }
-
-	std::shared_ptr<Aux> const& aux() const { return m_aux; }
-
 	EventType type;				///< Type of the event.
 	int8_t position;			///< -1 unknown, 0-63 for first 16th note in super-bar, second 16th note, &c.
 	Character character;		///< The character of this event.
@@ -115,7 +104,6 @@ struct StreamEvent
 	float surprise;				///< Quantity [0, 1] to describe how easily predicted that this StreamEvent was. Negative strength makes this value describe surprise that the phenomenon didn't happen.
 	float jitter;				///< Between [0, 1]; adds random stuff into decay (Attack/Decay) or easing error limit before snap change (Sustain).
 	float constancy;			///< "Slowness" between [0, 1]. Decay period (Attack/Decay) or inverse of easing speed (Sustain).
-	std::shared_ptr<Aux> m_aux;	///< Auxilliary data for the event. TODO: Deprecate in favour of an index/store comm. method.
 };
 
 inline float toHue(float _temperature)
@@ -148,143 +136,6 @@ inline float fromHue(float _hue)
  * Attack(strength=0; surprise=?) [nonsensical]
  */
 
-struct AuxLabel: public StreamEvent::Aux
-{
-	AuxLabel(std::string const& _label): label(_label) {}
-	virtual ~AuxLabel() {}
-	std::string label;
-};
-
-template <class _T>
-struct AuxVector: public StreamEvent::Aux
-{
-	AuxVector() {}
-	AuxVector(std::vector<_T> const& _d): data(_d) {}
-	AuxVector(_T const* _d, unsigned _s): data(std::vector<_T>(_d, _d + _s)) {}
-	AuxVector(foreign_vector<_T> const& _v): data(std::vector<_T>(_v.begin(), _v.end())) {}
-	virtual ~AuxVector() {}
-	std::vector<_T> data;
-};
-typedef AuxVector<float> AuxFloatVector;
-
-struct AuxMeterMap: public StreamEvent::Aux
-{
-	AuxMeterMap(std::map<float, Meter> const& _d): data(_d) {}
-	virtual ~AuxMeterMap() {}
-	std::map<float, Meter> data;
-};
-
-struct AuxFloatMap: public StreamEvent::Aux
-{
-	AuxFloatMap(std::map<float, float> const& _d): data(_d) {}
-	virtual ~AuxFloatMap() {}
-	std::map<float, float> data;
-};
-
-struct AuxPhaseMap: public StreamEvent::Aux
-{
-	AuxPhaseMap(std::map<float, Phase> const& _d): data(_d) {}
-	virtual ~AuxPhaseMap() {}
-	std::map<float, Phase> data;
-};
-
-enum GraphType
-{
-	LineChart,
-	FilledLineChart,
-	BarChart,
-	LabelPeaks,
-	MeterExplanation,
-	PhaseExplanation,
-	LabeledPoints,
-	LinesChart,
-	RuleY
-};
-
-typedef std::pair<float, float> Range;
-Range static const AutoRange = {std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity()};
-
-struct GraphSpec
-{
-	GraphSpec(float _n, EventType _f, GraphType _t, RGBA8 _p, float _xC = 0.f, float _xM = 1.f, float _yC = 0.f, float _yM = 1.f, Range const& _xR = AutoRange, Range const& _yR = AutoRange):
-		temperature(_n),
-		filter(_f),
-		type(_t),
-		primary(_p),
-		xC(_xC),
-		xM(_xM),
-		yC(_yC),
-		yM(_yM),
-		xRange(_xR),
-		yRange(_yR)
-	{}
-
-	GraphSpec(std::function<float(float)> const& _f, GraphType _t, RGBA8 _p, float _xC = 0.f, float _xM = 1.f, float _yC = 0.f, float _yM = 1.f, Range const& _xR = AutoRange, Range const& _yR = AutoRange):
-		filter(NoEvent),
-		type(_t),
-		primary(_p),
-		xC(_xC),
-		xM(_xM),
-		yC(_yC),
-		yM(_yM),
-		f(_f),
-		xRange(_xR),
-		yRange(_yR)
-	{}
-
-	float temperature;
-	EventType filter;
-	GraphType type;
-	RGBA8 primary;
-	float xC;
-	float xM;
-	float yC;
-	float yM;
-	std::function<float(float)> f;
-	std::pair<float, float> xRange;
-	std::pair<float, float> yRange;
-};
-
-std::string id(float _y);
-std::string idL(float _x, float _y);
-std::string ms(float _x);
-std::string msL(float _x, float _y);
-std::string bpm(float _x);
-std::string bpmL(float _x, float _y);
-
-struct AuxGraphsSpec: public StreamEvent::Aux
-{
-	AuxGraphsSpec(std::string const& _name, std::function<std::string(float)> const& _xLabel, std::function<std::string(float)> const& _yLabel, std::function<std::string(float, float)> const& _pLabel, std::pair<float, float> const& _xRange = AutoRange, std::pair<float, float> const& _yRange = AutoRange):
-		name (_name),
-		xLabel(_xLabel),
-		yLabel(_yLabel),
-		pLabel(_pLabel),
-		xRange(_xRange),
-		yRange(_yRange)
-	{
-	}
-
-	AuxGraphsSpec(std::string const& _name, std::function<std::string(float, bool)> const& _pxLabel, std::function<std::string(float)> const& _yLabel, std::pair<float, float> const& _xRange = AutoRange, std::pair<float, float> const& _yRange = AutoRange):
-		name (_name),
-		xLabel([=](float _f){return _pxLabel(_f, false);}),
-		yLabel(_yLabel),
-		pLabel([=](float _x, float){ return _pxLabel(_x, true);}),
-		xRange(_xRange),
-		yRange(_yRange)
-	{
-	}
-
-	void addGraph(GraphSpec const& _s) { graphs.push_back(_s); }
-
-	std::string name;
-	std::function<std::string(float)> xLabel;
-	std::function<std::string(float)> yLabel;
-	std::function<std::string(float, float)> pLabel;
-	std::pair<float, float> xRange;
-	std::pair<float, float> yRange;
-	std::vector<GraphSpec> graphs;
-};
-
 typedef std::vector<StreamEvent> StreamEvents;
 
 static const StreamEvents NullStreamEvents;
@@ -296,15 +147,6 @@ inline StreamEvents& merge(StreamEvents& _dest, StreamEvents const& _src)
 	foreach (StreamEvent const& e, _src)
 		_dest.push_back(e);
 	return _dest;
-}
-
-inline StreamEvents noComment(StreamEvents const& _se)
-{
-	StreamEvents ret;
-	for (auto i = _se.begin(); i != _se.end(); ++i)
-		if (i->type != Comment && i->type < Graph)
-			ret.push_back(*i);
-	return ret;
 }
 
 inline std::ostream& operator<<(std::ostream& _out, StreamEvent const& _e)

@@ -37,7 +37,7 @@ class EventCompiler
 public:
 	static EventCompiler create(EventCompilerImpl* _i) { EventCompiler ret; ret.m_impl = std::shared_ptr<EventCompilerImpl>(_i); return ret; }
 
-	StreamEvents init(unsigned _bands, Time _hop, Time _nyquist) { if (m_impl) return m_impl->doInit(_bands, _hop, _nyquist); return StreamEvents(); }
+	void init(unsigned _bands, Time _hop, Time _nyquist) { if (m_impl) m_impl->doInit(_bands, _hop, _nyquist); }
 	template <class _T> StreamEvents compile(std::vector<_T> const& _mag, std::vector<_T> const& _phase, std::vector<_T> const& _wave) { if (m_impl) return m_impl->doCompile(_mag, _phase, _wave); else return StreamEvents(); }
 	Members<EventCompilerImpl> properties() { return m_impl ? Members<EventCompilerImpl>(m_impl->propertyMap(), m_impl) : Members<EventCompilerImpl>(); }
 	Members<EventCompilerImpl> state() { return m_impl ? Members<EventCompilerImpl>(m_impl->stateMap(), m_impl) : Members<EventCompilerImpl>(); }

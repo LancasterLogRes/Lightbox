@@ -72,7 +72,6 @@ struct Track
 			_read(&se, sizeof(StreamEvent));
 			if (se.type == SyncPoint)
 				syncPoints.push_back(t);
-			memset(&se.m_aux, 0, sizeof(se.m_aux));		// shouldn't be set, but just in case...
 			events.insert(std::make_pair(t, se));
 		}
 	}
