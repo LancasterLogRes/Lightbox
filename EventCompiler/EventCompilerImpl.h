@@ -143,6 +143,18 @@ private:
 	std::map<std::string, CompilerGraph*> m_graphs;
 };
 
+// Something that stores some timeline data.
+// Will be implemented with DataSet, but this is virtualised so it doesn't have to be in EventCompiler.
+class DataStore
+{
+public:
+	virtual ~DataStore() {}
+
+	// Variable record length if 0. _dense if all hops are stored, otherwise will store sparsely.
+	virtual void init(unsigned _recordLength, bool _dense) { (void)_recordLength; (void)_dense; }
+	virtual void shiftBuffer(unsigned _index, foreign_vector<float> const& _record) { (void)_index; (void)_record; }
+};
+
 class CompilerGraph
 {
 public:
@@ -197,6 +209,8 @@ protected:
 
 	bool m_doneSetup = false;
 	bool m_doneSetupThisTime = false;
+
+	DataStore* m_store = nullptr;
 };
 
 template <class _N>
@@ -238,7 +252,6 @@ public:
 	std::vector<float> const& data() const { return m_data; }
 
 	std::string ylabel() const { return m_ylabel; }
-
 	Range yrangeReal() const { return m_yrangeReal; }
 	Range yrangeHint() const { return m_yrangeHint; }
 
@@ -247,6 +260,8 @@ public:
 		CompilerGraph::init();
 		m_data.clear();
 		m_yrangeReal = AutoRange;
+		if (m_store)
+			m_store->init(1, true);
 	}
 
 	template <class _T> void operator<<(_T const& _a) { shift(_a); }
@@ -259,6 +274,9 @@ public:
 		while (m_data.size() < i)
 			m_data.push_back(l);
 		m_data.push_back((float)_a);
+
+		float d = (float)_a;
+		m_store->shiftBuffer(ec()->index(), Lightbox::foreign_vector<float>(d, Lightbox::ByValue));
 	}
 
 private:
@@ -310,19 +328,36 @@ public:
 	template <class _T> void shift(_T const& _a, int _offset = 0)
 	{
 		m_data[m_ec->index()].resize(_a.size());
+
 		float* f = m_data[m_ec->index()].data();
 		unsigned s = _a.size();
 		unsigned i = (s - _offset) % s;
 		for (auto t: _a)
 		{
 			f[i] = m_ytx.apply((float)t);
-			if (isFinite(m_yrangeReal.first))
-				widenToFit(m_yrangeReal, f[i]);
-			else
-				m_yrangeReal = std::make_pair(f[i], f[i]);
 			i++;
 			if (i == s)
 				i = 0;
+		}
+
+		if (m_store)
+		{
+			float f[_a.size()];
+
+			unsigned i = (s - _offset) % s;
+			for (auto t: _a)
+			{
+				f[i] = m_ytx.apply((float)t);
+				if (isFinite(m_yrangeReal.first))
+					widenToFit(m_yrangeReal, f[i]);
+				else
+					m_yrangeReal = std::make_pair(f[i], f[i]);
+				i++;
+				if (i == s)
+					i = 0;
+			}
+
+			m_store->shiftBuffer(ec()->index(), f);
 		}
 	}
 
@@ -348,6 +383,8 @@ public:
 	{
 		GraphSparseDense::init();
 		m_maxGraphSize = 0;
+		if (m_store)
+			m_store->init(0, false);
 	}
 
 	virtual Range xrangeReal() const { return xtx().apply(std::make_pair(0, m_maxGraphSize - 1)); }
@@ -376,6 +413,13 @@ public:
 		GraphSparseDense::setup(_p ...);
 	}
 	virtual void setupFromParent() { GraphSparseDense::setupFromParent(); if (auto p = dynamic_cast<GraphSparseDenseConstSize*>(parent())) { m_graphSize = p->m_graphSize; } }
+
+	virtual void init()
+	{
+		GraphSparseDense::init();
+		if (m_store)
+			m_store->init(m_graphSize, false);
+	}
 
 	unsigned graphSize() const { return m_graphSize; }
 	virtual Range xrangeReal() const { return xtx().apply(std::make_pair(0, m_graphSize - 1)); }

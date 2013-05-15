@@ -385,6 +385,8 @@ template <class _T> std::vector<_T> operator+(std::vector<_T> const& _v, _T cons
 template <class _T> std::vector<_T> operator+(_T const& _t, std::vector<_T> const& _v) { return operator+(_v, _t); }
 template <class _T> std::vector<_T> operator+(std::vector<_T> const& _v1, std::vector<_T> const& _v2) { auto v = _v1; catenate(v, _v2); return v; }
 
+enum ByValueType { ByValue };
+
 template <class _T>
 class foreign_vector
 {
@@ -396,6 +398,7 @@ public:
 	foreign_vector(std::vector<typename std::remove_const<_T>::type>* _data): m_data(_data->data()), m_count(_data->size()) {}
 	foreign_vector(_T* _data, unsigned _count): m_data(_data), m_count(_count) {}
 	foreign_vector(std::shared_ptr<std::vector<typename std::remove_const<_T>::type> > const& _data): m_data(_data->data()), m_count(_data->size()), m_lock(_data) {}
+	foreign_vector(_T const& _t, ByValueType): m_data(&_t), m_count(1) {}
 
 	explicit operator bool() const { return m_data && m_count; }
 
@@ -420,6 +423,8 @@ public:
 
 	_T& operator[](unsigned _i) { assert(m_data); assert(_i < m_count); return m_data[_i]; }
 	_T const& operator[](unsigned _i) const { assert(m_data); assert(_i < m_count); return m_data[_i]; }
+
+	void reset() { m_data = nullptr; m_count = 0; m_lock.reset(); }
 
 private:
 	_T* m_data;
