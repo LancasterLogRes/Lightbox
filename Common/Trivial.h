@@ -49,12 +49,27 @@ static const ColorSet DimmableSelection =		HueSelection|ChromaSelection|ValueCon
 static const ColorSet DimmableMono =			SingleColor|ValueContinuous;
 static const ColorSet FullColorSet =			HueContinuous|ChromaContinuous|ValueContinuous;
 
-LIGHTBOX_STRUCT(6, Meter, float, period, float, Wstrength, float, Hstrength, float, Qstrength, float, Dstrength, float, Tstrength);
+typedef std::pair<float, float> Range;
+Range static const AutoRange = {std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity()};
 
-LIGHTBOX_STRUCT(7, Phase, float, phase, float, forebeat, float, qBackbeat, float, eBackbeat, float, sBackbeat, float, trailGap, float, mltAnchor);
+template <class _N>
+class XO
+{
+public:
+	XO(_N _scale = 1, _N _offset = 0): m_scale(_scale), m_offset(_offset) {}
+	static XO toUnity(Range _r) { return XO(1 / (_r.second - _r.first), _r.first / (_r.second - _r.first)); }
 
-LIGHTBOX_STRUCT(6, Tempo, float, prior, float, Wstrength, float, Hstrength, float, Qstrength, float, Dstrength, float, Tstrength);
+	_N apply(_N _v) const { return _v * m_scale + m_offset; }
+	Range apply(Range _v) const { return Range(apply(_v.first), apply(_v.second)); }
 
-LIGHTBOX_STRUCT(6, Start, float, forebeat, float, qBackbeat, float, eBackbeat, float, sBackbeat, float, trailGap, float, mltAnchor);
+	_N scale() const { return m_scale; }
+	_N offset() const { return m_offset; }
+
+private:
+	_N m_scale;
+	_N m_offset;
+};
+
+typedef XO<float> XOf;
 
 }

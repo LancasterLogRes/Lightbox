@@ -9,13 +9,15 @@ HEADERS += StreamEvent.h \
     Track.h \
     EventType.h \
 	Character.h \
-	Compiler.h
+	Compiler.h \
+    GraphSpec.h
 
 SOURCES += \
     Preprocessors.cpp \
     Track.cpp \
 	StreamEvent.cpp \
-	Compiler.cpp
+	Compiler.cpp \
+    GraphSpec.cpp
 
 SOURCES += \
     EventCompilerImpl.cpp

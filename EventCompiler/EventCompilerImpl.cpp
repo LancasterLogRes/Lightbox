@@ -1,4 +1,5 @@
 #include <Common/Global.h>
+#include "GraphSpec.h"
 #include "EventCompilerImpl.h"
 using namespace std;
 using namespace Lightbox;
@@ -19,7 +20,7 @@ StreamEvents EventCompilerImpl::doInit(unsigned _bands, Time _hop, Time _nyquist
 	return StreamEvents();
 }
 
-void EventCompilerImpl::registerGraph(CompilerGraph* _g)
+void EventCompilerImpl::registerGraph(GraphSpec* _g)
 {
 	assert(!m_graphs.count(_g->name()));
 	m_graphs.insert(std::make_pair(_g->name(), _g));

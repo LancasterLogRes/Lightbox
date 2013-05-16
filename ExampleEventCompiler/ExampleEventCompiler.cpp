@@ -49,8 +49,8 @@ private:
 		highEnergy.setHistory(c_historySize);
 
 /*		AuxGraphsSpec* ags = new AuxGraphsSpec("History", ms, id, msL);
-		ags->addGraph(GraphSpec(0.1f, HistoryComment, LineChart, RGBA8::fromHsp(0.1f * 360, 255, 255), 0, toSeconds(hop())));
-		ret.push_back(StreamEvent(GraphSpecComment, ags));*/
+		ags->addGraph(GraphOLDSpec(0.1f, HistoryComment, LineChart, RGBA8::fromHsp(0.1f * 360, 255, 255), 0, toSeconds(hop())));
+		ret.push_back(StreamEvent(GraphOLDSpecComment, ags));*/
 
 		m_maxBeatLikelihood = 0.0f;
 		m_lastBL = 0.f;
