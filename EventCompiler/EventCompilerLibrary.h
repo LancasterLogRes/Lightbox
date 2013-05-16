@@ -29,16 +29,22 @@
 
 namespace lb
 {
-typedef std::unordered_map<std::string, std::function<EventCompilerImpl*()> > EventCompilerFactories;
+struct EventCompilerFactoryDefinition
+{
+	std::function<EventCompilerImpl*()> factory;
+	unsigned version;
+};
+typedef std::unordered_map<std::string, EventCompilerFactoryDefinition> EventCompilerFactories;
 }
 
 #define LIGHTBOX_EVENTCOMPILER_LIBRARY_HEADER \
-	extern "C" __attribute__ ((visibility ("default"))) lb::EventCompilerFactories const& eventCompilerFactories()
+	extern "C" __attribute__ ((visibility ("default"))) lb::EventCompilerFactories const& eventCompilerFactories();
 
 #define LIGHTBOX_EVENTCOMPILER_LIBRARY \
 	LIGHTBOX_FINALIZING_LIBRARY \
 	extern "C" __attribute__ ((visibility ("default"))) lb::EventCompilerFactories const& eventCompilerFactories() { static lb::EventCompilerFactories s_ret; return s_ret; } \
-	extern "C" __attribute__ ((visibility ("default"))) lb::EventCompilerFactories const& eventCompilerFactories()
+	LIGHTBOX_EVENTCOMPILER_LIBRARY_HEADER
 
-#define LIGHTBOX_EVENTCOMPILER(O) \
-	auto g_reg ## O = (const_cast<lb::EventCompilerFactories&>(eventCompilerFactories())[#O] = [](){return new O;})
+#define LIGHTBOX_EVENTCOMPILER(O, V) \
+	auto g_reg ## O = (const_cast<lb::EventCompilerFactories&>(eventCompilerFactories())[#O] = {[](){return new O;}, V})
+

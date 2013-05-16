@@ -107,4 +107,4 @@ private:
 	float m_decayedBL;
 };
 
-LIGHTBOX_EVENTCOMPILER(BeatDetector);
+LIGHTBOX_EVENTCOMPILER(BeatDetector, 1);

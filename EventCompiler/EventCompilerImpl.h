@@ -129,8 +129,6 @@ public:
 	std::map<std::string, GraphSpec*> const& graphMap() const { return m_graphs; }
 	GraphSpec* graph(std::string _name) const { if (m_graphs.count(_name)) return m_graphs.at(_name); return nullptr; }
 
-	virtual unsigned version() const { return 1; }
-
 protected:
 	virtual void initPres() {}
 
