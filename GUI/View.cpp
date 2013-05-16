@@ -7,7 +7,7 @@
 #include "Slate.h"
 #include "View.h"
 using namespace std;
-using namespace Lightbox;
+using namespace lb;
 
 void Layer::refresh()
 {
@@ -341,14 +341,14 @@ void ViewBody::releasePointer(int _id)
 string ViewBody::name() const
 {
 	string ret = demangled(typeid(*this).name());
-	if (ret.substr(0, 10) == "Lightbox::")
+	if (ret.substr(0, 10) == "lb::")
 		ret = ret.substr(10);
 	if (ret.substr(ret.size() - 4) == "Body")
 		ret = ret.substr(0, ret.size() - 4);
 	return ret;
 }
 
-/*namespace Lightbox
+/*namespace lb
 {
 template <class _S> _S& operator<<(_S& _out, boost::any const& _a)
 {
@@ -361,7 +361,7 @@ template <class _S> _S& operator<<(_S& _out, boost::any const& _a)
 }
 }*/
 
-std::string Lightbox::toString(View const& _v, std::string const& _insert)
+std::string lb::toString(View const& _v, std::string const& _insert)
 {
 	std::stringstream out;
 	out << (_v->m_isEnabled ? "EN" : "--") << " "
@@ -385,7 +385,7 @@ std::string Lightbox::toString(View const& _v, std::string const& _insert)
 	return out.str();
 }
 
-void Lightbox::debugOut(View const& _v, std::string const& _indent)
+void lb::debugOut(View const& _v, std::string const& _indent)
 {
 	cnote << toString(_v, _indent);
 	for (auto const& c: _v->children())

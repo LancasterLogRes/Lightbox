@@ -22,7 +22,7 @@
 #include <EventCompiler/EventCompiler.h>
 #include <EventCompiler/Preprocessors.h>
 using namespace std;
-using namespace Lightbox;
+using namespace lb;
 
 LIGHTBOX_EVENTCOMPILER_LIBRARY;
 

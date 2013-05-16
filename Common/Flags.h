@@ -27,7 +27,7 @@
 #include <boost/algorithm/string.hpp>
 #include "Global.h"
 
-namespace Lightbox
+namespace lb
 {
 
 template <class _T> struct is_flag: public std::false_type {};
@@ -76,7 +76,7 @@ public:
 //		operator unsigned() const { return (unsigned)v; }
 		unsigned asUnsigned() const { return (unsigned)v; }
 		explicit operator bool() const { return (unsigned)v; }
-		_Enum highestSet() const { return _Enum(Lightbox::highestBitOnly(long(v))); }
+		_Enum highestSet() const { return _Enum(lb::highestBitOnly(long(v))); }
 
 private:
 		_Enum v;

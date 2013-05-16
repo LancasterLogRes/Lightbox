@@ -26,7 +26,7 @@
 
 #undef _U
 
-namespace Lightbox
+namespace lb
 {
 
 template <int _I>
@@ -134,7 +134,7 @@ struct UnitTestBase
 	};
 
 #define LIGHTBOX_UNITTEST_DEFINE(_ID) \
-	void Lightbox::UnitTest<_ID>::test()
+	void lb::UnitTest<_ID>::test()
 
 #define LIGHTBOX_REQUIRE(_cond) require(_cond, #_cond)
 #define LIGHTBOX_REQUIRE_EQUAL(_u, _v) requireEqual(_u, _v, #_u " == " #_v)

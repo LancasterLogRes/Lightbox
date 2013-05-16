@@ -3,7 +3,7 @@
 #include "Quad.h"
 #include "Coord.h"
 
-namespace Lightbox
+namespace lb
 {
 
 template <class Numeric>

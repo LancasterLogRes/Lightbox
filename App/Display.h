@@ -3,7 +3,7 @@
 #include <Numeric/Coord.h>
 #include <Numeric/Rect.h>
 
-namespace Lightbox
+namespace lb
 {
 
 class Display

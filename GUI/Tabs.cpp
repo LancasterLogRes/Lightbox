@@ -4,7 +4,7 @@
 #include "Slate.h"
 #include "Tabs.h"
 using namespace std;
-using namespace Lightbox;
+using namespace lb;
 
 static const float c_tabBodyHeight = 35;
 static const float c_tabTailHeight = 5;

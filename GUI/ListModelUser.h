@@ -6,7 +6,7 @@
 #include <vector>
 #include "ListModel.h"
 
-namespace Lightbox
+namespace lb
 {
 
 enum class SelectionMethod

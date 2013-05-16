@@ -2,7 +2,7 @@
 #include "GraphSpec.h"
 #include "EventCompilerImpl.h"
 using namespace std;
-using namespace Lightbox;
+using namespace lb;
 
 StreamEvents EventCompilerImpl::doInit(unsigned _bands, Time _hop, Time _nyquist)
 {

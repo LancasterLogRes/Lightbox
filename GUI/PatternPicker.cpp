@@ -5,7 +5,7 @@
 #include "Slate.h"
 #include "PatternPicker.h"
 using namespace std;
-using namespace Lightbox;
+using namespace lb;
 
 PatternPickerBody::PatternPickerBody(Color _c, Grouping _grouping):
 	ViewCreator(_c, _grouping),
@@ -57,7 +57,7 @@ void PatternPickerBody::draw(Slate const& _c, unsigned _layer)
 	int xBig[] = { m_space.w() / 4, m_space.w() * 3 / 4 };
 	int yBig[] = { m_space.h() / 4, m_space.h() * 3 / 4 };
 	iRect oinner = rect().inset(innerMargin(effectiveGrouping()));
-	Lightbox::drawButton(_c, oinner, color(), isChecked(), _layer == 0, _layer == 1, false);
+	lb::drawButton(_c, oinner, color(), isChecked(), _layer == 0, _layer == 1, false);
 	fSize thumbPx = _c.toPixelsF(GUIApp::style().thumbDiameter / 2);
 	fRect inner = fRect(oinner).inset(thumbPx);
 

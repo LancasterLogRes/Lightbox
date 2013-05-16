@@ -22,15 +22,15 @@
 #include "Time.h"
 #include "Algorithms.h"
 using namespace std;
-using namespace Lightbox;
+using namespace lb;
 
-float Lightbox::sensiblePrior(Time _period)
+float lb::sensiblePrior(Time _period)
 {
 	static const std::map<Time, float> c_curve{{+FromBpm<220>::value, 0.f}, {+FromBpm<170>::value, .2f}, {+FromBpm<153>::value, 1.f}, {+FromBpm<88>::value, 1.f}, {+FromBpm<65>::value, .2f}, {+FromBpm<40>::value, 0.f}};
 	return lerpLookup(c_curve, _period);
 }
 
-std::string Lightbox::textualTime(Time _t, Time _d, Time _i, Time _m)
+std::string lb::textualTime(Time _t, Time _d, Time _i, Time _m)
 {
 	std::stringstream ss;
 	int h = std::abs(_t / OneHour);

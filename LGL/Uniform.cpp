@@ -2,7 +2,7 @@
 #include "Program.h"
 #include "Uniform.h"
 using namespace std;
-using namespace Lightbox;
+using namespace lb;
 
 Uniform::Uniform(Program const& _p, std::string const& _name):
 	m_p			(_p.sharedPtr()),

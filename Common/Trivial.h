@@ -24,7 +24,7 @@
 #include "Global.h"
 #include "Flags.h"
 
-namespace Lightbox
+namespace lb
 {
 
 enum ColorSetItem

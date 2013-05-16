@@ -38,7 +38,7 @@
 #include "EventType.h"
 #include "Character.h"
 
-namespace Lightbox
+namespace lb
 {
 
 /**

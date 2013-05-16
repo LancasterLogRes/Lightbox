@@ -4,7 +4,7 @@
 #include "Slate.h"
 #include "SensitiveView.h"
 using namespace std;
-using namespace Lightbox;
+using namespace lb;
 
 SensitiveViewBody::SensitiveViewBody()
 {

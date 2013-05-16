@@ -3,7 +3,7 @@
 #include <Common/FFT.h>
 #include <EventCompiler/EventCompiler.h>
 
-namespace Lightbox
+namespace lb
 {
 
 /** @brief Potentially multi-channel audio stream abstract class.

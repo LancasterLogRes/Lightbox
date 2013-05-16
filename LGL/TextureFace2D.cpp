@@ -4,7 +4,7 @@
 #include "Program.h"
 #include "TextureFace2D.h"
 using namespace std;
-using namespace Lightbox;
+using namespace lb;
 
 void TextureFace2D::bindData(iSize const& _dims, foreign_vector<uint8_t> const& _data, GLenum _format, int _internalFormat, int _level)
 {
@@ -33,7 +33,7 @@ static void readPngAux(png_structp png, png_bytep data, png_size_t size)
 	(*(std::function<void(uint8_t*, size_t)> const*)png_get_io_ptr(png))(data, size);
 }
 
-pair<iSize, foreign_vector<uint8_t> > Lightbox::readPng(std::function<void(uint8_t*, size_t)> const& _read)
+pair<iSize, foreign_vector<uint8_t> > lb::readPng(std::function<void(uint8_t*, size_t)> const& _read)
 {
 	pair<iSize, foreign_vector<uint8_t> > ret;
 

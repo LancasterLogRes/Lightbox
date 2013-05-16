@@ -3,7 +3,7 @@
 #undef _S
 #undef _T
 
-namespace Lightbox
+namespace lb
 {
 
 template<class T> class Pair;

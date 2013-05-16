@@ -22,7 +22,7 @@
 
 #include <cstdint>
 
-namespace Lightbox
+namespace lb
 {
 
 // e.g. in the case of 16-bit stereo @ 44100 Hz:

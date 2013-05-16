@@ -4,7 +4,7 @@
 #include <Common/Global.h>
 #include "BufferFace.h"
 
-namespace Lightbox
+namespace lb
 {
 
 template <class _T>

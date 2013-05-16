@@ -7,7 +7,7 @@
 #include <Common/UnitTesting.h>
 #include "Vector.h"
 
-namespace Lightbox
+namespace lb
 {
 
 /** Quaternion class for rotations

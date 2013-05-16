@@ -3,7 +3,7 @@
 #include <Common/Global.h>
 #include "Global.h"
 
-namespace Lightbox
+namespace lb
 {
 
 class ShaderFace

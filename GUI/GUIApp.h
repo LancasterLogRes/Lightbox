@@ -11,7 +11,7 @@
 #include "Joint.h"
 #include "Frame.h"
 
-namespace Lightbox
+namespace lb
 {
 
 struct Style

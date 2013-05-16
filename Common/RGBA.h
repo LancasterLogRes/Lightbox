@@ -3,7 +3,7 @@
 #include <cstdint>
 #include <Numeric/Vector.h>
 
-namespace Lightbox
+namespace lb
 {
 
 class RGBA: public fVector4

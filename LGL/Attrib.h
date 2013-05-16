@@ -8,7 +8,7 @@
 
 #undef _T
 
-namespace Lightbox
+namespace lb
 {
 
 class Attrib

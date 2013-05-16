@@ -25,7 +25,7 @@
 #include <boost/operators.hpp>
 #include "UnitTesting.h"
 
-namespace Lightbox
+namespace lb
 {
 
 template <std::size_t I, std::size_t F>

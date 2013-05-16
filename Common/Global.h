@@ -54,7 +54,7 @@
 	static std::string g_lightbox_upperNamesOf ## Name;\
 	inline std::string toString(Name _n)\
 	{\
-		return ::Lightbox::afterComma(#__VA_ARGS__, (uint16_t)_n);\
+		return ::lb::afterComma(#__VA_ARGS__, (uint16_t)_n);\
 	}\
 	template <class T> inline T& operator<<(T& _o, Name _e)\
 	{\
@@ -68,7 +68,7 @@
 			g_lightbox_upperNamesOf ## Name = boost::algorithm::to_upper_copy(std::string(#__VA_ARGS__));\
 		for (unsigned i = 0; ; ++i)\
 		{\
-			std::string s = ::Lightbox::afterComma(_caseSensitive ? #__VA_ARGS__ : g_lightbox_upperNamesOf ## Name.c_str(), i);\
+			std::string s = ::lb::afterComma(_caseSensitive ? #__VA_ARGS__ : g_lightbox_upperNamesOf ## Name.c_str(), i);\
 			if (s.empty())\
 				return Name(0);\
 			else if ((_caseSensitive ? _s : ucs) == s)\
@@ -227,10 +227,10 @@ struct Name \
 #endif
 
 #define LIGHTBOX_LIBRARY_HEADER(TARGET) \
-	extern "C" __attribute__ ((visibility ("default"))) Lightbox::LibraryInfo const& lightboxLibraryInfo ## TARGET();
+	extern "C" __attribute__ ((visibility ("default"))) lb::LibraryInfo const& lightboxLibraryInfo ## TARGET();
 
 #define LIGHTBOX_LIBRARY(TARGET) \
-	extern "C" __attribute__ ((visibility ("default"))) Lightbox::LibraryInfo const& lightboxLibraryInfo ## TARGET() { static const Lightbox::LibraryInfo s_ret{ LIGHTBOX_BUILD_DATE }; return s_ret; }
+	extern "C" __attribute__ ((visibility ("default"))) lb::LibraryInfo const& lightboxLibraryInfo ## TARGET() { static const lb::LibraryInfo s_ret{ LIGHTBOX_BUILD_DATE }; return s_ret; }
 
 
 typedef int16_t v4hi __attribute__ ((vector_size (8)));
@@ -238,7 +238,7 @@ typedef float v4sf __attribute__ ((vector_size (16)));
 typedef int32_t i4sf __attribute__ ((vector_size (16)));
 typedef double d4sf __attribute__ ((vector_size (32)));
 
-namespace Lightbox
+namespace lb
 {
 
 struct LibraryInfo { uint64_t buildDate; };
@@ -270,7 +270,7 @@ std::string shortened(std::string const& _s);
 
 constexpr inline bool static_strcmp(char const* a, char const* b)
 {
-	return *a == *b && (!*a || ::Lightbox::static_strcmp(a + 1, b + 1));
+	return *a == *b && (!*a || ::lb::static_strcmp(a + 1, b + 1));
 }
 
 template <class _T> struct Packed { static const bool value = false; };
@@ -487,24 +487,24 @@ public:
 };
 
 // Dirties the global namespace, but oh so convenient...
-#define cnote Lightbox::DebugOutputStream<Lightbox::NoteChannel, true>()
-#define cwarn Lightbox::DebugOutputStream<Lightbox::WarnChannel, true>()
+#define cnote lb::DebugOutputStream<lb::NoteChannel, true>()
+#define cwarn lb::DebugOutputStream<lb::WarnChannel, true>()
 
-#define nbug(X) if (true) {} else Lightbox::NullOutputStream()
-#define nsbug(X) if (true) {} else Lightbox::NullOutputStream()
-#define ndebug if (true) {} else Lightbox::NullOutputStream()
+#define nbug(X) if (true) {} else lb::NullOutputStream()
+#define nsbug(X) if (true) {} else lb::NullOutputStream()
+#define ndebug if (true) {} else lb::NullOutputStream()
 
 #if DEBUG
-#define cbug(X) Lightbox::DebugOutputStream<X>()
-#define csbug(X) Lightbox::DebugOutputStream<X, false>()
-#define cdebug Lightbox::DebugOutputStream<Lightbox::DebugChannel, true>()
+#define cbug(X) lb::DebugOutputStream<X>()
+#define csbug(X) lb::DebugOutputStream<X, false>()
+#define cdebug lb::DebugOutputStream<lb::DebugChannel, true>()
 #else
 #define cbug(X) nbug(X)
 #define csbug(X) nsbug(X)
 #define cdebug ndebug
 #endif
 
-#define clog Lightbox::SysLogOutputStream<true>()
+#define clog lb::SysLogOutputStream<true>()
 
 class Resources
 {

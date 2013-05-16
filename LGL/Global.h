@@ -36,7 +36,7 @@
 #undef _Y
 #undef _Z
 
-namespace Lightbox
+namespace lb
 {
 
 class Attrib;
@@ -74,7 +74,7 @@ char const* glSymbolString(int _s);
 template <class _T> _T GL_aux(_T _t, char const* _s) { cbug(SnoopGL) << _s << "->" << _t; checkGlError(_s); return _t; }
 
 #define LIGHTBOX_GL_RET(X) GL_aux(X, #X)
-#define LIGHTBOX_GL(X) LIGHTBOX_BLOCK_TO_STATEMENT(cbug(::Lightbox::SnoopGL) << #X; X; checkGlError(#X);)
+#define LIGHTBOX_GL(X) LIGHTBOX_BLOCK_TO_STATEMENT(cbug(::lb::SnoopGL) << #X; X; checkGlError(#X);)
 
 inline std::string argsToString(char const*) { return std::string(); }
 

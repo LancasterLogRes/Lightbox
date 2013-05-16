@@ -22,7 +22,7 @@
 #include "RGBA.h"
 #include "Color.h"
 using namespace std;
-using namespace Lightbox;
+using namespace lb;
 
 float Color::hueCorrection(float _h)
 {

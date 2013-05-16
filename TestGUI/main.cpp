@@ -1,7 +1,7 @@
 #include <App.h>
 #include "TestGUIApp.h"
 using namespace std;
-using namespace Lightbox;
+using namespace lb;
 
 #if LIGHTBOX_ANDROID
 extern "C" void android_main(struct android_app* _state)

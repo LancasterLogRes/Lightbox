@@ -19,5 +19,5 @@
  */
 
 #include "Preprocessors.h"
-using namespace Lightbox;
+using namespace lb;
 

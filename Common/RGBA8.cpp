@@ -21,7 +21,7 @@
 #include <cmath>
 #include "RGBA8.h"
 using namespace std;
-using namespace Lightbox;
+using namespace lb;
 
 float RGBA8::hueCorrection(unsigned _h)
 {
@@ -29,7 +29,7 @@ float RGBA8::hueCorrection(unsigned _h)
 	return lerpLookup(c_brightnessCurve, _h);
 }
 
-std::vector<uint8_t> Lightbox::gammaTable(float _g)
+std::vector<uint8_t> lb::gammaTable(float _g)
 {
 	std::vector<uint8_t> ret(256);
 	for (int i = 0; i < 256; ++i)

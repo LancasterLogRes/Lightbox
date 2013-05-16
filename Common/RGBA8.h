@@ -30,7 +30,7 @@
 #include "Maths.h"
 #include "Algorithms.h"
 
-namespace Lightbox
+namespace lb
 {
 
 class RGBA8

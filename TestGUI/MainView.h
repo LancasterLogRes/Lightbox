@@ -2,7 +2,7 @@
 
 #include <GUI/Frame.h>
 
-namespace Lightbox
+namespace lb
 {
 
 class MainView: public FrameBody

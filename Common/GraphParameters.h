@@ -27,7 +27,7 @@
 #undef foreach
 #define foreach BOOST_FOREACH
 
-namespace Lightbox
+namespace lb
 {
 
 template <class T>

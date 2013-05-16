@@ -2,7 +2,7 @@
 
 #include "Global.h"
 
-namespace Lightbox
+namespace lb
 {
 
 /// Cyclic reflection.

@@ -2,7 +2,7 @@
 
 #include <memory>
 
-namespace Lightbox
+namespace lb
 {
 
 template<class T>

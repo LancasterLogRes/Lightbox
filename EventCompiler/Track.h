@@ -27,7 +27,7 @@
 #include <Common/Time.h>
 #include "StreamEvent.h"
 
-namespace Lightbox
+namespace lb
 {
 
 LIGHTBOX_TEXTUAL_ENUM(OutputFormat, XMLFormat, NiceFormat, BinaryFormat, AutoFormat)

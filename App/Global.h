@@ -1,6 +1,6 @@
 #pragma once
 
-namespace Lightbox
+namespace lb
 {
 
 #if !defined(LIGHTBOX_CROSS)

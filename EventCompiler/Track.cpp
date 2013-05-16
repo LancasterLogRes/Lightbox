@@ -24,7 +24,7 @@
 #include <boost/algorithm/string.hpp>
 #include "Track.h"
 using namespace std;
-using namespace Lightbox;
+using namespace lb;
 
 void Track::writeFile(string const& _filename, OutputFormat _f)
 {

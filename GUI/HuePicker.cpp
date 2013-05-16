@@ -5,7 +5,7 @@
 #include "RenderToTextureSlate.h"
 #include "HuePicker.h"
 using namespace std;
-using namespace Lightbox;
+using namespace lb;
 
 HuePickerBody::HuePickerBody(Color _c, Grouping _grouping):
 	ViewCreator(_c, _grouping),

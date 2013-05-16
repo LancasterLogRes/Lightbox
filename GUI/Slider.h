@@ -4,7 +4,7 @@
 #include <LGL/Program.h>
 #include "View.h"
 
-namespace Lightbox
+namespace lb
 {
 
 class SliderBody;

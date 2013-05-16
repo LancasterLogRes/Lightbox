@@ -2,7 +2,7 @@
 
 #include "View.h"
 
-namespace Lightbox
+namespace lb
 {
 
 class FrameBody;

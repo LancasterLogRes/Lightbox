@@ -34,7 +34,7 @@
 #include "StreamIO.h"
 #include "MemberMap.h"
 
-namespace Lightbox
+namespace lb
 {
 
 template <class _Owner>

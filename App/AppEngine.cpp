@@ -16,7 +16,7 @@
 #include "Display.h"
 #include "AppEngine.h"
 using namespace std;
-using namespace Lightbox;
+using namespace lb;
 
 AppEngine* AppEngine::s_this = nullptr;
 
@@ -42,7 +42,7 @@ AppEngine::AppEngine():
 	m_lastDrawTime(wallTime())
 {
 	s_this = this;
-//	Lightbox::g_debugEnabled[50] = true;
+//	lb::g_debugEnabled[50] = true;
 }
 #endif
 
@@ -117,7 +117,7 @@ void AppEngine::setApp(App* _app)
 	m_app = std::shared_ptr<App>(_app);
 }
 
-static const Lightbox::Time c_frameTime = FromSeconds<1>::value / 60;
+static const lb::Time c_frameTime = FromSeconds<1>::value / 60;
 
 void AppEngine::exec()
 {
@@ -421,7 +421,7 @@ struct AssetCloser
 	AAsset* m_id;
 };
 
-std::function<void(uint8_t*, size_t)> Lightbox::assetReader(std::string const& _filename)
+std::function<void(uint8_t*, size_t)> lb::assetReader(std::string const& _filename)
 {
 	auto a = make_shared<AssetCloser>();
 	if (a->m_id = AAssetManager_open(AppEngine::get()->androidApp()->activity->assetManager, _filename.c_str(), AASSET_MODE_UNKNOWN))
@@ -436,7 +436,7 @@ std::function<void(uint8_t*, size_t)> Lightbox::assetReader(std::string const& _
 	}
 }
 #elif !defined(LIGHTBOX_CROSS)
-std::function<void(uint8_t*, size_t)> Lightbox::assetReader(std::string const& _filename)
+std::function<void(uint8_t*, size_t)> lb::assetReader(std::string const& _filename)
 {
 	auto a = make_shared<ifstream>();
 	a->open(_filename);
@@ -453,7 +453,7 @@ std::function<void(uint8_t*, size_t)> Lightbox::assetReader(std::string const& _
 }
 #endif
 
-std::function<void(uint8_t*, size_t)> Lightbox::resReader(uint8_t const* _data)
+std::function<void(uint8_t*, size_t)> lb::resReader(uint8_t const* _data)
 {
 	auto offset = make_shared<size_t>(0);
 	return [=](uint8_t* d, size_t s)

@@ -4,7 +4,7 @@
 #include "View.h"
 #include "Layout.h"
 using namespace std;
-using namespace Lightbox;
+using namespace lb;
 
 std::vector<float> doLayout(float _total, std::vector<float> const& _stretch, std::vector<float> const& _minima, std::vector<float> const& _maxima)
 {

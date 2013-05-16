@@ -6,7 +6,7 @@
 #include <set>
 #include <Numeric/Coord.h>
 
-namespace Lightbox
+namespace lb
 {
 
 class Slate;

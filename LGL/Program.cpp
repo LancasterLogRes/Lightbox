@@ -1,6 +1,6 @@
 #include "Program.h"
 #include "Shader.h"
-using namespace Lightbox;
+using namespace lb;
 
 Program::Program(std::string const& _file):
 	Program(Shader::vertex(Resources::find(_file, "vert")), Shader::fragment(Resources::find(_file, "frag")))

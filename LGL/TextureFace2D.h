@@ -6,7 +6,7 @@
 #include "GL.h"
 #include "Global.h"
 
-namespace Lightbox
+namespace lb
 {
 
 class TextureFace2D: public boost::noncopyable

@@ -2,7 +2,7 @@
 
 #include <Common/Flags.h>
 
-namespace Lightbox
+namespace lb
 {
 
 class ViewBody;

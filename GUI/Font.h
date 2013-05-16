@@ -8,7 +8,7 @@
 #include <Numeric/Rect.h>
 #include "Global.h"
 
-namespace Lightbox
+namespace lb
 {
 
 LIGHTBOX_STRUCT(2, FontDefinition, std::string, family, bool, bold);

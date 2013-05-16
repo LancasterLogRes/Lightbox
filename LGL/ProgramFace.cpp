@@ -5,7 +5,7 @@
 #include "ProgramFace.h"
 #include "Metrics.h"
 using namespace std;
-using namespace Lightbox;
+using namespace lb;
 
 shared_ptr<ProgramFace> ProgramFace::s_inUse;
 

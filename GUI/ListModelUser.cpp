@@ -3,7 +3,7 @@
 #include "Global.h"
 #include "ListModelUser.h"
 using namespace std;
-using namespace Lightbox;
+using namespace lb;
 
 void ListModelUser::ensureIndexed() const
 {

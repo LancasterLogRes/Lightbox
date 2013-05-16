@@ -2,7 +2,7 @@
 #include "ProgramFace.h"
 #include "Program.h"
 #include "Uniform.h"
-using namespace Lightbox;
+using namespace lb;
 
 Attrib::Attrib(Program const& _p, std::string const& _name):
 	m_p			(_p.sharedPtr()),

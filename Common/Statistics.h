@@ -27,7 +27,7 @@
 
 #include "Global.h"
 
-namespace Lightbox
+namespace lb
 {
 
 template <class _T> struct zero_of { static _T value() { return _T(0); } };

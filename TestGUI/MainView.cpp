@@ -4,7 +4,7 @@
 #include "Global.h"
 #include "MainView.h"
 using namespace std;
-using namespace Lightbox;
+using namespace lb;
 
 class TestViewBody;
 typedef boost::intrusive_ptr<TestViewBody> TestView;

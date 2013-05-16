@@ -219,8 +219,8 @@ inline_resource_compiler2.commands = \
 	echo 'static bool s_registerResources = true' >> ${QMAKE_FILE_OUT} &&\
 	for i in ${QMAKE_FILE_IN}; do \
 		f=`echo "\$\$i" | sed 's:.*/::g'` &&\
-		echo -n '\" && Lightbox::Resources::add(\\\"\$\$f\\\", \"' >> ${QMAKE_FILE_OUT} &&\
-		echo -n '\"Lightbox::foreign(&_binary_\$\${f}_start, &_binary_\$\${f}_end\"' | sed 's/[\\\\.-]/_/g' >> ${QMAKE_FILE_OUT} &&\
+		echo -n '\" && lb::Resources::add(\\\"\$\$f\\\", \"' >> ${QMAKE_FILE_OUT} &&\
+		echo -n '\"lb::foreign(&_binary_\$\${f}_start, &_binary_\$\${f}_end\"' | sed 's/[\\\\.-]/_/g' >> ${QMAKE_FILE_OUT} &&\
 		echo -n ' - ' >> ${QMAKE_FILE_OUT} &&\
 		echo '\"&_binary_\$\${f}_start))\"' | sed 's/[\\\\.-]/_/g' >> ${QMAKE_FILE_OUT} ;\
 	done ;\

@@ -4,9 +4,9 @@
 #include <GUI/GUIApp.h>
 #include "MainView.h"
 using namespace std;
-using namespace Lightbox;
+using namespace lb;
 
-namespace Lightbox
+namespace lb
 {
 
 class TestGUIApp: public GUIApp

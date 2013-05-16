@@ -2,7 +2,7 @@
 #include "Framebuffer.h"
 #include "Program.h"
 using namespace std;
-using namespace Lightbox;
+using namespace lb;
 
 Texture2D Texture2D::filter(Program const& _p, Texture2D _out) const
 {

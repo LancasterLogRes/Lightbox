@@ -23,7 +23,7 @@
 #include <set>
 #include <Common/Trivial.h>
 
-namespace Lightbox
+namespace lb
 {
 
 LIGHTBOX_TEXTUAL_ENUM_INHERITS(EventType, uint8_t,

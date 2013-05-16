@@ -5,7 +5,7 @@
 #include "Global.h"
 using namespace std;
 
-namespace Lightbox
+namespace lb
 {
 
 void checkGlError(const char* op)

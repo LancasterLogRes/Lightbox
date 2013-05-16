@@ -6,7 +6,7 @@
 #include <LGL/Program.h>
 #include "Font.h"
 
-namespace Lightbox
+namespace lb
 {
 
 class RenderToTextureSlate;

@@ -5,7 +5,7 @@
 #include "GL.h"
 #include "Global.h"
 
-namespace Lightbox
+namespace lb
 {
 
 class BufferFaceGeneral: public boost::noncopyable

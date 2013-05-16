@@ -27,7 +27,7 @@
 #include "Global.h"
 #include "Maths.h"
 
-namespace Lightbox
+namespace lb
 {
 
 std::vector<float> const& parabolaAC(unsigned _s, float _period);

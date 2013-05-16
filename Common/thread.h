@@ -6,7 +6,7 @@
 #include <pthread.h>
 #include "Global.h"
 
-namespace Lightbox
+namespace lb
 {
 
 class thread
@@ -86,7 +86,7 @@ private:
 
 #include <boost/thread.hpp>
 
-namespace Lightbox
+namespace lb
 {
 
 using boost::thread;
@@ -99,7 +99,7 @@ using boost::mutex;
 #include <thread>
 #include <mutex>
 
-namespace Lightbox
+namespace lb
 {
 
 using std::thread;

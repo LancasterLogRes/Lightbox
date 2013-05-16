@@ -27,7 +27,7 @@
 #include "Maths.h"
 #include "FFT.h"
 using namespace std;
-using namespace Lightbox;
+using namespace lb;
 
 void FFT<float>::setArity(unsigned _arity)
 {

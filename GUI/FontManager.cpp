@@ -3,7 +3,7 @@
 #include "Global.h"
 #include "FontManager.h"
 using namespace std;
-using namespace Lightbox;
+using namespace lb;
 
 FontManager::FontManager(bool _canRender):
 	m_canRender(_canRender)

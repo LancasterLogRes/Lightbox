@@ -7,7 +7,7 @@
 #include "Texture2D.h"
 #include "Shader.h"
 
-namespace Lightbox
+namespace lb
 {
 
 class UniformPage;

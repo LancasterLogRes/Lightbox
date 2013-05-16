@@ -4,7 +4,7 @@
 #include "Slate.h"
 #include "LightPicker.h"
 using namespace std;
-using namespace Lightbox;
+using namespace lb;
 
 LightPickerBody::LightPickerBody():
 	m_light(.5f),

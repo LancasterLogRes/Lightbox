@@ -3,7 +3,7 @@
 #include <LGL/Program.h>
 #include "ToggleButton.h"
 
-namespace Lightbox
+namespace lb
 {
 
 class HuePickerBody;

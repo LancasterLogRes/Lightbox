@@ -28,7 +28,7 @@ SOURCES += Common.cpp \
 	fix_fft.cpp
 #	fixmath.cpp
 
-HEADERS += Common.h Global.h \
+HEADERS += Common.h Global.h Angular.h \
     Time.h \
     GraphParameters.h \
     WavHeader.h \

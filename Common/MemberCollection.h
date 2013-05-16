@@ -32,7 +32,7 @@
 #include "MemberMap.h"
 #include "Global.h"
 
-namespace Lightbox
+namespace lb
 {
 
 #define LIGHTBOX_MEMBERS(COLLECTOR, ...) \
@@ -44,13 +44,13 @@ namespace Lightbox
 
 #define LIGHTBOX_MEMBERS_AUX(N, Base, ...) \
 	LIGHTBOX_MEMBERS(_collect_ ## N, __VA_ARGS__) \
-	virtual Lightbox::MemberMap N() const \
+	virtual lb::MemberMap N() const \
 	{ \
 		if (m_lightbox_ ## N.empty()) \
-			m_lightbox_ ## N = Lightbox::MemberCatcher::populate(*static_cast<Base const*>(this), [=](Lightbox::MemberCatcher& _pc){ return _collect_ ## N(_pc); }); \
+			m_lightbox_ ## N = lb::MemberCatcher::populate(*static_cast<Base const*>(this), [=](lb::MemberCatcher& _pc){ return _collect_ ## N(_pc); }); \
 		return m_lightbox_ ## N; \
 	} \
-	mutable Lightbox::MemberMap m_lightbox_ ## N
+	mutable lb::MemberMap m_lightbox_ ## N
 
 #define LIGHTBOX_STATE(...) LIGHTBOX_MEMBERS_AUX(state, LIGHTBOX_STATE_BaseClass, __VA_ARGS__)
 #define LIGHTBOX_PROPERTIES(...) LIGHTBOX_MEMBERS_AUX(propertyMap, LIGHTBOX_PROPERTIES_BaseClass, __VA_ARGS__)

@@ -2,7 +2,7 @@
 #include "Global.h"
 #include "ShaderFace.h"
 using namespace std;
-using namespace Lightbox;
+using namespace lb;
 
 ShaderFace::ShaderFace(foreign_vector<uint8_t const> const& _code, bool _isFragment)
 {

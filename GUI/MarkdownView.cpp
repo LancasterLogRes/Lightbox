@@ -5,7 +5,7 @@
 #include "Global.h"
 #include "MarkdownView.h"
 using namespace std;
-using namespace Lightbox;
+using namespace lb;
 
 MarkdownViewBody::MarkdownViewBody(std::string const& _text, Color _color, Font const& _font):
 	m_text(_text),

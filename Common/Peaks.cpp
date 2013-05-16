@@ -24,7 +24,7 @@
 #include "Maths.h"
 #include "Peaks.h"
 using namespace std;
-using namespace Lightbox;
+using namespace lb;
 
 #undef _S
 
@@ -76,17 +76,17 @@ std::map<typename element_of<_T>::type, typename element_of<_T>::type> parabolic
 	return ret;
 }
 
-std::map<float, float> Lightbox::parabolicPeaks(std::vector<float> const& _s)
+std::map<float, float> lb::parabolicPeaks(std::vector<float> const& _s)
 {
 	return parabolicPeaksT(_s, _s.size());
 }
 
-std::map<float, float> Lightbox::parabolicPeaks(float const* _s, unsigned _n)
+std::map<float, float> lb::parabolicPeaks(float const* _s, unsigned _n)
 {
 	return parabolicPeaksT(_s, _n);
 }
 
-vector<float> const& Lightbox::parabolaAC(unsigned _s, float _period)
+vector<float> const& lb::parabolaAC(unsigned _s, float _period)
 {
 	static __thread map<unsigned, map<float, vector<float> > >* s_savedP = nullptr;
 	if (!s_savedP)
@@ -104,7 +104,7 @@ vector<float> const& Lightbox::parabolaAC(unsigned _s, float _period)
 	return sp->second;
 }
 
-float Lightbox::parabolaACf(float _x, float _period, unsigned _lobe)
+float lb::parabolaACf(float _x, float _period, unsigned _lobe)
 {
 	return (_x > _period * (_lobe + 0.5f) && _x < _period * (_lobe + 1.5f)) ? sqr(sqr(sqr(fmod(float(_x * 2) / _period, 2) - 1)))/* * 2.f - 1.f*/ : 0;
 }

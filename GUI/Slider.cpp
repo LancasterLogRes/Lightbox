@@ -5,7 +5,7 @@
 #include "Slate.h"
 #include "Slider.h"
 using namespace std;
-using namespace Lightbox;
+using namespace lb;
 
 SliderBody::SliderBody(Orientation _o, float _value, float _min, float _max):
 	m_o		(_o),
@@ -72,8 +72,8 @@ void SliderBody::draw(Slate const& _c, unsigned _l)
 		fRect inner = outer.inset(GUIApp::style().thumbDiameter.w() / 2, (GUIApp::style().thumbDiameter.h() - c_innerMM) / 2);
 		if (_l == 0)
 		{
-			Lightbox::drawButton(_c, rect(), White, true, true, false, false, false);
-			Lightbox::drawButton(_c, _c.toPixels(inner), White, false, true, false, true, false);
+			lb::drawButton(_c, rect(), White, true, true, false, false, false);
+			lb::drawButton(_c, _c.toPixels(inner), White, false, true, false, true, false);
 		}
 		else
 		{

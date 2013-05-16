@@ -8,7 +8,7 @@
 
 #include "EventCompilerImpl.h"
 
-namespace Lightbox
+namespace lb
 {
 
 // Something that stores some timeline data.
@@ -125,7 +125,7 @@ public:
 		m_data.push_back((float)_a);
 
 		float d = (float)_a;
-		m_store->shiftBuffer(ec()->index(), Lightbox::foreign_vector<float>(d, Lightbox::ByValue));
+		m_store->shiftBuffer(ec()->index(), lb::foreign_vector<float>(d, lb::ByValue));
 	}
 
 private:

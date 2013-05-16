@@ -5,7 +5,7 @@
 
 #undef _N
 
-namespace Lightbox
+namespace lb
 {
 
 template<class Numeric> class Size;

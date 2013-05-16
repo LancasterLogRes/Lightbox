@@ -8,7 +8,7 @@
 
 class AInputEvent;
 
-namespace Lightbox
+namespace lb
 {
 
 class Display;

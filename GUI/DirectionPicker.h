@@ -3,7 +3,7 @@
 #include <Numeric/Ellipse.h>
 #include "View.h"
 
-namespace Lightbox
+namespace lb
 {
 
 class DirectionPickerBody;

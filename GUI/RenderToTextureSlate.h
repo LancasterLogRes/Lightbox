@@ -8,7 +8,7 @@
 #include <Numeric/Margin.h>
 #include "Slate.h"
 
-namespace Lightbox
+namespace lb
 {
 
 class RenderToTextureSlate: public Slate

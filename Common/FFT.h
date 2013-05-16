@@ -30,7 +30,7 @@
 struct fftwf_plan_s;
 #endif
 
-namespace Lightbox
+namespace lb
 {
 
 template <class _N> struct FFT {};

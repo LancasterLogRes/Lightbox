@@ -2,7 +2,7 @@
 #include "Global.h"
 #include "Frame.h"
 using namespace std;
-using namespace Lightbox;
+using namespace lb;
 
 FrameBody::FrameBody()
 {
@@ -18,7 +18,7 @@ bool FrameBody::event(Event* _e)
 	return Super::event(_e);
 }
 
-View Lightbox::operator|(View const& _a, View const& _b)
+View lb::operator|(View const& _a, View const& _b)
 {
 	if (!!_a->children().size() == !!_b->children().size())
 	{

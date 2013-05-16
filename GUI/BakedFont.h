@@ -14,7 +14,7 @@
 
 struct stbtt_fontinfo;
 
-namespace Lightbox
+namespace lb
 {
 
 class BakedFont;

@@ -32,9 +32,9 @@
 #include <EventCompiler/EventCompilerImpl.h>
 using namespace std;
 using boost::circular_buffer;
-using namespace Lightbox;
+using namespace lb;
 
-namespace Lightbox
+namespace lb
 {
 /*
 

@@ -18,7 +18,7 @@
 #include "AppEngine.h"
 #include "Display.h"
 using namespace std;
-using namespace Lightbox;
+using namespace lb;
 
 #define EGL_CHECK(X) if (!(X)) { cwarn << "FATAL:" << #X; exit(-1); } else void(0)
 #define SDL_CHECK(X) if (!(X)) { cwarn << "FATAL:" << #X << SDL_GetError(); SDL_Quit(); exit(-1); } else void(0)
@@ -44,12 +44,12 @@ static const int c_defaultWidthMM = 800;
 static const int c_defaultHeightMM = 480;
 #endif
 
-#define Assert(X) Lightbox::doAssert(X, #X, __FILE__, __LINE__, false);
+#define Assert(X) lb::doAssert(X, #X, __FILE__, __LINE__, false);
 #undef assert
-#define assert(X) Lightbox::doAssert(X, #X, __FILE__, __LINE__, true);
-#define assertEqual(X, Y) Lightbox::doAssertEqual(X, Y, #X, #Y, __FILE__, __LINE__, true);
+#define assert(X) lb::doAssert(X, #X, __FILE__, __LINE__, true);
+#define assertEqual(X, Y) lb::doAssertEqual(X, Y, #X, #Y, __FILE__, __LINE__, true);
 
-namespace Lightbox
+namespace lb
 {
 
 inline bool doAssert(bool _x, char const* _s, char const* _file, unsigned _line, bool _fail)
@@ -83,7 +83,7 @@ template <class _T> inline bool doAssertEqual(_T const& _x, _T const& _y, char c
 
 }
 
-Lightbox::Display::Display()
+lb::Display::Display()
 {
 #if LIGHTBOX_USE_EGL
 	cnote << "Setting up EGL...";
@@ -284,7 +284,7 @@ Lightbox::Display::Display()
 #endif
 }
 
-Lightbox::Display::~Display()
+lb::Display::~Display()
 {
 #if LIGHTBOX_USE_EGL
 	if (m_display != EGL_NO_DISPLAY)
@@ -305,7 +305,7 @@ Lightbox::Display::~Display()
 #endif
 }
 
-void Lightbox::Display::update()
+void lb::Display::update()
 {
 #if LIGHTBOX_USE_EGL
 	eglSwapBuffers(m_display, m_surface);

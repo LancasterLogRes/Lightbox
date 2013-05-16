@@ -4,7 +4,7 @@
 #include "Slate.h"
 #include "DropListView.h"
 using namespace std;
-using namespace Lightbox;
+using namespace lb;
 
 DropListViewBody::DropListViewBody(ListModelPtr const& _model)
 {

@@ -3,7 +3,7 @@
 #include <Common/Time.h>
 #include <Numeric/Coord.h>
 
-namespace Lightbox
+namespace lb
 {
 
 struct Event

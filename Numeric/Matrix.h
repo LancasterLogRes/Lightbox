@@ -4,7 +4,7 @@
 
 #include "Vector.h"
 
-namespace Lightbox
+namespace lb
 {
 
 template<class T>

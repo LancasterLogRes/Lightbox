@@ -47,7 +47,7 @@
 #undef _A
 #undef _B
 
-namespace Lightbox
+namespace lb
 {
 
 inline void dumpInto(std::string const& _fn, foreign_vector<uint8_t const> const& _data)

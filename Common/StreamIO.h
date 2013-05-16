@@ -37,7 +37,7 @@
 #undef _S
 #undef _T
 
-namespace Lightbox
+namespace lb
 {
 
 template <class T> std::string toString(T const& _t)

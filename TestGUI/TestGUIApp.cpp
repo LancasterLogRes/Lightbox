@@ -5,11 +5,11 @@
 #include "Global.h"
 #include "TestGUIApp.h"
 using namespace std;
-using namespace Lightbox;
+using namespace lb;
 
 TestGUIApp::TestGUIApp()
 {
-	Lightbox::g_debugEnabled[SnoopGL] = 0;	// Enable/disable GL snoop.
+	lb::g_debugEnabled[SnoopGL] = 0;	// Enable/disable GL snoop.
 }
 
 void TestGUIApp::initGraphics(Display& _d)

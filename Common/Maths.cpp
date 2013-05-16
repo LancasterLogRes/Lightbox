@@ -22,9 +22,9 @@
 #include <cmath>
 #include "Maths.h"
 using namespace std;
-using namespace Lightbox;
+using namespace lb;
 
-std::vector<float> Lightbox::windowFunction(unsigned _size, WindowFunction _f, float _parameter)
+std::vector<float> lb::windowFunction(unsigned _size, WindowFunction _f, float _parameter)
 {
 	std::vector<float> ret(_size);
 	switch (_f)
@@ -96,14 +96,14 @@ static void populateToneFrequencies()
 	}
 }
 
-float Lightbox::toneFrequency(unsigned _t, unsigned _o)
+float lb::toneFrequency(unsigned _t, unsigned _o)
 {
 	if (s_toneFrequencies[9][0] != 27.5f)
 		populateToneFrequencies();
 	return s_toneFrequencies[clamp(_t, 0u, 11u)][clamp(_o, 0u, 7u)];
 }
 
-std::vector<float> Lightbox::zeroPhaseWindow(std::vector<float> const& _w)
+std::vector<float> lb::zeroPhaseWindow(std::vector<float> const& _w)
 {
 	std::vector<float> ret(_w.size());
 	unsigned off = (_w.size() + 1) / 2;
@@ -112,7 +112,7 @@ std::vector<float> Lightbox::zeroPhaseWindow(std::vector<float> const& _w)
 	return ret;
 }
 
-std::vector<float> Lightbox::scaledWindow(std::vector<float> const& _w, float _f)
+std::vector<float> lb::scaledWindow(std::vector<float> const& _w, float _f)
 {
 	std::vector<float> ret(_w.size());
 	for (unsigned i = 0; i < _w.size(); ++i)
@@ -120,7 +120,7 @@ std::vector<float> Lightbox::scaledWindow(std::vector<float> const& _w, float _f
 	return ret;
 }
 
-vector<float> Lightbox::solveQuadratic(float a, float b, float c)
+vector<float> lb::solveQuadratic(float a, float b, float c)
 {
 	float disc = b*b - 4*a*c;
 	if (disc < 0)
@@ -130,7 +130,7 @@ vector<float> Lightbox::solveQuadratic(float a, float b, float c)
 	return vector<float>({{(-b + sqrt(disc)) / (2*a), (-b - sqrt(disc)) / (2*a)}});
 }
 
-vector<float> Lightbox::solveCubic(float a, float b, float c, float d)
+vector<float> lb::solveCubic(float a, float b, float c, float d)
 {
 	// a is too small - go to quadratic solver
 	if (fabs(a) < .0001)
@@ -216,7 +216,7 @@ static float biasHelper(float _x, float _z)
 }
 
 /// Bias an x == y curve by some amount _z.
-float Lightbox::bias(float _x, float _z)
+float lb::bias(float _x, float _z)
 {
 	if (_z > 0)
 		return biasHelper(_x + .25 * _z, _z) * (1.f - _z) + _z;
@@ -224,7 +224,7 @@ float Lightbox::bias(float _x, float _z)
 		return biasHelper(_x + .25 * _z, _z) * (_z + 1.f);
 }
 
-float Lightbox::powScale(float _x, float _z)
+float lb::powScale(float _x, float _z)
 {
 #ifdef LIGHTBOX_ANDROID
 	return clamp(_x * exp(_z) / exp(10), -1.f, 1.f);

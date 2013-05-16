@@ -3,7 +3,7 @@
 #include "GUIApp.h"
 #include "Event.h"
 using namespace std;
-using namespace Lightbox;
+using namespace lb;
 
 iCoord TouchEvent::local() const
 {

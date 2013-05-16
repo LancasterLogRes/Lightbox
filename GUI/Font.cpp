@@ -2,7 +2,7 @@
 #include "Font.h"
 #include "GUIApp.h"
 using namespace std;
-using namespace Lightbox;
+using namespace lb;
 
 Font::Font(Metric _m, float _u, FontDefinition const& _d):
 	m_definition(_d),

@@ -3,7 +3,7 @@
 #include "GUIApp.h"
 #include "Slate.h"
 using namespace std;
-using namespace Lightbox;
+using namespace lb;
 
 iSize Slate::toPixels(fSize _mm) const
 {

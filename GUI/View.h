@@ -16,7 +16,7 @@
 #include "Event.h"
 #include "Layout.h"
 
-namespace Lightbox
+namespace lb
 {
 
 class Slate;

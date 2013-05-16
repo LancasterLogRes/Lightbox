@@ -31,7 +31,7 @@
 #include <Common/StreamIO.h>
 #include "StreamEvent.h"
 
-namespace Lightbox
+namespace lb
 {
 
 inline std::string id(float _y) { return toString(_y); }

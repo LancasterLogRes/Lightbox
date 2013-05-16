@@ -5,7 +5,7 @@
 #include "Font.h"
 #include "BakedFont.h"
 
-namespace Lightbox
+namespace lb
 {
 
 class FontManager

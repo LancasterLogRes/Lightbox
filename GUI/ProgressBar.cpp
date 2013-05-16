@@ -4,7 +4,7 @@
 #include "Slate.h"
 #include "ProgressBar.h"
 using namespace std;
-using namespace Lightbox;
+using namespace lb;
 
 ProgressBarBody::ProgressBarBody():
 	m_progress(0)

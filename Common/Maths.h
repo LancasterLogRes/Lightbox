@@ -30,7 +30,7 @@
 #include "Statistics.h"
 #include "UnitTesting.h"
 
-namespace Lightbox
+namespace lb
 {
 
 static const float MinusInfinity = -std::numeric_limits<float>::infinity();

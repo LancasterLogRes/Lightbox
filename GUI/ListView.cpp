@@ -4,7 +4,7 @@
 #include "GUIApp.h"
 #include "ListView.h"
 using namespace std;
-using namespace Lightbox;
+using namespace lb;
 
 ListViewBody::ListViewBody(ListModelPtr const& _model)
 {

@@ -6,7 +6,7 @@
 #include "ListModelUser.h"
 #include "View.h"
 
-namespace Lightbox
+namespace lb
 {
 
 class ListViewBody;

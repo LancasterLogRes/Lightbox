@@ -3,7 +3,7 @@
 #include "GUIApp.h"
 #include "ToggleButton.h"
 using namespace std;
-using namespace Lightbox;
+using namespace lb;
 
 ToggleButtonBody::ToggleButtonBody(Color _c, Grouping _grouping):
 	ViewCreator(_c, _grouping),

@@ -3,7 +3,7 @@
 #include "Coord.h"
 #include "Margin.h"
 
-namespace Lightbox
+namespace lb
 {
 
 template<typename Numeric>

@@ -28,9 +28,9 @@
 #include "StreamIO.h"
 #include "Global.h"
 using namespace std;
-using namespace Lightbox;
+using namespace lb;
 
-namespace Lightbox
+namespace lb
 {
 
 bool g_debugEnabled[256] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, true, true, true, true};
@@ -63,7 +63,7 @@ std::function<void(char, std::string const&)> g_syslogPost =
 	};
 }
 
-string Lightbox::afterComma(char const* _s, unsigned _i)
+string lb::afterComma(char const* _s, unsigned _i)
 {
 	while (_i && *_s)
 		if (*(_s++) == ',')
@@ -76,7 +76,7 @@ string Lightbox::afterComma(char const* _s, unsigned _i)
 	return string(_s, l);
 }
 
-string Lightbox::demangled(char const* _name)
+string lb::demangled(char const* _name)
 {
 	int status;
 	char* r = abi::__cxa_demangle(_name, 0, 0, &status);
@@ -85,7 +85,7 @@ string Lightbox::demangled(char const* _name)
 	return ret;
 }
 
-string Lightbox::shortened(string const& _s)
+string lb::shortened(string const& _s)
 {
 	string ret;
 	ret.reserve(_s.size());

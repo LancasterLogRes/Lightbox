@@ -5,7 +5,7 @@
 #include "Texture2D.h"
 #include "Global.h"
 
-namespace Lightbox
+namespace lb
 {
 
 class FramebufferFace

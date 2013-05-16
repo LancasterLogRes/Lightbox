@@ -24,7 +24,7 @@
 #include <Common/Trivial.h>
 #include <Common/UnitTesting.h>
 
-namespace Lightbox
+namespace lb
 {
 
 static const int c_negativeCharacters = 4;

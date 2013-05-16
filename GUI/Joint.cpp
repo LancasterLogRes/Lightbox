@@ -7,7 +7,7 @@
 #include "RenderToTextureSlate.h"
 #include "View.h"
 using namespace std;
-using namespace Lightbox;
+using namespace lb;
 
 Joint::Joint(): display(nullptr)
 {
@@ -75,7 +75,7 @@ void Joint::init3(Display& _d)
 	flatGeometry = flat.attrib("geometry");
 	shadedGeometry = shaded.attrib("geometry");
 
-	glowLevels = Lightbox::log2(ceil(_d.toPixelsF(fSize(0, 2)).h()));
+	glowLevels = lb::log2(ceil(_d.toPixelsF(fSize(0, 2)).h()));
 	lightEdgePixels = display->toUnalignedPixels(GUIApp::style().lightEdgeSize);
 	lightBedPixels = display->toUnalignedPixels(GUIApp::style().lightBedSize);
 	glowPixels = iSize(1 << (glowLevels * 2 + 0));	// was + 1

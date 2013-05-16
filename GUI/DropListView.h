@@ -5,7 +5,7 @@
 #include "ListView.h"
 #include "BasicButton.h"
 
-namespace Lightbox
+namespace lb
 {
 
 class DropListViewBody;

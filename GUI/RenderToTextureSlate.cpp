@@ -3,7 +3,7 @@
 #include "Global.h"
 #include "RenderToTextureSlate.h"
 using namespace std;
-using namespace Lightbox;
+using namespace lb;
 
 RenderToTextureSlate::RenderToTextureSlate(Texture2D const& _tex):
 	Slate(iRect((iCoord)_tex.size()), iRect((iCoord)_tex.size())),

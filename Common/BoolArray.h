@@ -22,7 +22,7 @@
 
 #include <cstdint>
 
-namespace Lightbox
+namespace lb
 {
 
 template <class C>

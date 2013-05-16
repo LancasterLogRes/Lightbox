@@ -3,7 +3,7 @@
 #include "BakedFont.h"
 #include "GUIApp.h"
 using namespace std;
-using namespace Lightbox;
+using namespace lb;
 
 static const unsigned s_maxAtOnce = 64;
 static const unsigned s_charDataFirst = 32;

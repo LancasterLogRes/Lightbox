@@ -7,7 +7,7 @@
 #include "Uniform.h"
 #include "ShaderFace.h"
 
-namespace Lightbox
+namespace lb
 {
 
 class Shader: public Pimpl<ShaderFace>

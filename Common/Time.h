@@ -33,7 +33,7 @@
 #include <limits>
 #include <sys/time.h>
 
-namespace Lightbox
+namespace lb
 {
 
 // Is a multiple of 192000, 48000, 36000, 24000 &c.; 88200, 44100, 22050 &c.; and 1000000.

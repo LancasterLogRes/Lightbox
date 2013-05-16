@@ -3,7 +3,7 @@
 #include <Common/Color.h>
 #include "Font.h"
 
-namespace Lightbox
+namespace lb
 {
 
 class Display;

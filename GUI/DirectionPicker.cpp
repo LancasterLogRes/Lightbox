@@ -5,7 +5,7 @@
 #include "BasicButton.h"
 #include "DirectionPicker.h"
 using namespace std;
-using namespace Lightbox;
+using namespace lb;
 
 DirectionPickerBody::DirectionPickerBody(Color _c, Grouping _grouping):
 	m_direction(0.5f, 0.5f, 0.5f),

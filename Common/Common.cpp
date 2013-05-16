@@ -19,4 +19,4 @@
  */
 
 #include "Common.h"
-using namespace Lightbox;
+using namespace lb;

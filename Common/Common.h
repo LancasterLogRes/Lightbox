@@ -41,6 +41,6 @@
 #include "WavHeader.h"
 #include "RGBA.h"
 
-namespace Lightbox
+namespace lb
 {
 }

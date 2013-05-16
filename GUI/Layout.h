@@ -4,7 +4,7 @@
 #include <Numeric/Margin.h>
 #include "Global.h"
 
-namespace Lightbox
+namespace lb
 {
 
 class Layout

@@ -4,7 +4,7 @@
 #include <Common/Pimpl.h>
 #include "TextureFace2D.h"
 
-namespace Lightbox
+namespace lb
 {
 
 class TextureActivator;

@@ -9,7 +9,7 @@
 #include "RenderToTextureSlate.h"
 #include "GUIApp.h"
 using namespace std;
-using namespace Lightbox;
+using namespace lb;
 
 void Style::generateColors(Color _fore)
 {

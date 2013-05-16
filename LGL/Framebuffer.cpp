@@ -3,7 +3,7 @@
 #include "Global.h"
 #include "Framebuffer.h"
 using namespace std;
-using namespace Lightbox;
+using namespace lb;
 
 int FramebufferFace::s_current = 0;
 

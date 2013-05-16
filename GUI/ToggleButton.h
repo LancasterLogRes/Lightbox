@@ -2,7 +2,7 @@
 #include <unordered_set>
 #include "BasicButton.h"
 
-namespace Lightbox
+namespace lb
 {
 
 class ToggleButtonBody;

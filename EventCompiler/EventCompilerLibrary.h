@@ -27,18 +27,18 @@
 #include <Common/Global.h>
 #include "EventCompilerImpl.h"
 
-namespace Lightbox
+namespace lb
 {
 typedef std::unordered_map<std::string, std::function<EventCompilerImpl*()> > EventCompilerFactories;
 }
 
 #define LIGHTBOX_EVENTCOMPILER_LIBRARY_HEADER \
-	extern "C" __attribute__ ((visibility ("default"))) Lightbox::EventCompilerFactories const& eventCompilerFactories()
+	extern "C" __attribute__ ((visibility ("default"))) lb::EventCompilerFactories const& eventCompilerFactories()
 
 #define LIGHTBOX_EVENTCOMPILER_LIBRARY \
 	LIGHTBOX_FINALIZING_LIBRARY \
-	extern "C" __attribute__ ((visibility ("default"))) Lightbox::EventCompilerFactories const& eventCompilerFactories() { static Lightbox::EventCompilerFactories s_ret; return s_ret; } \
-	extern "C" __attribute__ ((visibility ("default"))) Lightbox::EventCompilerFactories const& eventCompilerFactories()
+	extern "C" __attribute__ ((visibility ("default"))) lb::EventCompilerFactories const& eventCompilerFactories() { static lb::EventCompilerFactories s_ret; return s_ret; } \
+	extern "C" __attribute__ ((visibility ("default"))) lb::EventCompilerFactories const& eventCompilerFactories()
 
 #define LIGHTBOX_EVENTCOMPILER(O) \
-	auto g_reg ## O = (const_cast<Lightbox::EventCompilerFactories&>(eventCompilerFactories())[#O] = [](){return new O;})
+	auto g_reg ## O = (const_cast<lb::EventCompilerFactories&>(eventCompilerFactories())[#O] = [](){return new O;})

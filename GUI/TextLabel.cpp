@@ -4,7 +4,7 @@
 #include "Slate.h"
 #include "TextLabel.h"
 using namespace std;
-using namespace Lightbox;
+using namespace lb;
 
 TextLabelBody::TextLabelBody(std::string const& _text, Color _color, Font const& _font, Alignment _a):
 	m_text(_text),

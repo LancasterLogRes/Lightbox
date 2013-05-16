@@ -9,7 +9,7 @@
 #include <GUI/Slate.h>
 #include "ListModel.h"
 
-namespace Lightbox
+namespace lb
 {
 
 typedef std::pair<std::string, std::string> DoubleString;

@@ -29,7 +29,7 @@
 #include "EventCompilerImpl.h"
 #include "EventCompilerLibrary.h"
 
-namespace Lightbox
+namespace lb
 {
 
 class EventCompiler

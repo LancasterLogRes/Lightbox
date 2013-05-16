@@ -31,7 +31,7 @@
 #include "RGBA.h"
 #include "RGBA8.h"
 
-namespace Lightbox
+namespace lb
 {
 
 class Color;

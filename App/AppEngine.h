@@ -17,7 +17,7 @@ struct AInputEvent;
 struct _JNIEnv;
 typedef _JNIEnv JNIEnv;
 
-namespace Lightbox
+namespace lb
 {
 
 class Display;

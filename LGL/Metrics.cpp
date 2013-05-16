@@ -2,9 +2,9 @@
 #include "Global.h"
 #include "Metrics.h"
 using namespace std;
-using namespace Lightbox;
+using namespace lb;
 
-Metrics Lightbox::g_metrics;
+Metrics lb::g_metrics;
 
 Metrics::Metrics()
 {

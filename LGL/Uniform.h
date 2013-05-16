@@ -9,7 +9,7 @@
 #undef Assert
 #define Assert(X) X
 
-namespace Lightbox
+namespace lb
 {
 
 class Program;

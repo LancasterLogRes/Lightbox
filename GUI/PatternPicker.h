@@ -2,7 +2,7 @@
 
 #include "ToggleButton.h"
 
-namespace Lightbox
+namespace lb
 {
 
 class PatternPickerBody;
