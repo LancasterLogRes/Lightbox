@@ -124,8 +124,11 @@ public:
 			m_data.push_back(l);
 		m_data.push_back((float)_a);
 
-		float d = (float)_a;
-		m_store->shiftBuffer(ec()->index(), lb::foreign_vector<float>(d, lb::ByValue));
+		if (m_store)
+		{
+			float d = (float)_a;
+			m_store->shiftBuffer(ec()->index(), lb::foreign_vector<float>(d, lb::ByValue));
+		}
 	}
 
 private:

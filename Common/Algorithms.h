@@ -280,6 +280,46 @@ void valcpy(_T* _d, _T const* _s, unsigned _n, unsigned _dstride = 1, unsigned _
 			_d[i * _dstride] = _s[i * _sstride];
 }
 
+// _dest[0] = _dest[1] = _source[0];
+// _dest[2] = _dest[3] = _source[1];
+// ...
+// _dest[2*(n-1)] = _dest[2*(n-1)+1] = _source[n-1];
+template <class _T>
+void valfan2(_T* _dest, _T const* _source, unsigned _n)
+{
+	unsigned nLess4 = _n - 4;
+	if (_dest + 2 * _n < _source || _source + _n < _dest)
+	{
+		// separate
+		unsigned i = 0;
+		for (; i < nLess4; i += 4)
+		{
+			_dest[2 * i] = _dest[2 * (i + 0) + 1] = _source[i];
+			_dest[2 * (i + 1)] = _dest[2 * (i + 1) + 1] = _source[i + 1];
+			_dest[2 * (i + 2)] = _dest[2 * (i + 2) + 1] = _source[i + 2];
+			_dest[2 * (i + 3)] = _dest[2 * (i + 3) + 1] = _source[i + 3];
+		}
+		for (; i < _n; ++i)
+			_dest[2 * i] = _dest[2 * i + 1] = _source[i];
+	}
+	else
+	{
+		// overlapping; assert we're the same - we can't handle any other situation.
+		assert(_dest == _source);
+		// do it backwards.
+		int i = _n - 4;
+		for (; i >= 0; i -= 4)
+		{
+			_dest[2 * (i + 3)] = _dest[2 * (i + 3) + 1] = _source[i + 3];
+			_dest[2 * (i + 2)] = _dest[2 * (i + 2) + 1] = _source[i + 2];
+			_dest[2 * (i + 1)] = _dest[2 * (i + 1) + 1] = _source[i + 1];
+			_dest[2 * i] = _dest[2 * (i + 0) + 1] = _source[i];
+		}
+		for (; i >= 0; --i)
+			_dest[2 * i] = _dest[2 * i + 1] = _source[i];
+	}
+}
+
 template <class _T, class _U>
 void catenate(_T& _target, _U const& _extra)
 {
