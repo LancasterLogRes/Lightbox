@@ -89,7 +89,7 @@ public:
 	inline unsigned rate() const { return s_baseRate / m_nyquist * 2; }
 	inline float band(float _frequency) const { return clamp<float>(_frequency * m_windowSeconds, 0.f, m_bands - 1.f); }
 
-	StreamEvents doInit(unsigned _bands, Time _hop, Time _nyquist);
+	void doInit(unsigned _bands, Time _hop, Time _nyquist);
 
 	virtual void init() {}
 	virtual MemberMap propertyMap() const { return NullMemberMap; }

@@ -28,13 +28,14 @@ class GraphSpec
 public:
 	GraphSpec(GraphSpec& _parent, std::string const& _name): m_ec(_parent.ec()), m_parent(&_parent), m_name(_name)
 	{
-		m_ec->registerGraph(this);
+		if (m_ec)
+			m_ec->registerGraph(this);
 		m_parent->m_children.insert(this);
 	}
-
 	GraphSpec(EventCompilerImpl* _ec, std::string const& _name): m_ec(_ec), m_parent(nullptr), m_name(_name)
 	{
-		m_ec->registerGraph(this);
+		if (m_ec)
+			m_ec->registerGraph(this);
 	}
 	virtual ~GraphSpec() {}
 
@@ -139,7 +140,6 @@ private:
 	Range m_yrangeReal;
 	std::vector<float> m_data;
 };
-
 
 class GraphSparseDense: public GraphSpec
 {

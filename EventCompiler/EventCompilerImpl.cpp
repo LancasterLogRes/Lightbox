@@ -4,7 +4,7 @@
 using namespace std;
 using namespace lb;
 
-StreamEvents EventCompilerImpl::doInit(unsigned _bands, Time _hop, Time _nyquist)
+void EventCompilerImpl::doInit(unsigned _bands, Time _hop, Time _nyquist)
 {
 	m_bands = _bands;
 	m_hop = _hop;
@@ -17,7 +17,6 @@ StreamEvents EventCompilerImpl::doInit(unsigned _bands, Time _hop, Time _nyquist
 	init();
 	for (auto g: m_graphs)
 		g.second->init();
-	return StreamEvents();
 }
 
 void EventCompilerImpl::registerGraph(GraphSpec* _g)
