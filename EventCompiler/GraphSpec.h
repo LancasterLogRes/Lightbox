@@ -26,6 +26,7 @@ public:
 class GraphSpec
 {
 public:
+	GraphSpec(std::string const& _url, std::string const& _name): m_url(_url), m_name(_name) {}
 	GraphSpec(GraphSpec& _parent, std::string const& _name): m_ec(_parent.ec()), m_parent(&_parent), m_name(_name)
 	{
 		if (m_ec)
@@ -42,7 +43,11 @@ public:
 	GraphSpec* parent() const { return m_parent; }
 	std::set<GraphSpec*> const& children() const { return m_children; }
 	EventCompilerImpl* ec() const { return m_ec; }
+	std::string const& url() const { return m_url; }
 	std::string const& name() const { return m_name; }
+
+	void setName(std::string _name) { m_name = _name; }
+	void setUrl(std::string _url) { m_url = _url; }
 	void setStore(DataStore* _s) { m_store = _s; }
 
 	virtual void preinit()
@@ -71,11 +76,13 @@ public:
 	virtual void setupFromParent() {}
 
 protected:
-	EventCompilerImpl* m_ec;
-	GraphSpec* m_parent;
-	std::set<GraphSpec*> m_children;
+	std::string m_url;
 
+	EventCompilerImpl* m_ec = nullptr;
+	GraphSpec* m_parent = nullptr;
+	std::set<GraphSpec*> m_children;
 	std::string m_name;
+	std::string m_opId;
 
 	bool m_doneSetup = false;
 	bool m_doneSetupThisTime = false;
@@ -86,6 +93,7 @@ protected:
 class GraphChart: public GraphSpec
 {
 public:
+	GraphChart(std::string _url, std::string const& _name): GraphSpec(_url, _name) {}
 	GraphChart(GraphChart& _p, std::string const& _name): GraphSpec(_p, _name) {}
 	GraphChart(EventCompilerImpl* _ec, std::string const& _name): GraphSpec(_ec, _name) {}
 	template <class ... _P> GraphChart(EventCompilerImpl* _ec, std::string const& _name, _P ... _p): GraphChart(_ec, _name) { setup(_p ...); }
@@ -117,13 +125,13 @@ public:
 	template <class _T> void operator<<(_T const& _a) { shift(_a); }
 	template <class _T> void shift(_T const& _a)
 	{
-		unsigned i = ec()->index();
+		/*unsigned i = ec()->index();
 		float l = m_data.size() ? m_data.back() : _a;
 		widenToFit(m_yrangeReal, _a);
 		m_data.reserve(i + 1);
 		while (m_data.size() < i)
 			m_data.push_back(l);
-		m_data.push_back((float)_a);
+		m_data.push_back((float)_a);*/
 
 		if (m_store)
 		{
