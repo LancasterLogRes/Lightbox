@@ -56,6 +56,11 @@ void FFT<float>::setArity(unsigned _arity)
 	m_phase.resize(m_arity / 2 + 1);
 }
 
+void FFT<float>::rawProcess()
+{
+	fftwf_execute(m_plan);
+}
+
 void FFT<float>::process()
 {
 /*	for (unsigned i = 0; i < m_arity; i++)
@@ -64,7 +69,7 @@ void FFT<float>::process()
 			cerr << "!!! Bad input data - " << m_in[i] << " outside unity. Clamping." << endl;
 			m_in[i] = std::min(1.f, std::max(-1.f, m_in[i]));
 		}*/
-	fftwf_execute(m_plan);
+	rawProcess();
 	for (unsigned i = 0; i <= m_arity / 2; i++)
 	{
 		float re = (i == m_arity / 2) ? 0 : m_work[i];

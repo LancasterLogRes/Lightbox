@@ -49,6 +49,7 @@ public:
 	void setName(std::string _name) { m_name = _name; }
 	void setUrl(std::string _url) { m_url = _url; }
 	void setStore(DataStore* _s) { m_store = _s; }
+	DataStore* store() const { return m_store; }
 
 	virtual void preinit()
 	{
@@ -112,6 +113,7 @@ public:
 	std::string ylabel() const { return m_ylabel; }
 	Range yrangeReal() const { return m_yrangeReal; }
 	Range yrangeHint() const { return m_yrangeHint; }
+	XOf ytx() const { return m_ytx; }
 
 	virtual void init()
 	{
@@ -253,6 +255,7 @@ public:
 	virtual void setupFromParent() { GraphSpec::setupFromParent(); if (auto p = dynamic_cast<GraphDenseDenseFixed*>(parent())) { m_xlabel = p->m_xlabel; m_ylabel = p->m_ylabel, m_xtx = p->m_xtx, m_ytx = p->m_ytx, m_yrangeHint = p->m_yrangeHint; m_graphSize = p->m_graphSize; } }
 
 	XOf xtx() const { return m_xtx; }
+	XOf ytx() const { return m_ytx; }
 
 	std::string xlabel() const { return m_xlabel; }
 	std::string ylabel() const { return m_ylabel; }
@@ -260,7 +263,7 @@ public:
 	unsigned graphSize() const { return m_graphSize; }
 
 	virtual Range xrangeReal() const { return xtx().apply(std::make_pair(0, m_graphSize - 1)); }
-	virtual Range xrangeHint() const { return AutoRange; }
+	virtual Range xrangeHint() const { return xrangeReal(); }
 	Range yrangeReal() const { return m_yrangeReal; }
 	Range yrangeHint() const { return m_yrangeHint; }
 

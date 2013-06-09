@@ -1108,16 +1108,18 @@ public:
 static const std::array<float, 26> s_barkBands = {{ 100, 200, 300, 400, 510, 630, 770, 920, 1080, 1270, 1480, 1720, 2000, 2320, 2700, 3150, 3700, 4400, 5300, 6400, 7700, 9500, 12000, 15500, 20500, 27000 }};
 static const std::array<float, 26> s_barkCentres = {{ 50, 150, 250, 350, 450, 570, 700, 840, 1000, 1170, 1370, 1600, 1850, 2150, 2500, 2900, 3400, 4000, 4800, 5800, 7000, 8500, 10500, 13500, 17500, 22500 }};
 
+inline float band(unsigned _bandCount, float _windowSeconds, float _frequency) { return clamp<float>(_frequency * _windowSeconds, 0.f, _bandCount - 1.f); }
+
 template <class _F>
 class BandRemapper
 {
 public:
 	template <class _T>
-	void init(EventCompilerImpl* _ec, _T const& _bf)
+	void init(unsigned _bandCount, float _windowSeconds, _T const& _bf)
 	{
 		m_bands.resize(_bf.size());
 		for (unsigned i = 0; i < _bf.size(); ++i)
-			m_bands[i] = clamp<int, int>(_ec->band(_bf[i]), 0, _ec->bands() - 1);
+			m_bands[i] = band(_bandCount, _windowSeconds, _bf[i]);
 	}
 	std::vector<_F> spectrum(std::vector<_F> const& _mag) const
 	{
@@ -1219,7 +1221,7 @@ public:
 
 	void init(EventCompilerImpl* _eci)
 	{
-		m_bark.init(_eci, s_barkBands);
+		m_bark.init(_eci->windowSeconds(), _eci->bands(), s_barkBands);
 		m_phon.init(s_barkCentres);
 		m_last = 0;
 	}
@@ -1238,23 +1240,27 @@ private:
 	Phon<Scalar> m_phon;
 };
 
-template <unsigned _From = 0, unsigned _To = 26, class _ScalarType = float>
-class BarkPhon
+template <class _PP, unsigned _From = 0, unsigned _To = 26>
+class BarkPhon: public _PP
 {
 public:
-	typedef _ScalarType Scalar;
+	typedef _PP Super;
+	typedef typename Info<_PP>::ScalarType Scalar;
 	typedef array<Scalar, _To - _From> ElementType;
 
 	void init(EventCompilerImpl* _eci)
 	{
-		m_bark.init(_eci, s_barkBands);
+		Super::init(_eci);
+		// A bit ugly - we make an assumption over determining the original window size from the magnitude bands, but without general OOB dataflow, there's not much else to be done.
+		m_bark.init(_PP::recordSize(), float(2 * _PP::recordSize() - 2) / _eci->rate(), s_barkBands);
 		m_phon.init(s_barkCentres);
 		m_last.fill(0);
 	}
-	void execute(EventCompilerImpl*, Time, std::vector<Scalar> const& _mag, std::vector<Scalar> const&, std::vector<Scalar> const&)
+	void execute(EventCompilerImpl* _eci, Time _t, std::vector<Scalar> const&, std::vector<Scalar> const&, std::vector<Scalar> const& _wave)
 	{
+		_PP::execute(_eci, _t, std::vector<Scalar>(), std::vector<Scalar>(), _wave);
 		for (unsigned cb = _From; cb < _To; ++cb)
-			m_last[cb - _From] = m_phon.value(m_bark.mag(_mag, cb), cb);
+			m_last[cb - _From] = m_phon.value(m_bark.mag(_PP::get(), cb), cb);
 	}
 	ElementType const& get() const { return m_last; }
 	bool changed() const { return true; }
@@ -1265,13 +1271,13 @@ private:
 	Phon<Scalar> m_phon;
 };
 
-template <unsigned _From, unsigned _To, class _ScalarType>
-class GenSum<BarkPhon<_From, _To, _ScalarType>>: public BarkPhon<_From, _To, _ScalarType>
+template <class _PP, unsigned _From, unsigned _To>
+class GenSum<BarkPhon<_PP, _From, _To>>: public BarkPhon<_PP, _From, _To>
 {
 public:
-	typedef BarkPhon<_From, _To, _ScalarType> Super;
-	typedef _ScalarType ElementType;
-	typedef _ScalarType Scalar;
+	typedef BarkPhon<_PP, _From, _To> Super;
+	typedef typename Info<Super>::ScalarType ElementType;
+	typedef typename Info<Super>::ScalarType Scalar;
 
 	void init(EventCompilerImpl* _eci)
 	{
@@ -1301,13 +1307,13 @@ class DiffSum: public _PP
 {
 };
 
-template <unsigned _From, unsigned _To, class _ScalarType>
-class DiffSum<BarkPhon<_From, _To, _ScalarType>>: public BarkPhon<_From, _To, _ScalarType>
+template <class _PP, unsigned _From, unsigned _To>
+class DiffSum<BarkPhon<_PP, _From, _To>>: public BarkPhon<_PP, _From, _To>
 {
 public:
-	typedef BarkPhon<_From, _To, _ScalarType> Super;
-	typedef _ScalarType ElementType;
-	typedef _ScalarType Scalar;
+	typedef BarkPhon<_PP, _From, _To> Super;
+	typedef typename Info<Super>::ScalarType ElementType;
+	typedef typename Info<Super>::ScalarType Scalar;
 
 	void init(EventCompilerImpl* _eci)
 	{

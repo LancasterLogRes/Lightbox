@@ -49,15 +49,15 @@ public:
 	{
 		m_arity = _arity;
 		assert(highestBitOnly(m_arity) == m_arity);
-		m_real.resize(m_arity);
-		m_imag.resize(m_arity);
+		m_realimag.resize(m_arity * 2);
 		m_mag.resize(m_arity / 2 + 1);
 		m_phase.resize(m_arity / 2 + 1);
 	}
 
 	unsigned arity() const { return m_arity; }
 	unsigned bands() const { return m_arity / 2 + 1; }
-	Fixed<1, 15>* in() { return m_real.data(); }
+	Fixed<1, 15>* in() { return m_realimag.data(); }
+	Fixed<1, 15> const* out() const { return m_realimag.data(); }
 	std::vector<OutputType> const& mag() const { return m_mag; }
 	std::vector<OutputType> const& phase() const { return m_phase; }
 
@@ -65,14 +65,19 @@ public:
 	Fixed<1, 15>* inFixed1x15() { return in(); }
 	float* inFloat() { return nullptr; }
 
+	void rawProcess()
+	{
+		memset(m_realimag.data() + m_arity, 0, m_arity * sizeof(int16_t));
+		fix_fft((int16_t*)m_realimag.data(), (int16_t*)m_realimag.data() + m_arity, log2(m_arity), 0);
+	}
+
 	void process()
 	{
-		memset(m_imag.data(), 0, m_imag.size() * sizeof(int16_t));
-		fix_fft((int16_t*)m_real.data(), (int16_t*)m_imag.data(), log2(m_arity), 0);
+		rawProcess();
 		for (unsigned i = 0; i <= m_arity / 2; i++)
 		{
-			WorkType re = m_real[i];//(i == m_arity / 2) ? 0 : m_work[i];
-			WorkType im = m_imag[i];//i ? m_work[m_arity - i] : 0;
+			WorkType re = m_realimag[i];//(i == m_arity / 2) ? 0 : m_work[i];
+			WorkType im = m_realimag[i + m_arity];//i ? m_work[m_arity - i] : 0;
 			WorkType p = (re * re + im * im);
 			m_mag[i] = (isFinite(p) && p != 0.f) ? sqrt(p * m_arity) : 0;
 			m_phase[i] = OutputType(atan2(re, im)) + pi<OutputType>();
@@ -83,8 +88,7 @@ public:
 
 private:
 	unsigned m_arity = 0;
-	std::vector<Fixed<1, 15>> m_real;
-	std::vector<Fixed<1, 15>> m_imag;
+	std::vector<Fixed<1, 15>> m_realimag;
 	std::vector<OutputType> m_mag;
 	std::vector<OutputType> m_phase;
 };
@@ -105,13 +109,15 @@ public:
 	unsigned arity() const { return m_arity; }
 	unsigned bands() const { return m_arity / 2 + 1; }
     float* in() const { return m_in; }
-    std::vector<float> const& mag() const { return m_mag; }
+	float const* out() const { return m_work; }
+	std::vector<float> const& mag() const { return m_mag; }
     std::vector<float> const& phase() const { return m_phase; }
 
 	int16_t* inInt16() { return nullptr; }
 	Fixed<1, 15>* inFixed1x15() { return nullptr; }
 	float* inFloat() { return in(); }
 
+	void rawProcess();
 	void process();
 
 private:

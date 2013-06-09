@@ -87,7 +87,9 @@ public:
 	inline Time hop() const { return m_hop; }
 	inline Time nyquist() const { return m_nyquist; }
 	inline unsigned rate() const { return s_baseRate / m_nyquist * 2; }
-	inline float band(float _frequency) const { return clamp<float>(_frequency * m_windowSeconds, 0.f, m_bands - 1.f); }
+	inline float windowSeconds() const { return m_windowSeconds; }
+
+	inline float band(float _frequency) const { return clamp<float>(_frequency * m_windowSeconds, 0.f, m_bands - 1.f); } ///< @DEPRECATED
 
 	void doInit(unsigned _bands, Time _hop, Time _nyquist);
 

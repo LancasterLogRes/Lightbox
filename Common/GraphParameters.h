@@ -47,6 +47,8 @@ static T graphParameters(T _min, T _max, unsigned _divisions, T* o_from = 0, T* 
 	T inc = _forceMinor
 			? ((mt > 6.f) ? ep / 2.f : (mt > 3.f) ? ep / 5.f : (mt > 1.2f) ? ep / 10.f : ep / 20.f)
 			: ((mt > 6.f) ? ep * 2.f : (mt > 3.f) ? ep : (mt > 1.2f) ? ep / 2.f : ep / 5.f);
+	if (inc == 0)
+		inc = 1;
 	if (o_delta && o_from)
 	{
 		(*o_from) = std::floor(uMin / inc) * inc * _divisor;

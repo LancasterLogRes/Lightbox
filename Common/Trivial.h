@@ -57,13 +57,17 @@ class XO
 {
 public:
 	XO(_N _scale = 1, _N _offset = 0): m_scale(_scale), m_offset(_offset) {}
-	static XO toUnity(Range _r) { return XO(1 / (_r.second - _r.first), _r.first / (_r.second - _r.first)); }
+	static XO toUnity(Range _r) { return XO(1 / (_r.second - _r.first), -_r.first / (_r.second - _r.first)); }
 
 	_N apply(_N _v) const { return _v * m_scale + m_offset; }
 	Range apply(Range _v) const { return Range(apply(_v.first), apply(_v.second)); }
 
 	_N scale() const { return m_scale; }
 	_N offset() const { return m_offset; }
+
+	bool isIdentity() const { return m_scale == 1 && m_offset == 0; }
+
+	XO composed(XO const& _then) const { return XO(_then.m_scale * m_scale, _then.m_scale * m_offset + _then.m_offset); }
 
 private:
 	_N m_scale;
