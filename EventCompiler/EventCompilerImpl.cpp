@@ -4,13 +4,11 @@
 using namespace std;
 using namespace lb;
 
-void EventCompilerImpl::doInit(unsigned _bands, Time _hop, Time _nyquist)
+void EventCompilerImpl::doInit(Time _hop, Time _nyquist)
 {
-	m_bands = _bands;
 	m_hop = _hop;
 	m_nyquist = _nyquist;
 	m_t = 0;
-	m_windowSeconds = toSeconds(windowSize());
 	for (auto g: m_graphs)
 		g.second->preinit();
 	initPres();

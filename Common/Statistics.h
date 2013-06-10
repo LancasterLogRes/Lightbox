@@ -176,6 +176,26 @@ template <class _T> LIGHTBOX_STRUCT(2, GenGaussian, _T, mean, _T, sigma);
 
 template <class _F> struct zero_of<GenGaussian<_F> > { static GenGaussian<_F> value() { return GenGaussian<_F>(zero_of<_F>::value(), zero_of<_F>::value()); } };
 
+template <class _N = float>
+struct GaussianMag
+{
+	GaussianMag(): mean(0), sigma(0), mag(0) {}
+	GaussianMag(GaussianMag const& _s): mean(_s.mean), sigma(_s.sigma), mag(_s.mag) {}
+	GaussianMag(_N _mean, _N _sigma, _N _mag): mean(_mean), sigma(_sigma), mag(_mag) {}
+	LIGHTBOX_STRUCT_INTERNALS_3 (GaussianMag, _N, mean, _N, sigma, _N, mag)
+
+	_N mean;
+	_N sigma;
+	_N mag;
+};
+
+template <class _N> GaussianMag<_N> sqrt(GaussianMag<_N> const& _a) { return GaussianMag<_N>(sqrt(_a.mean), sqrt(_a.sigma), sqrt(_a.mag)); }
+template <class _N> struct zero_of<GaussianMag<_N>> { static GaussianMag<_N> value() { return GaussianMag<_N>(_N(0), _N(0), _N(0)); } };
+template <class _N> GaussianMag<_N>& operator+=(GaussianMag<_N>& _a, GaussianMag<_N> const& _b) { _a.mean += _b.mean; _a.sigma += _b.sigma; _a.mag += _b.mag; return _a; }
+template <class _N, class _M> GaussianMag<_N> operator/(GaussianMag<_N> const& _a, _M _b) { return GaussianMag<_N>(_a.mean / _b, _a.sigma / _b, _a.mag / _b); }
+template <class _N> GaussianMag<_N> operator*(GaussianMag<_N> const& _a, GaussianMag<_N> const& _b) { return GaussianMag<_N>(_a.mean * _b.mean, _a.sigma * _b.sigma, _a.mag * _b.mag); }
+template <class _N> GaussianMag<_N> operator-(GaussianMag<_N> const& _a, GaussianMag<_N> const& _b) { return GaussianMag<_N>(_a.mean - _b.mean, _a.sigma - _b.sigma, _a.mag - _b.mag); }
+
 template <class T>
 T normal(T _x, Gaussian _muSigma, T _rootScale = 1)
 {

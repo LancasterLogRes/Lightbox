@@ -154,5 +154,6 @@ static const Colors NullColors;
 static const Colors RedOnly = { Red };
 static const Colors GreenOnly = { Green };
 static const Colors BlueOnly = { Blue };
+static const Colors WhiteOnly = { White };
 
 }

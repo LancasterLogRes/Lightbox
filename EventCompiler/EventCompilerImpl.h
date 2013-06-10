@@ -41,7 +41,7 @@ inline std::string msL(float _x, float _y) { return toString(round(_x * 1000)) +
 
 #define LIGHTBOX_PREPROCESSORS(...) \
 	virtual void initPres() { Initer(this) , __VA_ARGS__; } \
-	virtual void executePres(Time _t, std::vector<Native> const& _mag, std::vector<Native> const& _phase, std::vector<Native> const& _wave) { Executor<Native>(this, _t, _mag, _phase, _wave) , __VA_ARGS__; } \
+	virtual void executePres(std::vector<Native> const& _wave) { Executor<Native>(this, _wave) , __VA_ARGS__; } \
 	class Lightbox_Preprocessors_Macro_End {}
 
 class EventCompiler;
@@ -57,14 +57,11 @@ struct Initer
 template <class _Native>
 struct Executor
 {
-	Executor(EventCompilerImpl* _eci, Time _t, std::vector<_Native> const& _mag, std::vector<_Native> const& _phase, std::vector<_Native> const& _wave): m_eci(_eci), m_t(_t), m_mag(_mag), m_phase(_phase), m_wave(_wave)
+	Executor(EventCompilerImpl* _eci, std::vector<_Native> const& _wave): m_eci(_eci), m_wave(_wave)
 	{
 	}
-	template <class _T> Executor& operator,(_T& _t) { _t.execute(m_eci, m_t, m_mag, m_phase, m_wave); return *this; }
+	template <class _T> Executor& operator,(_T& _t) { _t.execute(m_eci, m_wave); return *this; }
 	EventCompilerImpl* m_eci;
-	Time m_t;
-	std::vector<_Native> const& m_mag;
-	std::vector<_Native> const& m_phase;
 	std::vector<_Native> const& m_wave;
 };
 
@@ -82,44 +79,33 @@ public:
 	EventCompilerImpl() {}
 	virtual ~EventCompilerImpl() {}
 
-	inline unsigned bands() const { return m_bands; }
-	inline Time windowSize() const { return toBase((m_bands - 1) * 2, rate()); }
 	inline Time hop() const { return m_hop; }
 	inline Time nyquist() const { return m_nyquist; }
 	inline unsigned rate() const { return s_baseRate / m_nyquist * 2; }
-	inline float windowSeconds() const { return m_windowSeconds; }
 
-	inline float band(float _frequency) const { return clamp<float>(_frequency * m_windowSeconds, 0.f, m_bands - 1.f); } ///< @DEPRECATED
-
-	void doInit(unsigned _bands, Time _hop, Time _nyquist);
+	void doInit(Time _hop, Time _nyquist);
 
 	virtual void init() {}
 	virtual MemberMap propertyMap() const { return NullMemberMap; }
 	virtual MemberMap stateMap() const { return NullMemberMap; }
 
-	virtual StreamEvents doCompile(std::vector<float> const& _mag, std::vector<float> const& _phase, std::vector<float> const& _wave) = 0;
-	virtual StreamEvents doCompile(std::vector<Fixed16> const& _mag, std::vector<Fixed16> const& _phase, std::vector<Fixed16> const& _wave) = 0;
-	virtual StreamEvents doCompile(std::vector<Fixed<11, 21>> const& _mag, std::vector<Fixed<11, 21>> const& _phase, std::vector<Fixed<11, 21>> const& _wave) = 0;
+	virtual StreamEvents doCompile(std::vector<float> const& _wave) = 0;
+	virtual StreamEvents doCompile(std::vector<Fixed16> const& _wave) = 0;
+	virtual StreamEvents doCompile(std::vector<Fixed<11, 21>> const& _wave) = 0;
 
-	template <class _Out, class _This, class _In> static StreamEvents crossCompile(_This* _this, std::vector<_In> const& _mag, std::vector<_In> const& _phase, std::vector<_In> const& _wave, typename std::enable_if<!std::is_same<_Out, _In>::value>::type* = 0)
+	template <class _Out, class _This, class _In> static StreamEvents crossCompile(_This* _this, std::vector<_In> const& _wave, typename std::enable_if<!std::is_same<_Out, _In>::value>::type* = 0)
 	{
-		std::vector<_Out> mag(_mag.size());
-		std::vector<_Out> phase(_phase.size());
 		std::vector<_Out> wave(_wave.size());
-		for (unsigned i = 0; i < _mag.size(); ++i)
-			mag[i] = (_Out)_mag[i];
-		for (unsigned i = 0; i < _phase.size(); ++i)
-			phase[i] = (_Out)_phase[i];
 		for (unsigned i = 0; i < _wave.size(); ++i)
 			wave[i] = (_Out)_wave[i];
-		return crossCompile<_Out>(_this, mag, phase, wave);
+		return crossCompile<_Out>(_this, wave);
 	}
 
-	template <class _InOut, class _This> static StreamEvents crossCompile(_This* _this, std::vector<_InOut> const& _mag, std::vector<_InOut> const& _phase, std::vector<_InOut> const& _wave)
+	template <class _InOut, class _This> static StreamEvents crossCompile(_This* _this, std::vector<_InOut> const& _wave)
 	{
 		EventCompilerImpl* thisBase = _this;
-		_this->executePres(thisBase->m_t, _mag, _phase, _wave);
-		StreamEvents ret = _this->compile(thisBase->m_t, _mag, _phase, _wave);
+		_this->executePres(_wave);
+		StreamEvents ret = _this->compile(thisBase->m_t, _wave);
 		thisBase->m_t += thisBase->m_hop;
 		return ret;
 	}
@@ -137,11 +123,7 @@ protected:
 private:
 	Time m_hop;
 	Time m_nyquist;
-	unsigned m_bands;
 	Time m_t;
-
-	// Cached...
-	float m_windowSeconds;
 
 	std::map<std::string, GraphSpec*> m_graphs;
 };
@@ -157,9 +139,9 @@ public:
 	Time time() const { return m_t; }
 
 protected:
-	virtual StreamEvents doCompile(std::vector<float> const&, std::vector<float> const&, std::vector<float> const&) { m_t += m_hop; return StreamEvents(); }
-	virtual StreamEvents doCompile(std::vector<Fixed16> const&, std::vector<Fixed16> const&, std::vector<Fixed16> const&) { m_t += m_hop; return StreamEvents(); }
-	virtual StreamEvents doCompile(std::vector<Fixed<11, 21>> const&, std::vector<Fixed<11, 21>> const&, std::vector<Fixed<11, 21>> const&) { m_t += m_hop; return StreamEvents(); }
+	virtual StreamEvents doCompile(std::vector<float> const&) { m_t += m_hop; return StreamEvents(); }
+	virtual StreamEvents doCompile(std::vector<Fixed16> const&) { m_t += m_hop; return StreamEvents(); }
+	virtual StreamEvents doCompile(std::vector<Fixed<11, 21>> const&) { m_t += m_hop; return StreamEvents(); }
 };
 
 template <class _Native>
@@ -171,13 +153,13 @@ public:
 	typedef _Native Native;
 
 protected:
-	virtual StreamEvents compile(Time _t, std::vector<Native> const& _mag, std::vector<Native> const& _phase, std::vector<Native> const& _wave) { (void)_t; (void)_mag; (void)_phase; (void)_wave; return StreamEvents(); }
-	virtual void executePres(Time _t, std::vector<Native> const& _mag, std::vector<Native> const& _phase, std::vector<Native> const& _wave) { (void)_t; (void)_mag; (void)_phase; (void)_wave; }
+	virtual StreamEvents compile(Time _t, std::vector<Native> const& _wave) { (void)_t; (void)_wave; return StreamEvents(); }
+	virtual void executePres(std::vector<Native> const& _wave) { (void)_wave; }
 
 private:
-	virtual StreamEvents doCompile(std::vector<float> const& _mag, std::vector<float> const& _phase, std::vector<float> const& _wave) { return crossCompile<Native>(this, _mag, _phase, _wave); }
-	virtual StreamEvents doCompile(std::vector<Fixed16> const& _mag, std::vector<Fixed16> const& _phase, std::vector<Fixed16> const& _wave) { return crossCompile<Native>(this, _mag, _phase, _wave); }
-	virtual StreamEvents doCompile(std::vector<Fixed<11, 21>> const& _mag, std::vector<Fixed<11, 21>> const& _phase, std::vector<Fixed<11, 21>> const& _wave) { return crossCompile<Native>(this, _mag, _phase, _wave); }
+	virtual StreamEvents doCompile(std::vector<float> const& _wave) { return crossCompile<Native>(this, _wave); }
+	virtual StreamEvents doCompile(std::vector<Fixed16> const& _wave) { return crossCompile<Native>(this, _wave); }
+	virtual StreamEvents doCompile(std::vector<Fixed<11, 21>> const& _wave) { return crossCompile<Native>(this, _wave); }
 };
 
 }

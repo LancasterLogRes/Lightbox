@@ -20,7 +20,7 @@
 
 #include <Common/Common.h>
 #include <EventCompiler/EventCompiler.h>
-#include <EventCompiler/Preprocessors.h>
+#include <Preprocessors/Preprocessors.h>
 using namespace std;
 using namespace lb;
 
@@ -58,7 +58,7 @@ private:
 		m_decayedBL = 0.f;
 	}
 
-	virtual StreamEvents compile(Time, vector<float> const&, vector<float> const&, std::vector<float> const&)
+	virtual StreamEvents compile(Time, vector<float> const&)
 	{
 		StreamEvents ret;
 
