@@ -127,14 +127,6 @@ public:
 	template <class _T> void operator<<(_T const& _a) { shift(_a); }
 	template <class _T> void shift(_T const& _a)
 	{
-		/*unsigned i = ec()->index();
-		float l = m_data.size() ? m_data.back() : _a;
-		widenToFit(m_yrangeReal, _a);
-		m_data.reserve(i + 1);
-		while (m_data.size() < i)
-			m_data.push_back(l);
-		m_data.push_back((float)_a);*/
-
 		if (m_store)
 		{
 			float d = (float)_a;
@@ -339,6 +331,18 @@ private:
 	unsigned m_maxGraphSize;
 };
 
+class GraphSpectrum: public GraphDenseDenseFixed
+{
+public:
+	GraphSpectrum(GraphSpectrum& _ec, std::string const& _name): GraphDenseDenseFixed(_ec, _name) {}
+	GraphSpectrum(EventCompilerImpl* _ec, std::string const& _name): GraphDenseDenseFixed(_ec, _name) {}
+	template <class ... _P> GraphSpectrum(EventCompilerImpl* _ec, std::string const& _name, _P ... _p): GraphDenseDenseFixed(_ec, _name) { setup(_p ...); }
+
+	unsigned bandCount() const { return graphSize(); }
+
+	template <class _T> void operator<<(_T const& _a) { shift(_a); }
+};
+
 class GraphSparseDenseConstSize: public GraphSparseDense
 {
 public:
@@ -381,18 +385,6 @@ public:
 	template <class ... _P> GraphHistory(EventCompilerImpl* _ec, std::string const& _name, _P ... _p): GraphSparseDenseConstSize(_ec, _name) { setup(_p ...); }
 
 	unsigned historySize() const { return graphSize(); }
-
-	template <class _T> void operator<<(_T const& _a) { shift(_a); }
-};
-
-class GraphSpectrum: public GraphSparseDenseConstSize
-{
-public:
-	GraphSpectrum(GraphSpectrum& _ec, std::string const& _name): GraphSparseDenseConstSize(_ec, _name) {}
-	GraphSpectrum(EventCompilerImpl* _ec, std::string const& _name): GraphSparseDenseConstSize(_ec, _name) {}
-	template <class ... _P> GraphSpectrum(EventCompilerImpl* _ec, std::string const& _name, _P ... _p): GraphSparseDenseConstSize(_ec, _name) { setup(_p ...); }
-
-	unsigned bandCount() const { return graphSize(); }
 
 	template <class _T> void operator<<(_T const& _a) { shift(_a); }
 };

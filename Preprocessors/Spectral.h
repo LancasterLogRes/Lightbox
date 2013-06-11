@@ -39,7 +39,7 @@ public:
 	void init(EventCompilerImpl* _eci)
 	{
 		m_last = std::vector<Scalar>(m_sizeMultiple * fromBase(_eci->hop(), _eci->rate()), 0);
-		m_windowSeconds = float(2 * m_last.size() - 2) / _eci->rate();
+		m_windowSeconds = m_last.size() / float(_eci->rate());
 	}
 	void execute(EventCompilerImpl*, std::vector<Scalar> const& _wave)
 	{
