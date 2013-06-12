@@ -1,3 +1,27 @@
+# Lightbox/Common.pri
+# Lightbox common project include file.
+# This is a long and complex file most of which you don't need to know about.
+# This top bit houses the configuration section which you do need to know about.
+
+# Beginning of configuration:
+
+# If you're on Windows, you'll need to set up the BOOST & FFTW project paths:
+win32 {
+	BOOST = C:/boost_1_50_0
+	FFTW = C:/Lightbox/fftw
+}
+
+# If you're on Mac, you should to confirm the MacPorts library path is correct.
+mac {
+	MACPORTS_LIBS = /opt/local/lib
+}
+
+# Uncomment to build App framework/GUI stuff (wholly independent of Qt).
+#CONFIG += llr
+
+# End of configurable part
+##############################################################################
+
 DEFINES += LIGHTBOX_VERSION=1.0.0 LIGHTBOX_BUILD_DATE="`date +'%y%m%d%H%M\'`"
 
 ANDROID_NDK_PATH = $$PWD/../Android/ndk
@@ -61,7 +85,7 @@ outputs {
 
 #OUT_PWD = $$LLR_PATH/$$ARCH/$$PROJECT_NAME-$$BUILD_TYPE/$$SUBPROJECT_NAME
 
-message ( "TEMPLATE:" $$TEMPLATE "TARGET:" $$TARGET "PROJECT: $$PROJECT_NAME/$$SUBPROJECT_NAME" "CONFIG:" $$find(CONFIG, (outputs)|(pi)|(amd)|(android)|(x86)|(native)|(cross)) "PWD:" $$PWD "OUT_PWD:" $$OUT_PWD "IN_PWD:" $$IN_PWD "DESTDIR:" $$DESTDIR)
+#message ( "TEMPLATE:" $$TEMPLATE "TARGET:" $$TARGET "PROJECT: $$PROJECT_NAME/$$SUBPROJECT_NAME" "CONFIG:" $$find(CONFIG, (outputs)|(pi)|(amd)|(android)|(x86)|(native)|(cross)) "PWD:" $$PWD "OUT_PWD:" $$OUT_PWD "IN_PWD:" $$IN_PWD "DESTDIR:" $$DESTDIR)
 
 final {
 	QMAKE_CXXFLAGS += -DFINAL
@@ -235,27 +259,20 @@ QMAKE_CXXFLAGS += -pipe -fexceptions -std=gnu++11 -frtti -ffast-math
 QMAKE_CXXFLAGS_WARN_ON += -Wno-parentheses
 
 INCLUDEPATH += $$IN_PWD
+
 # For macports
-mac: LIBS += -L/opt/local/lib
+mac: LIBS += -L$$MACPORTS_LIBS
 
 win32 {
-	# Dependent on your configuration.
-	BOOST = C:/boost_1_50_0
-	FFTW = C:/Lightbox/fftw
-	PORTAUDIO = C:/Lightbox/portaudio
-	GLEW = C:/Lightbox/glew-1.8.0
-	RESAMPLE = C:/Lightbox/libresample-0.1.3
-	SNDFILE = C:/Lightbox/libsndfile
-	LIBS += -L$$BOOST/stage/lib -L$$FFTW -L$$PORTAUDIO/lib/.libs -L$$GLEW/lib -L$$RESAMPLE -L$$SNDFILE/lib
-	INCLUDEPATH += $$BOOST $$FFTW $$PORTAUDIO/include $$GLEW/include $$RESAMPLE/include $$SNDFILE/include
-        FFTW3_LIBS = -lfftw3f-3
-        SNDFILE_LIBS = $$SNDFILE/lib/libsndfile-1.lib
-        GL_LIBS += -lOpenGL32 -lGLU32 -lGLEW32
+	INCLUDEPATH += $$BOOST $$FFTW
+	LIBS += -L$$BOOST/stage/lib -L$$FFTW
+	FFTW3_LIBS = -lfftw3f-3
+	GL_LIBS += -lOpenGL32 -lGLU32
 }
 !win32 {
-        FFTW3_LIBS = -lfftw3f
-        SNDFILE_LIBS = -lsndfile
-        GL_LIBS += -lGL -lGLU -lGLEW
+	FFTW3_LIBS = -lfftw3f
+	SNDFILE_LIBS = -lsndfile
+	GL_LIBS += -lGL -lGLU
 }
 
 android: CONFIG += use_egl use_gles2
@@ -290,7 +307,7 @@ force_shared {
         CONFIG -= create_prl link_prl static
         CONFIG += shared dll dylib
         DEFINES += LIGHTBOX_SHARED_LIBRARY
-        system (echo "Shared build")
+#        system (echo "Shared build")
 }
 
 force_static {
@@ -298,7 +315,7 @@ force_static {
         CONFIG -= shared dll dylib
         DEFINES += LIGHTBOX_STATIC_LIBRARY
         LIBS += -static
-        system (echo "Static build")
+#        system (echo "Static build")
 }
 
 win32: LIBRARY_PREFIX =
@@ -309,8 +326,7 @@ mac: shared: LIBRARY_SUFFIX = .dylib
 linux: shared: LIBRARY_SUFFIX = .so
 unix: static: LIBRARY_SUFFIX = .a
 
-
-message ("$$LIGHTBOX_ROOT_PROJECT <- $$LIGHTBOX_USES_PROJECTS")
+#message ("$$LIGHTBOX_ROOT_PROJECT <- $$LIGHTBOX_USES_PROJECTS")
 
 defineReplace(ProjectPath) {
     To = $$1
@@ -364,16 +380,16 @@ outputs {
 defineTest(tidy) {
 	SD = $$SUBDIRS
 	for(sd, SD) {
-		message ("Tidying $$sd (depends: " $$eval($${sd}.depends) ")" )
+#		message ("Tidying $$sd (depends: " $$eval($${sd}.depends) ")" )
 		ds = $$eval($${sd}.depends)
 		for(d, ds) {
 			!exists($${OUT_PWD}/$${d}) {
-				message ("Killing $${d}...")
+#				message ("Killing $${d}...")
 				eval($${sd}.depends -= $$d)
 			}
 		}
 		export($${sd}.depends)
-		message ("Tidyied $$sd (depends: " $$eval($${sd}.depends) ")" )
+#		message ("Tidyied $$sd (depends: " $$eval($${sd}.depends) ")" )
 	}
 }
 
@@ -388,4 +404,4 @@ DEPENDPATH = $INCLUDEPATH
 
 OTHER_FILES +=
 
-message ($$TARGET "deps:" $$deps)
+#message ($$TARGET "deps:" $$deps)
