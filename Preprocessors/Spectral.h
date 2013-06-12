@@ -25,7 +25,7 @@
 namespace lb
 {
 
-template <unsigned _SizeMultiple = 8, class _ScalarType = float>
+template <class _ScalarType = float, unsigned _SizeMultiple = 8>
 class Accumulate
 {
 public:
