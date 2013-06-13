@@ -404,6 +404,8 @@ public:
 
 	std::vector<_T> toVector() const { return std::vector<_T>(m_data, m_data + m_count); }
 	std::string toString() const { return std::string((char const*)m_data, ((char const*)m_data) + m_count); }
+	template <class _T2> operator foreign_vector<_T2>() const { assert(m_count * sizeof(_T) / sizeof(_T2) * sizeof(_T2) / sizeof(_T) == m_count); return foreign_vector<_T2>((_T2*)m_data, m_count * sizeof(_T) / sizeof(_T2)).tied(m_lock); }
+//	template <class _T2> foreign_vector<_T2> as() const { assert(m_count * sizeof(_T) / sizeof(_T2) * sizeof(_T2) / sizeof(_T) == m_count); return foreign_vector<_T2>((_T2*)m_data, m_count * sizeof(_T) / sizeof(_T2)); }
 
 	_T* data() const { return m_data; }
 //	_T const* data() const { return m_data; }
