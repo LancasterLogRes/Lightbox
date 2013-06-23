@@ -61,7 +61,20 @@ public:
 
 	_N apply(_N _v) const { return _v * m_scale + m_offset; }
 	Range apply(Range _v) const { return Range(apply(_v.first), apply(_v.second)); }
-	template <class _T> void apply(std::vector<_T>& _v) const { for (auto& i: _v) i = apply(i); }
+	template <class _T> void apply(std::vector<_T>& _v) const
+	{
+		_T* i = &(_v[0]);
+		_T* ie = &(_v[0]) + _v.size();
+		for (; i < ie; i += 4)
+		{
+			i[0] = i[0] * m_scale + m_offset;
+			i[1] = i[1] * m_scale + m_offset;
+			i[2] = i[2] * m_scale + m_offset;
+			i[3] = i[3] * m_scale + m_offset;
+		}
+		for (; i < ie; ++i)
+			i[0] = i[0] * m_scale + m_offset;
+	}
 
 	_N scale() const { return m_scale; }
 	_N offset() const { return m_offset; }

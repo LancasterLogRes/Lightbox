@@ -48,7 +48,7 @@ public:
 				m_lastAc.resize((s - 1) / 2, 0);
 			autocross(h.begin(), s, _X::call, (s - 1) / 2, 1, m_lastAc);
 //			m_lastAc = autocross(h.begin(), s, _X::call, s / 2);
-			assert(isFinite(m_lastAc[0]));
+			assert(!m_lastAc.size() || isFinite(m_lastAc[0]));
 		}
 	}
 

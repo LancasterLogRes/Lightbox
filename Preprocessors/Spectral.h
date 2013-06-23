@@ -59,7 +59,7 @@ private:
 	float m_windowSeconds;
 };
 
-template <class _PP = Accumulate<>, unsigned _Function = (unsigned)HannWindow, class _FunctionParam = FloatValue<1, 0>, bool _ZeroPhase = true>
+template <class _PP = Accumulate<>, WindowFunction _Function = HannWindow, class _FunctionParam = FloatValue<1, 0>, bool _ZeroPhase = true>
 class WindowedComplexFourier: public _PP
 {
 public:
@@ -67,7 +67,7 @@ public:
 	typedef typename Info<_PP>::ScalarType Scalar;
 	typedef typename FFT<Scalar>::InputType ElementType;
 
-	WindowedComplexFourier(WindowFunction _function = (WindowFunction)_Function, float _functionParam = _FunctionParam::value, bool _zeroPhase = _ZeroPhase):
+	WindowedComplexFourier(WindowFunction _function = _Function, float _functionParam = _FunctionParam::value, bool _zeroPhase = _ZeroPhase):
 		m_function(_function),
 		m_functionParam(_functionParam),
 		m_zeroPhase(_zeroPhase)

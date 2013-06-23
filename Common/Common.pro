@@ -54,5 +54,6 @@ HEADERS += Common.h Global.h Angular.h \
     RGBA8.h \
     RGBA.h \
 	thread.h \
-	fix_fft.h
+	fix_fft.h \
+    SimpleKey.h
 #	fixmath.h

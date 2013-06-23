@@ -906,7 +906,7 @@ void autocross(_It _begin, int _s, _F const& _f, unsigned _maxPeriod, unsigned _
 {
 //	_ret = autocross(_begin, _s, _f, _maxPeriod);
 //	return;
-	typedef typename element_of<_It>::type T;
+//	typedef typename element_of<_It>::type T;
 	int lagPeriods = std::min<int>(_maxPeriod, _s - 1 - _movingBy);
 	_It outgoingEnd = _begin;
 	_It incomingEnd = std::next(_begin, _s - _movingBy);

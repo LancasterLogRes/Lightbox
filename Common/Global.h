@@ -256,9 +256,9 @@ template <> struct Int<8> { typedef int64_t type; };
 
 template <class _T> _T const& NullReturn() { static const _T s_ret = _T(); return s_ret; }
 
-template <class _T> _T defaultTo(_T _val, _T _default, _T _invalid = (_T)0)
+template <class _T, class _S> _T defaultTo(_S _val, _T _default, _S _invalid = (_T)0)
 {
-	return _val == _invalid ? _default : _val;
+	return _val == _invalid ? _default : (_T)_val;
 }
 
 enum Orientation { Horizontal = 0, Vertical };

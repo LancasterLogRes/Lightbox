@@ -81,7 +81,7 @@ public:
 
 	inline Time hop() const { return m_hop; }
 	inline Time nyquist() const { return m_nyquist; }
-	inline unsigned rate() const { return s_baseRate / m_nyquist * 2; }
+	inline unsigned rate() const { return s_baseRate * 2 / m_nyquist; }
 
 	void doInit(Time _hop, Time _nyquist);
 

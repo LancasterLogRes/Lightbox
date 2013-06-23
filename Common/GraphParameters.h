@@ -35,7 +35,7 @@ static T graphParameters(T _min, T _max, unsigned _divisions, T* o_from = 0, T* 
 {
 	T uMin = _min / _divisor;
 	T uMax = _max / _divisor;
-	if (uMax == uMin)
+	if (uMax == uMin || !_divisions)
 	{
 		*o_from = 0;
 		*o_delta = 1;

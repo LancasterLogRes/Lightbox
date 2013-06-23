@@ -19,7 +19,7 @@ public:
 	virtual ~DataStore() {}
 
 	// Variable record length if 0. _dense if all hops are stored, otherwise will store sparsely.
-	virtual void init(unsigned _recordLength, bool _dense) { (void)_recordLength; (void)_dense; }
+	virtual void init() {}
 	virtual void shiftBuffer(unsigned _index, foreign_vector<float> const& _record) { (void)_index; (void)_record; }
 };
 
@@ -121,7 +121,7 @@ public:
 		m_data.clear();
 		m_yrangeReal = AutoRange;
 		if (m_store)
-			m_store->init(1, true);
+			m_store->init();
 	}
 
 	template <class _T> void operator<<(_T const& _a) { shift(_a); }
@@ -264,14 +264,14 @@ public:
 		GraphSpec::init();
 		m_yrangeReal = AutoRange;
 		if (m_store)
-			m_store->init(m_graphSize, true);
+			m_store->init();
 	}
 
 	template <class _T> void shift(_T const& _a, int _offset = 0)
 	{
 		assert(_a.size() == m_graphSize);
 
-		if (m_store)
+		if (m_store && _a.size())
 		{
 			float f[_a.size()];
 
@@ -315,7 +315,7 @@ public:
 		GraphSparseDense::init();
 		m_maxGraphSize = 0;
 		if (m_store)
-			m_store->init(0, false);
+			m_store->init();
 	}
 
 	virtual Range xrangeReal() const { return xtx().apply(std::make_pair(0, m_maxGraphSize - 1)); }
@@ -361,7 +361,7 @@ public:
 	{
 		GraphSparseDense::init();
 		if (m_store)
-			m_store->init(m_graphSize, false);
+			m_store->init();
 	}
 
 	unsigned graphSize() const { return m_graphSize; }

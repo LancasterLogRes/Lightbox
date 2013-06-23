@@ -5,6 +5,6 @@ llr {
 	android|native: SUBDIRS += App LGL GUI TestGUI
 }
 
-pi|x86|native: SUBDIRS += EventCompiler Preprocessors ExampleEventCompiler
+pi|x86|native: SUBDIRS += EventCompiler Compute Preprocessors ExampleEventCompiler
 
 SUBDIRS += Numeric Common
