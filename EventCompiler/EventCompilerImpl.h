@@ -29,6 +29,8 @@
 #include <Common/MemberCollection.h>
 #include <Common/Time.h>
 #include <Common/StreamIO.h>
+#include <Common/GraphMetadata.h>
+#include <Compute/Compute.h>
 #include "StreamEvent.h"
 
 namespace lb
@@ -117,6 +119,9 @@ public:
 	std::map<std::string, GraphSpec*> const& graphMap() const { return m_graphs; }
 	GraphSpec* graph(std::string _name) const { if (m_graphs.count(_name)) return m_graphs.at(_name); return nullptr; }
 
+	void addGraph(GenericCompute const& _c, GraphMetadata _g);
+	std::vector<GraphMetadata> const& graphsX() const { return m_graphsX; }
+
 protected:
 	virtual void initPres() {}
 
@@ -126,6 +131,7 @@ private:
 	Time m_t;
 
 	std::map<std::string, GraphSpec*> m_graphs;
+	std::vector<GraphMetadata> m_graphsX;
 };
 
 template <class _Native>

@@ -31,6 +31,7 @@ SOURCES += Common.cpp \
 HEADERS += Common.h Global.h Angular.h \
     Time.h \
     GraphParameters.h \
+    GraphMetadata.h \
     WavHeader.h \
     Algorithms.h \
     Color.h \

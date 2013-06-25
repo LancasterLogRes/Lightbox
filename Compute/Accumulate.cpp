@@ -3,7 +3,7 @@
 using namespace std;
 using namespace lb;
 
-void AccumulateImpl::compute(std::vector<float>& _v)
+void AccumulateWaveImpl::compute(std::vector<float>& _v)
 {
 	unsigned h = input.info().size;
 	if (m_last.size() != h * factor)

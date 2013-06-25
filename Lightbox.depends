@@ -1,5 +1,5 @@
 Numeric.depends = Common
-EventCompiler.depends = Common
+EventCompiler.depends = Common Compute
 Preprocessor.depends = Common
 ExampleEventCompiler.depends = EventCompiler Preprocessors Compute
 App.depends = Common

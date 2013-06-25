@@ -4,14 +4,43 @@
 #include <Common/Global.h>
 #include <Common/SimpleKey.h>
 #include <Common/Time.h>
+#include <Common/GraphMetadata.h>
 
 namespace lb
 {
+
+struct ScalarInfo
+{
+	GraphMetadata::Axes axes() const { return { { "Value", XOf(), Range(0, 1) } }; }
+};
 
 struct PCMInfo
 {
 	unsigned rate;
 	unsigned size;
+	GraphMetadata::Axes axes() const { return { { "Amplitude", XOf(), Range(0, 1) } }; }
+};
+
+struct SpectrumInfo
+{
+	unsigned nyquist;
+	Time windowDuration;
+	unsigned bands;
+	GraphMetadata::Axes axes() const { return { { "Frequency (Hz)", XOf(1 / toSeconds(windowDuration)), Range(0, bands / toSeconds(windowDuration)) }, { "Magnitude", XOf(), Range(0, 1) } }; }
+};
+
+struct BarkSpectrumInfo: public SpectrumInfo
+{
+	BarkSpectrumInfo() = default;
+	BarkSpectrumInfo(unsigned _n, Time _wD, unsigned _b): SpectrumInfo{_n, _wD, _b} {}
+	GraphMetadata::Axes axes() const { return { { "Band (Bark)", XOf(), Range(0, 26) }, { "Phon", XOf(), Range(0, 100) } }; }
+};
+
+struct ComplexSpectrumInfo: public SpectrumInfo
+{
+	ComplexSpectrumInfo() = default;
+	ComplexSpectrumInfo(unsigned _n, Time _wD, unsigned _b, bool _iHCP): SpectrumInfo{_n, _wD, _b}, isHCPacked(_iHCP) {}
+	bool isHCPacked;
 };
 
 }

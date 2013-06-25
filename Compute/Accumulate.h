@@ -8,11 +8,11 @@
 namespace lb
 {
 
-class AccumulateImpl: public ComputeImpl<PCMInfo, float>
+class AccumulateWaveImpl: public ComputeImplBase<PCMInfo, float>
 {
 public:
-	AccumulateImpl(Compute<PCMInfo, float> const& _input, unsigned _factor = 8): input(_input), factor(_factor) {}
-	virtual SimpleKey hash() { return generateKey("Accumulate", input.hash(), factor); }
+	AccumulateWaveImpl(Compute<PCMInfo, float> const& _input, unsigned _factor = 8): ComputeImplBase(input, factor), input(_input), factor(_factor) {}
+	virtual char const* name() const { return "Accumulate"; }
 	virtual PCMInfo info()
 	{
 		return { input.info().rate, input.info().size * factor };
@@ -29,7 +29,7 @@ public:
 private:
 	std::vector<float> m_last;
 };
-using Accumulate = ComputeBase<AccumulateImpl>;
+using AccumulateWave = ComputeBase<AccumulateWaveImpl>;
 
 }
 

@@ -33,8 +33,6 @@
 namespace lb
 {
 
-inline float band(unsigned _bandCount, float _windowSeconds, float _frequency) { return clamp<float>(_frequency * _windowSeconds, 0.f, _bandCount - 1.f); }
-
 template <int _Base, int _Exp>
 struct FloatValue
 {

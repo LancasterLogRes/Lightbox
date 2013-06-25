@@ -1,6 +1,7 @@
 #pragma once
 #include <unordered_map>
 #include <unordered_set>
+#include <Common/GraphMetadata.h>
 #include "Common.h"
 
 namespace lb
@@ -11,7 +12,9 @@ class GenericComputeImpl
 public:
 	GenericComputeImpl() {}
 	virtual ~GenericComputeImpl() {}
-	virtual SimpleKey hash() { return 0; }
+	virtual void init() {}
+	virtual char const* name() const { return ""; }	// should be = 0;
+	virtual SimpleKey hash() const { return 0; }
 	virtual char const* elementTypeName() const = 0;
 	virtual size_t elementSize() const = 0;
 	virtual void genericCompute(std::vector<uint8_t>& _v) = 0;
@@ -20,11 +23,18 @@ public:
 class GenericCompute
 {
 public:
-	GenericCompute(GenericComputeImpl* _p): m_p(_p) {}
+	GenericCompute() {}
+	GenericCompute(GenericComputeImpl* _p)
+	{
+		std::shared_ptr<GenericComputeImpl> p (_p);
+		p.swap(m_p);
+	}
 
 	explicit operator bool() const { return !!m_p; }
 
+	void init() const { if (m_p) m_p->init(); }
 	SimpleKey hash() const { return m_p ? m_p->hash() : 0; }
+	std::string name() const { return m_p ? m_p->name() : ""; }
 
 	std::shared_ptr<GenericComputeImpl> const& p() const { return m_p; }
 
@@ -41,7 +51,6 @@ public:
 	using Info = _Info;
 	using Element = _Element;
 
-	virtual void init() {}
 	virtual Info info() { return Info(); }
 	virtual void genericCompute(std::vector<uint8_t>& _v)
 	{
@@ -58,6 +67,50 @@ protected:
 	virtual char const* elementTypeName() const { return typeid(_Element).name(); }
 };
 
+class Hasher
+{
+public:
+	virtual ~Hasher() {}
+	virtual SimpleKey hash(void const* _this) = 0;
+};
+
+template <class _T, class ... _P>
+class MemberMapMaker: public Hasher
+{
+public:
+	template <class _C> MemberMapMaker(_C const* _this, _T const& _t, _P const& ... _p): m_offset((intptr_t)&_t - (intptr_t)_this), m_others(_this, _p ...) {}
+	virtual SimpleKey hash(void const* _this) { return doHash(_this); }
+	SimpleKey doHash(void const* _this) { return generateKey(*(_T const*)((intptr_t)_this + m_offset), m_others.hash(_this)); }
+
+private:
+	size_t m_offset;
+	MemberMapMaker<_P ...> m_others;
+};
+
+template <class _T>
+class MemberMapMaker<_T>: public Hasher
+{
+public:
+	template <class _C> MemberMapMaker(_C const* _this, _T const& _t): m_offset((intptr_t)&_t - (intptr_t)_this) {}
+	virtual SimpleKey hash(void const* _this) { return doHash(_this); }
+	SimpleKey doHash(void const* _this) { return generateKey(*(_T const*)((intptr_t)_this + m_offset)); }
+
+private:
+	size_t m_offset;
+};
+
+template <class _Info = VoidInfo, class _Element = float>
+class ComputeImplBase: public ComputeImpl<_Info, _Element>
+{
+protected:
+	template <class ... _P> ComputeImplBase(_P const& ... _p): m_members(new MemberMapMaker<_P ...>(this, _p ...)) {}
+	virtual ~ComputeImplBase() { delete m_members; }
+	virtual SimpleKey hash() const { return generateKey(m_members->hash(this), this->name()); }
+
+private:
+	Hasher* m_members;
+};
+
 template <class _Info = VoidInfo, class _Element = float>
 class Compute: public GenericCompute
 {
@@ -65,6 +118,7 @@ public:
 	using Info = _Info;
 	using Element = _Element;
 
+	Compute() {}
 	Compute(ComputeImpl<_Info, _Element>* _p): GenericCompute(_p) {}
 
 	Info info() const { return m_p ? p()->info() : Info(); }
@@ -72,6 +126,8 @@ public:
 
 	std::shared_ptr<ComputeImpl<_Info, _Element> > p() const { return std::static_pointer_cast<ComputeImpl<_Info, _Element> >(m_p); }
 };
+
+template <class _Info = VoidInfo, class _Element = float> SimpleKey generateKey(Compute<_Info, _Element> const& _c) { return _c.hash(); }
 
 class ComputeRegistrar
 {
@@ -88,6 +144,8 @@ public:
 	lb::foreign_vector<uint8_t> compute(GenericComputeImpl* _c)
 	{
 		SimpleKey h = _c->hash();
+		if (!m_memos.count(h))
+			_c->init();
 		lb::foreign_vector<uint8_t> ret = m_memos[h].second;
 		if (!ret.size())
 		{
@@ -157,8 +215,6 @@ protected:
 template <class _Info, class _Element>
 lb::foreign_vector<_Element> ComputeImpl<_Info, _Element>::get()
 {
-	if (ComputeRegistrar::get()->isFirst())
-		init();
 	return (lb::foreign_vector<_Element>)ComputeRegistrar::get()->compute(this);
 }
 
