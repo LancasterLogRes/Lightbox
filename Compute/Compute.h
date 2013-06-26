@@ -141,59 +141,14 @@ public:
 
 	void compute(GenericCompute const& _c) { compute(_c.p().get()); }
 
-	lb::foreign_vector<uint8_t> compute(GenericComputeImpl* _c)
-	{
-		SimpleKey h = _c->hash();
-		if (!m_memos.count(h))
-			_c->init();
-		lb::foreign_vector<uint8_t> ret = m_memos[h].second;
-		if (!ret.size())
-		{
-			// Memo hasn't been accessed yet this time...
-			insertMemo(h);
-			ret = m_memos[h].second;
-		}
-		if (!ret.size())
-		{
-			// Memo not yet computed...
-			std::vector<uint8_t>& vbyte = m_memos[h].first;
-			_c->genericCompute(vbyte);
-			ret = m_memos[h].second = lb::foreign_vector<uint8_t>(&vbyte);
-		}
-
-		return ret;
-	}
-
-	void init()
-	{
-		m_memos.clear();
-		onInit();
-	}
-
-	void beginTime(lb::Time _t)
-	{
-		for (auto& i: m_memos)
-			i.second.second.reset();
-		onBeginTime(_t);
-		m_time = _t;
-	}
-
-	void endTime(lb::Time _t)
-	{
-		onEndTime(_t);
-	}
-
-	void fini()
-	{
-		onFini();
-	}
+	lb::foreign_vector<uint8_t> compute(GenericComputeImpl* _c);
+	void init();
+	void beginTime(lb::Time _t);
+	void endTime(lb::Time _t) { onEndTime(_t); }
+	void fini() { onFini(); }
+	bool store(GenericCompute const& _p) { return onStore(_p); }
 
 	lb::Time time() const { return m_time; }
-
-	bool store(GenericCompute const& _p)
-	{
-		return onStore(_p);
-	}
 
 protected:
 	ComputeRegistrar() {}
