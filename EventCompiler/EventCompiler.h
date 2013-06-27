@@ -47,6 +47,7 @@ public:
 	template <class T> T const& asA() const { /*if (!isA<T>()) throw std::exception();*/ return *dynamic_cast<T const*>(m_impl.get()); }
 	std::weak_ptr<EventCompilerImpl> weak() const { return m_impl; }
 
+	explicit operator bool() const { return !!m_impl; }
 	bool operator<(EventCompiler const& _c) const { return m_impl < _c.m_impl; }
 	bool operator==(EventCompiler const& _c) const { return m_impl == _c.m_impl; }
 	bool operator!=(EventCompiler const& _c) const { return !operator==(_c); }

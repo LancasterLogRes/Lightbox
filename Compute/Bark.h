@@ -7,14 +7,14 @@
 namespace lb
 {
 
-class BarkImpl: public ComputeImplBase<BarkSpectrumInfo, float>
+class BarkPhonImpl: public ComputeImplBase<BarkPhonSpectrumInfo, float>
 {
 public:
-	BarkImpl(Compute<SpectrumInfo, float> const& _input): ComputeImplBase(input), input(_input) {}
-	virtual ~BarkImpl() {}
+	BarkPhonImpl(Compute<SpectrumInfo, float> const& _input): ComputeImplBase(input), input(_input) {}
+	virtual ~BarkPhonImpl() {}
 	
-	virtual char const* name() const { return "Bark"; }
-	virtual BarkSpectrumInfo info() { return { 0, input.info().windowDuration, 26 }; }
+	virtual char const* name() const { return "BarkPhon"; }
+	virtual BarkPhonSpectrumInfo info() { return { 0, input.info().windowDuration, 26 }; }
 	virtual void init();
 	virtual void compute(std::vector<float>& _v);
 	
@@ -25,7 +25,7 @@ private:
 	Phon<float> m_phon;
 };
 
-using Bark = ComputeBase<BarkImpl>;
+using BarkPhon = ComputeBase<BarkPhonImpl>;
 
 }
 

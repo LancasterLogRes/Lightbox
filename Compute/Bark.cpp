@@ -4,14 +4,14 @@
 using namespace std;
 using namespace lb;
 
-void BarkImpl::init()
+void BarkPhonImpl::init()
 {
 	// A bit ugly - we make an assumption over determining the original window size from the magnitude bands, but without general OOB dataflow, there's not much else to be done.
 	m_bark.init(input.info().bands, toSeconds(input.info().windowDuration), s_barkBands);
 	m_phon.init(s_barkCentres);
 }
 
-void BarkImpl::compute(std::vector<float>& _v)
+void BarkPhonImpl::compute(std::vector<float>& _v)
 {
 	auto in = input.get();
 	_v.resize(26);

@@ -1,6 +1,8 @@
 #pragma once
 #include <unordered_map>
 #include <unordered_set>
+#include <functional>
+#include <type_traits>
 #include <Common/GraphMetadata.h>
 #include "Common.h"
 
@@ -24,11 +26,8 @@ class GenericCompute
 {
 public:
 	GenericCompute() {}
-	GenericCompute(GenericComputeImpl* _p)
-	{
-		std::shared_ptr<GenericComputeImpl> p (_p);
-		p.swap(m_p);
-	}
+	GenericCompute(GenericComputeImpl* _p): m_p(_p) {}
+	GenericCompute(GenericCompute const& _p): m_p(_p.m_p) {}
 
 	explicit operator bool() const { return !!m_p; }
 
@@ -41,8 +40,6 @@ public:
 protected:
 	std::shared_ptr<GenericComputeImpl> m_p;
 };
-
-struct VoidInfo {};
 
 template <class _Info = VoidInfo, class _Element = float>
 class ComputeImpl: public GenericComputeImpl
@@ -111,6 +108,8 @@ private:
 	Hasher* m_members;
 };
 
+template <class _Impl> class ComputeBase;
+
 template <class _Info = VoidInfo, class _Element = float>
 class Compute: public GenericCompute
 {
@@ -120,11 +119,23 @@ public:
 
 	Compute() {}
 	Compute(ComputeImpl<_Info, _Element>* _p): GenericCompute(_p) {}
+	Compute(Compute<Info, Element> const& _p): GenericCompute(_p), m_infoConvertor(_p.m_infoConvertor) {}
+	template <class _SubInfo> Compute(Compute<_SubInfo, Element> const& _p, _Info = static_cast<_Info const&>(_SubInfo())):
+		GenericCompute((GenericCompute const&)_p),
+		m_infoConvertor([=](GenericComputeImpl* i) -> Info
+		{
+			auto orig = _p.m_infoConvertor;
+			_SubInfo ret = orig ? orig(i) : dynamic_cast<ComputeImpl<_SubInfo, Element>*>(i)->info();
+			return ret;
+		})
+	{}
 
-	Info info() const { return m_p ? p()->info() : Info(); }
+	Info info() const { return m_p ? m_infoConvertor ? m_infoConvertor(m_p.get()) : p()->info() : Info(); }
 	lb::foreign_vector<Element> get() const { return m_p ? p()->get() : lb::foreign_vector<Element>(); }
 
 	std::shared_ptr<ComputeImpl<_Info, _Element> > p() const { return std::static_pointer_cast<ComputeImpl<_Info, _Element> >(m_p); }
+
+	std::function<Info(GenericComputeImpl*)> m_infoConvertor;
 };
 
 template <class _Info = VoidInfo, class _Element = float> SimpleKey generateKey(Compute<_Info, _Element> const& _c) { return _c.hash(); }

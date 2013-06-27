@@ -27,6 +27,9 @@
 namespace lb
 {
 
+namespace pp
+{
+
 template <class _PP, unsigned _From = 0, unsigned _To = 26>
 class BarkPhonSum: public _PP
 {
@@ -90,11 +93,13 @@ private:
 	Phon<Scalar> m_phon;
 };
 
+}
+
 template <class _PP, unsigned _From, unsigned _To>
-class GenSum<BarkPhon<_PP, _From, _To>>: public BarkPhon<_PP, _From, _To>
+class GenSum<pp::BarkPhon<_PP, _From, _To>>: public pp::BarkPhon<_PP, _From, _To>
 {
 public:
-	typedef BarkPhon<_PP, _From, _To> Super;
+	typedef pp::BarkPhon<_PP, _From, _To> Super;
 	typedef typename Info<Super>::ScalarType ElementType;
 	typedef typename Info<Super>::ScalarType Scalar;
 
@@ -122,10 +127,10 @@ private:
 };
 
 template <class _PP, unsigned _From, unsigned _To>
-class DiffSum<BarkPhon<_PP, _From, _To>>: public BarkPhon<_PP, _From, _To>
+class DiffSum<pp::BarkPhon<_PP, _From, _To>>: public pp::BarkPhon<_PP, _From, _To>
 {
 public:
-	typedef BarkPhon<_PP, _From, _To> Super;
+	typedef pp::BarkPhon<_PP, _From, _To> Super;
 	typedef typename Info<Super>::ScalarType ElementType;
 	typedef typename Info<Super>::ScalarType Scalar;
 
