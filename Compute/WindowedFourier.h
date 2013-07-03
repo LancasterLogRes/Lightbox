@@ -11,7 +11,7 @@ namespace lb
 class WindowedFourierImpl: public ComputeImplBase<ComplexSpectrumInfo, float>
 {
 public:
-	WindowedFourierImpl(Compute<PCMInfo, float> const& _input, WindowFunction _function = HannWindow, float _functionParam = 0, bool _zeroPhase = true): ComputeImplBase(input, function, functionParam, zeroPhase), input(_input), function(_function), functionParam(_functionParam), zeroPhase(_zeroPhase) {}
+	WindowedFourierImpl(Compute<float, PCMInfo> const& _input, WindowFunction _function = HannWindow, float _functionParam = 0, bool _zeroPhase = true): ComputeImplBase(input, function, functionParam, zeroPhase), input(_input), function(_function), functionParam(_functionParam), zeroPhase(_zeroPhase) {}
 	virtual ~WindowedFourierImpl() {}
 	
 	virtual char const* name() const { return "WindowedFourier"; }
@@ -19,7 +19,7 @@ public:
 	virtual void init();
 	virtual void compute(std::vector<float>& _v);
 	
-	Compute<PCMInfo, float> input;
+	Compute<float, PCMInfo> input;
 	WindowFunction function;
 	float functionParam;
 	bool zeroPhase;

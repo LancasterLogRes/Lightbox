@@ -10,7 +10,7 @@ namespace lb
 class SumRecordImpl: public ComputeImplBase<ScalarInfo, float>
 {
 public:
-	SumRecordImpl(Compute<VoidInfo, float> const& _input): ComputeImplBase(input), input(_input) {}
+	SumRecordImpl(Compute<float, VoidInfo> const& _input): ComputeImplBase(input), input(_input) {}
 	virtual ~SumRecordImpl() {}
 	
 	virtual char const* name() const { return "SumRecord"; }
@@ -18,7 +18,7 @@ public:
 	virtual void init();
 	virtual void compute(std::vector<float>& _v);
 	
-	Compute<VoidInfo, float> input;
+	Compute<float, VoidInfo> input;
 };
 
 using SumRecord = ComputeBase<SumRecordImpl>;

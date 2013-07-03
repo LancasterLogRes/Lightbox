@@ -10,7 +10,7 @@ namespace lb
 class MeanRecordImpl: public ComputeImplBase<ScalarInfo, float>
 {
 public:
-	MeanRecordImpl(Compute<VoidInfo, float> const& _input): ComputeImplBase(input), input(_input) {}
+	MeanRecordImpl(Compute<float, VoidInfo> const& _input): ComputeImplBase(input), input(_input) {}
 	virtual ~MeanRecordImpl() {}
 	
 	virtual char const* name() const { return "MeanRecord"; }
@@ -18,7 +18,7 @@ public:
 	virtual void init();
 	virtual void compute(std::vector<float>& _v);
 	
-	Compute<VoidInfo, float> input;
+	Compute<float, VoidInfo> input;
 };
 
 using MeanRecord = ComputeBase<MeanRecordImpl>;

@@ -110,7 +110,7 @@ private:
 
 template <class _Impl> class ComputeBase;
 
-template <class _Info = VoidInfo, class _Element = float>
+template <class _Element = float, class _Info = VoidInfo>
 class Compute: public GenericCompute
 {
 public:
@@ -119,8 +119,8 @@ public:
 
 	Compute() {}
 	Compute(ComputeImpl<_Info, _Element>* _p): GenericCompute(_p) {}
-	Compute(Compute<Info, Element> const& _p): GenericCompute(_p), m_infoConvertor(_p.m_infoConvertor) {}
-	template <class _SubInfo> Compute(Compute<_SubInfo, Element> const& _p, _Info = static_cast<_Info const&>(_SubInfo())):
+	Compute(Compute<Element, Info> const& _p): GenericCompute(_p), m_infoConvertor(_p.m_infoConvertor) {}
+	template <class _SubInfo> Compute(Compute<Element, _SubInfo> const& _p, _Info = static_cast<_Info const&>(_SubInfo())):
 		GenericCompute((GenericCompute const&)_p),
 		m_infoConvertor([=](GenericComputeImpl* i) -> Info
 		{
@@ -138,7 +138,7 @@ public:
 	std::function<Info(GenericComputeImpl*)> m_infoConvertor;
 };
 
-template <class _Info = VoidInfo, class _Element = float> SimpleKey generateKey(Compute<_Info, _Element> const& _c) { return _c.hash(); }
+template <class _Info = VoidInfo, class _Element = float> SimpleKey generateKey(Compute<_Element, _Info> const& _c) { return _c.hash(); }
 
 class ComputeRegistrar
 {
@@ -146,7 +146,7 @@ public:
 	virtual ~ComputeRegistrar() {}
 
 	static ComputeRegistrar* get() { if (!s_this) s_this = new ComputeRegistrar; return s_this; }
-	static Compute<PCMInfo, float> feeder() { return get()->createFeeder(); }
+	static Compute<float, PCMInfo> feeder() { return get()->createFeeder(); }
 
 	bool isFirst() const { return m_time == 0; }
 
@@ -170,7 +170,7 @@ protected:
 	virtual void onEndTime(lb::Time _oldTime) { (void)_oldTime; }
 	virtual bool onStore(GenericCompute const&) { return true; }	///< @returns true iff data is already computed and available.
 	virtual void insertMemo(SimpleKey _operation) { m_memos.insert(std::make_pair(_operation, std::make_pair(std::vector<uint8_t>(), lb::foreign_vector<uint8_t>()))); }
-	virtual Compute<PCMInfo, float> createFeeder() { cwarn << "Creating null feeder!"; return Compute<PCMInfo, float>(nullptr); }
+	virtual Compute<float, PCMInfo> createFeeder() { cwarn << "Creating null feeder!"; return Compute<float, PCMInfo>(nullptr); }
 
 	static thread_local ComputeRegistrar* s_this;
 
@@ -185,10 +185,10 @@ lb::foreign_vector<_Element> ComputeImpl<_Info, _Element>::get()
 }
 
 template <class _Impl>
-class ComputeBase: public Compute<typename _Impl::Info, typename _Impl::Element>
+class ComputeBase: public Compute<typename _Impl::Element, typename _Impl::Info>
 {
 public:
-	template <class ... _P> ComputeBase(_P ... _p): Compute<typename _Impl::Info, typename _Impl::Element>(new _Impl(_p ...)) {}
+	template <class ... _P> ComputeBase(_P ... _p): Compute<typename _Impl::Element, typename _Impl::Info>(new _Impl(_p ...)) {}
 };
 
 }

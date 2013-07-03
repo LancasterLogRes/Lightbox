@@ -375,7 +375,7 @@ inline unsigned log2(unsigned _i)
 	return ret;
 }
 
-template <class _Iterator> struct element_of { typedef typename _Iterator::value_type type; };
+template <class _Iterator> struct element_of { typedef typename std::remove_const<typename _Iterator::value_type>::type type; };
 template <class _E> struct element_of<_E*> { typedef _E type; };
 template <class _E> struct element_of<_E const*> { typedef _E type; };
 

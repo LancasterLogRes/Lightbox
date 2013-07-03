@@ -10,7 +10,7 @@ namespace lb
 class ExtractMagnitudeImpl: public ComputeImplBase<SpectrumInfo, float>
 {
 public:
-	ExtractMagnitudeImpl(Compute<ComplexSpectrumInfo, float> const& _input): ComputeImplBase(input), input(_input) {}
+	ExtractMagnitudeImpl(Compute<float, ComplexSpectrumInfo> const& _input): ComputeImplBase(input), input(_input) {}
 	virtual ~ExtractMagnitudeImpl() {}
 	
 	virtual char const* name() const { return "ExtractMagnitude"; }
@@ -18,7 +18,7 @@ public:
 	virtual void init();
 	virtual void compute(std::vector<float>& _v);
 	
-	Compute<ComplexSpectrumInfo, float> input;
+	Compute<float, ComplexSpectrumInfo> input;
 };
 
 using ExtractMagnitude = ComputeBase<ExtractMagnitudeImpl>;

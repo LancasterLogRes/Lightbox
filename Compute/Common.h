@@ -49,4 +49,11 @@ struct ComplexSpectrumInfo: public SpectrumInfo
 	bool isHCPacked;
 };
 
+struct FreqPeak
+{
+	float band;
+	float phase;
+	float mag;
+};
+
 }

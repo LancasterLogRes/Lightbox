@@ -10,7 +10,7 @@ namespace lb
 class ZeroCrossingsImpl: public ComputeImplBase<ScalarInfo, float>
 {
 public:
-	ZeroCrossingsImpl(Compute<PCMInfo, float> const& _input): ComputeImplBase(input), input(_input) {}
+	ZeroCrossingsImpl(Compute<float, PCMInfo> const& _input): ComputeImplBase(input), input(_input) {}
 	virtual ~ZeroCrossingsImpl() {}
 	
 	virtual char const* name() const final override { return "ZeroCrossings"; }
@@ -18,7 +18,7 @@ public:
 	virtual void init();
 	virtual void compute(std::vector<float>& _v);
 
-	Compute<PCMInfo, float> input;
+	Compute<float, PCMInfo> input;
 };
 
 using ZeroCrossings = ComputeBase<ZeroCrossingsImpl>;

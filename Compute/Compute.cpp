@@ -7,6 +7,7 @@ thread_local ComputeRegistrar* lb::ComputeRegistrar::s_this = nullptr;
 
 void ComputeRegistrar::init()
 {
+	cdebug << "ComputeReg::init";
 	m_memos.clear();
 	onInit();
 }
@@ -25,6 +26,7 @@ lb::foreign_vector<uint8_t> ComputeRegistrar::compute(GenericComputeImpl* _c)
 	auto it = m_memos.find(h);
 	if (it == m_memos.end())
 	{
+		cdebug << "ComputeReg: Initializing compute" << _c->name() << hex << h;
 		_c->init();
 		bool b;
 		tie(it, b) = m_memos.insert(std::make_pair(h, std::pair<std::vector<uint8_t>, lb::foreign_vector<uint8_t> >()));

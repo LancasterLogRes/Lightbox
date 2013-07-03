@@ -43,9 +43,10 @@ std::pair<T, T> parabolicPeakOf(T _a, T _b, T _c)
 std::map<float, float> parabolicPeaks(std::vector<float> const& _s);
 std::map<float, float> parabolicPeaks(float const* _s, unsigned _n);
 
-template <class T> std::map<T, unsigned> peaks(std::vector<T> const& _s)
+template <class _T> std::map<typename element_of<_T>::type, unsigned> peaks(_T const& _s)
 {
-	std::map<float, unsigned> ret;
+	using E = typename element_of<_T>::type;
+	std::map<E, unsigned> ret;
 	int start = -1;
 	int peak = -1;
 	for (unsigned i = 1; i < _s.size(); ++i)
@@ -70,6 +71,60 @@ template <class T> std::map<T, unsigned> peaks(std::vector<T> const& _s)
 		}
 	}
 	return ret;
+}
+
+template <class _T = float> LIGHTBOX_STRUCT(2, Peak, _T, band, _T, mag);
+
+template <class _T>
+unsigned topPeaks(_T const& _s, foreign_vector< Peak<typename element_of<_T>::type> > _top)
+{
+	using P = Peak<typename element_of<_T>::type>;
+	for (auto& i: _top)
+		i = P(-1, -1);
+	auto n = _s.size();
+	int start = -1;
+	int peak = -1;
+	unsigned ret = 0;
+	for (unsigned i = 1; i < n; ++i)
+	{
+		if (_s[i] < _s[i - 1]) // descending
+		{
+			if (start != -1 && peak == -1) // were climbing
+				peak = i - 1;
+		}
+		if (_s[i] > _s[i - 1] || i == n - 1)	// climbing
+		{
+			if (start != -1 && peak != -1)
+			{
+				// found a peak
+				auto pk = parabolicPeakOf(_s[peak - 1], _s[peak], _s[peak + 1]);
+				// get local-relative strength +/- 5% of the width.
+				P current(pk.first + peak, pk.second - (_s[start] + _s[i - 1]) / 2);
+
+				for (size_t ins = 0; ins <= _top.size(); ++ins)
+					// If we've reached the end, no comparison necessary; otherwise finish if the item at the candidate insert position is >= us (and not empty <- -1).
+					if (ins == _top.size() || (_top[ins].band != -1 && current.mag < _top[ins].mag))
+					{
+						// If the insert position is in the list, record. Then exit.
+						if (ins > 0)
+						{
+							_top[ins - 1] = current;
+							++ret;
+						}
+						break;
+					}
+					else if (ins + 1 < _top.size())
+						// We passed an item - move the item above them into their place.
+						_top[ins] = _top[ins + 1];
+
+				start = -1;
+				peak = -1;
+			}
+			if (start == -1)
+				start = i - 1;
+		}
+	}
+	return std::min(_top.size(), ret);
 }
 
 }

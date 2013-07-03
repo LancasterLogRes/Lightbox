@@ -11,7 +11,7 @@ namespace lb
 class AccumulateWaveImpl: public ComputeImplBase<PCMInfo, float>
 {
 public:
-	AccumulateWaveImpl(Compute<PCMInfo, float> const& _input, unsigned _factor = 8): ComputeImplBase(input, factor), input(_input), factor(_factor) {}
+	AccumulateWaveImpl(Compute<float, PCMInfo> const& _input, unsigned _factor = 8): ComputeImplBase(input, factor), input(_input), factor(_factor) {}
 	virtual char const* name() const { return "Accumulate"; }
 	virtual PCMInfo info()
 	{
@@ -23,7 +23,7 @@ public:
 	}
 	virtual void compute(std::vector<float>& _v);
 
-	Compute<PCMInfo, float> input;
+	Compute<float, PCMInfo> input;
 	unsigned factor;
 
 private:
