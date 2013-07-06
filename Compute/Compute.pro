@@ -8,7 +8,10 @@ HEADERS += Common.h Compute.h \
     ExtractPhase.h \
     Bark.h \
     SumRecord.h \
-    MeanRecord.h
+    MeanRecord.h \
+    PeakGather.h \
+    PeakTrack.h \
+    CycleDelta.h
 
 SOURCES += Compute.cpp \
     Accumulate.cpp \
@@ -16,4 +19,7 @@ SOURCES += Compute.cpp \
     ExtractPhase.cpp \
     Bark.cpp \
     SumRecord.cpp \
-    MeanRecord.cpp
+    MeanRecord.cpp \
+    PeakGather.cpp \
+    PeakTrack.cpp \
+    CycleDelta.cpp

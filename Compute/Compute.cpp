@@ -14,10 +14,13 @@ void ComputeRegistrar::init()
 
 void ComputeRegistrar::beginTime(lb::Time _t)
 {
-	for (auto& i: m_memos)
-		i.second.second.reset();
-	onBeginTime(_t);
-	m_time = _t;
+	if (m_time != _t)
+	{
+		for (auto& i: m_memos)
+			i.second.second.reset();
+		onBeginTime(_t);
+		m_time = _t;
+	}
 }
 
 lb::foreign_vector<uint8_t> ComputeRegistrar::compute(GenericComputeImpl* _c)

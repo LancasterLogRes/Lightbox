@@ -38,9 +38,19 @@ static const float MinusInfinity = -std::numeric_limits<float>::infinity();
 /// Linear interpolate with templated fixed-point (thousandths) factor.
 template <int _x> inline float lerp(float _a, float _b) { return _a * (1.f - _x / 1000.f) + _b * _x / 1000.f; }
 
-template <class T> inline T lerp(double _x, T _a, T _b) { return _a + (_b - _a) * _x; }
+template <class _T> inline _T lerp(double _x, _T _a, _T _b) { return _a + (_b - _a) * _x; }
 
 template <class _T> double lext(_T _v, _T _a, _T _b) { return double(_v - _a) / (_b - _a); }
+
+template <class _T> inline _T lext(_T _a, _T _b)
+{
+	return _b / (_a + _b);
+}
+
+template <class _T> inline _T llerp(_T _x, _T _a, _T _b)
+{
+	return pow(_a, 1.f - _x) * pow(_b, _x);
+}
 
 inline float mod1(float _f)
 {

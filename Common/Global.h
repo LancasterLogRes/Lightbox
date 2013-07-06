@@ -281,6 +281,9 @@ template <> struct Packed<int32_t> { static const bool value = true; typedef i4s
 static const double Pi = 3.1415926535898;
 static const double TwoPi = Pi * 2.0;
 static const double HalfPi = Pi / 2.0;
+static const float fPi = float(Pi);
+static const float fTwoPi = float(TwoPi);
+static const float fHalfPi = float(HalfPi);
 
 template <class _T> constexpr inline _T pi() { return _T(Pi); }
 template <class _T> constexpr inline _T twoPi() { return _T(TwoPi); }

@@ -51,6 +51,7 @@ public:
 
 	bool isSignificant() const { return lengthSquared() > s_tolerance; }
 	bool approximates(Vector2<T> const& _cmp) const { return ((*this) - _cmp).lengthSquared() < s_tolerance; }
+	bool approximates(Vector2<T> const& _cmp, T _tolerance) const { return ((*this) - _cmp).lengthSquared() < _tolerance; }
 };
 
 typedef Vector2<unsigned> uVector2;
