@@ -8,7 +8,7 @@
 namespace lb
 {
 
-class WindowedFourierImpl: public ComputeImplBase<ComplexSpectrumInfo, float>
+class WindowedFourierImpl: public ComputeImplBase<float, ComplexSpectrumInfo>
 {
 public:
 	WindowedFourierImpl(Compute<float, PCMInfo> const& _input, WindowFunction _function = HannWindow, float _functionParam = 0, bool _zeroPhase = true): ComputeImplBase(input, function, functionParam, zeroPhase), input(_input), function(_function), functionParam(_functionParam), zeroPhase(_zeroPhase) {}

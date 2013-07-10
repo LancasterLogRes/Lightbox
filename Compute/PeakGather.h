@@ -8,7 +8,7 @@
 namespace lb
 {
 
-class PeakGatherImpl: public ComputeImplBase<SpectrumInfo, Peak<> >
+class PeakGatherImpl: public ComputeImplBase<Peak<>, SpectrumInfo>
 {
 public:
 	PeakGatherImpl(Compute<float, SpectrumInfo> const& _input, unsigned _count): ComputeImplBase(input, count), input(_input), count(_count) {}

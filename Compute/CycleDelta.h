@@ -7,7 +7,7 @@
 namespace lb
 {
 
-class CycleDeltaImpl: public ComputeImplBase<SpectrumInfo, float>
+class CycleDeltaImpl: public ComputeImplBase<float, SpectrumInfo>
 {
 public:
 	CycleDeltaImpl(Compute<float, SpectrumInfo> const& _input): ComputeImplBase(input), input(_input) {}

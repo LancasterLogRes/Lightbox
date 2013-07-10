@@ -7,7 +7,7 @@
 namespace lb
 {
 
-class BarkPhonImpl: public ComputeImplBase<BarkPhonSpectrumInfo, float>
+class BarkPhonImpl: public ComputeImplBase<float, BarkPhonSpectrumInfo>
 {
 public:
 	BarkPhonImpl(Compute<float, SpectrumInfo> const& _input): ComputeImplBase(input), input(_input) {}

@@ -3,6 +3,7 @@
 #include <unordered_set>
 #include <functional>
 #include <type_traits>
+#include <EventCompiler/StreamEvent.h>
 #include <Common/GraphMetadata.h>
 #include "Common.h"
 
@@ -41,7 +42,7 @@ protected:
 	std::shared_ptr<GenericComputeImpl> m_p;
 };
 
-template <class _Info = VoidInfo, class _Element = float>
+template <class _Element = float, class _Info = VoidInfo>
 class ComputeImpl: public GenericComputeImpl
 {
 public:
@@ -96,8 +97,8 @@ private:
 	size_t m_offset;
 };
 
-template <class _Info = VoidInfo, class _Element = float>
-class ComputeImplBase: public ComputeImpl<_Info, _Element>
+template <class _Element = float, class _Info = VoidInfo>
+class ComputeImplBase: public ComputeImpl<_Element, _Info>
 {
 protected:
 	template <class ... _P> ComputeImplBase(_P const& ... _p): m_members(new MemberMapMaker<_P ...>(this, _p ...)) {}
@@ -118,14 +119,14 @@ public:
 	using Element = _Element;
 
 	Compute() {}
-	Compute(ComputeImpl<_Info, _Element>* _p): GenericCompute(_p) {}
+	Compute(ComputeImpl<_Element, _Info>* _p): GenericCompute(_p) {}
 	Compute(Compute<Element, Info> const& _p): GenericCompute(_p), m_infoConvertor(_p.m_infoConvertor) {}
 	template <class _SubInfo> Compute(Compute<Element, _SubInfo> const& _p, _Info = static_cast<_Info const&>(_SubInfo())):
 		GenericCompute((GenericCompute const&)_p),
 		m_infoConvertor([=](GenericComputeImpl* i) -> Info
 		{
 			auto orig = _p.m_infoConvertor;
-			_SubInfo ret = orig ? orig(i) : dynamic_cast<ComputeImpl<_SubInfo, Element>*>(i)->info();
+			_SubInfo ret = orig ? orig(i) : dynamic_cast<ComputeImpl<Element, _SubInfo>*>(i)->info();
 			return ret;
 		})
 	{}
@@ -133,12 +134,12 @@ public:
 	Info info() const { return m_p ? m_infoConvertor ? m_infoConvertor(m_p.get()) : p()->info() : Info(); }
 	lb::foreign_vector<Element> get() const { return m_p ? p()->get() : lb::foreign_vector<Element>(); }
 
-	std::shared_ptr<ComputeImpl<_Info, _Element> > p() const { return std::static_pointer_cast<ComputeImpl<_Info, _Element> >(m_p); }
+	std::shared_ptr<ComputeImpl<_Element, _Info> > p() const { return std::static_pointer_cast<ComputeImpl<_Element, _Info> >(m_p); }
 
 	std::function<Info(GenericComputeImpl*)> m_infoConvertor;
 };
 
-template <class _Info = VoidInfo, class _Element = float> SimpleKey generateKey(Compute<_Element, _Info> const& _c) { return _c.hash(); }
+template <class _Element = float, class _Info = VoidInfo> SimpleKey generateKey(Compute<_Element, _Info> const& _c) { return _c.hash(); }
 
 class ComputeRegistrar
 {
@@ -147,6 +148,7 @@ public:
 
 	static ComputeRegistrar* get() { if (!s_this) s_this = new ComputeRegistrar; return s_this; }
 	static Compute<float, PCMInfo> feeder() { return get()->createFeeder(); }
+	static Compute<StreamEvent, EventStreamInfo> eventFeeder() { return get()->createEventFeeder(); }
 
 	bool isFirst() const { return m_time == 0; }
 
@@ -171,6 +173,7 @@ protected:
 	virtual bool onStore(GenericCompute const&) { return true; }	///< @returns true iff data is already computed and available.
 	virtual void insertMemo(SimpleKey _operation) { m_memos.insert(std::make_pair(_operation, std::make_pair(std::vector<uint8_t>(), lb::foreign_vector<uint8_t>()))); }
 	virtual Compute<float, PCMInfo> createFeeder() { cwarn << "Creating null feeder!"; return Compute<float, PCMInfo>(nullptr); }
+	virtual Compute<StreamEvent, EventStreamInfo> createEventFeeder() { cwarn << "Creating null event feeder!"; return Compute<StreamEvent, EventStreamInfo>(nullptr); }
 
 	static thread_local ComputeRegistrar* s_this;
 
@@ -178,8 +181,8 @@ protected:
 	lb::Time m_time = UndefinedTime;
 };
 
-template <class _Info, class _Element>
-lb::foreign_vector<_Element> ComputeImpl<_Info, _Element>::get()
+template <class _Element, class _Info>
+lb::foreign_vector<_Element> ComputeImpl<_Element, _Info>::get()
 {
 	return (lb::foreign_vector<_Element>)ComputeRegistrar::get()->compute(this);
 }

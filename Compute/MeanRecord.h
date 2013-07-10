@@ -7,7 +7,7 @@
 namespace lb
 {
 
-class MeanRecordImpl: public ComputeImplBase<ScalarInfo, float>
+class MeanRecordImpl: public ComputeImplBase<float, ScalarInfo>
 {
 public:
 	MeanRecordImpl(Compute<float, VoidInfo> const& _input): ComputeImplBase(input), input(_input) {}

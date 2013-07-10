@@ -35,6 +35,9 @@ namespace lb
 
 static const float MinusInfinity = -std::numeric_limits<float>::infinity();
 
+template <class _T> inline _T dbFromPower(_T _l) { return _l > 0 ? log10(_l) * 10 : -255; }
+template <class _T> inline _T dbFromAmp(_T _l) { return _l > 0 ? log10(_l) * 20 : -255; }
+
 /// Linear interpolate with templated fixed-point (thousandths) factor.
 template <int _x> inline float lerp(float _a, float _b) { return _a * (1.f - _x / 1000.f) + _b * _x / 1000.f; }
 

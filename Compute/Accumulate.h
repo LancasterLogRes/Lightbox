@@ -8,7 +8,7 @@
 namespace lb
 {
 
-class AccumulateWaveImpl: public ComputeImplBase<PCMInfo, float>
+class AccumulateWaveImpl: public ComputeImplBase<float, PCMInfo>
 {
 public:
 	AccumulateWaveImpl(Compute<float, PCMInfo> const& _input, unsigned _factor = 8): ComputeImplBase(input, factor), input(_input), factor(_factor) {}

@@ -27,7 +27,7 @@ struct PeakState: public FreqPeak
 	bool operator<(PeakState _s) const { return band < _s.band; }
 };
 
-class PeakTrackImpl: public ComputeImplBase<SpectrumInfo, FreqPeak>
+class PeakTrackImpl: public ComputeImplBase<FreqPeak, SpectrumInfo>
 {
 public:
 	PeakTrackImpl(Compute<Peak<>, SpectrumInfo> const& _input, unsigned _count, float _gravity): ComputeImplBase(input, count, gravity), input(_input), count(_count), gravity(_gravity) {}

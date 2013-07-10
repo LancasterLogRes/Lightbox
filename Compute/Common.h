@@ -11,6 +11,10 @@ namespace lb
 
 struct VoidInfo {};
 
+struct EventStreamInfo: public VoidInfo
+{
+};
+
 struct ScalarInfo: public VoidInfo
 {
 	GraphMetadata::Axes axes() const { return { { "Value", XOf(), Range(0, 1) } }; }

@@ -7,7 +7,7 @@
 namespace lb
 {
 
-class ExtractMagnitudeImpl: public ComputeImplBase<SpectrumInfo, float>
+class ExtractMagnitudeImpl: public ComputeImplBase<float, SpectrumInfo>
 {
 public:
 	ExtractMagnitudeImpl(Compute<float, ComplexSpectrumInfo> const& _input): ComputeImplBase(input), input(_input) {}

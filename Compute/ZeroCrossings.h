@@ -7,7 +7,7 @@
 namespace lb
 {
 
-class ZeroCrossingsImpl: public ComputeImplBase<ScalarInfo, float>
+class ZeroCrossingsImpl: public ComputeImplBase<float, ScalarInfo>
 {
 public:
 	ZeroCrossingsImpl(Compute<float, PCMInfo> const& _input): ComputeImplBase(input), input(_input) {}

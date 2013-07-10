@@ -7,7 +7,7 @@
 namespace lb
 {
 
-class SumRecordImpl: public ComputeImplBase<ScalarInfo, float>
+class SumRecordImpl: public ComputeImplBase<float, ScalarInfo>
 {
 public:
 	SumRecordImpl(Compute<float, VoidInfo> const& _input): ComputeImplBase(input), input(_input) {}
