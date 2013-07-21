@@ -16,6 +16,7 @@ public:
 	GenericComputeImpl() {}
 	virtual ~GenericComputeImpl() {}
 	virtual void init() {}
+	virtual bool isVolatile() const { return false; }
 	virtual char const* name() const { return ""; }	// should be = 0;
 	virtual SimpleKey hash() const { return 0; }
 	virtual char const* elementTypeName() const = 0;
@@ -32,6 +33,7 @@ public:
 
 	explicit operator bool() const { return !!m_p; }
 
+	bool isVolatile() const { return m_p ? m_p->isVolatile() : false; }
 	void init() const { if (m_p) m_p->init(); }
 	SimpleKey hash() const { return m_p ? m_p->hash() : 0; }
 	std::string name() const { return m_p ? m_p->name() : ""; }
@@ -148,6 +150,7 @@ public:
 
 	static ComputeRegistrar* get() { if (!s_this) s_this = new ComputeRegistrar; return s_this; }
 	static Compute<float, PCMInfo> feeder() { return get()->createFeeder(); }
+	static Compute<float, MultiPCMInfo> multiFeeder() { return get()->createMultiFeeder(); }
 	static Compute<StreamEvent, EventStreamInfo> eventFeeder() { return get()->createEventFeeder(); }
 
 	bool isFirst() const { return m_time == 0; }
@@ -159,7 +162,7 @@ public:
 	void beginTime(lb::Time _t);
 	void endTime(lb::Time _t) { onEndTime(_t); }
 	void fini() { onFini(); }
-	bool store(GenericCompute const& _p) { return onStore(_p); }
+	bool store(GenericCompute const& _p, bool _precompute) { return onStore(_p, _precompute); }
 
 	lb::Time time() const { return m_time; }
 
@@ -170,9 +173,10 @@ protected:
 	virtual void onFini() {}
 	virtual void onBeginTime(lb::Time _newTime) { (void)_newTime; }
 	virtual void onEndTime(lb::Time _oldTime) { (void)_oldTime; }
-	virtual bool onStore(GenericCompute const&) { return true; }	///< @returns true iff data is already computed and available.
+	virtual bool onStore(GenericCompute const&, bool) { return true; }	///< @returns true iff data is already computed and available.
 	virtual void insertMemo(SimpleKey _operation) { m_memos.insert(std::make_pair(_operation, std::make_pair(std::vector<uint8_t>(), lb::foreign_vector<uint8_t>()))); }
 	virtual Compute<float, PCMInfo> createFeeder() { cwarn << "Creating null feeder!"; return Compute<float, PCMInfo>(nullptr); }
+	virtual Compute<float, MultiPCMInfo> createMultiFeeder() { cwarn << "Creating null multi feeder!"; return Compute<float, MultiPCMInfo>(nullptr); }
 	virtual Compute<StreamEvent, EventStreamInfo> createEventFeeder() { cwarn << "Creating null event feeder!"; return Compute<StreamEvent, EventStreamInfo>(nullptr); }
 
 	static thread_local ComputeRegistrar* s_this;

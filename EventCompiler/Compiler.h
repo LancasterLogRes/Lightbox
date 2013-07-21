@@ -12,13 +12,17 @@ namespace lb
 class AudioStream
 {
 public:
+	virtual ~AudioStream() {}
+	virtual unsigned channels() const { return 1; }	// channels
 	virtual unsigned rate() const = 0;	// samples per second
 	virtual unsigned hop() const = 0;	// samples per iteration
 	virtual void iterate() = 0;	// do an iteration
-	virtual void copyTo(unsigned _channel, Fixed<11, 21>* _p) = 0;		// copy samples of given channel to given buffer (as I16F16 format).
+	virtual void copyTo(unsigned _channel, Fixed<11, 21>* _p) = 0;		// copy samples of given channel to given buffer (as I11F21 format).
 	virtual void copyTo(unsigned _channel, Fixed<16, 16>* _p) = 0;		// copy samples of given channel to given buffer (as I16F16 format).
 	virtual void copyTo(unsigned _channel, Fixed<1, 15>* _p) = 0;		// copy samples of given channel to given buffer (as I1F15 format).
-	virtual void copyTo(unsigned _channel, float* _p) = 0;			// copy samples of given channel to given buffer (as I1F15 format).
+	virtual void copyTo(unsigned _channel, float* _p) = 0;			// copy samples of given channel to given buffer (as float format).
+
+	virtual void copyTo(float*) {}			// copy interleaved samples (of arity channels()) to given buffer (as float format).
 
 	Time hopTime() const { return toBase(hop(), rate()); }
 

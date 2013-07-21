@@ -224,6 +224,17 @@ float lb::bias(float _x, float _z)
 		return biasHelper(_x + .25 * _z, _z) * (_z + 1.f);
 }
 
+float lb::biasScale(float _x, float _nbias)
+{
+	if (_x < 0)
+		return -biasScale(-_x, _nbias);
+	if (_nbias > 0)
+		return 1.f - biasScale(1.f - _x, -_nbias);
+	_x = min(1.f, _x);
+	float rbias = 1.f - clamp(-_nbias, 0.f, 1.f);
+	return 1.f - pow(1.f - pow(_x, 1.f / rbias), rbias);
+}
+
 float lb::powScale(float _x, float _z)
 {
 #ifdef LIGHTBOX_ANDROID

@@ -65,6 +65,7 @@ public:
 	Rect lerp(float _xf, float _yf, float _xt, float _yt) const { xCoord o = lerp(_xf, _yf); return Rect(o, lerp(_xt, _yt) - o); }
 	xCoord lerp(fSize _xy) const { return m_pos + xSize(m_size.w() * _xy.w(), m_size.h() * _xy.h()); }
 	Rect lerpAlign(xSize _s, float _x, float _y) const { return Rect(xCoord(Size<float>(size() - _s) * Size<float>(_x, _y)) + pos(), _s); }
+	Rect lerp(Rect _r, float _c) const { return Rect(lerp(_c, x(), _r.x()), lerp(_c, y(), _r.y()), lerp(_c, w(), _r.w()), lerp(_c, h(), _r.h())); }
 
 	Rect flippedHorizontal() const { return Rect(x() + w(), y(), -w(), h()); }
 	Rect flippedVertical() const { return Rect(x(), y() + h(), w(), -h()); }

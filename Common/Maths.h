@@ -221,6 +221,9 @@ float bias(float _x, float _z);
 /// Power scale helper.
 float powScale(float _x, float _z);
 
+/// Power bias scale helper.
+float biasScale(float _x, float _nbias);
+
 /// Get the "io" of a number.
 template <class T> inline T io(T x)
 {

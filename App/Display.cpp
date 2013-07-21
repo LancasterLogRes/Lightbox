@@ -15,7 +15,6 @@
 #include <sstream>
 #include <LGL/GL.h>
 #include <Common/Global.h>
-#include "AppEngine.h"
 #include "Display.h"
 using namespace std;
 using namespace lb;
@@ -255,7 +254,7 @@ lb::Display::Display()
 
 	GLuint p = glCreateProgram();
 	GLuint vs = glCreateShader(GL_VERTEX_SHADER);
-	GLchar const* vsc = "attribute vec3 geometry; void main() { gl_Position.xyz = geometry; }";
+	GLchar const* vsc = "attribute vec3 geometry; void main() { gl_Position.w = 1.0; gl_Position.xyz = geometry; }";
 	glShaderSource(vs, 1, &vsc, nullptr);
 	glCompileShader(vs);
 	glAttachShader(p, vs);

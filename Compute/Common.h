@@ -29,6 +29,15 @@ struct PCMInfo: public ScalarInfo
 	GraphMetadata::Axes axes() const { return { { "Amplitude", XOf(), Range(0, 1) } }; }
 };
 
+struct MultiPCMInfo: public VoidInfo
+{
+	unsigned rate;
+	unsigned size;
+	unsigned channels;
+	MultiPCMInfo() = default;
+	MultiPCMInfo(unsigned _r, unsigned _s, unsigned _c): rate(_r), size(_s), channels(_c) {}
+};
+
 struct SpectrumInfo: public VoidInfo
 {
 	unsigned nyquist;

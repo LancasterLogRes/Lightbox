@@ -26,7 +26,7 @@ void EventCompilerImpl::registerGraph(GraphSpec* _g)
 
 void EventCompilerImpl::addGraph(GenericCompute const& _c, GraphMetadata _g)
 {
-	ComputeRegistrar::get()->store(_c);
+	ComputeRegistrar::get()->store(_c, false);
 	_g.setOperationKey(_c.hash());
 	if (_g.title().empty())
 		_g.setTitle(_c.name());
