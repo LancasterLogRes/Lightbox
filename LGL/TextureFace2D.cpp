@@ -1,5 +1,7 @@
+#if !LIGHTBOX_PI
 #define PNG_DEBUG 9
 #include <libpng/png.h>
+#endif
 
 #include "Program.h"
 #include "TextureFace2D.h"
@@ -28,6 +30,7 @@ void TextureFace2D::deactivate(uint _unit) const
 	LB_GL(glBindTexture, GL_TEXTURE_2D, 0);
 }
 
+#if !LIGHTBOX_PI
 static void readPngAux(png_structp png, png_bytep data, png_size_t size)
 {
 	(*(std::function<void(uint8_t*, size_t)> const*)png_get_io_ptr(png))(data, size);
@@ -126,4 +129,4 @@ pair<iSize, foreign_vector<uint8_t> > lb::readPng(std::function<void(uint8_t*, s
 
 	return ret;
 }
-
+#endif

@@ -1,7 +1,9 @@
 TEMPLATE = lib
 include ( ../Common.pri )
 
-LIBS += $$GFX_LIBS -lpng -lz
+LIBS += $$GFX_LIBS
+!pi: LIBS += -lpng -lz
+
 SOURCES += ProgramFace.cpp Program.cpp ShaderFace.cpp Uniform.cpp \
     Global.cpp \
     Attrib.cpp \

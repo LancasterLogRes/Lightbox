@@ -3,6 +3,11 @@
 #include <Numeric/Coord.h>
 #include <Numeric/Rect.h>
 
+namespace nwtpi {
+class OEGLWindow;
+class OEGLCapabilities;
+}
+
 namespace lb
 {
 
@@ -74,6 +79,11 @@ private:
 	/*EGLDisplay*/ void* m_display;
 	/*EGLSurface*/ void* m_surface;
 	/*EGLContext*/ void* m_context;
+#endif
+
+#if LIGHTBOX_USE_NWTPI
+	nwtpi::OEGLWindow* m_oeglWindow;
+	nwtpi::OEGLCapabilities* m_oeglCaps;
 #endif
 
 #if LIGHTBOX_USE_XLIB

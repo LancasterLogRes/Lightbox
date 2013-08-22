@@ -69,6 +69,42 @@ private:
 	pthread_mutex_t m_p;
 };
 
+class recursive_mutex
+{
+public:
+	recursive_mutex()
+	{
+		pthread_mutexattr_t attr;
+		pthread_mutexattr_init(&attr);
+		pthread_mutexattr_settype(attr, PTHREAD_MUTEX_RECURSIVE);
+		pthread_mutex_init(&m_p, &attr);
+		pthread_mutexattr_destroy(&attr);
+	}
+
+	~recursive_mutex()
+	{
+		pthread_mutex_destroy(&m_p);
+	}
+
+	void lock()
+	{
+		pthread_mutex_lock(&m_p);
+	}
+
+	bool try_lock()
+	{
+		return !pthread_mutex_trylock(&m_p);
+	}
+
+	void unlock()
+	{
+		pthread_mutex_unlock(&m_p);
+	}
+
+private:
+	pthread_mutex_t m_p;
+};
+
 template <class _T>
 class lock_guard
 {
@@ -91,6 +127,7 @@ namespace lb
 
 using boost::thread;
 using boost::mutex;
+using boost::recursive_mutex;
 
 }
 
@@ -104,6 +141,7 @@ namespace lb
 
 using std::thread;
 using std::mutex;
+using std::recursive_mutex;
 
 }
 

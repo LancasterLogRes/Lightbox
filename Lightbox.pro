@@ -2,7 +2,8 @@ TEMPLATE = subdirs
 include (Common.pri)
 
 llr {
-	android|native: SUBDIRS += App LGL GUI TestGUI
+	SUBDIRS += App LGL
+	android|native: SUBDIRS += GUI TestGUI
 }
 
 pi|x86|native: SUBDIRS += EventCompiler Compute Preprocessors ExampleEventCompiler

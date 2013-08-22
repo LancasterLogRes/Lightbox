@@ -179,7 +179,7 @@ protected:
 	virtual Compute<float, MultiPCMInfo> createMultiFeeder() { cwarn << "Creating null multi feeder!"; return Compute<float, MultiPCMInfo>(nullptr); }
 	virtual Compute<StreamEvent, EventStreamInfo> createEventFeeder() { cwarn << "Creating null event feeder!"; return Compute<StreamEvent, EventStreamInfo>(nullptr); }
 
-	static thread_local ComputeRegistrar* s_this;
+	static __thread ComputeRegistrar* s_this;
 
 	std::unordered_map<SimpleKey, std::pair<std::vector<uint8_t>, lb::foreign_vector<uint8_t> > > m_memos;
 	lb::Time m_time = UndefinedTime;

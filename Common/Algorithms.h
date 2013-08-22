@@ -57,6 +57,11 @@ inline void dumpInto(std::string const& _fn, foreign_vector<uint8_t const> const
 	out.write((char*)_data.data(), _data.size());
 }
 
+inline size_t fileExists(std::string const& _filename)
+{
+	return access(_filename.c_str(), F_OK) != -1;
+}
+
 inline size_t fileSize(std::string const& _filename)
 {
 	std::ifstream is;

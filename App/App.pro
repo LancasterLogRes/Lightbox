@@ -4,11 +4,12 @@ include ( ../Common.pri )
 LIBS += $$GFX_LIBS
 android: LIBS += $$LIBSTL -llog -landroid
 
-SOURCES += AppEngine.cpp \
-    Display.cpp \
+SOURCES += Display.cpp
+HEADERS += Display.h \
+	All.h \
+	Global.h
+
+!pi: SOURCES += AppEngine.cpp \
     App.cpp
-HEADERS +=    AppEngine.h \
-    Display.h \
-    App.h \
-    All.h \
-    Global.h
+!pi: HEADERS +=    AppEngine.h \
+	App.h

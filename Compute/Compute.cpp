@@ -3,7 +3,7 @@
 using namespace std;
 using namespace lb;
 
-thread_local ComputeRegistrar* lb::ComputeRegistrar::s_this = nullptr;
+__thread ComputeRegistrar* lb::ComputeRegistrar::s_this = nullptr;
 
 void ComputeRegistrar::init()
 {

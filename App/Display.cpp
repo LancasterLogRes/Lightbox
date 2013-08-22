@@ -2,6 +2,9 @@
 #if LIGHTBOX_ANDROID
 #include <android_native_app_glue.h>
 #endif
+#if LIGHTBOX_PI
+#include <NWTPI.h>
+#endif
 #if LIGHTBOX_USE_XLIB
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
@@ -18,6 +21,7 @@
 #include "Display.h"
 using namespace std;
 using namespace lb;
+using namespace nwtpi;
 
 #define EGL_CHECK(X) if (!(X)) { cwarn << "FATAL:" << #X; exit(-1); } else void(0)
 #define SDL_CHECK(X) if (!(X)) { cwarn << "FATAL:" << #X << SDL_GetError(); SDL_Quit(); exit(-1); } else void(0)
@@ -84,6 +88,14 @@ template <class _T> inline bool doAssertEqual(_T const& _x, _T const& _y, char c
 
 lb::Display::Display()
 {
+#if LIGHTBOX_USE_NWTPI
+	m_oeglCaps = new OEGLCapabilities(OEGLCapabilities::RGBA888);
+	m_oeglCaps->setAttribute(EGL_DEPTH_SIZE, 24);
+	m_oeglCaps->setAttribute(EGL_BIND_TO_TEXTURE_RGB, 0);
+	m_oeglCaps->setAttribute(EGL_BIND_TO_TEXTURE_RGBA, 0);
+	m_oeglWindow = new OEGLWindow("Triangle", 720, 480, 0, m_oeglCaps);
+#endif
+
 #if LIGHTBOX_USE_EGL
 	cnote << "Setting up EGL...";
 #if LIGHTBOX_ANDROID
@@ -285,6 +297,10 @@ lb::Display::Display()
 
 lb::Display::~Display()
 {
+#if LIGHTBOX_USE_NWTPI
+	delete m_oeglWindow;
+	delete m_oeglCaps;
+#endif
 #if LIGHTBOX_USE_EGL
 	if (m_display != EGL_NO_DISPLAY)
 	{
@@ -306,6 +322,9 @@ lb::Display::~Display()
 
 void lb::Display::update()
 {
+#if LIGHTBOX_USENWTPI
+	m_oeglWindow->swapBuffers();
+#endif
 #if LIGHTBOX_USE_EGL
 	eglSwapBuffers(m_display, m_surface);
 #endif

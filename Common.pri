@@ -17,7 +17,7 @@ mac {
 }
 
 # Uncomment to build App framework/GUI stuff (wholly independent of Qt).
-#CONFIG += llr
+CONFIG += llr
 
 # End of configurable part
 ##############################################################################
@@ -60,8 +60,8 @@ debug: BUILD_TYPE = Debug
 release: BUILD_TYPE = Release
 profile: BUILD_TYPE = Profile
 
-pi|amd: CONFIG += force_static
-native: CONFIG += force_shared
+amd: CONFIG += force_static
+pi|native: CONFIG += force_shared
 
 LLR_PATH = $$section(IN_PWD, "/", 0, -2)
 RELATIVE_DESTDIR = ../built
@@ -275,13 +275,26 @@ win32 {
 	GL_LIBS += -lGL -lGLU
 }
 
+pi {
+	VCUL = $$TP/userland
+	INCLUDEPATH += $$VCUL/host_applications/linux/libs/bcm_host/include $$VCUL/interface/vcos/pthreads $$VCUL/interface/vmcs_host/linux $$VCUL $$VCUL/interface/khronos/include
+	GFX_LIBS += -L$$VCUL/build/../build/lib -shared -lbcm_host -lvcos -lvchiq_arm
+}
+
+pi: CONFIG += use_nwtpi use_gles2
 android: CONFIG += use_egl use_gles2
 x86: CONFIG += use_xlib use_egl use_gles2
 #x86: CONFIG += use_sdl use_gl
 
 use_egl {
-    DEFINES += LIGHTBOX_USE_EGL=1
-    GFX_LIBS += -lEGL
+	DEFINES += LIGHTBOX_USE_EGL=1
+	GFX_LIBS += -lEGL
+}
+use_nwtpi {
+	DEFINES += LIGHTBOX_USE_NWTPI=1
+	NWTPI = $$TP/nwtpi-read-only
+	INCLUDEPATH += $$NWTPI $$NWTPI/OEGL $$NWTPI/Native
+	GFX_LIBS += -L$$NWTPI -shared -lnwtpi -lEGL
 }
 use_xlib {
     DEFINES += LIGHTBOX_USE_XLIB=1

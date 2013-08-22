@@ -35,6 +35,8 @@ private:
 	GLenum m_sampling;
 };
 
+#if !LIGHTBOX_PI
 std::pair<iSize, foreign_vector<uint8_t> > readPng(std::function<void(uint8_t*, size_t)> const& _read);
+#endif
 
 }
